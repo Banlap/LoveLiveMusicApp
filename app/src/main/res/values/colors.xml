@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">#03DAC5</color>
+
+    <color name="keke">#91BDC1</color>
+    <color name="purple_a1">#9B6EA1</color>
+    <color name="purple">#8B4993</color>
+    <color name="purple_light">#EE82EE</color>
+    <color name="purple_d9">#d979fa</color>
+    <color name="green_44">#44F0CA</color>
+    <color name="green_AA">#3BCAAA</color>
+    <color name="green_3A">#04FF3A</color>
+
+    <color name="light_ff">#697E8A</color>
+    <color name="light_29">#296599</color>
+    <color name="light_0E">#0E5399</color>
+    <color name="light_f8">#91FDF8</color>
+    <color name="light_ea">#a9edea</color>
+    <color name="light_e7">#c7e4e7</color>
+    <color name="light_8a">#FB508A</color>
+    <color name="light_b5">#9F556D</color>
+    <color name="light_7e">#9E6F7E</color>
+    <color name="light_alpha_70">#B3D8BDCB</color>
+
+    <color name="yellow_00">#F6FF00</color>
+
+    <color name="orange_fa">#FADCB9</color>
+    <color name="orange_ff">#FFB669</color>
+    <color name="orange_e6">#E66B4E</color>
+    <color name="orange_0b">#99350B</color>
+    <color name="orange_f4">#F85C2D</color>
+    <color name="orange_alpha_70">#B3FFB669</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="background_color_F2">#F2F2F2</color>
+
+    <color name="gray_f1">#f1f3f4</color>
+    <color name="gray_ea">#EAEAEA</color>
+    <color name="gray_e6">#E6E6E6</color>
+    <color name="gray_e4">#E6E4E4</color>
+    <color name="gray_d1">#D1D1D1</color>
+    <color name="gray_c9">#C9C9C9</color>
+    <color name="gray_7b">#7B7B7B</color>
+    <color name="gray_4a">#4A4A4A</color>
+    <color name="gray_5c">#5C5C66</color>
+    <color name="gray_3c">#3C3C3C</color>
+    <color name="gray_36">#363636</color>
+    <color name="gray_2c">#2c2c2c</color>
+
+    <color name="alpha">#00FFFFFF</color>
+    <color name="alpha_10">#1AFFFFFF</color>
+    <color name="alpha_30">#4DFFFFFF</color>
+    <color name="alpha_50">#807B7B7B</color>
+    <color name="alpha_40">#66B6B6B6</color>
+    <color name="alpha_70">#B37B7B7B</color>
+    <color name="alpha_90">#E6616161</color>
+
+
+    <color name="white_alpha_70">#B3FFFFFF</color>
+    <color name="white_alpha_50">#80FFFFFF</color>
+
+    <color name="gray_purple_ac">#bfacbf</color>
+    <color name="gray_purple_f1_30">#4DFAEDFA</color>
+
+    <color name="black">#000000</color>
+    <color name="black_alpha_10">#1A000000</color>
+    <color name="black_alpha_30">#4D000000</color>
+
+
+
+</resources>

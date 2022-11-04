@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/ll_sort_dialog"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="7dp">
+
+        <LinearLayout
+            android:id="@+id/ll_sort_by_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            android:weightSum="1">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_sort_by_name" />
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="按歌名排序"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/iv_sort_by_name_type"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_sort_up" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/v_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_sort_by_name"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_c9" />
+
+        <LinearLayout
+            android:id="@+id/ll_sort_by_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/v_line"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:weightSum="1">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_sort_by_time" />
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="按时间排序"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/iv_sort_by_time_type"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_sort_up" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/v_line2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_sort_by_time"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_c9" />
+
+        <LinearLayout
+            android:id="@+id/ll_sort_by_singer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/v_line2"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:weightSum="1">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_sort_by_singer" />
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="按歌手排序"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/iv_sort_by_singer_type"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_sort_up" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</layout>

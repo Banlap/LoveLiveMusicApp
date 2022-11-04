@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">LLMusic</string>
+    <attr name="play_controller_bg" format="reference"/>
+</resources>

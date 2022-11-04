@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.banlap.llmusic">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_llmp_2"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_llmp_2"
+        android:supportsRtl="true"
+        android:theme="@style/NormalTheme"
+        android:requestLegacyExternalStorage="true">
+
+        <service
+            android:name="com.banlap.llmusic.service.MusicPlayService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
+        <service
+            android:name="com.banlap.llmusic.service.MusicNextService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
+        <service
+            android:name="com.banlap.llmusic.service.MusicLastService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
+        <service
+            android:name="com.banlap.llmusic.service.MusicIsPauseService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
+
+        <service
+            android:name="com.banlap.llmusic.service.CharacterService"
+            android:enabled="true"
+            android:exported="true">
+
+        </service>
+
+        <activity android:name=".ui.WelcomeActivity"
+            android:screenOrientation="portrait">
+
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".ui.WebViewActivity"
+            android:screenOrientation="portrait"/>
+
+        <provider
+            android:authorities="com.banlap.llmusic.fileProvider"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+    </application>
+
+</manifest>

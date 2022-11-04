@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:background="@drawable/selector_tab_selected2">
+
+        <LinearLayout
+            android:id="@+id/ll_order_num"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:visibility="visible"
+                android:id="@+id/tv_order_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:text="00"
+                android:textColor="@color/white"
+                android:textSize="17dp" />
+
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/iv_audio"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/ic_audio"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/light_ea"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail_dark"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/black"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail_purple"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/purple"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail_orange"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/orange_f4"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail_light"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/light_8a"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:layout_weight="1">
+
+            <com.banlap.llmusic.widget.AlwaysMarqueeTextView
+                android:id="@+id/tv_music_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginBottom="5dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:scrollHorizontally="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:text="MusiName"
+                android:textColor="@color/white"
+                android:textSize="17dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_singer_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginBottom="5dp"
+                android:text="SingerName"
+                android:textColor="@color/white"
+                android:textSize="14dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/selector_tab_selected2">
+
+            <ImageView
+                android:id="@+id/iv_delete"
+                android:layout_width="28dp"
+                android:layout_height="23dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/selector_delete_selected" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</layout>

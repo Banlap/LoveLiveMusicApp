@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/rl_play_controller_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/shape_button_white_3"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <RelativeLayout
+                android:id="@+id/rl_music_img"
+                android:layout_width="68dp"
+                android:layout_height="68dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginBottom="5dp"
+                android:onClick="musicImgClick">
+
+                <ImageView
+                    android:id="@+id/iv_music_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/ic_music_default" />
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_music_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/rl_music_img"
+                android:orientation="vertical">
+
+                <ProgressBar
+                    android:visibility="invisible"
+                    android:id="@+id/pb_loading_music"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:indeterminateTint="@color/purple_light" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_music_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@+id/bt_change_play_mode"
+                android:layout_toEndOf="@+id/ll_music_loading"
+                android:layout_alignTop="@+id/rl_music_img"
+                android:layout_alignBottom="@+id/rl_music_img"
+                android:layout_marginEnd="10dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.banlap.llmusic.widget.AlwaysMarqueeTextView
+                        android:id="@+id/tv_music_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:scrollHorizontally="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:text="MusicName"
+                        android:textColor="@color/black"
+                        android:textSize="17dp" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_singer_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:singleLine="true"
+                    android:layout_marginTop="5dp"
+                    android:text="SingerName"
+                    android:textColor="@color/black"
+                    android:textSize="12dp" />
+
+            </LinearLayout>
+
+            <Button
+                android:visibility="gone"
+                android:id="@+id/bt_change_play_mode"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="20dp"
+                android:layout_toStartOf="@+id/bt_play"
+                android:background="@drawable/ic_order_play"
+                android:onClick="changePlayModeButtonClick" />
+
+
+            <Button
+                android:id="@+id/bt_play"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="15dp"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/selector_play_black_selected"
+                android:onClick="playButtonClick" />
+
+            <Button
+                android:visibility="gone"
+                android:id="@+id/bt_current_list"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/selector_music_list_selected"
+                android:onClick="currentListButtonClick" />
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

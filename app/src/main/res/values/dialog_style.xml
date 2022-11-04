@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="dialogStyle" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit</item>
+    </style>
+    <style name="dialogStyleBottom" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter_bottom</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit_bottom</item>
+        <item name="android:windowBackground">@color/alpha</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="dialogStyleBottom2" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_enter_bottom_default</item>
+        <item name="android:windowExitAnimation">@anim/dialog_exit_bottom_default</item>
+        <item name="android:windowBackground">@color/alpha</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <declare-styleable name="MusicLoadingView">
+        <!-- 音轨数量 -->
+        <attr name="rail_count" format="integer" />
+        <!-- 音轨的颜色 -->
+        <attr name="rail_color" format="color" />
+        <!-- 音轨线宽粗细 -->
+        <attr name="rail_width" format="integer|float|dimension" />
+    </declare-styleable>
+
+</resources>
