@@ -19,6 +19,7 @@
 <p align="start">8. 版本更新推送</p>
 <p align="start">9. 壁纸设置</p>
 <p align="start">10. 通知栏及蓝牙控制播放</p>
+
 #
 ### 联系
 <p align="start">b站up：圆圈AB https://space.bilibili.com/18177261</p>
