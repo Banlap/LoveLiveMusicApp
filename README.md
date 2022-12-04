@@ -19,6 +19,7 @@
 <p align="start">8. 版本更新推送</p>
 <p align="start">9. 壁纸设置</p>
 <p align="start">10. 通知栏及蓝牙控制播放</p>
+<p align="start">11. 本地歌曲导入功能</p>
 
 #
 ### 联系
