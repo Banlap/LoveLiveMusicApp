@@ -56,7 +56,7 @@ public class HorizontalProgressBar extends View {
         super.onDraw(canvas);
         mPaint.setAntiAlias(true);
         int round = mHeight/2; //半径
-        Log.e("LogByAB", "mWidth: " + mWidth +  " mHeight: " + mHeight  + " round: " + round);
+        //Log.e("LogByAB", "mWidth: " + mWidth +  " mHeight: " + mHeight  + " round: " + round);
         mPaint.setColor(getResources().getColor(R.color.alpha_30)); //设置边框背景颜色
         mPaint.setShader(getLinearGradient());
         rectBg.right = mWidth;
@@ -66,7 +66,7 @@ public class HorizontalProgressBar extends View {
         float section = currentCount/maxCount; //进度条的比例
         rectProgressBg.right = section * mWidth;
         rectProgressBg.bottom = mHeight;
-        Log.e("LogByAB", "section: " + section);
+        //Log.e("LogByAB", "section: " + section);
 
         //Paint设置setColor(白色无透明)和setShader，只让setShader生效；不然前面setColor设置了透明度，透明度会生效，和setShader效果叠加
         mPaint.setColor(getResources().getColor(R.color.white));

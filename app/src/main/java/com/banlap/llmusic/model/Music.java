@@ -15,6 +15,8 @@ public class Music implements Serializable {
     public String musicLyric;
     public int musicFavorite;
     public boolean isPlaying;
+    public boolean isLocal;
+    public byte[] musicImgByte;
 
     public int getMusicId() { return musicId; }
     public void setMusicId(int musicId) { this.musicId = musicId; }
@@ -40,4 +42,9 @@ public class Music implements Serializable {
     public int getMusicFavorite() { return musicFavorite; }
     public void setMusicFavorite(int musicFavorite) { this.musicFavorite = musicFavorite; }
 
+    public boolean isLocal() { return isLocal; }
+    public void setLocal(boolean local) { isLocal = local; }
+
+    public byte[] getMusicImgByte() { return musicImgByte; }
+    public void setMusicImgByte(byte[] musicImgByte) { this.musicImgByte = musicImgByte; }
 }

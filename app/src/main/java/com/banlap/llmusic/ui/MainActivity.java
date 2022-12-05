@@ -17,11 +17,15 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.Spannable;
@@ -42,6 +46,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -50,10 +55,18 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
@@ -61,6 +74,8 @@ import com.banlap.llmusic.databinding.ActivityMainBinding;
 import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
 import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
+import com.banlap.llmusic.databinding.DialogLocalFileBinding;
+import com.banlap.llmusic.databinding.DialogMainMenuBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
 import com.banlap.llmusic.databinding.ItemLyricListBinding;
@@ -89,12 +104,16 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URI;
+import java.nio.ByteBuffer;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -110,6 +129,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         implements MainVM.MainCallBack {
 
+    private final Context context = MainActivity.this;
     private List<Music> musicList;                      //按类型的所有歌曲
     private List<Music> tempMusicList;                  //临时音乐列表
     private List<Music> playList;                       //当前播放的列表
@@ -148,12 +168,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private int rThemeId =0;                             //当前主题
     /** 角色视图 */
     private String mCharacterName;                       //当前角色
-    private float sx;                                    //获取当前点击时X坐标
-    private float sy;                                    //获取当前点击时Y坐标
-    private boolean isMove = false;                      //角色功能：是否在触摸移动
-    private int mStartX, mStartY;                        //触摸时记录开始时的坐标 用于判断按下事件跟结束事件
-    private long mLastTime;                              //触摸时记录开始时的时间 用于判断按下事件跟结束事件
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
+    private ActivityResultLauncher<Intent> intentTakePhotoLauncher;
     private DialogDownloadBinding downloadBinding;
     private boolean isExistNewVersion = false;            //是否存在新版本app
     private boolean isFinishAnimator = true;              //是否执行标题栏文本显示动画
@@ -165,13 +181,41 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private boolean isUpSortBySinger = false;
     private int clickSortType = 0;                        //当前点击的排序类型
     private LyricScrollView lyricScrollView;              //
+    private MediaSession mSession;                        //用于获取按键事件
+    public boolean isFirstBluetoothControl = true;
+    private MainFragmentStateAdapter  mainFragmentStateAdapter;
+    public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 101;       //检查扫描文件所需要的权限
+    public static final int REQUEST_CODE_DOWNLOAD_APP = 102;           //检查下载app时需要的权限
+    private final String[] permissions = {                  //权限列表
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    };
+    private DialogLocalFileBinding dialogLocalFileBinding;
+
+    private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
+        @Override
+        public boolean onMediaButtonEvent(@NonNull Intent intent) {
+            if (mSession == null) {
+                return false;
+            }
+            if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
+                KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
+                    onKeyDown(event.getKeyCode(),event);
+                    onKeyUp(event.getKeyCode(),event);
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
 
     @SuppressLint("CheckResult")
     @Override
     protected void initData() {
-        //musicList = LiellaMusic.getInstance().getMusicData();
         musicList = new ArrayList<>();
         playList = new ArrayList<>();
         musicLyricList = new ArrayList<>();
@@ -204,7 +248,38 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         EventBus.getDefault().register(this);
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
+        //checkPermissions();
+        //初始化主页内容
+        initMainView();
+        //连接数据库
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.CONNECT_MYSQL));
+        //各种监听
+        initListener();
+        //initCharacter();
+        //开启所有相关服务
+        startAllService();
+        //广播监听蓝牙连接状态
+        BluetoothUtil.getInstance().registerBluetoothReceiver(this);
+        //初始化碎片
+        initFragment();
 
+    }
+
+    private void checkPermissions() {
+        //如果系统大于android6.0，进行动态权限申请
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String str : permissions) {
+                if (checkSelfPermission(str) != PackageManager.PERMISSION_GRANTED) {
+                    //申请权限
+                    requestPermissions(permissions, REQUEST_CODE_CHECK_PERMISSION);
+                    return;
+                }
+            }
+        }*/
+    }
+
+    /** 初始化主页内容 */
+    private void initMainView(){
         getViewDataBinding().clMain.setVisibility(View.VISIBLE);
         getViewDataBinding().clAlbumDetail.setVisibility(View.VISIBLE);
         getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
@@ -244,33 +319,72 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 .into(getViewDataBinding().ivMusicImg);
 
         getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
-        //连接数据库
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.CONNECT_MYSQL));
-        //各种监听
-        initListener();
-        //initCharacter();
-        //开启所有相关服务
-        startAllService();
-        //广播监听蓝牙连接状态
-        BluetoothUtil.getInstance().registerBluetoothReceiver(this);
 
+        //歌词滚动
         lyricScrollView = getViewDataBinding().lvShowLyric;
-
-        //getViewDataBinding().lvgShowLyric.addView(lyricScrollView);
     }
 
-    /** 初始化角色显示 (已使用服务形式显示) */
-    private void initCharacter() {
-        CharacterHelper.initCharacter(getViewDataBinding().ivCharacter);
-        getViewDataBinding().clCharacter.setVisibility(View.GONE);
-        getViewDataBinding().llCharacterTalk.setVisibility(View.GONE);
-        getViewDataBinding().llSayHello.setVisibility(View.GONE);
-        getViewDataBinding().llSayGood.setVisibility(View.GONE);
-        getViewDataBinding().llSayHello.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llSayGood.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().ivCharacter.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().ivCharacter.setOnTouchListener(new ViewTouchListener());
+    /** 初始化碎片 */
+    private void initFragment() {
+
+        if(null == mainFragmentStateAdapter) {
+            List<Fragment> fragmentList = new ArrayList<>();
+            fragmentList.add(new MainListFragment());
+            fragmentList.add(new LocalListFragment());
+            mainFragmentStateAdapter = new MainFragmentStateAdapter(this, fragmentList);
+        }
+
+        getViewDataBinding().vp2Main.setOffscreenPageLimit(2);
+        getViewDataBinding().vp2Main.setAdapter(mainFragmentStateAdapter);
+
+        getViewDataBinding().vp2Main.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(0 == position) {
+                    AnimatorSet animatorSet = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, 1, (float) 1.3);
+                    AnimatorSet animatorSet2 = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, (float) 1.3, 1);
+                    animatorSet.start();
+                    animatorSet2.start();
+
+                    AnimatorSet animatorSetMove = MyAnimationUtil.animatorSetMove(getViewDataBinding().vLine, false);
+                    animatorSetMove.start();
+
+                } else if(1 == position) {
+                    AnimatorSet animatorSet = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover,  (float) 1.3, 1);
+                    AnimatorSet animatorSet2 = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, 1, (float) 1.3);
+                    animatorSet.start();
+                    animatorSet2.start();
+
+                    AnimatorSet animatorSetMove = MyAnimationUtil.animatorSetMove(getViewDataBinding().vLine, true);
+                    animatorSetMove.start();
+                }
+            }
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels);
+                //Log.e("PageScrolled", "position: " + position + " positionOffset: " + positionOffset + " positionOffsetPixels: " + positionOffsetPixels);
+
+            }
+        });
+
+        getViewDataBinding().tvDiscover.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getViewDataBinding().vp2Main.setCurrentItem(0);
+            }
+        });
+
+        getViewDataBinding().tvLocal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getViewDataBinding().vp2Main.setCurrentItem(1);
+            }
+        });
+
     }
+
 
     /** 初始化所有功能监听 */
     private void initListener() {
@@ -283,13 +397,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         getViewDataBinding().llSearch.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llSort.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llCancel.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llSettings.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llList1.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llList2.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llList3.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llList4.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llList5.setOnClickListener(new ButtonClickListener());
-        getViewDataBinding().llList6.setOnClickListener(new ButtonClickListener());
+
         getViewDataBinding().llBack.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().ablAppBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
@@ -357,6 +465,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
             }
         });
+
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -373,9 +482,38 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                                 intentCharacterService.putExtra("CharacterName", mCharacterName);
                                 startService(intentCharacterService);
                             }
+                            getViewDataBinding().ivCharacterStatus.setVisibility(View.VISIBLE);
                         }
                     }
                 });
+
+        intentTakePhotoLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        try {
+                            Intent intent = result.getData();
+                            Uri uri = intent.getData();
+                            //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                            //getViewDataBinding().ivBg.setImageBitmap(bitmap);
+
+                            if(null != uri) {
+                                SPUtil.setStrValue(context,"BackgroundUri",uri.toString());
+                            }
+
+                            Glide.with(getApplication())
+                                    .setDefaultRequestOptions(requestOptions)
+                                    .load(uri)
+                                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                                    .into(getViewDataBinding().ivBg);
+                            Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+
+                        }
+                    }
+                });
+
     }
 
     /** 开启所有相关服务 */
@@ -475,13 +613,50 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     @Override
     public void onResume(){
         super.onResume();
+        //获取壁纸数据
+        String strBackgroundUri = SPUtil.getStrValue(getApplicationContext(), "BackgroundUri");
+        if(null != strBackgroundUri && !"".equals(strBackgroundUri)) {
+            Glide.with(getApplication())
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(Uri.parse(strBackgroundUri))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(getViewDataBinding().ivBg);
+        }
+
         String strThemeId = SPUtil.getStrValue(getApplicationContext(), "SaveThemeId");
         if(strThemeId!=null) {
             if(!strThemeId.equals("")) {
                 rThemeId = Integer.parseInt(strThemeId);
                 changeTheme(rThemeId);
                 lyricScrollView.setThemeId(rThemeId);
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
             }
+        }
+        //用于蓝牙耳机按钮控制
+        createMediaSession();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //releaseMediaSession();
+    }
+
+    private void createMediaSession() {
+        if (mSession == null) {
+            mSession = new MediaSession(context, MainActivity.class.getSimpleName());
+            mSession.setCallback(mSessionCallback);
+            mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS);
+            mSession.setActive(true);
+        }
+    }
+
+    private void releaseMediaSession() {
+        if (mSession != null) {
+            mSession.setCallback(null);
+            mSession.setActive(false);
+            mSession.release();
+            mSession = null;
         }
     }
 
@@ -492,6 +667,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             //TopFloatView.start(this);
         }
     }
+
     @SuppressLint({"SetTextI18n", "RemoteViewLayout"})
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
@@ -526,6 +702,45 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 detailPanelChangeObjectAnimator.start();
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
                 isNotMain = true;
+                break;
+            case ThreadEvent.GET_ALBUM_SUCCESS:
+                if(ThreadEvent.ALBUM_LIELLA.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_liella_3);
+                    getViewDataBinding().tvTitleBar.setText("Liella!");
+                    getViewDataBinding().tvListMsgName1.setText("Liella!");
+                    getViewDataBinding().tvListMsgName2.setText("LoveLive!Superstar!!");
+                } else if(ThreadEvent.ALBUM_FOUR_YUU.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_liyuu);
+                    getViewDataBinding().tvTitleBar.setText("Liyuu");
+                    getViewDataBinding().tvListMsgName1.setText("Liyuu");
+                    getViewDataBinding().tvListMsgName2.setText("Liyuu");
+                } else if(ThreadEvent.ALBUM_SUNNY_PASSION.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_sunny_passion);
+                    getViewDataBinding().tvTitleBar.setText("SunnyPassion");
+                    getViewDataBinding().tvListMsgName1.setText("SunnyPassion");
+                    getViewDataBinding().tvListMsgName2.setText("サニーパッション");
+                } else if(ThreadEvent.ALBUM_NIJIGASAKI.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_nijigasaki_3);
+                    getViewDataBinding().tvTitleBar.setText("虹ヶ咲学園スクールアイドル同好会");
+                    getViewDataBinding().tvListMsgName1.setText("Nijigasaki HighSchool IdolClub");
+                    getViewDataBinding().tvListMsgName2.setText("虹ヶ咲学園スクールアイドル同好会");
+                } else if(ThreadEvent.ALBUM_AQOURS.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_aqours_3);
+                    getViewDataBinding().tvTitleBar.setText("Aqours");
+                    getViewDataBinding().tvListMsgName1.setText("Aqours");
+                    getViewDataBinding().tvListMsgName2.setText("LoveLive!Sunshine!!");
+                } else if(ThreadEvent.ALBUM_US.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_us_3);
+                    getViewDataBinding().tvTitleBar.setText("μ's");
+                    getViewDataBinding().tvListMsgName1.setText("μ's");
+                    getViewDataBinding().tvListMsgName2.setText("国立音ノ木坂学院");
+                }
                 break;
             case ThreadEvent.GET_COUNT_SUCCESS:
                 getViewDataBinding().tvCount.setText(""+event.i);
@@ -666,6 +881,43 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
                 }
                 break;
+            case ThreadEvent.PLAY_LOCAL_MUSIC:   //点击了本地歌曲并添加
+                //binder.showLyric(event.music, event.b);
+                if(playList.size()>0){
+                    for(int i=0; i<playList.size(); i++) {
+                        if(playList.get(i).isPlaying) {
+                            playList.get(i).isPlaying = false;
+                            binder.showLyric(event.music, (playMode == 2));
+                            playList.add(i+1, setMusicMsg(event.music, true));
+                            playMusicListAdapter.notifyDataSetChanged();
+
+                            SPUtil.setListValue(context, "PlayListData", playList);
+                            return;
+                        }
+                    }
+                    binder.showLyric(event.music, (playMode == 2));
+                    playList.add(playList.size(), setMusicMsg(event.music, true));
+                } else {
+                    binder.showLyric(event.music, (playMode == 2));
+                    playList.add(setMusicMsg(event.music, true));
+                }
+                playMusicListAdapter.notifyDataSetChanged();
+                SPUtil.setListValue(context, "PlayListData", playList);
+                break;
+            case ThreadEvent.ADD_LOCAL_MUSIC:   //添加了本地歌曲并添加
+                playList.add(setMusicMsg(event.music, false));
+
+                if(playList.size()==1) {
+                    playList.get(0).isPlaying = true;
+                    binder.showLyric(playList.get(0), (playMode == 2));
+                } else {
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC));
+                }
+                playMusicListAdapter.notifyDataSetChanged();
+
+                SPUtil.setListValue(context, "PlayListData", playList);
+
+                break;
             case ThreadEvent.MUSIC_IS_PAUSE:
                 if(binder!=null) {
                     binder.pause(this, event.str, event.str2, event.bitmap);
@@ -763,55 +1015,79 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 getViewDataBinding().tvMusicName.setText(musicMsg);
                 getViewDataBinding().tvSingerName.setText(event.music.musicSinger);
                 getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
+
                 currentMusicImg = event.music.getMusicImg();
 
                 if(rThemeId!=0) {
                     if(rThemeId == R.id.ll_theme_normal) {
+
                         Glide.with(getApplication())
                                 .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.getMusicImg())
+                                .load(event.music.isLocal?
+                                                (null != event.music.musicImgByte?
+                                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                                )
                                 .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
                                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                 .into(getViewDataBinding().ivMusicImg);
                     } else if(rThemeId == R.id.ll_theme_dark) {
+
                         Glide.with(getApplication())
                                 .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.getMusicImg())
+                                .load(event.music.isLocal?
+                                        (null != event.music.musicImgByte?
+                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                                )
                                 .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.white)))
                                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                 .into(getViewDataBinding().ivMusicImg);
                     } else if(rThemeId == R.id.ll_theme_white) {
                         Glide.with(getApplication())
                                 .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.getMusicImg())
+                                .load(event.music.isLocal?
+                                        (null != event.music.musicImgByte?
+                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                                )
                                 .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple_light)))
                                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                 .into(getViewDataBinding().ivMusicImg);
                     } else if(rThemeId == R.id.ll_theme_orange) {
                         Glide.with(getApplication())
                                 .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.getMusicImg())
+                                .load(event.music.isLocal?
+                                        (null != event.music.musicImgByte?
+                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                                )
                                 .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.orange_0b)))
                                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                 .into(getViewDataBinding().ivMusicImg);
                     } else if(rThemeId == R.id.ll_theme_light) {
                         Glide.with(getApplication())
                                 .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.getMusicImg())
+                                .load(event.music.isLocal?
+                                        (null != event.music.musicImgByte?
+                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                                )
                                 .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_b5)))
                                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                 .into(getViewDataBinding().ivMusicImg);
                     } else {
                         Glide.with(getApplication())
                                 .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.getMusicImg())
+                                .load(event.music.isLocal?
+                                        (null != event.music.musicImgByte?
+                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                                )
                                 .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
                                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                 .into(getViewDataBinding().ivMusicImg);
                     }
                 } else {
                     Glide.with(getApplication())
-                            .load(event.music.getMusicImg())
+                            .load(event.music.isLocal?
+                                    (null != event.music.musicImgByte?
+                                            BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
+                            )
                             .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
                             .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                             .into(getViewDataBinding().ivMusicImg);
@@ -828,10 +1104,19 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 objectAnimator.start();
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    if(!event.music.musicImg.equals("")) {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg));
+                    if(event.music.isLocal) {
+                        if(null != event.music.musicImgByte) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
+                        } else {
+                            startMusicService(true,event.music.musicName, event.music.musicSinger, null);
+                        }
                     } else {
-                        startMusicService(true,event.music.musicName, event.music.musicSinger, null);
+                        if(!event.music.musicImg.equals("")) {
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
+                        } else {
+                            startMusicService(true,event.music.musicName, event.music.musicSinger, null);
+                        }
                     }
                 } else {
                     initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg);
@@ -841,11 +1126,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 currentMusicName = event.str;
                 currentMusicSinger = event.str2;
                 currentBitmap = event.bitmap;
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
+
+                /* if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startMusicService(true, event.str, event.str2, event.bitmap);
                 } else {
                     NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
-                }
+                }*/
                 break;
             case ThreadEvent.VIEW_LYRIC:
                 lyricScrollView.setMusicLyrics(event.tList);
@@ -914,22 +1202,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 clineHeight = lyricViewHeight/lyricSize;
                 Log.e("ABMediaPlay", "mathLineheight: " + clineHeight);
 
-               /* List<MusicLyric> currentMusicLyricList = new ArrayList<>();
-                int lyricId =0;
-                String[] str = currentMusicLyric.split("\n\n\n");
-                for (int x=0; x<str.length; x++) {
-                    if (!str[x].equals("")) {
-                        lyricId++;
-                        MusicLyric musicLyric = new MusicLyric();
-                        musicLyric.setLyricId(lyricId);
-                        musicLyric.setLyricContext(str[x]);
-                        currentMusicLyricList.add(musicLyric);
-                    }
-                }
-                currentLyricPos=0;
-                musicLyricList.clear();
-                musicLyricList.addAll(currentMusicLyricList);
-                scrollLyricAdapter.notifyDataSetChanged();*/
+
                 if(null != event.tList) {
                     musicLyricList.clear();
                     musicLyricList.addAll(event.tList);
@@ -983,12 +1256,22 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
                 }
                 break;
-            case ThreadEvent.VIEW_SHOW_CHARACTER_TALK_CONTENT:
-                getViewDataBinding().tvCharacterTalk.setText(event.str);
+            case ThreadEvent.ACTION_MEDIA_BUTTON:
+                if(null != event.kt) {
+                    if(binder!=null) {
+                        if(KeyEvent.KEYCODE_MEDIA_NEXT == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            lastOrNextMusic(true);
+                        } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            lastOrNextMusic(false);
+                        } else if(KeyEvent.KEYCODE_MEDIA_PLAY == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            binder.playImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+                        } else if(KeyEvent.KEYCODE_MEDIA_PAUSE == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+                        }
+                    }
+                }
                 break;
-            case ThreadEvent.VIEW_HIDE_CHARACTER_TALK:
-                getViewDataBinding().llCharacterTalk.setVisibility(View.GONE);
-                break;
+
             case ThreadEvent.VIEW_NORMAL_STATUS_CHARACTER:
                 if(MainVM.CHARACTER_NAME_KEKE_INT == event.i) {
                     CharacterHelper.showNormalStatusCharacter(CharacterHelper.CHARACTER_NAME_KEKE);
@@ -1017,6 +1300,23 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     CharacterHelper.showListenStatusCharacter(CharacterHelper.CHARACTER_NAME_KANON, false);
                 }
                 break;
+
+            case ThreadEvent.SCAN_LOCAL_FILE_SUCCESS:
+                getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
+                if(null != dialogLocalFileBinding) {
+                    dialogLocalFileBinding.prLocalMusicLoading.setVisibility(View.GONE);
+                    dialogLocalFileBinding.llSelectFile.setClickable(true);
+                    dialogLocalFileBinding.llScanFile.setClickable(true);
+                }
+                break;
+            case ThreadEvent.SELECT_LOCAL_FILE_SUCCESS:
+                if(null != dialogLocalFileBinding) {
+                    dialogLocalFileBinding.prLocalMusicLoading.setVisibility(View.GONE);
+                    dialogLocalFileBinding.llSelectFile.setClickable(true);
+                    dialogLocalFileBinding.llScanFile.setClickable(true);
+                }
+                break;
+
         }
     }
 
@@ -1028,13 +1328,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 break;
             case ThreadEvent.DOWNLOAD_APP:
                 if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                    int REQUEST_CODE_CONTACT = 101;
                     String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
                     //验证是否许可权限
                     for (String str : permissions) {
                         if (checkSelfPermission(str) != PackageManager.PERMISSION_GRANTED) {
                             //申请权限
-                            requestPermissions(permissions, REQUEST_CODE_CONTACT);
+                            requestPermissions(permissions, REQUEST_CODE_DOWNLOAD_APP);
                             return;
                         }
                     }
@@ -1056,26 +1355,32 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 EventBus.getDefault().post(new ThreadEvent<Message>(ThreadEvent.GET_MESSAGE_SUCCESS, MysqlHelper.getInstance().findMessageSql(), ""));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LIELLA:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_LIELLA));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Liella")));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Liella")));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_FOUR_YUU:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_FOUR_YUU));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Fo(u)rYuU")));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Fo(u)rYuU")));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_SUNNY_PASSION:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_SUNNY_PASSION));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("SunnyPassion")));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("SunnyPassion")));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_NIJIGASAKI:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_NIJIGASAKI));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Nijigasaki")));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Nijigasaki")));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_AQOURS:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_AQOURS));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Aqours")));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Aqours")));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_US:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_US));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("μs")));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("μs")));
                 break;
@@ -1084,37 +1389,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 getViewModel().showLyric(event.music, event.b);
                 break;
             case ThreadEvent.SCROLL_LYRIC:
-                /*getViewDataBinding().clCurrentMusicPanel.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        getViewDataBinding().rvMusicLyricList.smoothScrollToPosition(event.i);
-                    }
-                });*/
 
-               /* getViewDataBinding().svMusicLyric.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        *//*if(musicLyricList.size()>0) {
-                            if(currentLyricPos < musicLyricList.size());{
-                                currentLyricPos++;
-                                getViewDataBinding().rvMusicLyricList.smoothScrollToPosition(currentLyricPos);
-                            }
-                        }*//*
-                        if(event.intArray[0] !=0) {
-                            if (cLyricScrollHeight < lyricViewHeight) {
-                                //Log.e("ABMediaPlay", "clineHeight: " + clineHeight + " cLyricIntArray: "+ cLyricIntArray[0] + " " + cLyricIntArray[1] + " " + cLyricIntArray[2]);
-                                getViewDataBinding().svMusicLyric.smoothScrollTo(0, clineHeight*cLyricIntArray[0]);
-                                //getViewDataBinding().svMusicLyric.smoothScrollBy(0, clineHeight*4);
-                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.REMOVE_TIME_BY_LYRIC, event.intArray, event.strArray));
-                                cLyricIntArray = event.intArray;
-                            }
-                        }
-
-                    }
-                });*/
                 break;
             case ThreadEvent.SHOW_IMAGE_URL:  //设置状态栏显示对应图片
-                getViewModel().showImageURL(event.str, event.str2, event.str3);
+                if(event.b) {
+                    getViewModel().showImageBitmap(event.str, event.str2, event.bitmap);
+                } else {
+                    getViewModel().showImageURL(event.str, event.str2, event.str3);
+                }
                 break;
 
             case ThreadEvent.REMOVE_TIME_BY_LYRIC:
@@ -1200,53 +1482,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 searchCancel();
             } else if (v.getId() == R.id.ll_settings) {
                 intoSettings();
-            } else if (v.getId() == R.id.ll_list_1) {
-                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_LIELLA));
-                getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_liella_3);
-                getViewDataBinding().tvTitleBar.setText("Liella!");
-                getViewDataBinding().tvListMsgName1.setText("Liella!");
-                getViewDataBinding().tvListMsgName2.setText("LoveLive!Superstar!!");
-
-            } else if (v.getId() == R.id.ll_list_2) {
-                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_FOUR_YUU));
-                getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_liyuu);
-                getViewDataBinding().tvTitleBar.setText("Liyuu");
-                getViewDataBinding().tvListMsgName1.setText("Liyuu");
-                getViewDataBinding().tvListMsgName2.setText("Liyuu");
-
-            } else if (v.getId() == R.id.ll_list_3) {
-                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_SUNNY_PASSION));
-                getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_sunny_passion);
-                getViewDataBinding().tvTitleBar.setText("SunnyPassion");
-                getViewDataBinding().tvListMsgName1.setText("SunnyPassion");
-                getViewDataBinding().tvListMsgName2.setText("サニーパッション");
-
-            } else if (v.getId() == R.id.ll_list_4) {
-                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_NIJIGASAKI));
-                getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_nijigasaki_3);
-                getViewDataBinding().tvTitleBar.setText("虹ヶ咲学園スクールアイドル同好会");
-                getViewDataBinding().tvListMsgName1.setText("Nijigasaki HighSchool IdolClub");
-                getViewDataBinding().tvListMsgName2.setText("虹ヶ咲学園スクールアイドル同好会");
-
-            } else if (v.getId() == R.id.ll_list_5) {
-                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_AQOURS));
-                getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_aqours_3);
-                getViewDataBinding().tvTitleBar.setText("Aqours");
-                getViewDataBinding().tvListMsgName1.setText("Aqours");
-                getViewDataBinding().tvListMsgName2.setText("LoveLive!Sunshine!!");
-
-            } else if (v.getId() == R.id.ll_list_6) {
-                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_US));
-                getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_us_3);
-                getViewDataBinding().tvTitleBar.setText("μ's");
-                getViewDataBinding().tvListMsgName1.setText("μ's");
-                getViewDataBinding().tvListMsgName2.setText("国立音ノ木坂学院");
 
             } else if(v.getId() == R.id.ll_back) {
                 searchCancel();
@@ -1256,96 +1491,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 detailPanelChangeObjectAnimator.start();
                 isNotMain = false;
 
-            } else if(v.getId() == R.id.iv_character) {
-                if(getViewDataBinding().llSayHello.getVisibility() == View.GONE &&
-                        getViewDataBinding().llSayGood.getVisibility() == View.GONE) {
-                    getViewDataBinding().llSayHello.setVisibility(View.VISIBLE);
-                    getViewDataBinding().llSayGood.setVisibility(View.VISIBLE);
-                } else {
-                    getViewDataBinding().llSayHello.setVisibility(View.GONE);
-                    getViewDataBinding().llSayGood.setVisibility(View.GONE);
-                }
-            } else if(v.getId() == R.id.ll_say_hello) {
-                if(getViewDataBinding().llCharacterTalk.getVisibility() == View.GONE) {
-                    getViewDataBinding().llCharacterTalk.setVisibility(View.VISIBLE);
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_CHARACTER_TALK_CONTENT, CharacterHelper.sayHelloContent(mCharacterName)));
-                    getViewModel().showCharacterContent();
-                }
-            } else if(v.getId() == R.id.ll_say_good) {
-                if(getViewDataBinding().llCharacterTalk.getVisibility() == View.GONE) {
-                    getViewDataBinding().llCharacterTalk.setVisibility(View.VISIBLE);
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_CHARACTER_TALK_CONTENT, CharacterHelper.sayGoodContent(mCharacterName)));
-                    getViewModel().showCharacterContent();
-                }
+
             }
         }
     }
 
-    /** 点击触摸事件 */
-    public class ViewTouchListener implements View.OnTouchListener {
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (R.id.iv_character == v.getId()) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        mStartX = (int) event.getRawX();
-                        mStartY = (int) event.getRawY();
-                        sx = event.getRawX();
-                        sy = event.getRawY();
-                        mLastTime = System.currentTimeMillis();
-                        isMove = false;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        isMove = true;
-                        int containerWidth = getViewDataBinding().rlCharacterView.getWidth();
-                        int containerHeight = getViewDataBinding().rlCharacterView.getHeight();
-
-                        float distanceX = sx - event.getRawX();
-                        float distanceY = sy - event.getRawY();
-
-                        float x = getViewDataBinding().clCharacter.getX() - distanceX;
-                        float y = getViewDataBinding().clCharacter.getY() - distanceY;
-                        // 不能移出屏幕
-                        if (y < 0) {
-                            y = 0;
-                        } else if (y > containerHeight - getViewDataBinding().clCharacter.getHeight()) {
-                            y = containerHeight - getViewDataBinding().clCharacter.getHeight();
-                        }
-                        if (x < 0) {
-                            x = 0;
-                        } else if (x > containerWidth - getViewDataBinding().clCharacter.getWidth()) {
-                            x = containerWidth - getViewDataBinding().clCharacter.getWidth();
-                        }
-                        // 属性动画移动
-                        CharacterHelper.moveCharacterView(getViewDataBinding().clCharacter, x, y);
-
-                        sx = event.getRawX();
-                        sy = event.getRawY();
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        long mCurrentTime = System.currentTimeMillis();
-                        int mStopX = (int) event.getRawX();
-                        int mStopY = (int) event.getRawY();
-                        //判断时间
-                        if (mCurrentTime - mLastTime < 500) {
-                            //判断移动距离
-                            if (Math.abs(mStartX - mStopX) >= 10 || Math.abs(mStartY - mStopY) >= 10) {
-                                isMove = true;
-                            } else {
-                                isMove = false;
-                            }
-                        } else {
-                            isMove = true;
-                        }
-                        break;
-                }
-                return isMove;
-            } else {
-                return true;
-            }
-        }
-    }
 
     /** 获取版本code */
     public int getAppVersionCode(Context context) {
@@ -1439,11 +1589,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_white);
             getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvLiellaMusic.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvFourYuu.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvSunnyPassion.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvNijigasaki.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.light_ff));
@@ -1468,7 +1616,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
+            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
@@ -1476,15 +1624,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_light);
             getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_light);
             getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_light);
-            getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
+            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
             getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_black);
             getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_light);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
             getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.selector_last_2_selected);
             getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.selector_next_2_selected);
+            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_black);
 
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.light_ff));
+
+            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
                 getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
@@ -1535,11 +1686,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_black_2);
             getViewDataBinding().pbLoadingMusic.setProgressDrawable(getResources().getDrawable(R.color.gray_36));
             getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_white);
             getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvLiellaMusic.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvFourYuu.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvSunnyPassion.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvNijigasaki.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.white));
@@ -1564,7 +1713,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
+            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
@@ -1572,15 +1721,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_white);
             getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search);
             getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort);
-            getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings);
+            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings);
             getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete);
             getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back);
             getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.ic_last);
             getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.ic_next);
+            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode);
 
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.white));
+
+            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
                 getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play);
@@ -1630,11 +1782,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_purple);
             getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvLiellaMusic.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvFourYuu.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvSunnyPassion.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvNijigasaki.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvMusicName.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.purple));
@@ -1659,7 +1809,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_white_theme_selected);
             getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_white_theme_selected);
             getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_white_theme_selected);
+            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_white_theme_selected);
             getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_white_theme_selected);
             getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_white_theme_selected);
             getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_white_theme_selected);
@@ -1668,16 +1818,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_purple);
             getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_purple);
             getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_purple);
-            getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_purple);
+            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_purple);
             getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_purple);
             getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_purple);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_purple);
             getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.ic_last_purple);
             getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.ic_next_purple);
+            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_purple);
 
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.gray_purple_ac));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.purple));
 
+            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu_purple);
 
             if(playMode == 0) {
                 getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
@@ -1728,11 +1880,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().pbLoadingMusic.setProgressDrawable(getResources().getDrawable(R.color.orange_0b));
             getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.orange_f4));
+            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.orange_f4));
+            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_orange);
             getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvLiellaMusic.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvFourYuu.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvSunnyPassion.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvNijigasaki.setTextColor(getResources().getColor(R.color.white));
+
             getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.orange_0b));
@@ -1757,7 +1908,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
+            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
@@ -1765,15 +1916,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_orange);
             getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_orange);
             getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_orange);
-            getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_orange);
+            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_orange);
             getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_orange);
             getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_orange);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_orange);
             getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.selector_last_orange_selected);
             getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.selector_next_orange_selected);
+            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_orange);
 
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.orange_0b));
+
+            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
                 getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
@@ -1823,11 +1977,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_white);
             getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvLiellaMusic.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvFourYuu.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvSunnyPassion.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvNijigasaki.setTextColor(getResources().getColor(R.color.light_b5));
             getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.light_ff));
@@ -1852,7 +2004,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
+            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
@@ -1860,15 +2012,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_light);
             getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_light);
             getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_light);
-            getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
+            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
             getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_light);
             getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_light);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
             getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.ic_last_purple_light);
             getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.ic_next_light);
-
+            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_light);
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.light_ff));
+
+            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
                 getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
@@ -1918,31 +2072,218 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         playMusicListAdapter.notifyDataSetChanged();
     }
 
-    /** 点击展示悬浮窗角色系统菜单 */
-    public void showCharacterAuthMenu(View view) {
-        final DialogCharacterMenuBinding characterMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.dialog_character_menu, null, false);
+    /** 点击展示系统菜单 */
+    public void showMainMenu(View view) {
+        DialogMainMenuBinding mainMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_main_menu, null, false);
 
-        characterMenuBinding.llCharacterByKeke.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showCharacterAuth(CharacterHelper.CHARACTER_NAME_KEKE);
-            }
-        });
-
-        characterMenuBinding.llCharacterByKanon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showCharacterAuth(CharacterHelper.CHARACTER_NAME_KANON);
-            }
-        });
-
-        PopupWindow popupWindow  = new PopupWindow(characterMenuBinding.getRoot(),
+        PopupWindow menuPopupWindow  = new PopupWindow(mainMenuBinding.getRoot(),
                 PxUtil.getInstance().dp2px(110, this),  WindowManager.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setTouchable(true);
-        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
-        popupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, this),  PxUtil.getInstance().dp2px(10, this));
+        menuPopupWindow.setTouchable(true);
 
+        if(rThemeId != 0) {
+            if(rThemeId == R.id.ll_theme_normal) {
+                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else if(rThemeId == R.id.ll_theme_dark) {
+                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
+                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else if(rThemeId == R.id.ll_theme_white) {
+                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_white));
+                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.purple));
+                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.purple));
+                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.purple));
+                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.purple));
+                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.purple));
+                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.purple));
+                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.purple));
+            } else if(rThemeId == R.id.ll_theme_orange) {
+                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_orange));
+                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else if(rThemeId == R.id.ll_theme_light) {
+                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_light));
+                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else {
+                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
+                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            }
+        } else {
+            menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+            mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
+            mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
+            mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
+            mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
+            mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+        }
+        menuPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, this),  PxUtil.getInstance().dp2px(10, this));
+
+        mainMenuBinding.llSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuPopupWindow.dismiss();
+                intoSettings();
+            }
+        });
+
+        mainMenuBinding.llCharacter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuPopupWindow.dismiss();
+                //展示角色菜单
+                DialogCharacterMenuBinding characterMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(v.getContext()),
+                        R.layout.dialog_character_menu, null, false);
+
+                characterMenuBinding.llCharacterByKeke.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showCharacterAuth(CharacterHelper.CHARACTER_NAME_KEKE);
+                    }
+                });
+
+                characterMenuBinding.llCharacterByKanon.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showCharacterAuth(CharacterHelper.CHARACTER_NAME_KANON);
+                    }
+                });
+
+                PopupWindow characterPopupWindow  = new PopupWindow(characterMenuBinding.getRoot(),
+                        PxUtil.getInstance().dp2px(110, v.getContext()),  WindowManager.LayoutParams.WRAP_CONTENT, true);
+                characterPopupWindow.setTouchable(true);
+                if(rThemeId!=0) {
+                    if(rThemeId == R.id.ll_theme_normal) {
+                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                    } else if(rThemeId == R.id.ll_theme_dark) {
+                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
+                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                    } else if(rThemeId == R.id.ll_theme_white) {
+                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_white));
+                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.purple));
+                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.purple));
+                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.purple));
+                    } else if(rThemeId == R.id.ll_theme_orange) {
+                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_orange));
+                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                    } else if(rThemeId == R.id.ll_theme_light) {
+                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_light));
+                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                    } else {
+                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
+                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                    }
+                } else {
+                    characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                    characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
+                    characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
+                    characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                }
+                characterPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, v.getContext()),  PxUtil.getInstance().dp2px(10, v.getContext()));
+            }
+        });
+
+        mainMenuBinding.llBackground.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuPopupWindow.dismiss();
+                Intent intentPhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // 获得当前手机版本
+                if(Build.VERSION.SDK_INT<=19) {
+                    intentPhoto.setAction(Intent.ACTION_PICK);
+                    intentPhoto.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                } else{
+
+                    intentPhoto.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                    intentPhoto.addCategory(Intent.CATEGORY_OPENABLE);
+                    intentPhoto.setType("image/*");
+                }
+                intentTakePhotoLauncher.launch(intentPhoto);
+            }
+        });
+
+        mainMenuBinding.llLocalMusic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuPopupWindow.dismiss();
+                if(null != dialogLocalFileBinding) {
+                    dialogLocalFileBinding =null;
+                }
+                dialogLocalFileBinding = DataBindingUtil.inflate(LayoutInflater.from(context),
+                        R.layout.dialog_local_file, null, false);
+
+                dialogLocalFileBinding.llSelectFile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialogLocalFileBinding.llSelectFile.setClickable(false);
+                        dialogLocalFileBinding.llScanFile.setClickable(false);
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "select"));
+                        mAlertDialog.dismiss();
+                    }
+                });
+
+                dialogLocalFileBinding.llScanFile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mAlertDialog.dismiss();
+                        getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+
+                        dialogLocalFileBinding.prLocalMusicLoading.setVisibility(View.VISIBLE);
+                        dialogLocalFileBinding.llSelectFile.setClickable(false);
+                        dialogLocalFileBinding.llScanFile.setClickable(false);
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "scan"));
+                    }
+                });
+
+                mAlertDialog = new AlertDialog.Builder(context)
+                        .setView(dialogLocalFileBinding.getRoot())
+                        .create();
+                Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+                mAlertDialog.show();
+
+            }
+        });
 
     }
 
@@ -2012,6 +2353,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         //Toast.makeText(this, "click img", Toast.LENGTH_SHORT).show();
         showOrHideMusicPlayerPanel();
     }
+
+    /** 壁纸模式 */
+    public void backgroundModeClick(View view) {
+        if(View.VISIBLE == getViewDataBinding().clBgMode.getVisibility()) {
+            getViewDataBinding().clMain.setVisibility(View.VISIBLE);
+            getViewDataBinding().clAlbumDetail.setVisibility(View.VISIBLE);
+            getViewDataBinding().clBgMode.setVisibility(View.GONE);
+        } else {
+            getViewDataBinding().clMain.setVisibility(View.GONE);
+            getViewDataBinding().clAlbumDetail.setVisibility(View.GONE);
+            getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
+        }
+    }
+
     /** 点击播放按钮 */
     public void playButtonClick(View view)  {
         //getViewModel().pause();
@@ -2248,9 +2603,23 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             sortMenuBinding.ivSortByNameType.setVisibility(View.INVISIBLE);
             sortMenuBinding.ivSortBySingerType.setVisibility(View.VISIBLE);
         }
-        sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-        sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-        sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+
+        if(rThemeId!=0) {
+            if(rThemeId == R.id.ll_theme_white) {
+                sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
+                sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
+                sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
+            } else {
+                sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+            }
+        } else {
+            sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+            sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+            sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+        }
+
 
         /* 按时间排序 */
         sortMenuBinding.llSortByTime.setOnClickListener(new View.OnClickListener() {
@@ -2258,7 +2627,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 isUpSortByTime = !isUpSortByTime;
                 sortList(0);
-                sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                if(rThemeId!=0) {
+                    if(rThemeId == R.id.ll_theme_white) {
+                        sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
+                    } else {
+                        sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                    }
+                } else {
+                    sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                }
                 sortMenuBinding.ivSortByTimeType.setVisibility(View.VISIBLE);
                 sortMenuBinding.ivSortByNameType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortBySingerType.setVisibility(View.INVISIBLE);
@@ -2272,7 +2649,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 isUpSortByName = !isUpSortByName;
                 sortList(1);
-                sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                if(rThemeId!=0) {
+                    if(rThemeId == R.id.ll_theme_white) {
+                        sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
+                    } else {
+                        sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                    }
+                } else {
+                    sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                }
                 sortMenuBinding.ivSortByTimeType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortByNameType.setVisibility(View.VISIBLE);
                 sortMenuBinding.ivSortBySingerType.setVisibility(View.INVISIBLE);
@@ -2288,7 +2673,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 isUpSortBySinger = !isUpSortBySinger;
                 sortList(2);
-                sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                if(rThemeId!=0) {
+                    if(rThemeId == R.id.ll_theme_white) {
+                        sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
+                    } else {
+                        sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                    }
+                } else {
+                    sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
+                }
                 sortMenuBinding.ivSortByTimeType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortByNameType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortBySingerType.setVisibility(View.VISIBLE);
@@ -2299,8 +2692,80 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         PopupWindow popupWindow  = new PopupWindow(sortMenuBinding.getRoot(),
                 PxUtil.getInstance().dp2px(150, this),  WindowManager.LayoutParams.WRAP_CONTENT, true);
         popupWindow.setTouchable(true);
-        popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
-        popupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, this),  PxUtil.getInstance().dp2px(10, this));
+        if(rThemeId!=0) {
+            if(rThemeId == R.id.ll_theme_normal) {
+                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
+                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
+                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
+                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else if(rThemeId == R.id.ll_theme_dark) {
+                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
+                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
+                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
+                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
+                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else if(rThemeId == R.id.ll_theme_white) {
+                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_white));
+                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.purple));
+                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.purple));
+                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.purple));
+                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time_purple);
+                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name_purple);
+                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer_purple);
+                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.purple));
+                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.purple));
+            } else if(rThemeId == R.id.ll_theme_orange) {
+                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_orange));
+                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
+                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
+                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
+                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else if(rThemeId == R.id.ll_theme_light) {
+                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_light));
+                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
+                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
+                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
+                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            } else {
+                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
+                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
+                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
+                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
+                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            }
+        } else {
+            popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
+            sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
+            sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
+            sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
+            sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
+            sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
+            sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
+            sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+            sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
+        }
+        popupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-105, this),  PxUtil.getInstance().dp2px(10, this));
     }
 
     /** 按类型排序歌曲 */
@@ -2658,14 +3123,26 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         EventBus.getDefault().unregister(this);
         if(binder!=null) {
             binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+            binder.clearMedia();
         }
+        clearMediaSession();
         MainVM.stopHandler();
         MainVM.stopTalkHandler();
         unbindService(conn);
         stopService(intentService);
         stopService(intentCharacterService);
         BluetoothUtil.getInstance().unRegisterBluetoothReceiver(this);
-        getViewModel().stop();
+
+    }
+
+    /** 清除媒体会话参数 */
+    public void clearMediaSession(){
+        if (mSession != null) {
+            mSession.setCallback(null);
+            mSession.setActive(false);
+            mSession.release();
+            mSession = null;
+        }
     }
 
     /** 屏蔽返回键 */
@@ -2685,7 +3162,31 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 isNotMain = false;
                 return true;
             }
+        } else if (KeyEvent.KEYCODE_MEDIA_PLAY == keyCode&& keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            if(isFirstBluetoothControl){
+                isFirstBluetoothControl = false;
+                binder.clearMedia();
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
+            } else {
+                binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+            }
+           // binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+        } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+            if(isFirstBluetoothControl){
+                isFirstBluetoothControl = false;
+                binder.clearMedia();
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
+            } else {
+                binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+            }
+            //binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+        } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
+            lastOrNextMusic(true);
+        } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
+            lastOrNextMusic(false);
         }
+
+
         return super.onKeyDown(keyCode, keyEvent);
     }
 
@@ -3032,6 +3533,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         music.setMusicURL(musicMsg.getMusicURL());
         music.setMusicFavorite(musicMsg.getMusicFavorite());
         music.setMusicLyric(musicMsg.getMusicLyric());
+        music.setMusicImgByte(musicMsg.getMusicImgByte());
+        music.setLocal(musicMsg.isLocal);
         music.isPlaying = isPlaying;
         return music;
     }
@@ -3156,7 +3659,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     binding.ivMusicRailLight.setVisibility(View.GONE);
                 }
 
-
+                //点击播放列表的歌曲
                 binding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -3243,13 +3746,48 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-        for (int i=0; i<permissions.length; i++) {
-            if(permissions[i].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP, versionList.get(0).versionUrl));
+        if(REQUEST_CODE_DOWNLOAD_APP== requestCode) {
+            for (int i=0; i<permissions.length; i++) {
+                if(permissions[i].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP, versionList.get(0).versionUrl));
+                    }
+                }
+            }
+        } else if(REQUEST_CODE_SCAN_LOCAL_FILE == requestCode) {
+            for (int i=0; i<permissions.length; i++) {
+                if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE));
+                    }
                 }
             }
         }
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+    private class MainFragmentStateAdapter extends FragmentStateAdapter {
+
+        private List<Fragment> fragmentList;
+
+        public MainFragmentStateAdapter(FragmentActivity fragmentActivity, List<Fragment> fragmentList) {
+            super(fragmentActivity);
+            this.fragmentList = fragmentList;
+        }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            Fragment fragment = fragmentList.get(position);
+            return fragment;
+        }
+
+        @Override
+        public int getItemCount() {
+            return fragmentList.size();
+        }
+
+    }
+
 }

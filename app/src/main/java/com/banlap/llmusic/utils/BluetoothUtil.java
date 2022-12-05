@@ -3,6 +3,7 @@ package com.banlap.llmusic.utils;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.banlap.llmusic.receiver.BluetoothStateBroadcastReceiver;
@@ -19,7 +20,6 @@ public class BluetoothUtil {
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-
         context.registerReceiver(mReceiver, intentFilter);
     }
 

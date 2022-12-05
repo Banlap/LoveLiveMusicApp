@@ -17,6 +17,24 @@
         android:background="@mipmap/ic_gradient_color5"
         tools:context=".ui.MainActivity">
 
+        <!-- 壁纸模式 -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_bg_mode"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@mipmap/ic_bg_mode_1"
+                android:scaleType="centerCrop"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 专辑详细页 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_album_detail"
             android:layout_width="match_parent"
@@ -273,7 +291,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="10dp"
-                                android:layout_marginEnd="5dp"
+                                android:layout_marginEnd="10dp"
                                 android:background="@drawable/selector_normal_selected"
                                 android:gravity="center"
                                 android:orientation="horizontal"
@@ -288,7 +306,7 @@
 
                             </LinearLayout>
 
-                            <LinearLayout
+                          <!--  <LinearLayout
                                 android:id="@+id/ll_settings"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -306,7 +324,7 @@
                                     android:layout_height="20dp"
                                     android:background="@drawable/ic_settings_light" />
 
-                            </LinearLayout>
+                            </LinearLayout>-->
 
                         </LinearLayout>
 
@@ -415,7 +433,7 @@
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
+        <!-- 主页 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_main"
             android:layout_width="match_parent"
@@ -425,7 +443,7 @@
             <LinearLayout
                 android:id="@+id/ll_tittle_bar_1"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 app:layout_constraintStart_toStartOf="parent"
@@ -433,19 +451,75 @@
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginTop="30dp">
 
-                <TextView
-                    android:id="@+id/tv_discover"
-                    android:layout_width="wrap_content"
+               <!-- <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tl_title"
+                    android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:text="Discover"
-                    android:textSize="36dp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:shadowColor="@color/gray_5c"
-                    android:shadowDx="1"
-                    android:shadowDy="1"
-                    android:shadowRadius="1"/>
+                    app:tabIndicator="@drawable/indicator_rectangle"
+                    app:tabIndicatorFullWidth="false"
+                    app:tabPaddingStart="-5dp"
+                    app:tabPaddingEnd="-5dp"
+                    app:tabIndicatorHeight="5dp"
+                    app:tabTextColor="@color/white"
+                    app:tabSelectedTextColor="@color/light_ff"
+                    app:tabIndicatorColor="@color/white"
+                    app:tabTextAppearance="@style/TabLayoutTextAppearance"
+                    />-->
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_discover"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        android:layout_marginStart="30dp"
+                        android:text="Discover"
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"/>
+
+                    <TextView
+                        android:id="@+id/tv_local"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toEndOf="@+id/tv_discover"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="20dp"
+                        android:text="Local"
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"/>
+
+                    <View
+                        android:id="@+id/v_line"
+                        app:layout_constraintStart_toStartOf="@+id/tv_discover"
+                        app:layout_constraintEnd_toEndOf="@+id/tv_discover"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_discover"
+                        android:layout_width="20dp"
+                        android:layout_height="5dp"
+                        android:layout_marginTop="5dp"
+                        android:background="@drawable/shape_button_white"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
 
                 <View
                     android:layout_weight="1"
@@ -503,7 +577,7 @@
                     android:layout_height="match_parent">
 
                     <LinearLayout
-                        android:id="@+id/ll_character_bt"
+                        android:id="@+id/ll_main_menu_bt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
@@ -511,16 +585,16 @@
                         android:layout_marginEnd="20dp"
                         android:background="@drawable/selector_normal_selected"
                         android:gravity="center"
-                        android:onClick="showCharacterAuthMenu"
+                        android:onClick="showMainMenu"
                         android:orientation="horizontal"
                         android:paddingTop="10dp"
                         android:paddingBottom="10dp">
 
                         <ImageView
-                            android:id="@+id/iv_character_bt"
+                            android:id="@+id/iv_main_menu_bt"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:background="@drawable/ic_character_auth" />
+                            android:background="@drawable/ic_menu" />
 
                     </LinearLayout>
 
@@ -530,7 +604,7 @@
                         android:layout_width="10dp"
                         android:layout_height="10dp"
                         android:background="@drawable/shape_round_green"
-                        android:layout_alignEnd="@+id/ll_character_bt"
+                        android:layout_alignEnd="@+id/ll_main_menu_bt"
                         />
 
                     <TextView
@@ -554,7 +628,18 @@
 
             </LinearLayout>
 
-            <ScrollView
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vp2_main"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ll_tittle_bar_1"
+                app:layout_constraintVertical_bias="1.0"/>
+
+           <!-- <ScrollView
                 android:id="@+id/nsv_main"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -775,12 +860,12 @@
 
                 </LinearLayout>
 
-            </ScrollView>
+            </ScrollView>-->
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
+        <!-- 灰色背景 用于禁止触摸 -->
         <RelativeLayout
             android:id="@+id/rl_disable_click"
             android:layout_width="match_parent"
@@ -792,278 +877,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-       <!-- <RelativeLayout
-            android:id="@+id/rl_play_controller_new_style"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginBottom="15dp"
-            android:layout_marginStart="17dp"
-            android:layout_marginEnd="17dp">
-
-            <RelativeLayout
-                android:id="@+id/rl_play_controller_in"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="10dp"
-                android:background="@drawable/shape_button_white_3"
-                android:layout_alignParentTop="true">
-
-                <RelativeLayout
-                    android:id="@+id/rl_music_img"
-                    android:layout_width="68dp"
-                    android:layout_height="68dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginBottom="5dp"
-                    android:onClick="musicImgClick">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentBottom="true"
-                        android:background="@drawable/ic_music_default" />
-
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:id="@+id/ll_music_info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/bt_play"
-                    android:layout_toEndOf="@+id/rl_music_img"
-                    android:layout_alignTop="@+id/rl_music_img"
-                    android:layout_alignBottom="@+id/rl_music_img"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <com.banlap.llmusic.widget.AlwaysMarqueeTextView
-                            android:id="@+id/tv_music_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:ellipsize="marquee"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            android:scrollHorizontally="true"
-                            android:marqueeRepeatLimit="marquee_forever"
-                            android:text="MusicName"
-                            android:textColor="@color/black"
-                            android:textSize="20dp" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_singer_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="marquee"
-                        android:focusable="true"
-                        android:focusableInTouchMode="true"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:singleLine="true"
-                        android:layout_marginTop="5dp"
-                        android:text="SingerName"
-                        android:textColor="@color/black"
-                        android:textSize="14dp" />
-
-                </LinearLayout>
-
-                <Button
-                    android:id="@+id/bt_play"
-                    android:layout_width="35dp"
-                    android:layout_height="35dp"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="15dp"
-                    android:layout_alignParentEnd="true"
-                    android:background="@drawable/selector_play_4_selected"
-                    android:onClick="playButtonClick" />
-
-            </RelativeLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_current_all_panel"
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:layout_below="@+id/rl_play_controller_in"
-                android:visibility="gone">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/cl_current_music_panel"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="20dp"
-                    android:layout_height="match_parent"
-                    android:visibility="gone"
-                    android:background="@drawable/shape_button_white_3"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-
-                    <ScrollView
-                        android:visibility="visible"
-                        android:id="@+id/sv_music_lyric"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:scrollbars="none"
-                        app:layout_constraintBottom_toTopOf="@+id/cl_current_music_panel_in"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-
-                        <LinearLayout
-                            android:id="@+id/ll_show_lyric_new"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/tv_music_lyric_new"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:text=""
-                                android:textAlignment="center"
-                                android:textColor="@color/white"
-                                android:textSize="14dp"
-                                android:visibility="gone" />
-
-
-                            <TextView
-                                android:id="@+id/tv_music_no_lyric_new"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:text="暂无歌词"
-                                android:textAlignment="center"
-                                android:textColor="@color/white"
-                                android:textSize="14dp"
-                                android:visibility="visible" />
-
-                        </LinearLayout>
-
-
-                    </ScrollView>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:visibility="gone"
-                        android:id="@+id/rv_music_lyric_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        app:layout_constraintBottom_toTopOf="@+id/cl_current_music_panel_in"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp"
-                        app:layout_constraintBottom_toTopOf="@+id/cl_current_music_panel_in"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent">
-
-
-                        <TextView
-                            android:id="@+id/tv_start_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_marginStart="15dp"
-                            android:text="00:00"
-                            android:textColor="@color/black"
-                            android:textSize="12dp" />
-
-
-                        <SeekBar
-                            android:layout_weight="1"
-                            android:id="@+id/sb_music_bar_new"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:progressTint="@color/purple_light" />
-
-                        <TextView
-                            android:id="@+id/tv_all_time"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginEnd="15dp"
-                            android:text="00:00"
-                            android:textColor="@color/black"
-                            android:textSize="12dp" />
-
-                    </LinearLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/cl_current_music_panel_in"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent">
-
-                        <ImageView
-                            android:id="@+id/iv_panel_last"
-                            android:layout_width="42dp"
-                            android:layout_height="42dp"
-                            android:layout_marginEnd="15dp"
-                            android:background="@drawable/selector_last_2_selected"
-                            android:onClick="lastMusicButtonClick"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@+id/iv_panel_play"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/iv_panel_play"
-                            android:layout_width="72dp"
-                            android:layout_height="72dp"
-                            android:background="@drawable/selector_play_5_selected"
-                            android:onClick="playButtonClick"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/iv_panel_next"
-                            android:layout_width="42dp"
-                            android:layout_height="42dp"
-                            android:layout_marginStart="15dp"
-                            android:background="@drawable/selector_next_2_selected"
-                            android:onClick="nextMusicButtonClick"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toEndOf="@+id/iv_panel_play"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-        </RelativeLayout>-->
-
+        <!-- 播放控制栏 -->
         <RelativeLayout
             android:id="@+id/rl_play_controller"
             android:layout_width="match_parent"
@@ -1071,8 +885,7 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            >
+            app:layout_constraintStart_toStartOf="parent">
 
             <RelativeLayout
                 android:id="@+id/rl_play_controller_in"
@@ -1246,7 +1059,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="2dp"
-                        android:layout_marginEnd="2dp"/>
+                        android:layout_marginEnd="2dp" />
 
                 </RelativeLayout>
 
@@ -1260,6 +1073,7 @@
                 android:layout_below="@+id/rl_play_controller_in"
                 android:visibility="gone">
 
+                <!-- 音乐控制面板 -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/cl_current_music_panel"
                     android:layout_width="match_parent"
@@ -1408,6 +1222,32 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent">
 
+
+                        <LinearLayout
+                            android:id="@+id/ll_bg_mode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginEnd="20dp"
+                            android:layout_centerVertical="true"
+                            android:onClick="backgroundModeClick"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingTop="10dp"
+                            android:paddingBottom="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+
+                            <ImageView
+                                android:id="@+id/iv_bg_mode"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:background="@drawable/ic_bg_mode_black" />
+
+                        </LinearLayout>
+
+
                         <ImageView
                             android:id="@+id/iv_panel_last"
                             android:layout_width="32dp"
@@ -1445,7 +1285,7 @@
 
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
+                <!-- 音乐列表面板 -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/cl_current_music_list"
                     android:layout_width="match_parent"
@@ -1555,6 +1395,7 @@
 
         </RelativeLayout>
 
+        <!-- loading框 -->
         <RelativeLayout
             android:id="@+id/rl_show_loading"
             android:layout_width="match_parent"
@@ -1579,102 +1420,6 @@
 
         </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/rl_character_view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" >
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_character"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="10dp"
-                android:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/iv_character"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@mipmap/ic_character_keke"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <LinearLayout
-                    android:id="@+id/ll_character_talk"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/selector_button_selected2"
-                    android:orientation="vertical"
-                    android:visibility="visible"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_character"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <TextView
-                        android:id="@+id/tv_character_talk"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="" />
-
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:id="@+id/ll_say_good"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/shape_round_gray"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="visible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_character">
-
-                    <ImageView
-                        android:id="@+id/iv_say_good"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_say_good" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/ll_say_hello"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:background="@drawable/shape_round_gray"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="visible"
-                    app:layout_constraintBottom_toTopOf="@+id/ll_say_good"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_character">
-
-                    <ImageView
-                        android:id="@+id/iv_say_hello"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_say_hello" />
-
-                </LinearLayout>
-
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </RelativeLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

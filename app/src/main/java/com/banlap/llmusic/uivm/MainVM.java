@@ -163,7 +163,7 @@ public class MainVM extends AndroidViewModel {
             List<MusicLyric> musicLyricList = new ArrayList<>();
             String lyricUrl = dataSource.musicLyric !=null ? dataSource.musicLyric : "";
             if(!lyricUrl.equals("")) {
-                Log.e("ABMediaPlay", "url: " + lyricUrl);
+                //Log.e("ABMediaPlay", "url: " + lyricUrl);
                 URL url = new URL(lyricUrl);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET"); //请求方式
@@ -284,6 +284,11 @@ public class MainVM extends AndroidViewModel {
                 connection.disconnect();
             }
         }
+    }
+
+    /** 展示本地文件图片 */
+    public void showImageBitmap(String musicName, String musicSinger, Bitmap bitmap) {
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
     }
 
     /** 下载新版本App */

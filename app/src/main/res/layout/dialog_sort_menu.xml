@@ -20,11 +20,13 @@
             android:weightSum="1">
 
             <ImageView
+                android:id="@+id/iv_sort_by_name"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:background="@drawable/ic_sort_by_name" />
 
             <TextView
+                android:id="@+id/tv_sort_by_name"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -62,11 +64,13 @@
             android:weightSum="1">
 
             <ImageView
+                android:id="@+id/iv_sort_by_time"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:background="@drawable/ic_sort_by_time" />
 
             <TextView
+                android:id="@+id/tv_sort_by_time"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -104,11 +108,13 @@
             android:weightSum="1">
 
             <ImageView
+                android:id="@+id/iv_sort_by_singer"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:background="@drawable/ic_sort_by_singer" />
 
             <TextView
+                android:id="@+id/tv_sort_by_singer"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

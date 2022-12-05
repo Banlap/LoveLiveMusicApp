@@ -39,6 +39,7 @@ import com.banlap.llmusic.utils.CharacterHelper;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
+import java.util.Random;
 
 public class CharacterService extends Service {
 

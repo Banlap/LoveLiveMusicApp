@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">LLMusic</string>
     <attr name="play_controller_bg" format="reference"/>
+    <item name="img_load" type="id"/>
 </resources>

@@ -89,6 +89,12 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 showUpgradeApp();
             }
         });
+        getViewDataBinding().llAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAboutApp();
+            }
+        });
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -206,6 +212,32 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mAlertDialog.show();
     }
 
+    /** 关于 */
+    private void showAboutApp() {
+        DialogMessageBinding messageBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_message, null, false);
+
+        messageBinding.tvTitle.setText("关于App");
+        messageBinding.tvContent.setTextIsSelectable(true);
+        messageBinding.tvContent.setText("设计者：banlap\nB站up：圆圈AB\nhttps://space.bilibili.com/18177261\nqq交流群：748504621");
+        messageBinding.btSelectIconCancel.setVisibility(View.GONE);
+        messageBinding.btSelectIconCommit.setText("确认");
+        messageBinding.btSelectIconCommit.setTextColor(getResources().getColor(R.color.white));
+        messageBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected3);
+        messageBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.dismiss();
+            }
+        });
+
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setView(messageBinding.getRoot())
+                .create();
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        mAlertDialog.show();
+
+    }
 
     private void showLoadingApp() {
         if(null != mAlertDialog) {
@@ -244,7 +276,6 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     public class ButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            int rid = v.getId();
             if(v.getId() == R.id.ll_theme_normal) {
                 changeTheme(R.id.ll_theme_normal);
             } else if(v.getId() == R.id.ll_theme_dark) {
@@ -256,7 +287,6 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             } else if(v.getId() == R.id.ll_theme_light) {
                 changeTheme(R.id.ll_theme_light);
             }
-            SPUtil.setStrValue(getApplicationContext(), "SaveThemeId", String.valueOf(rid));
         }
     }
 
@@ -264,6 +294,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     /** 改变主题 */
     private void changeTheme(int rId) {
+        SPUtil.setStrValue(getApplicationContext(), "SaveThemeId", String.valueOf(rId));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
         if(rId == R.id.ll_theme_normal) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color5);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
@@ -281,6 +313,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
         } else if(rId == R.id.ll_theme_dark) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color6);
@@ -299,6 +332,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.white));
         } else if(rId == R.id.ll_theme_white) {
             getViewDataBinding().clBg.setBackgroundResource(R.color.background_color_F2);
@@ -317,6 +351,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.gray_purple_ac));
         } else if(rId == R.id.ll_theme_orange) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color7);
@@ -335,6 +370,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.orange_0b));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.orange_0b));
         } else if(rId == R.id.ll_theme_light) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color4);
@@ -353,6 +389,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
         }
     }

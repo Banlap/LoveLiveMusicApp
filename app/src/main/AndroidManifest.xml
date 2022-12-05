@@ -55,6 +55,7 @@
         </service>
 
         <activity android:name=".ui.WelcomeActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait">
 
             <intent-filter android:priority="1000">
@@ -65,10 +66,12 @@
 
         <activity
             android:name=".ui.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"/>
 
         <activity
             android:name=".ui.SettingsActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"/>
 
         <activity

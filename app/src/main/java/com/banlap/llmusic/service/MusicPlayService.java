@@ -267,6 +267,10 @@ public class MusicPlayService extends Service {
             }
         }
 
+        public void clearMedia() {
+            stop();
+        }
+
         public MediaPlayer getMediaPlayer() {
             if(null == mediaPlayer) {
                 return null;

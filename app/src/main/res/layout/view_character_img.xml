@@ -62,6 +62,72 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_jiandao"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_character"
+                app:layout_constraintStart_toEndOf="@+id/ll_say_good">
+
+                <TextView
+                    android:id="@+id/tv_jiandao"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:text="剪"
+                    android:textAlignment="center"
+                   />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_shitou"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_character"
+                app:layout_constraintStart_toEndOf="@+id/ll_jiandao">
+
+                <TextView
+                    android:id="@+id/tv_shitou"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:text="石"
+                    android:textAlignment="center"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_bu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_character"
+                app:layout_constraintStart_toEndOf="@+id/ll_shitou">
+
+                <TextView
+                    android:id="@+id/tv_bu"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:text="布"
+                    android:textAlignment="center"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/ll_say_hello"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -82,7 +148,71 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/ll_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/ll_say_hello"
+                app:layout_constraintStart_toEndOf="@+id/ll_say_hello">
 
+                <TextView
+                    android:id="@+id/tv_result"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:text="值"
+                    android:textAlignment="center"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_win"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/ll_say_hello"
+                app:layout_constraintStart_toEndOf="@+id/ll_result">
+
+                <TextView
+                    android:id="@+id/tv_win"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:text="0"
+                    android:textAlignment="center"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_lose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/ll_say_hello"
+                app:layout_constraintStart_toEndOf="@+id/ll_win">
+
+                <TextView
+                    android:id="@+id/tv_lose"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:text="0"
+                    android:textAlignment="center"
+                    />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_play_music"

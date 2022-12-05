@@ -19,6 +19,8 @@ import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.material.tabs.TabLayout;
+
 /**
  * @author Banlap on 2021/12/1
  */
@@ -78,12 +80,46 @@ public class MyAnimationUtil {
         return animatorSet;
     }
 
+    /** banlap: 动画效果  隐藏与显示 */
     public static ObjectAnimator objectAnimatorShowOrHide(Activity activity, float startAxis, float endAxis, TextView textView) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(textView, "alpha", startAxis, endAxis);
         animator.setRepeatMode(ObjectAnimator.RESTART);
         animator.setDuration(200);
         return animator;
     }
+
+    /** banlap: 添加动画效果 放大缩小 */
+    public static AnimatorSet animatorSetEnlarge(TextView textView, float startAxis,float endAxis) {
+        ObjectAnimator animatorX = ObjectAnimator.ofFloat(textView, "scaleX", startAxis, endAxis);
+        ObjectAnimator animatorY = ObjectAnimator.ofFloat(textView, "scaleY", startAxis, endAxis);
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(animatorX, animatorY);
+        animatorSet.setDuration(150);
+        return animatorSet;
+    }
+
+    /** banlap: 动画效果  隐藏与显示 */
+    public static AnimatorSet animatorSetMove(View view, boolean isRun) {
+
+        view.setPivotX(0);
+        ObjectAnimator animatorXStart = ObjectAnimator.ofFloat(view, "scaleX", 1, 2);
+        ObjectAnimator animatorXEnd = ObjectAnimator.ofFloat(view, "scaleX", 2, 1);
+        ObjectAnimator animatorMove = ObjectAnimator.ofFloat(view, "translationX", 0, PxUtil.getInstance().dp2px(80, view.getContext()));
+        animatorXStart.setDuration(1000);
+        animatorXEnd.setDuration(1000);
+
+        if(!isRun) {
+            view.setPivotX(view.getWidth());
+            animatorMove = ObjectAnimator.ofFloat(view, "translationX", PxUtil.getInstance().dp2px(80, view.getContext()), 0);
+        }
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playTogether(animatorXStart, animatorMove, animatorXEnd);
+        animatorSet.setDuration(200);
+        return animatorSet;
+    }
+
 
 
 
