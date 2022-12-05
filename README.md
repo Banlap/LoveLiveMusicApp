@@ -22,6 +22,11 @@
 <p align="start">11. 本地歌曲导入功能</p>
 
 #
-### 联系
+### 如何下载使用：
+[点击这里跳转](https://github.com/Banlap/LoveLiveMusicApp/releases)
+
+#
+### 联系：
 <p align="start">b站up：圆圈AB https://space.bilibili.com/18177261</p>
 <p align="start">QQ交流或维护群：748504621</p>
+
