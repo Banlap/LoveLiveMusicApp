@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.banlap.llmusic",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "properties": [],
+      "versionCode": 147,
+      "versionName": "1.4.7",
+      "enabled": true,
+      "outputFile": "LLMusicPlayer_official_v1.4.7_2022-12-05_15-15.apk"
+    }
+  ]
+}

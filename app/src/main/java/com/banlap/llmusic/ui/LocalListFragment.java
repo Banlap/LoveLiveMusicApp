@@ -135,9 +135,6 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             case ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION:
                 checkScanPermission(event.str);
                 break;
-            case ThreadEvent.SCAN_LOCAL_FILE:
-                scan();
-                break;
             case ThreadEvent.SCAN_LOCAL_FILE_SUCCESS:
                 if(null != mLocalMusicList) {
                     mLocalMusicList.clear();
@@ -247,7 +244,11 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         for (String str : permissions) {
             if (ContextCompat.checkSelfPermission(getActivity(), str) != PackageManager.PERMISSION_GRANTED) {
                 //申请权限
-                ActivityCompat.requestPermissions(getActivity(), permissions, MainActivity.REQUEST_CODE_SCAN_LOCAL_FILE);
+                if("scan".equals(type)) {
+                    ActivityCompat.requestPermissions(getActivity(), permissions, MainActivity.REQUEST_CODE_SCAN_LOCAL_FILE);
+                } else {
+                    ActivityCompat.requestPermissions(getActivity(), permissions, MainActivity.REQUEST_CODE_SELECT_LOCAL_FILE);
+                }
                 return;
             }
         }
@@ -260,16 +261,17 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
     }
 
+    /** 扫描文件 */
     private void scan() {
         getViewModel().scan();
     }
 
+    /** 文件选择 */
     private void selectFile() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_GET_CONTENT);
         intent.setType("audio/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        //intent.setDataAndType(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, "audio/*");
         intentSelectMusicLauncher.launch(intent);
     }
 

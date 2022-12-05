@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 146
+        versionCode 147
         //versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -103,8 +103,9 @@ android {
         //1.解决app进入分屏、小屏幕模式下app重启并播放失败
         //2.解决播放部分歌曲时通知没及时更新成功
         //3.添加本地歌曲导入
-
-
+        versionName "1.4.7"
+        //1.修复首次点击本地文件时权限允许后问题
+        //2.修复选择本地文件的下载目录后，选择文件闪退问题
     }
 
     android.applicationVariants.all {

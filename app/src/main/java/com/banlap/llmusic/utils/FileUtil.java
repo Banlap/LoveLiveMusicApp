@@ -19,6 +19,8 @@ import java.io.InputStreamReader;
 
 public class FileUtil {
 
+    private static final String TAG = FileUtil.class.getSimpleName();
+
     public static FileUtil getInstance() { return new FileUtil();}
 
     public static String ReadTxtFile(String strFilePath) {
@@ -29,12 +31,10 @@ public class FileUtil {
         //如果path是传递过来的参数，可以做一个非目录的判断
         if (file.isDirectory()) {
             Log.e("TestFile", "The File doesn't not exist.");
-        }
-        else {
+        } else {
             try {
                 InputStream instream = new FileInputStream(file);
-                if (instream != null)
-                {
+                if (instream != null) {
                     InputStreamReader inputreader = new InputStreamReader(instream);
                     BufferedReader buffreader = new BufferedReader(inputreader);
                     String line;
@@ -63,30 +63,26 @@ public class FileUtil {
             // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
-//                Log.i(TAG,"isExternalStorageDocument***"+uri.toString());
-//                Log.i(TAG,"docId***"+docId);
-//                以下是打印示例：
-//                isExternalStorageDocument***content://com.android.externalstorage.documents/document/primary%3ATset%2FROC2018421103253.wav
-//                docId***primary:Test/ROC2018421103253.wav
                 final String[] split = docId.split(":");
                 final String type = split[0];
 
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
-            }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
-//                Log.i(TAG,"isDownloadsDocument***"+uri.toString());
+            } else if (isDownloadsDocument(uri)) { // DownloadsProvider
                 final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                if(id.contains(":")) {
+                    final String[] split = id.split(":");
+                    String path = split[1];
+                    return path;
+                } else {
+                    final Uri contentUri = ContentUris.withAppendedId(
+                            Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 
-                return getDataColumn(context, contentUri, null, null);
-            }
-            // MediaProvider
-            else if (isMediaDocument(uri)) {
-//                Log.i(TAG,"isMediaDocument***"+uri.toString());
+                    return getDataColumn(context, contentUri, null, null);
+                }
+
+            } else if (isMediaDocument(uri)) { // MediaProvider
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
                 final String type = split[0];

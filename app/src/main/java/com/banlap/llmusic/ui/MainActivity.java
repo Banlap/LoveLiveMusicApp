@@ -184,12 +184,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private MediaSession mSession;                        //用于获取按键事件
     public boolean isFirstBluetoothControl = true;
     private MainFragmentStateAdapter  mainFragmentStateAdapter;
-    public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 101;       //检查扫描文件所需要的权限
-    public static final int REQUEST_CODE_DOWNLOAD_APP = 102;           //检查下载app时需要的权限
-    private final String[] permissions = {                  //权限列表
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    };
+    public static final int REQUEST_CODE_DOWNLOAD_APP = 101;           //检查下载app时需要的权限
+    public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 102;       //检查扫描文件所需要的权限
+    public static final int REQUEST_CODE_SELECT_LOCAL_FILE = 103;       //检查选择文件所需要的权限
+
     private DialogLocalFileBinding dialogLocalFileBinding;
 
     private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
@@ -265,18 +263,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     }
 
-    private void checkPermissions() {
-        //如果系统大于android6.0，进行动态权限申请
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            for (String str : permissions) {
-                if (checkSelfPermission(str) != PackageManager.PERMISSION_GRANTED) {
-                    //申请权限
-                    requestPermissions(permissions, REQUEST_CODE_CHECK_PERMISSION);
-                    return;
-                }
-            }
-        }*/
-    }
 
     /** 初始化主页内容 */
     private void initMainView(){
@@ -3758,7 +3744,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             for (int i=0; i<permissions.length; i++) {
                 if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
                     if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "scan"));
+                    }
+                }
+            }
+        } else if(REQUEST_CODE_SELECT_LOCAL_FILE == requestCode) {
+            for (int i=0; i<permissions.length; i++) {
+                if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
+                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "select"));
                     }
                 }
             }
