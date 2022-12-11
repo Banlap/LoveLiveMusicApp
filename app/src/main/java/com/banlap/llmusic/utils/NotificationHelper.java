@@ -39,13 +39,19 @@ public class NotificationHelper {
     @SuppressLint("RemoteViewLayout")
     public void createRemoteViews(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isDefault) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.view_remote_notification_bar);
+        RemoteViews remoteBigViews = new RemoteViews(context.getPackageName(), R.layout.view_remote_notification_big_bar);
+
         remoteViews.setTextViewText(R.id.tv_music_name, musicName);
         remoteViews.setTextViewText(R.id.tv_singer_name, musicSinger);
+        remoteBigViews.setTextViewText(R.id.tv_music_name, musicName);
+        remoteBigViews.setTextViewText(R.id.tv_singer_name, musicSinger);
 
         if(isDefault) {
             remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_play_purple_notify_selected", "drawable", context.getPackageName()));
+            remoteBigViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_play_purple_notify_selected", "drawable", context.getPackageName()));
         } else {
             remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_pause_purple_notify_selected", "drawable", context.getPackageName()));
+            remoteBigViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_pause_purple_notify_selected", "drawable", context.getPackageName()));
         }
 
         Intent intentServiceIsPause = new Intent(context, MusicIsPauseService.class);
@@ -54,31 +60,35 @@ public class NotificationHelper {
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
         if(bitmap !=null) {
             remoteViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
+            remoteBigViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
             byte[] bitmapByte = baos.toByteArray();
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
         } else {
             remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));
+            remoteBigViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));
             intentServiceIsPause.putExtra("MusicBitmap", (byte[]) null);
         }
 
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentIsPause = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceIsPause, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
+        remoteBigViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
 
         Intent intentServiceNext = new Intent(context, MusicNextService.class);
         intentServiceNext.putExtra("NextMusic", true);
-
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentNext = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceNext, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
+        remoteBigViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
 
         Intent intentServiceLast = new Intent(context, MusicLastService.class);
         intentServiceLast.putExtra("LastMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentLast = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceLast, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
+        remoteBigViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
 
         Intent intentMain = new Intent(context, MainActivity.class);
         intentMain.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -87,13 +97,14 @@ public class NotificationHelper {
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentMain = PendingIntent.getActivity(context, LL_MUSIC_PLAYER, intentMain, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.ll_music_all, pIntentMain);
+        remoteBigViews.setOnClickPendingIntent(R.id.ll_music_all, pIntentMain);
 
-        NotificationHelper.getInstance().createNotification(context, null, remoteViews);
+        NotificationHelper.getInstance().createNotification(context, null, remoteViews, remoteBigViews);
 
     }
 
     /** 创建通知栏Notification */
-    public void createNotification(Context context, PendingIntent pIntent, RemoteViews view) {
+    public void createNotification(Context context, PendingIntent pIntent, RemoteViews view, RemoteViews bigView) {
 
         manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -102,7 +113,9 @@ public class NotificationHelper {
             manager.createNotificationChannel(channel);
 
             builder = new NotificationCompat.Builder(context, "channel_1");
+            builder.setCustomBigContentView(bigView);
             builder.setCustomContentView(view);
+            builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
             builder.setSmallIcon(R.mipmap.ic_llmp_2);
@@ -112,7 +125,9 @@ public class NotificationHelper {
             manager.notify(LL_MUSIC_PLAYER, notification);
         } else {
             builder = new NotificationCompat.Builder(context);
+            builder.setCustomBigContentView(bigView);
             builder.setCustomContentView(view);
+            builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
             builder.setSmallIcon(R.mipmap.ic_llmp_2);
@@ -126,13 +141,19 @@ public class NotificationHelper {
     @SuppressLint("RemoteViewLayout")
     public Notification createNotificationReturn(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isDefault) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.view_remote_notification_bar);
+        RemoteViews remoteBigViews = new RemoteViews(context.getPackageName(), R.layout.view_remote_notification_big_bar);
+
         remoteViews.setTextViewText(R.id.tv_music_name, musicName);
         remoteViews.setTextViewText(R.id.tv_singer_name, musicSinger);
+        remoteBigViews.setTextViewText(R.id.tv_music_name, musicName);
+        remoteBigViews.setTextViewText(R.id.tv_singer_name, musicSinger);
 
         if(isDefault) {
             remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_play_purple_notify_selected", "drawable", context.getPackageName()));
+            remoteBigViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_play_purple_notify_selected", "drawable", context.getPackageName()));
         } else {
             remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_pause_purple_notify_selected", "drawable", context.getPackageName()));
+            remoteBigViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_pause_purple_notify_selected", "drawable", context.getPackageName()));
         }
 
         Intent intentServiceIsPause = new Intent(context, MusicIsPauseService.class);
@@ -141,30 +162,35 @@ public class NotificationHelper {
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
         if(bitmap !=null) {
             remoteViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
+            remoteBigViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] bitmapByte = baos.toByteArray();
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
         } else {
             remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));
+            remoteBigViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));
             intentServiceIsPause.putExtra("MusicBitmap", (byte[]) null);
         }
 
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentIsPause = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceIsPause, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
+        remoteBigViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
 
         Intent intentServiceNext = new Intent(context, MusicNextService.class);
         intentServiceNext.putExtra("NextMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentNext = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceNext, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
+        remoteBigViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
 
         Intent intentServiceLast = new Intent(context, MusicLastService.class);
         intentServiceLast.putExtra("LastMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentLast = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceLast, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
+        remoteBigViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
 
         Intent intentMain = new Intent(context, MainActivity.class);
         intentMain.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -173,6 +199,7 @@ public class NotificationHelper {
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentMain = PendingIntent.getActivity(context, LL_MUSIC_PLAYER, intentMain, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.ll_music_all, pIntentMain);
+        remoteBigViews.setOnClickPendingIntent(R.id.ll_music_all, pIntentMain);
 
         manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -181,7 +208,9 @@ public class NotificationHelper {
             manager.createNotificationChannel(channel);
 
             builder = new NotificationCompat.Builder(context, "channel_1");
+            builder.setCustomBigContentView(remoteBigViews);
             builder.setCustomContentView(remoteViews);
+            builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
             builder.setSmallIcon(R.mipmap.ic_llmp_2);
@@ -191,7 +220,9 @@ public class NotificationHelper {
             manager.notify(LL_MUSIC_PLAYER, notification);
         } else {
             builder = new NotificationCompat.Builder(context);
+            builder.setCustomBigContentView(remoteBigViews);
             builder.setCustomContentView(remoteViews);
+            builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
             builder.setSmallIcon(R.mipmap.ic_llmp_2);

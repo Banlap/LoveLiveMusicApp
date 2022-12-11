@@ -74,6 +74,13 @@ public class FileUtil {
                 if(id.contains(":")) {
                     final String[] split = id.split(":");
                     String path = split[1];
+                    //部分机型获取格式为msf:XXX(数字) 则需要额外判断并使用另外的获取文件路径方式
+                    if(isNumeric(path)) {
+                        Uri contentUri = MediaStore.Files.getContentUri("external");
+                        final String selection = "_id=?";
+                        final String[] selectionArgs = new String[]{split[1]};
+                        return getDataColumn(context, contentUri, selection, selectionArgs);
+                    }
                     return path;
                 } else {
                     final Uri contentUri = ContentUris.withAppendedId(
@@ -107,6 +114,19 @@ public class FileUtil {
             return uri.getPath();
         }
         return null;
+    }
+
+    /**
+     * 当前字符串是否为数字
+     * */
+    public static boolean isNumeric(String str){
+        for(int i=str.length();--i>=0;){
+            int chr=str.charAt(i);
+            if(chr<48 || chr>57) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public String getDataColumn(Context context, Uri uri, String selection,

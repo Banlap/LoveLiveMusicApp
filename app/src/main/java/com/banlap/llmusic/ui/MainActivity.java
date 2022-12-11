@@ -138,7 +138,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private List<Version> versionList;                  //版本列表
     private MusicListAdapter musicListAdapter;          //音乐列表适配器
     private PlayMusicListAdapter playMusicListAdapter;  //播放列表适配器
-    private ScrollLyricAdapter scrollLyricAdapter;      //滚动歌词适配器
     private ObjectAnimator objectAnimator;              //动画效果
     private MusicPlayService.MusicBinder binder;        //用于绑定服务
     private ServiceConn conn;                           //用于绑定服务
@@ -154,16 +153,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private String currentMusicSinger ="";              //当前歌曲的歌手
     private String currentMusicImg ="";                 //当前歌曲的图片
     private Bitmap currentBitmap = null;                //当前歌曲Bitmap图
-    private String currentMusicLyric="";                //当前歌词（没有时间）
     private String currentMusicLyricWithTime="";        //当前歌词
     private AlertDialog mAlertDialog;                   //弹窗
     private int musicListSize = 0;                      //获取总播放列表数
     private int playMode = 0;                           //播放模式: 0顺序播放 1随机播放 2单曲循环
     private int currentAllTime = 0;                     //当前歌曲总时间
-    private int cLyricScrollHeight=0;                   //当前歌词滚动高度
     private int clineHeight=0;                          //当前歌词行高
     private int lyricViewHeight=0;                      //歌词View高度
-    private int[] cLyricIntArray = new int[MusicPlayService.ARRAY_LENGTH];
     private final int panelMoveAxis=750;                 //面板移动值
     private int rThemeId =0;                             //当前主题
     /** 角色视图 */
@@ -190,6 +186,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     private DialogLocalFileBinding dialogLocalFileBinding;
 
+    /** MediaSession框架回掉 用于返回耳机实体按钮操作 */
     private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
         @Override
         public boolean onMediaButtonEvent(@NonNull Intent intent) {
@@ -211,6 +208,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
 
+    /** 初始化主页数据 */
     @SuppressLint("CheckResult")
     @Override
     protected void initData() {
@@ -246,14 +244,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         EventBus.getDefault().register(this);
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
-        //checkPermissions();
         //初始化主页内容
         initMainView();
         //连接数据库
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.CONNECT_MYSQL));
         //各种监听
         initListener();
-        //initCharacter();
         //开启所有相关服务
         startAllService();
         //广播监听蓝牙连接状态
@@ -292,10 +288,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         getViewDataBinding().rvPlayList.setAdapter(playMusicListAdapter);
         playMusicListAdapter.notifyDataSetChanged();
 
-        scrollLyricAdapter = new ScrollLyricAdapter(this, musicLyricList);
-        getViewDataBinding().rvMusicLyricList.setLayoutManager(new CenterLayoutManager(this));
-        getViewDataBinding().rvMusicLyricList.setAdapter(scrollLyricAdapter);
-        scrollLyricAdapter.notifyDataSetChanged();
 
         Glide.with(getApplication())
                 .setDefaultRequestOptions(requestOptions)
@@ -618,7 +610,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
             }
         }
-        //用于蓝牙耳机按钮控制
+        //创建媒体MediaSession框架 用于蓝牙耳机按钮控制
         createMediaSession();
     }
 
@@ -628,6 +620,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         //releaseMediaSession();
     }
 
+    /** 创建媒体MediaSession框架 */
     private void createMediaSession() {
         if (mSession == null) {
             mSession = new MediaSession(context, MainActivity.class.getSimpleName());
@@ -643,14 +636,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             mSession.setActive(false);
             mSession.release();
             mSession = null;
-        }
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus){
-        super.onWindowFocusChanged(hasFocus);
-        if(hasFocus) {
-            //TopFloatView.start(this);
         }
     }
 
@@ -1115,92 +1100,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
                 NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
 
-                /* if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startMusicService(true, event.str, event.str2, event.bitmap);
-                } else {
-                    NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
-                }*/
                 break;
             case ThreadEvent.VIEW_LYRIC:
-                lyricScrollView.setMusicLyrics(event.tList);
-                //getViewDataBinding().lvShowLyric.setThemeId(rThemeId);
-                //是否显示歌词
-                ScrollView.LayoutParams lp = new ScrollView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                if(!event.str2.equals("")) {
-                    getViewDataBinding().svMusicLyric.smoothScrollTo(0,0);
-                    lp.gravity = Gravity.TOP;
-                    getViewDataBinding().llShowLyric.setLayoutParams(lp);
-                    getViewDataBinding().tvMusicLyric.setVisibility(View.VISIBLE);
-                    getViewDataBinding().tvMusicNoLyric.setVisibility(View.GONE);
-                    getViewDataBinding().tvMusicLyric.setText(event.str2);
-                    //主题切换代码
-                    if(rThemeId!=0) {
-                        if(rThemeId == R.id.ll_theme_normal) {
-                            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.black));
-                        } else if(rThemeId == R.id.ll_theme_dark) {
-                            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.white));
-                        } else if (rThemeId == R.id.ll_theme_white) {
-                            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-                        } else if(rThemeId == R.id.ll_theme_orange) {
-                            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.orange_alpha_70));
-                        } else if(rThemeId == R.id.ll_theme_light) {
-                            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.light_b5));
-                        } else {
-                            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.black));
-                        }
-                    }
-                } else {
-                    lp.gravity = Gravity.CENTER;
-                    getViewDataBinding().llShowLyric.setLayoutParams(lp);
-                    getViewDataBinding().tvMusicLyric.setVisibility(View.GONE);
-                    getViewDataBinding().tvMusicNoLyric.setVisibility(View.VISIBLE);
-                    //主题切换代码
-                    if(rThemeId!=0) {
-                        if(rThemeId == R.id.ll_theme_normal) {
-                            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.black));
-                        } else if(rThemeId == R.id.ll_theme_dark) {
-                            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.white));
-                        } else if (rThemeId == R.id.ll_theme_white) {
-                            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-                        } else if(rThemeId == R.id.ll_theme_orange) {
-                            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.orange_alpha_70));
-                        } else if(rThemeId == R.id.ll_theme_light) {
-                            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.light_b5));
-                        } else {
-                            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.black));
-                        }
-                    }
-                }
-                //歌词
-                currentMusicLyric = event.str2;
-                currentMusicLyricWithTime = event.str;
-                //初始化当前歌词行数组（用于显示和变色）
-                cLyricIntArray = new int[MusicPlayService.ARRAY_LENGTH];
-                //歌词总行数
-                int lyricSize = getViewDataBinding().tvMusicLyric.getText().toString().split("\n").length;
-
-                int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-                int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-                getViewDataBinding().tvMusicLyric.measure(w, h);
-                Log.e("ABMediaPlay","lineHeight" + getViewDataBinding().tvMusicLyric.getLineHeight());
-                Log.e("ABMediaPlay", "height: " + getViewDataBinding().tvMusicLyric.getMeasuredHeight() + " line: " + getViewDataBinding().tvMusicLyric.getText().toString().split("\n").length);
-                lyricViewHeight = getViewDataBinding().tvMusicLyric.getMeasuredHeight();
-                clineHeight = lyricViewHeight/lyricSize;
-                Log.e("ABMediaPlay", "mathLineheight: " + clineHeight);
-
-
                 if(null != event.tList) {
+                    //将歌词数据方法lyricScrollView显示
+                    lyricScrollView.setMusicLyrics(event.tList);
+
                     musicLyricList.clear();
                     musicLyricList.addAll(event.tList);
-                    scrollLyricAdapter.notifyDataSetChanged();
                 }
-
                 if(binder !=null) {
                     binder.player(event.music, event.b, event.str, musicLyricList);
                 }
-                break;
-            case ThreadEvent.VIEW_SPANNABLE_LYRIC:
-                getViewDataBinding().tvMusicLyric.setText(event.ssb);
                 break;
             case ThreadEvent.DOWNLOAD_APP_START:
                 showLoadingApp();
@@ -1371,7 +1282,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("μs")));
                 break;
             case ThreadEvent.GET_MUSIC_LYRIC:
-                cLyricScrollHeight=0;
                 getViewModel().showLyric(event.music, event.b);
                 break;
             case ThreadEvent.SCROLL_LYRIC:
@@ -1385,64 +1295,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 }
                 break;
 
-            case ThreadEvent.REMOVE_TIME_BY_LYRIC:
-                if(!currentMusicLyricWithTime.equals("")) {
-                    SpannableStringBuilder builder = new SpannableStringBuilder();
-                    int intArraySize = event.intArray.length;
-                    int strArraySize = event.strArray.length;
-
-                    //处理全歌词文本去除时间点 （除当前播放时间点所显示的歌词）
-                    String[] str = currentMusicLyricWithTime.split("\n");
-                    for (int x=0; x<str.length; x++) {
-                        boolean isExist = false;
-                        for(int y=0; y<strArraySize; y++) {
-                            if(!event.strArray[y].equals("")) {
-                                if(str[x].contains(event.strArray[y]))  {
-                                    isExist=true;
-                                    break;
-                                }
-                            }
-                        }
-                        builder.append(!isExist? str[x].substring(str[x].indexOf("]")+1) + "\n" : str[x] + "\n");
-                    }
-
-                    //指定行变色
-                    String handleLyric = builder.toString();
-                    for (int i = 0; i < intArraySize; i++) {
-                        if (event.intArray[i] != 0 && !event.strArray[i].equals("")) {
-                            int startLyric = handleLyric.indexOf(event.strArray[i]);
-                            //int endLyric = startLyric + event.strArray[i].length();
-                            int endLyric = startLyric + event.strArray[i].substring(0, event.strArray[i].indexOf("]")+1).length();
-                            builder.replace(startLyric, endLyric, "");
-
-                            int endLyricAfter = startLyric + event.strArray[i].substring(event.strArray[i].indexOf("]")+1).length();
-                            //主题切换代码
-                            if(rThemeId!=0) {
-                                if(rThemeId == R.id.ll_theme_normal) {
-                                    builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.light_ea)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                                } else if(rThemeId == R.id.ll_theme_dark) {
-                                    builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.black)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                                } else if (rThemeId == R.id.ll_theme_white) {
-                                    builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.purple_light)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                                } else if(rThemeId == R.id.ll_theme_orange) {
-                                    builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.orange_f4)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                                } else if(rThemeId == R.id.ll_theme_light) {
-                                    builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.light_8a)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                                } else {
-                                    builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.light_ea)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                                }
-                            } else {
-                                builder.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.light_ea)), startLyric, endLyricAfter, Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                            }
-                            //Log.e("ABMusicPlayer",  " start: " + startLyric + " end: " + endLyric + " endAfter: " + endLyricAfter);
-                            handleLyric = builder.toString();
-                        }
-                    }
-                    //Log.e("ABMusicPlayer",  " int: " + Arrays.toString(event.intArray) + " str: " + Arrays.toString(event.strArray) + " currentLyric: " + event.strArray[0]);
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SPANNABLE_LYRIC, builder));
-
-                }
-                break;
         }
     }
 
@@ -1481,7 +1333,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             }
         }
     }
-
 
     /** 获取版本code */
     public int getAppVersionCode(Context context) {
@@ -1592,8 +1443,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.black));
             getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.black));
             getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.black));
 
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color5);
             //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_alpha_50);
@@ -1689,8 +1538,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.white));
 
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color6);
             //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_orange_alpha_50);
@@ -1785,8 +1632,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.gray_purple_ac));
             getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.gray_purple_ac));
             getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.gray_purple_ac));
 
             getViewDataBinding().clBg.setBackgroundResource(R.color.background_color_F2);
             //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_white_alpha_50);
@@ -1884,8 +1729,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.orange_0b));
 
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color7);
             //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_orange_alpha_50);
@@ -1980,8 +1823,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().tvSingerName.setTextColor(getResources().getColor(R.color.light_b5));
             getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.light_b5));
             getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvMusicLyric.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvMusicNoLyric.setTextColor(getResources().getColor(R.color.light_b5));
 
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color4);
             //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_light_alpha_50);
@@ -3056,7 +2897,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     }
 
-
+    /** 音乐播放条调整 */
     private class MusicBarChangerListener implements SeekBar.OnSeekBarChangeListener {
 
         @Override
@@ -3286,13 +3127,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     }
 
 
-
     public static class MusicListViewHolder extends RecyclerView.ViewHolder {
         public MusicListViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }
-
+    /** 在线音乐列表Adapter */
     public class MusicListAdapter extends RecyclerView.Adapter<MusicListViewHolder> {
 
         private Context context;
@@ -3537,6 +3377,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     public static class PlayMusicListViewHolder extends RecyclerView.ViewHolder {
         public PlayMusicListViewHolder(@NonNull View itemView) { super(itemView); }
     }
+    /** 播放列表Adapter */
     public class PlayMusicListAdapter extends RecyclerView.Adapter<PlayMusicListViewHolder> {
 
         private Context context;
@@ -3679,48 +3520,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         }
     }
 
-    public static class ScrollLyricViewHolder extends RecyclerView.ViewHolder {
-        public ScrollLyricViewHolder(@NonNull View itemView) { super(itemView); }
-    }
-    public class ScrollLyricAdapter extends RecyclerView.Adapter<ScrollLyricViewHolder> {
-
-        private Context context;
-        private List<MusicLyric> musicLyricList;
-
-        public ScrollLyricAdapter(Context context, List<MusicLyric> musicLyricList) {
-            this.context = context;
-            this.musicLyricList = musicLyricList;
-        }
-
-        @NonNull
-        @Override
-        public ScrollLyricViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ItemLyricListBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.item_lyric_list, parent, false);
-            return new ScrollLyricViewHolder(binding.getRoot());
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ScrollLyricViewHolder holder, int position) {
-            ItemLyricListBinding binding = DataBindingUtil.getBinding(holder.itemView);
-            if(binding != null) {
-                binding.tvMusicLyric.setText(musicLyricList.get(position).getLyricContext());
-                binding.tvMusicLyric2.setVisibility(View.GONE);
-                if(null != musicLyricList.get(position).getLyricContext2()) {
-                    if(0 != musicLyricList.get(position).getLyricContext2().trim().length()) {
-                        binding.tvMusicLyric2.setVisibility(View.VISIBLE);
-                        binding.tvMusicLyric2.setText(musicLyricList.get(position).getLyricContext2());
-                    }
-                }
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return musicLyricList.size();
-        }
-    }
-
-
     /** 关闭软键盘 */
     public void hintKeyBoard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -3730,6 +3529,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         }
     }
 
+    /** 根据权限对应实现功能 */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         if(REQUEST_CODE_DOWNLOAD_APP== requestCode) {
@@ -3761,7 +3561,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private class MainFragmentStateAdapter extends FragmentStateAdapter {
+    /** 在线与本地页面碎片切换 */
+    private static class MainFragmentStateAdapter extends FragmentStateAdapter {
 
         private List<Fragment> fragmentList;
 

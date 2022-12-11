@@ -12,79 +12,78 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 147
-        //versionName "1.0"
+        versionCode 148
+        versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
-        //versionName "1.0.1"
+        versionName "1.0.1"
         //1.修正点击音乐列表其中一首，即时播放并添加到播放列表
         //2.修正播放模式：顺序播放、随机播放和单曲循环逻辑
         //3.修正播放列表显示效果
-        //versionName "1.0.2"
+        versionName "1.0.2"
         //1.新增保存已添加歌曲的列表数据、一键删除功能
         //2.修正app后台播放被清除进程问题
         //3.修改部分ui显示
-        //versionName "1.1"
+        versionName "1.1"
         //Beta version
         //1.新增歌词显示，根据歌曲时间显示对应歌词并颜色改变
         //(歌词滚动显示功能存在一定问题 后续对该功能继续优化)
         //2.新增通知栏控制歌曲播放
         //3.修正列表清空时点击添加歌曲显示异常
-        //versionName "1.1.1"
+        versionName "1.1.1"
         //1.修复播放音乐时使用前台服务提高存活性
-        //versionName "1.1.2"
+        versionName "1.1.2"
         //1.添加蓝牙断开时播放暂停功能
         //2.调整部分ui颜色
-        //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        //versionName "1.1.2.1"
+        versionName "1.1.2.1"
         //1.解决8.0系统以下前台通知导致闪退问题
-        //versionName "1.1.3"
+        versionName "1.1.3"
         //1.加入欢迎页面
-        //versionName "1.2.0"
+        versionName "1.2.0"
         //1.新增播放全部歌曲、查询列表歌曲、排序等功能
         //2.修改循环播放逻辑
-        //versionName "1.2.1"
+        versionName "1.2.1"
         //1.新增主题设置
         //2.优化界面交互效果
         //3.新增保存播放模式、主题参数
         //4.修复播放列表显示问题
-        //versionName "1.2.2"
+        versionName "1.2.2"
         //1.添加歌曲分类模块
         //2.优化界面交互效果，调整部分内容
-        //versionName "1.2.3"
+        versionName "1.2.3"
         //1.添加新分类
         //2.UI界面交互优化
-        //versionName "1.2.4"
+        versionName "1.2.4"
         //1.修改分类图ui、修正排序弹框显示位置、调整删除所有歌曲弹框样式
         //2.添加载入歌曲loading显示、添加橙色主题
         //3.修正随机播放模式下按下下一首功能
         //4.添加按歌手排序功能
-        //versionName "1.2.5"
+        versionName "1.2.5"
         //1.修改部分ui分类图
         //2.添加新分类
-        //versionName "1.2.6"
+        versionName "1.2.6"
         //1.修复图标无法正常切换问题
         //2.更改播放全部按钮处理逻辑
         //3.在播放页面添加播放模式功能
         //4.修正部分ui图
-        //versionName "1.3"
+        versionName "1.3"
         //1.beta版本 - 添加角色功能
-        //versionName "1.3.1"
+        versionName "1.3.1"
         //1.角色功能运行于服务、在桌面显示
         //2.角色中添加新状态、添加播放控制
         //3.修正通知栏显示图片质量显示问题
         //4.修正点击后退判断是否到app主界面
         //4.修正app销毁后音乐暂停并销毁所有服务
-        //versionName "1.3.2"
+        versionName "1.3.2"
         //1.添加新主题：浅色主题
         //2.调整播放栏UI问题、调整分类UI图
         //3.新增功能：版本更新推送以及app下载功能
-        //versionName "1.4"
+        versionName "1.4"
         //1.重新设计部分ui: 播放控制区域、列表局部滚动效果、图片大小、主题ui调整
         //2.新增黑色主题、新增升/降序排列歌曲
-        //versionName "1.4.1"
+        versionName "1.4.1"
         //1.修复app下载更新失败问题
-        //versionName "1.4.2"
+        versionName "1.4.2"
         //1.重新设计滚动歌词功能
         //2.添加新角色状态：涩谷香音
         //3.调整橙色主题内容
@@ -106,6 +105,10 @@ android {
         versionName "1.4.7"
         //1.修复首次点击本地文件时权限允许后问题
         //2.修复选择本地文件的下载目录后，选择文件闪退问题
+        versionName "1.4.8"
+        //1.微调通知栏ui布局
+        //2.修复部分机型在选择文件路径时获取文件路径问题
+        //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     android.applicationVariants.all {
