@@ -4,6 +4,7 @@ import static com.banlap.llmusic.utils.NotificationHelper.LL_MUSIC_PLAYER;
 
 import android.app.Notification;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -27,6 +28,7 @@ import com.banlap.llmusic.utils.NotificationHelper;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,11 +49,6 @@ public class MusicPlayService extends Service {
     private final Object lock = new Object();
     private List<MusicLyric> mMusicLyricList = new ArrayList<>();
     private int scrollTo=0;
-    private String[] currentLyric;
-    private String currentTime="";
-    public static final int ARRAY_LENGTH = 5;
-    private int[] cLyricIntArray = new int[ARRAY_LENGTH];
-    private String[] cLyricStrArray = new String[ARRAY_LENGTH];
 
     Runnable runnable = new Runnable() {
         @Override
@@ -102,8 +99,8 @@ public class MusicPlayService extends Service {
             String musicSinger = intent.getStringExtra("MusicSinger");
             byte[] res = intent.getByteArrayExtra("MusicBitmap");
 
-            Bitmap bitmap=null;
-            if(res!=null) {
+            Bitmap bitmap = null;
+            if(res != null) {
                 bitmap = BitmapFactory.decodeByteArray(res, 0, res.length);
             }
             Notification notification = NotificationHelper.getInstance().createNotificationReturn(this, musicName, musicSinger, bitmap, false);
@@ -139,12 +136,7 @@ public class MusicPlayService extends Service {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
 
                 mediaPlayer = new MediaPlayer();
-                //当前歌词
-                currentLyric = !lyric.equals("") ? lyric.split("\n") : null;
-                currentTime="";
                 scrollTo=0;
-                cLyricIntArray = new int[ARRAY_LENGTH];
-                cLyricStrArray = new String[ARRAY_LENGTH];
 
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
@@ -198,14 +190,13 @@ public class MusicPlayService extends Service {
                     isStop = true;
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, true));
                     NotificationHelper.getInstance().createRemoteViews(context, musicName, musicSinger, bitmap, true);
-                    //callBack.viewPause(true);
                 } else {
                     mediaPlayer.start();
                     resumeThread();
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
                     NotificationHelper.getInstance().createRemoteViews(context, musicName, musicSinger, bitmap, false);
-                    //callBack.viewPause(false);
                 }
+                sendWidgetBroadcastReceiver();
             } else {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             }
@@ -333,32 +324,6 @@ public class MusicPlayService extends Service {
         return Integer.parseInt(secStr);
     }
 
-    /** 查询是否存在对应时间的歌词 */
-    public int[] isSearchLyric(String time, String[] ly) {
-        int isSearch = -1;
-        int[] row = new int[ARRAY_LENGTH];
-        int maxSize = 0;
-        if(ly!=null) {
-            if(!currentTime.equals(time)) {
-                currentTime = time;
-                for(int i=0; i<ly.length; i++) {
-                   /* if(ly[i].contains(time)) {
-                        isSearch = i;
-                        break;
-                    }*/
-                    if(ly[i].contains(time)) {
-                        if(maxSize <row.length) {
-                            row[maxSize] = i;
-                            maxSize++;
-                        }
-                    }
-                }
-            }
-        }
-        //Log.e("ABMusicPlayer", "isSearch: " + isSearch + " time: " + time);
-        return row;
-    }
-
     /** 查询当前时间是否有对应歌词 */
     public boolean searchLyricListPos(String currentTime) {
         boolean isFind = false;
@@ -372,5 +337,14 @@ public class MusicPlayService extends Service {
             }
         }
         return isFind;
+    }
+
+    /** 发送广播给小组件 更新视图 */
+    private void sendWidgetBroadcastReceiver() {
+        Intent intent = new Intent("WIDGET_PROVIDER_REFRESH_MUSIC_MSG");
+        intent.setPackage(getPackageName());
+        intent.putExtra("IsLoading", false);
+
+        sendBroadcast(intent);
     }
 }

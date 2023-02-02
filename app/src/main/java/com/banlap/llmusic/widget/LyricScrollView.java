@@ -242,7 +242,7 @@ public class LyricScrollView extends View {
                     highLightLyricColor = getResources().getColor(R.color.black);
                     defaultLyricColor = getResources().getColor(R.color.white);
                 } else if(rThemeId == R.id.ll_theme_white) {
-                    highLightLyricColor = getResources().getColor(R.color.purple_light);
+                    highLightLyricColor = getResources().getColor(R.color.purple);
                     defaultLyricColor = getResources().getColor(R.color.gray_purple_ac);
                 } else if(rThemeId == R.id.ll_theme_orange) {
                     highLightLyricColor = getResources().getColor(R.color.orange_f4);
@@ -268,6 +268,7 @@ public class LyricScrollView extends View {
                 } else {
                     mPaint.setColor(defaultLyricColor);
                 }
+                mPaint.setFakeBoldText(i == currentPosition);
                 canvas.drawText(musicLyrics.get(i).lyricContext, lyricX, lyricY + mPaddingY * i, mPaint);
 
 

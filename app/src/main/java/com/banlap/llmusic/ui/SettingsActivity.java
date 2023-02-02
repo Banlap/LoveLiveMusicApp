@@ -312,6 +312,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
@@ -331,6 +332,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.white));
@@ -350,6 +352,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
+            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.shape_button_black_alpha);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.gray_purple_ac));
@@ -369,6 +372,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.orange_0b));
@@ -388,6 +392,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));

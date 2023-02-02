@@ -91,6 +91,7 @@ import com.banlap.llmusic.service.CharacterService;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.uivm.MainVM;
+import com.banlap.llmusic.utils.Base64;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.MyAnimationUtil;
@@ -143,23 +144,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private ServiceConn conn;                           //用于绑定服务
     private Intent intentService;                       //音乐服务
     private Intent intentCharacterService;              //角色服务
-    private boolean isPlay = false;                     //判断是否播放音乐
     private boolean isSelect = false;                   //查询一次数据
     private boolean isClick = false;                    //判断是否点击按钮
     private boolean isNotMain = false;                  //判断是否在主界面
     private boolean isShowMusicPanel = false;           //判断是否显示音乐面板
     private boolean isShowMusicList = false;            //判断是否显示音乐清单
-    private String currentMusicName ="";                //当前歌曲的歌名
-    private String currentMusicSinger ="";              //当前歌曲的歌手
+    public static boolean isPlay = false;               //判断是否播放音乐
+    public static String currentMusicName ="";          //当前歌曲的歌名
+    public static String currentMusicSinger ="";        //当前歌曲的歌手
     private String currentMusicImg ="";                 //当前歌曲的图片
-    private Bitmap currentBitmap = null;                //当前歌曲Bitmap图
-    private String currentMusicLyricWithTime="";        //当前歌词
+    public static Bitmap currentBitmap = null;          //当前歌曲Bitmap图
     private AlertDialog mAlertDialog;                   //弹窗
     private int musicListSize = 0;                      //获取总播放列表数
     private int playMode = 0;                           //播放模式: 0顺序播放 1随机播放 2单曲循环
     private int currentAllTime = 0;                     //当前歌曲总时间
-    private int clineHeight=0;                          //当前歌词行高
-    private int lyricViewHeight=0;                      //歌词View高度
     private final int panelMoveAxis=750;                 //面板移动值
     private int rThemeId =0;                             //当前主题
     /** 角色视图 */
@@ -573,6 +571,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, musicName, musicSinger, imgUrl));
         } else {
             NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, null, true);
+            sendWidgetBroadcastReceiver(false);
         }
     }
 
@@ -918,6 +917,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 lyricScrollView.posLock(true);
                 getViewDataBinding().sbMusicBar.setProgress(0);
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.VISIBLE);
+                sendWidgetBroadcastReceiver(true);
                 break;
 
             case ThreadEvent.VIEW_PAUSE:
@@ -1080,13 +1080,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
-                            startMusicService(true,event.music.musicName, event.music.musicSinger, null);
+                            startMusicService(true, event.music.musicName, event.music.musicSinger, null);
+                            sendWidgetBroadcastReceiver(false);
                         }
                     } else {
                         if(!event.music.musicImg.equals("")) {
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
-                            startMusicService(true,event.music.musicName, event.music.musicSinger, null);
+                            startMusicService(true, event.music.musicName, event.music.musicSinger, null);
+                            sendWidgetBroadcastReceiver(false);
                         }
                     }
                 } else {
@@ -1099,7 +1101,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 currentBitmap = event.bitmap;
 
                 NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
-
+                sendWidgetBroadcastReceiver(false);
                 break;
             case ThreadEvent.VIEW_LYRIC:
                 if(null != event.tList) {
@@ -1347,6 +1349,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         return versionCode;
     }
 
+    /** 发送广播给小组件 更新视图 */
+    private void sendWidgetBroadcastReceiver(boolean isLoading) {
+        Intent intent = new Intent("WIDGET_PROVIDER_REFRESH_MUSIC_MSG");
+        intent.setPackage(getPackageName());
+        intent.putExtra("IsLoading", isLoading);
+
+        sendBroadcast(intent);
+    }
+
     /** 显示弹窗更新App */
     private void showUpgradeApp(){
 
@@ -1470,6 +1481,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.light_ff));
 
+            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
@@ -1565,6 +1577,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.white));
 
+            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
@@ -1660,6 +1673,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.gray_purple_ac));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.purple));
 
+            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.shape_button_white_4);
             getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu_purple);
 
             if(playMode == 0) {
@@ -1690,7 +1704,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     Glide.with(getApplication())
                             .setDefaultRequestOptions(requestOptions)
                             .load(currentMusicImg)
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple_light)))
+                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple)))
                             .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                             .into(getViewDataBinding().ivMusicImg);
                 }
@@ -1702,16 +1716,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().sbMusicBar.getProgressDrawable().setBounds(r);
             //getViewDataBinding().sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
-            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.purple_light), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.purple_light), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().hpvProgress.setLinearGradient(R.color.purple_light);
+            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
+            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
+            getViewDataBinding().hpvProgress.setLinearGradient(R.color.purple);
         } else if(rId == R.id.ll_theme_orange) {
             getViewDataBinding().rlPlayControllerIn.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             getViewDataBinding().pbLoadingMusic.setProgressDrawable(getResources().getDrawable(R.color.orange_0b));
-            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.orange_f4));
-            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.orange_f4));
+            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.orange_0b));
+            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_orange);
             getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.orange_0b));
 
@@ -1756,7 +1770,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.orange_0b));
 
-            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
+            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu_orange);
 
             if(playMode == 0) {
                 getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
@@ -1849,6 +1864,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.light_ff));
 
+            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
 
             if(playMode == 0) {
@@ -3081,7 +3097,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 Glide.with(getApplication())
                         .setDefaultRequestOptions(requestOptions)
                         .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple_light)))
+                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(getViewDataBinding().ivMusicImg);
             } else if(rThemeId == R.id.ll_theme_orange) {

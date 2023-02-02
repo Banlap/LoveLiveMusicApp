@@ -307,7 +307,7 @@ public class CharacterService extends Service {
                     .setContentTitle("角色服务")
                     .setContentText("运行中..")
                     .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.drawable.ic_character_icon)
+                    .setSmallIcon(R.mipmap.ic_llmp_small_2)
                     .build();
             startForeground(LL_MUSIC_CHARACTER, notification);
         } else {
@@ -315,7 +315,7 @@ public class CharacterService extends Service {
                     .setContentTitle("角色服务")
                     .setContentText("运行中..")
                     .setWhen(System.currentTimeMillis())
-                    .setSmallIcon(R.drawable.ic_character_icon)
+                    .setSmallIcon(R.mipmap.ic_llmp_small_2)
                     .build();
             startForeground(LL_MUSIC_CHARACTER, notification);
         }

@@ -12,8 +12,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
@@ -24,7 +22,6 @@ import com.banlap.llmusic.service.MusicLastService;
 import com.banlap.llmusic.service.MusicNextService;
 import com.banlap.llmusic.ui.MainActivity;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 public class NotificationHelper {
@@ -118,7 +115,7 @@ public class NotificationHelper {
             builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
-            builder.setSmallIcon(R.mipmap.ic_llmp_2);
+            builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
             builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
             notification = builder.build();
             notification.flags |= Notification.FLAG_NO_CLEAR;
@@ -130,7 +127,7 @@ public class NotificationHelper {
             builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
-            builder.setSmallIcon(R.mipmap.ic_llmp_2);
+            builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
             builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
             notification = builder.build();
             notification.flags |= Notification.FLAG_NO_CLEAR;
@@ -213,7 +210,7 @@ public class NotificationHelper {
             builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
-            builder.setSmallIcon(R.mipmap.ic_llmp_2);
+            builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
             builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
             notification = builder.build();
             notification.flags |= Notification.FLAG_NO_CLEAR;
@@ -225,7 +222,7 @@ public class NotificationHelper {
             builder.setPriority(NotificationCompat.PRIORITY_MAX);
             //builder.setContentIntent(pIntent);
             builder.setWhen(System.currentTimeMillis());
-            builder.setSmallIcon(R.mipmap.ic_llmp_2);
+            builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
             builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
             notification = builder.build();
             notification.flags |= Notification.FLAG_NO_CLEAR;

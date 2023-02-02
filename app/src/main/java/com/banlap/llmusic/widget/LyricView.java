@@ -18,6 +18,9 @@ import com.banlap.llmusic.model.MusicLyric;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *  已弃用
+ * */
 public class LyricView extends View {
 
     private List<MusicLyric> musicLyrics;
@@ -166,7 +169,7 @@ public class LyricView extends View {
                 } else if(rThemeId == R.id.ll_theme_dark) {
                     mPaint.setColor(getResources().getColor(R.color.black));
                 } else if(rThemeId == R.id.ll_theme_white) {
-                    mPaint.setColor(getResources().getColor(R.color.purple_light));
+                    mPaint.setColor(getResources().getColor(R.color.purple));
                 } else if(rThemeId == R.id.ll_theme_orange) {
                     mPaint.setColor(getResources().getColor(R.color.orange_f4));
                 } else if(rThemeId == R.id.ll_theme_light) {
@@ -190,7 +193,7 @@ public class LyricView extends View {
                     } else if(rThemeId == R.id.ll_theme_dark) {
                         mPaint.setColor(getResources().getColor(R.color.black));
                     } else if(rThemeId == R.id.ll_theme_white) {
-                        mPaint.setColor(getResources().getColor(R.color.purple_light));
+                        mPaint.setColor(getResources().getColor(R.color.purple));
                     } else if(rThemeId == R.id.ll_theme_orange) {
                         mPaint.setColor(getResources().getColor(R.color.orange_f4));
                     } else if(rThemeId == R.id.ll_theme_light) {

@@ -26,33 +26,38 @@
         <service
             android:name="com.banlap.llmusic.service.MusicPlayService"
             android:enabled="true"
-            android:exported="true">
-        </service>
+            android:exported="true"/>
 
         <service
             android:name="com.banlap.llmusic.service.MusicNextService"
             android:enabled="true"
-            android:exported="true">
-        </service>
+            android:exported="true"/>
 
         <service
             android:name="com.banlap.llmusic.service.MusicLastService"
             android:enabled="true"
-            android:exported="true">
-        </service>
+            android:exported="true"/>
 
         <service
             android:name="com.banlap.llmusic.service.MusicIsPauseService"
             android:enabled="true"
-            android:exported="true">
-        </service>
+            android:exported="true"/>
 
         <service
             android:name="com.banlap.llmusic.service.CharacterService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"/>
 
-        </service>
+        <receiver android:name=".widget.LLMusicWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="WIDGET_PROVIDER_REFRESH_MUSIC_MSG" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_provider"/>
+        </receiver>
 
         <activity android:name=".ui.WelcomeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"

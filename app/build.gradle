@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 148
+        versionCode 150
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -108,6 +108,10 @@ android {
         versionName "1.4.8"
         //1.微调通知栏ui布局
         //2.修复部分机型在选择文件路径时获取文件路径问题
+        versionName "1.5.0"
+        //1.调整部分ui
+        //2.新增桌面音乐小组件
+
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
