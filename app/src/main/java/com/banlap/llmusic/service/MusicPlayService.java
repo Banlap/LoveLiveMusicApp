@@ -13,7 +13,9 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.SeekBar;
 
@@ -32,12 +34,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author Banlap on 2021/12/6
@@ -48,7 +54,12 @@ public class MusicPlayService extends Service {
     private boolean isStop = false;
     private final Object lock = new Object();
     private List<MusicLyric> mMusicLyricList = new ArrayList<>();
-    private int scrollTo=0;
+    public static int mStartPosition;  //当前歌曲播放时间
+    public static int mAllPosition;    //当前歌曲总时间
+    public static Handler appWidgetHandler = new Handler();
+    public static Runnable appWidgetRunnable;
+    public static final int DELAY_MILLIS = 1000;
+
 
     Runnable runnable = new Runnable() {
         @Override
@@ -68,12 +79,8 @@ public class MusicPlayService extends Service {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_CURRENT_TIME,  rebuildTime(currentPosition)));
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_POS, currentPosition));
 
-                    String currentTime = rebuildTime(currentPosition);
-                    if(mMusicLyricList.size()>0) {
-                       if(searchLyricListPos(currentTime)) {
-                           EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCROLL_LYRIC, scrollTo));
-                       }
-                    }
+                    mStartPosition = currentPosition;
+
                 }
             }
         }
@@ -136,7 +143,6 @@ public class MusicPlayService extends Service {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
 
                 mediaPlayer = new MediaPlayer();
-                scrollTo=0;
 
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
@@ -153,9 +159,8 @@ public class MusicPlayService extends Service {
                     public void onPrepared(MediaPlayer mp) {
                         isStop = false;
                         mediaPlayer.start();
-                        //callBack.viewPause(isLoop);
+                        mAllPosition = mediaPlayer.getDuration();
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, isStop));
-                        //callBack.viewMusicMsg(dataSource, mediaPlayer.getDuration());
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, mediaPlayer.getDuration()));
                         new Thread(runnable).start();
                     }
@@ -196,7 +201,7 @@ public class MusicPlayService extends Service {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
                     NotificationHelper.getInstance().createRemoteViews(context, musicName, musicSinger, bitmap, false);
                 }
-                sendWidgetBroadcastReceiver();
+                updateWidgetUI(mediaPlayer.isPlaying());
             } else {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             }
@@ -241,6 +246,7 @@ public class MusicPlayService extends Service {
             }
         }
 
+        /** 线程锁 */
         public void posLock(boolean isLock) {
             if(isLock) {
                 isStop = true;
@@ -270,25 +276,6 @@ public class MusicPlayService extends Service {
         }
     }
 
-    /** 播放或暂停 */
-    public void pause() {
-        if(mediaPlayer!=null) {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.pause();
-                isStop = true;
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, true));
-                //callBack.viewPause(true);
-            } else {
-                mediaPlayer.start();
-                resumeThread();
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
-                //callBack.viewPause(false);
-            }
-        } else {
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
-        }
-    }
-
     /** 恢复线程 */
     public void resumeThread() {
         isStop = false;
@@ -309,7 +296,7 @@ public class MusicPlayService extends Service {
     }
 
     /** 转换成时间格式*/
-    public String rebuildTime(long position) {
+    public static String rebuildTime(long position) {
         long minLong = position /1000/60;
         long secLong = position /1000%60;
         String minStr = minLong <10 ? "0"+minLong : ""+minLong;
@@ -318,9 +305,14 @@ public class MusicPlayService extends Service {
     }
 
     /** 转换为秒 */
-    public int showSec(long position) {
+    public static int showSec(long position) {
+        long minLong = position /1000/60;
         long secLong = position /1000%60;
+        String minStr = minLong <10 ? "0"+minLong : ""+minLong;
         String secStr = secLong <10 ? "0"+secLong : ""+secLong;
+        if(minLong >0) {
+            return (Integer.parseInt(secStr) + (Integer.parseInt(minStr) * 60));
+        }
         return Integer.parseInt(secStr);
     }
 
@@ -330,7 +322,6 @@ public class MusicPlayService extends Service {
         if(mMusicLyricList.size()>0) {
             for(int i=0; i< mMusicLyricList.size(); i++) {
                 if(currentTime.equals(mMusicLyricList.get(i).lyricTime)) {
-                    scrollTo = i;
                     isFind = true;
                     break;
                 }
@@ -339,12 +330,59 @@ public class MusicPlayService extends Service {
         return isFind;
     }
 
+    /** 更新小组件UI */
+    private void updateWidgetUI(boolean isPlaying) {
+        if(isPlaying) {
+            stopAppWidgetRunnable();
+            appWidgetRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    sendWidgetBroadcastReceiver();
+                    appWidgetHandler.postDelayed(appWidgetRunnable, DELAY_MILLIS);
+                }
+            };
+
+            appWidgetHandler.post(appWidgetRunnable);
+        } else {
+            if(stopAppWidgetRunnable()) {
+                sendWidgetBroadcastReceiver();
+            }
+        }
+    }
+
+    /** 关闭发送广播给小组件的线程 */
+    public static boolean stopAppWidgetRunnable() {
+        if(null != appWidgetRunnable) {
+            appWidgetHandler.removeCallbacks(appWidgetRunnable);
+            appWidgetRunnable = null;
+            return true;
+        }
+        return false;
+    }
+
     /** 发送广播给小组件 更新视图 */
     private void sendWidgetBroadcastReceiver() {
         Intent intent = new Intent("WIDGET_PROVIDER_REFRESH_MUSIC_MSG");
         intent.setPackage(getPackageName());
         intent.putExtra("IsLoading", false);
 
+        String startTime = rebuildTime(mStartPosition);
+        if(!TextUtils.isEmpty(startTime)) {
+            intent.putExtra("StartTime", startTime);
+        }
+        String allTime = rebuildTime(mAllPosition);
+        if(!TextUtils.isEmpty(allTime)) {
+            intent.putExtra("AllTime", allTime);
+        }
+
+        BigDecimal bd1 = new BigDecimal(showSec(mStartPosition));
+        BigDecimal bd2 = new BigDecimal(showSec(mAllPosition));
+
+        int progress = bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).intValue();
+        intent.putExtra("MusicProgress", progress);
+        //Log.e("LogByAB", "mStartPosition: " + showSec(mStartPosition) + " mAllPosition: " +  showSec(mAllPosition) + " /: " +  bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)));
         sendBroadcast(intent);
     }
+
+
 }

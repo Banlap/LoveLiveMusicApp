@@ -30,6 +30,7 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -91,7 +92,6 @@ import com.banlap.llmusic.service.CharacterService;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.uivm.MainVM;
-import com.banlap.llmusic.utils.Base64;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.MyAnimationUtil;
@@ -113,6 +113,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.text.CollationKey;
@@ -158,10 +159,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private int musicListSize = 0;                      //获取总播放列表数
     private int playMode = 0;                           //播放模式: 0顺序播放 1随机播放 2单曲循环
     private int currentAllTime = 0;                     //当前歌曲总时间
-    private final int panelMoveAxis=750;                 //面板移动值
-    private int rThemeId =0;                             //当前主题
+    private final int panelMoveAxis = 750;              //面板移动值
+    private int rThemeId =0;                            //当前主题
     /** 角色视图 */
-    private String mCharacterName;                       //当前角色
+    private String mCharacterName;                      //当前角色
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
     private ActivityResultLauncher<Intent> intentTakePhotoLauncher;
     private DialogDownloadBinding downloadBinding;
@@ -178,8 +179,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private MediaSession mSession;                        //用于获取按键事件
     public boolean isFirstBluetoothControl = true;
     private MainFragmentStateAdapter  mainFragmentStateAdapter;
-    public static final int REQUEST_CODE_DOWNLOAD_APP = 101;           //检查下载app时需要的权限
-    public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 102;       //检查扫描文件所需要的权限
+    public static final int REQUEST_CODE_DOWNLOAD_APP = 101;            //检查下载app时需要的权限
+    public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 102;         //检查扫描文件所需要的权限
     public static final int REQUEST_CODE_SELECT_LOCAL_FILE = 103;       //检查选择文件所需要的权限
 
     private DialogLocalFileBinding dialogLocalFileBinding;
@@ -571,7 +572,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, musicName, musicSinger, imgUrl));
         } else {
             NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, null, true);
-            sendWidgetBroadcastReceiver(false);
+            updateWidgetUI(false);
         }
     }
 
@@ -917,7 +918,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 lyricScrollView.posLock(true);
                 getViewDataBinding().sbMusicBar.setProgress(0);
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.VISIBLE);
-                sendWidgetBroadcastReceiver(true);
+                updateWidgetUI(true);
                 break;
 
             case ThreadEvent.VIEW_PAUSE:
@@ -1081,14 +1082,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
-                            sendWidgetBroadcastReceiver(false);
+                            updateWidgetUI(false);
                         }
                     } else {
                         if(!event.music.musicImg.equals("")) {
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
-                            sendWidgetBroadcastReceiver(false);
+                            updateWidgetUI(false);
                         }
                     }
                 } else {
@@ -1101,7 +1102,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 currentBitmap = event.bitmap;
 
                 NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
-                sendWidgetBroadcastReceiver(false);
+                updateWidgetUI(false);
                 break;
             case ThreadEvent.VIEW_LYRIC:
                 if(null != event.tList) {
@@ -1236,10 +1237,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             return;
                         }
                     }
-                    getViewModel().downloadUrl(event.str);
-                } else {
-                    getViewModel().downloadUrl(event.str);
                 }
+                getViewModel().downloadUrl(event.str);
                 break;
             case ThreadEvent.GET_DATA_LIST:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicSql()));
@@ -1349,11 +1348,46 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         return versionCode;
     }
 
+    /** 更新小组件UI */
+    private void updateWidgetUI(boolean isLoading) {
+        if(binder.isPlay()) {
+            MusicPlayService.stopAppWidgetRunnable();
+            MusicPlayService.appWidgetRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    sendWidgetBroadcastReceiver(isLoading);
+                    MusicPlayService.appWidgetHandler.postDelayed(MusicPlayService.appWidgetRunnable, MusicPlayService.DELAY_MILLIS);
+                }
+            };
+
+            MusicPlayService.appWidgetHandler.post(MusicPlayService.appWidgetRunnable);
+        } else {
+            if(MusicPlayService.stopAppWidgetRunnable()) {
+                sendWidgetBroadcastReceiver(isLoading);
+            }
+        }
+
+    }
+
     /** 发送广播给小组件 更新视图 */
     private void sendWidgetBroadcastReceiver(boolean isLoading) {
         Intent intent = new Intent("WIDGET_PROVIDER_REFRESH_MUSIC_MSG");
         intent.setPackage(getPackageName());
         intent.putExtra("IsLoading", isLoading);
+
+        String startTime = MusicPlayService.rebuildTime(MusicPlayService.mStartPosition);
+        if(!TextUtils.isEmpty(startTime)) {
+            intent.putExtra("StartTime", startTime);
+        }
+        String allTime = MusicPlayService.rebuildTime(MusicPlayService.mAllPosition);
+        if(!TextUtils.isEmpty(allTime)) {
+            intent.putExtra("AllTime", allTime);
+        }
+        BigDecimal bd1 = new BigDecimal(MusicPlayService.showSec(MusicPlayService.mStartPosition));
+        BigDecimal bd2 = new BigDecimal(MusicPlayService.showSec(MusicPlayService.mAllPosition));
+
+        int progress = bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).intValue();
+        intent.putExtra("MusicProgress", progress);
 
         sendBroadcast(intent);
     }

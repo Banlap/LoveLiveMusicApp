@@ -8,7 +8,7 @@
     android:minHeight="110dp"
     android:previewImage="@mipmap/ic_widget_ll_music"
     android:initialLayout="@layout/layout_widget_llmusic"
-    android:updatePeriodMillis="50000"
+    android:updatePeriodMillis="1800000"
     android:resizeMode="none"
     android:widgetCategory="home_screen">
 

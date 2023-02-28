@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -18,7 +19,6 @@ import com.banlap.llmusic.service.MusicIsPauseService;
 import com.banlap.llmusic.service.MusicLastService;
 import com.banlap.llmusic.service.MusicNextService;
 import com.banlap.llmusic.ui.MainActivity;
-import com.banlap.llmusic.utils.Base64;
 import com.banlap.llmusic.utils.NotificationHelper;
 
 import java.io.ByteArrayOutputStream;
@@ -42,7 +42,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         String action = intent.getAction();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
-        Log.e("LogByAB", "send success: " + intent.getStringExtra("MusicName") );
+        //Log.e("LogByAB", "send success: " + intent.getIntExtra("MusicProgress", 0));
 
         if (action.equals(WIDGET_PROVIDER_REFRESH_MUSIC_MSG)) {
             setRemoteViews(context, appWidgetManager, intent);
@@ -55,12 +55,20 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
     private void setRemoteViews(Context context, AppWidgetManager appWidgetManager, Intent intent) {
         final ComponentName mComponentName = new ComponentName(context, LLMusicWidgetProvider.class);
 
-        String musicName = "LLMusic", musicSinger = "LLSinger";
+        String musicName = "LLMusic", musicSinger = "LLSinger", startTime = "00:00", endTime = "00:00";
         boolean isDefault = true, isLoading = false;
         Bitmap bitmap = null;
+        int musicProgress = 0;
 
         if(intent != null) {
             isLoading = intent.getBooleanExtra("IsLoading", false);
+            if(!TextUtils.isEmpty(intent.getStringExtra("StartTime"))) {
+                startTime = intent.getStringExtra("StartTime");
+            }
+            if(!TextUtils.isEmpty(intent.getStringExtra("AllTime"))) {
+                endTime = intent.getStringExtra("AllTime");
+            }
+            musicProgress = intent.getIntExtra("MusicProgress", 0);
         }
 
         //当小组件重新加入时 获取上次音乐信息
@@ -85,6 +93,9 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
 
         remoteViews.setTextViewText(R.id.tv_music_name, musicName);
         remoteViews.setTextViewText(R.id.tv_music_singer, musicSinger);
+        remoteViews.setTextViewText(R.id.tv_start_time, startTime);
+        remoteViews.setTextViewText(R.id.tv_end_time, endTime);
+        remoteViews.setProgressBar(R.id.pb_music_bar, 100, musicProgress, false);
 
         remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier(isDefault ? "selector_play_black_selected" : "selector_pause_black_selected", "drawable", context.getPackageName()));
         remoteViews.setViewVisibility(R.id.pb_loading_music, isLoading? View.VISIBLE : View.INVISIBLE);

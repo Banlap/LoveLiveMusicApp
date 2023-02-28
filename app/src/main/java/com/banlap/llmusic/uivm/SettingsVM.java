@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.utils.OkhttpUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -18,6 +19,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import okhttp3.Response;
 
 public class SettingsVM extends AndroidViewModel {
 
@@ -38,21 +41,34 @@ public class SettingsVM extends AndroidViewModel {
     public void downloadUrl(String dataSource) {
         isDownloadStop = false;
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START2));
-        HttpURLConnection connection=null;
-        //数据缓冲
-        byte[] bs = new byte[1024];
-        int len;
-        long total = 0;
-        try {
-            URL url = new URL(dataSource);
-            connection = (HttpURLConnection) url.openConnection();
-            int contentLength = connection.getContentLength();
-            InputStream is = connection.getInputStream();
-            if (is == null) {
-                throw new RuntimeException("stream is null");
+
+        OkhttpUtil.newInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
+            @Override
+            public void onSuccess(Response response) {
+               downloadApp(response);
             }
+
+            @Override
+            public void onError(String e) {
+                Log.e("ABMediaPlay", "error " + e);
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
+            }
+        });
+    }
+
+    /** 下载新版本App */
+    private void downloadApp(Response response) {
+        try {
+            //数据缓冲
+            byte[] bs = new byte[1024];
+            int len;
+            long total = 0;
+
+            long contentLength = response.body().contentLength();
+            InputStream is = response.body().byteStream();
+
             String path="";
-            if (Build.VERSION.SDK_INT > 29) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
                 path = getApplication().getExternalFilesDir(null).getAbsolutePath() + "/LLMusic.apk";
             } else {
                 path = Environment.getExternalStorageDirectory().getPath() + "/LLMusic.apk";
@@ -67,7 +83,6 @@ public class SettingsVM extends AndroidViewModel {
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_LOADING2, progress));
-                //Log.e("LogByAB","Download progress: " + (100 * (total / (double) contentLength)));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, false));
@@ -81,15 +96,10 @@ public class SettingsVM extends AndroidViewModel {
             os.close();
             is.close();
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, true, file));
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("ABMediaPlay", "error " + e.getMessage());
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
-        } finally {
-            if(connection!=null) {
-                connection.disconnect();
-            }
         }
-
     }
 
     public void changeDownloadApp(boolean status){

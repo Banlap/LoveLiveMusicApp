@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 150
+        versionCode 151
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -111,7 +111,10 @@ android {
         versionName "1.5.0"
         //1.调整部分ui
         //2.新增桌面音乐小组件
-
+        versionName "1.5.1"
+        //1.调整ui：欢迎页视频、首页分类图
+        //2.使用网络框架管理url请求
+        //3.更新小组件ui
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -155,6 +158,8 @@ dependencies {
     implementation 'jp.wasabeef:glide-transformations:4.3.0'
     // If you want to use the GPU Filters
     implementation 'jp.co.cyberagent.android:gpuimage:2.1.0'
+    /** okhttp 框架*/
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
 
     implementation 'com.google.android.material:material:1.1.0'
 

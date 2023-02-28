@@ -25,6 +25,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.CharacterHelper;
+import com.banlap.llmusic.utils.OkhttpUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -46,6 +47,9 @@ import java.util.Objects;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Response;
 
 /**
  * @author Banlap on 2021/11/30
@@ -153,137 +157,131 @@ public class MainVM extends AndroidViewModel {
 
         }
     };
-
+    /** 获取歌词文本 */
     public void showLyric(Music dataSource, final boolean isLoop) {
-        HttpURLConnection connection=null;
-        try {
-            String ly="";   //歌词文本
-            String lyWithoutTime="";   //歌词文本
-            String lyLineTime="";   //歌词时间
-            List<MusicLyric> musicLyricList = new ArrayList<>();
-            String lyricUrl = dataSource.musicLyric !=null ? dataSource.musicLyric : "";
-            if(!lyricUrl.equals("")) {
-                //Log.e("ABMediaPlay", "url: " + lyricUrl);
-                URL url = new URL(lyricUrl);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET"); //请求方式
-                connection.setConnectTimeout(5000);
-                connection.setReadTimeout(5000);
-                if(connection.getResponseCode() == 200) {
-                    InputStream is = connection.getInputStream();
-                    if (is != null) {
-                        InputStreamReader inputreader = new InputStreamReader(is);
-                        BufferedReader buffreader = new BufferedReader(inputreader);
-                        String line;
-                        int id=0;
-                        //分行读取
-                        while (( line = buffreader.readLine()) != null) {
-                            ly += line + "\n";
-                            lyWithoutTime += line.substring(line.indexOf("]")+1) + "\n";
+        List<MusicLyric> musicLyricList = new ArrayList<>();
+        String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
+        if(!lyricUrl.equals("")) {
+            OkhttpUtil.newInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
+                @Override
+                public void onSuccess(Response response) {
+                    try {
+                        String ly="";   //歌词文本
+                        String lyWithoutTime="";   //歌词文本
+                        InputStream is = response.body().byteStream();
+                        if (is != null) {
+                            InputStreamReader inputreader = new InputStreamReader(is);
+                            BufferedReader buffreader = new BufferedReader(inputreader);
+                            String line;
+                            int id=0;
+                            //分行读取
+                            while (( line = buffreader.readLine()) != null) {
+                                ly += line + "\n";
+                                lyWithoutTime += line.substring(line.indexOf("]")+1) + "\n";
 
-                            if(!line.equals("")) {
-                                String time = "", lyric="";
-                                if("[".equals(line.substring(0,1))) {
-                                    time = line.substring(line.indexOf("[")+1, line.indexOf("]"));
-                                    lyric = line.substring(line.indexOf("]")+1);
-                                } else {
-                                    lyric = line;
-                                }
-                                if(!lyric.equals("") && 0 != lyric.trim().length()) {
-                                    MusicLyric musicLyric = new MusicLyric();
-                                    boolean isSetLyric = false;
-                                    if(!time.equals("")) {
-                                        if(musicLyricList.size() >0) {
-                                            for(int i=0; i< musicLyricList.size(); i++) {
-                                                if(!"00:00".equals(time)) {
-                                                    if(time.equals(musicLyricList.get(i).lyricTime)) {
-                                                        musicLyricList.get(i).setLyricContext2(lyric);
-                                                        isSetLyric = true;
-                                                        break;
+                                if(!line.equals("")) {
+                                    String time = "", lyric="";
+                                    if("[".equals(line.substring(0,1))) {
+                                        time = line.substring(line.indexOf("[")+1, line.indexOf("]"));
+                                        lyric = line.substring(line.indexOf("]")+1);
+                                    } else {
+                                        lyric = line;
+                                    }
+                                    if(!lyric.equals("") && 0 != lyric.trim().length()) {
+                                        MusicLyric musicLyric = new MusicLyric();
+                                        boolean isSetLyric = false;
+                                        if(!time.equals("")) {
+                                            if(musicLyricList.size() >0) {
+                                                for(int i=0; i< musicLyricList.size(); i++) {
+                                                    if(!"00:00".equals(time)) {
+                                                        if(time.equals(musicLyricList.get(i).lyricTime)) {
+                                                            musicLyricList.get(i).setLyricContext2(lyric);
+                                                            isSetLyric = true;
+                                                            break;
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if(!isSetLyric) {
-                                        musicLyric.setLyricId(id++);
-                                        musicLyric.setLyricTime(time);
-                                        musicLyric.setLyricContext(lyric);
-                                        musicLyric.setLyricContext2("");
-                                        musicLyricList.add(musicLyric);
-                                        if(musicLyricList.size() >1) {
-                                            musicLyricList.get(musicLyricList.size() -2).setLyricEndTime(time);
+                                        if(!isSetLyric) {
+                                            musicLyric.setLyricId(id++);
+                                            musicLyric.setLyricTime(time);
+                                            musicLyric.setLyricContext(lyric);
+                                            musicLyric.setLyricContext2("");
+                                            musicLyricList.add(musicLyric);
+                                            if(musicLyricList.size() >1) {
+                                                musicLyricList.get(musicLyricList.size() -2).setLyricEndTime(time);
+                                            }
                                         }
-                                    }
 
+                                    }
                                 }
                             }
+                            is.close();
+                            EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly, lyWithoutTime, musicLyricList));
                         }
-                        is.close();
-                        EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly, lyWithoutTime, musicLyricList));
+                    } catch (Exception e) {
+                        Log.e("ABMediaPlay", "http error " + e.getMessage());
+                        e.printStackTrace();
                     }
-                } else {
-                    Log.e("ABMediaPlay", "http code: error " + connection.getResponseCode());
                 }
-            } else {
-                EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly, lyWithoutTime, musicLyricList));
-            }
-        } catch (Exception e) {
-            Log.e("ABMediaPlay", "http error " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if(connection!=null) {
-                connection.disconnect();
-            }
+
+                @Override
+                public void onError(String e) {
+                    Log.e("ABMediaPlay", "error: " + e);
+                }
+            });
+        } else {
+            EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
         }
     }
 
+
     /** 获取网络图片 */
     public void showImageURL(String musicName, String musicSinger, String dataSource) {
-        HttpURLConnection connection=null;
-        try {
-            URL url = new URL(dataSource);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET"); //请求方式
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
-            if(connection.getResponseCode() == 200) {
-                InputStream inputStream = connection.getInputStream();
-                //inputStream调用一次后会被清空
-                byte[] inputStream2ByteArr = inputStream2ByteArr(inputStream);
-                //使用工厂把网络的输入流生产Bitmap
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                //options.inJustDecodeBounds = true;
-                options.inJustDecodeBounds = false;
-                options.inSampleSize = 1; // 1 不压缩, 4 为宽和高变为原来的1/4，即图片压缩为原来的1/16
-                Bitmap bitmap = BitmapFactory.decodeByteArray(inputStream2ByteArr,0,inputStream2ByteArr.length, options);
-                //Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 
-                //重新压缩图片
-                BitmapFactory.Options optionsNew = new BitmapFactory.Options();
-                optionsNew.inJustDecodeBounds = false;
-                optionsNew.inSampleSize = 4;//宽和高变为原来的1/4，即图片压缩为原来的1/16
-                Bitmap bitmapNew = BitmapFactory.decodeByteArray(inputStream2ByteArr,0,inputStream2ByteArr.length, optionsNew);
-                //Bitmap bitmapNew = BitmapFactory.decodeStream(inputStream, null, optionsNew);
+        OkhttpUtil.newInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
+            @Override
+            public void onSuccess(Response response) {
+                try {
+                    InputStream inputStream = response.body().byteStream();
+                    //inputStream调用一次后会被清空
+                    byte[] inputStream2ByteArr = inputStream2ByteArr(inputStream);
+                    //使用工厂把网络的输入流生产Bitmap
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    //options.inJustDecodeBounds = true;
+                    options.inJustDecodeBounds = false;
+                    options.inSampleSize = 1; // 1 不压缩, 4 为宽和高变为原来的1/4，即图片压缩为原来的1/16
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(inputStream2ByteArr, 0, inputStream2ByteArr.length, options);
+                    //Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 
-                //计算当前bitmap大小
-                Log.e("LogByAB", "bitmap: " + getBitmapSize(bitmap));
-                Log.e("LogByAB", "bitmapNew: " + getBitmapSize(bitmapNew));
-                if(getBitmapSize(bitmap)>=900000) {
-                    Log.e("LogByAB", "bitmap: resize" );
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmapNew));
-                } else {
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
+                    //重新压缩图片
+                    BitmapFactory.Options optionsNew = new BitmapFactory.Options();
+                    optionsNew.inJustDecodeBounds = false;
+                    optionsNew.inSampleSize = 4;//宽和高变为原来的1/4，即图片压缩为原来的1/16
+                    Bitmap bitmapNew = BitmapFactory.decodeByteArray(inputStream2ByteArr, 0, inputStream2ByteArr.length, optionsNew);
+                    //Bitmap bitmapNew = BitmapFactory.decodeStream(inputStream, null, optionsNew);
+
+                    //计算当前bitmap大小
+                    Log.e("LogByAB", "bitmap: " + getBitmapSize(bitmap));
+                    Log.e("LogByAB", "bitmapNew: " + getBitmapSize(bitmapNew));
+                    if (getBitmapSize(bitmap) >= 900000) {
+                        Log.e("LogByAB", "bitmap: resize");
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmapNew));
+                    } else {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
+                    }
+                } catch (Exception e) {
+                    Log.e("ABMediaPlay", "error " + e.getMessage());
                 }
             }
-        } catch (Exception e) {
-            Log.e("ABMediaPlay", "error " + e.getMessage());
-        } finally {
-            if(connection!=null) {
-                connection.disconnect();
+
+            @Override
+            public void onError(String e) {
+                Log.e("ABMediaPlay", "error: " + e);
             }
-        }
+        });
     }
 
     /** 展示本地文件图片 */
@@ -295,21 +293,34 @@ public class MainVM extends AndroidViewModel {
     public void downloadUrl(String dataSource) {
         isDownloadStop = false;
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START));
-        HttpURLConnection connection=null;
-        //数据缓冲
-        byte[] bs = new byte[1024];
-        int len;
-        long total = 0;
-        try {
-            URL url = new URL(dataSource);
-            connection = (HttpURLConnection) url.openConnection();
-            int contentLength = connection.getContentLength();
-            InputStream is = connection.getInputStream();
-            if (is == null) {
-                throw new RuntimeException("stream is null");
+
+        OkhttpUtil.newInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
+            @Override
+            public void onSuccess(Response response) {
+                downloadApp(response);
             }
+
+            @Override
+            public void onError(String e) {
+                Log.e("ABMediaPlay", "error " + e);
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR));
+            }
+        });
+    }
+
+    /** 下载新版本App */
+    private void downloadApp(Response response) {
+        try {
+            //数据缓冲
+            byte[] bs = new byte[1024];
+            int len;
+            long total = 0;
+
+            long contentLength = response.body().contentLength();
+            InputStream is = response.body().byteStream();
+
             String path="";
-            if (Build.VERSION.SDK_INT > 29) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
                 path = getApplication().getExternalFilesDir(null).getAbsolutePath() + "/LLMusic.apk";
             } else {
                 path = Environment.getExternalStorageDirectory().getPath() + "/LLMusic.apk";
@@ -338,15 +349,10 @@ public class MainVM extends AndroidViewModel {
             os.close();
             is.close();
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS, true, file));
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.e("ABMediaPlay", "error " + e.getMessage());
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR));
-        } finally {
-            if(connection!=null) {
-                connection.disconnect();
-            }
         }
-
     }
 
     public void changeDownloadApp(boolean status){

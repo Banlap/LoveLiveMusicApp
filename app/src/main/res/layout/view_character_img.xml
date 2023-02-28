@@ -242,14 +242,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
                 android:background="@drawable/shape_round_gray"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:visibility="visible"
+                app:layout_constraintEnd_toStartOf="@+id/ll_play_music"
                 app:layout_constraintHorizontal_bias="0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/ll_play_music"
                 app:layout_constraintTop_toBottomOf="@+id/iv_character">
 
                 <ImageView
@@ -258,6 +257,27 @@
                     android:layout_height="20dp"
                     android:layout_margin="5dp"
                     android:background="@drawable/ic_last_gray" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_game"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@+id/ll_last_music"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_character"
+                >
+
+                <ImageView
+                    android:id="@+id/iv_game"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/ic_game" />
 
             </LinearLayout>
 

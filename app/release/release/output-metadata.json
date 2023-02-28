@@ -11,10 +11,10 @@
       "type": "SINGLE",
       "filters": [],
       "properties": [],
-      "versionCode": 150,
-      "versionName": "1.5.0",
+      "versionCode": 151,
+      "versionName": "1.5.1",
       "enabled": true,
-      "outputFile": "LLMusicPlayer_official_v1.5.0_2023-02-02_14-42.apk"
+      "outputFile": "LLMusicPlayer_official_v1.5.1_2023-02-28_14-46.apk"
     }
   ]
 }

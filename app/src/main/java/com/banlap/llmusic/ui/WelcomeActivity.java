@@ -38,11 +38,32 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
             }
         }, 5000);
     }
+    /** 视频保持宽高比 */
+    private void setDimension() {
+        float videoProportion = getVideoProportion();
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+        float screenProportion = (float) screenHeight / (float) screenWidth;
+        android.view.ViewGroup.LayoutParams lp = getViewDataBinding().vvWelcomeVideo.getLayoutParams();
+        if (videoProportion < screenProportion) {
+            lp.height= screenHeight;
+            lp.width = (int) ((float) screenHeight / videoProportion);
+        } else {
+            lp.width = screenWidth;
+            lp.height = (int) ((float) screenWidth * videoProportion);
+        }
+        getViewDataBinding().vvWelcomeVideo.setLayoutParams(lp);
+    }
+
+    private float getVideoProportion(){
+        return 1.5f;
+    }
 
     /** 循环播放欢迎页视频 */
     private void initVideo() {
+        setDimension();
         getViewDataBinding().vvWelcomeVideo.setVideoURI(
-                Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.welcomevideo));
+                Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.welcomeliella));
         getViewDataBinding().vvWelcomeVideo.start();
         getViewDataBinding().vvWelcomeVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -51,6 +72,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
                 mp.setVolume(0f,0f);
             }
         });
+
         getViewDataBinding().vvWelcomeVideo.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {

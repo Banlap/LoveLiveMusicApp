@@ -80,7 +80,6 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         getViewDataBinding().llThemeOrange.setOnClickListener(new ButtonClickListener());
 
         getViewDataBinding().tvVersionValue.setText("V" + getAppVersionName(this));
-
         getViewDataBinding().tvNewVersion.setVisibility(isExistNewVersion? View.VISIBLE : View.GONE);
         getViewDataBinding().llVersionMain.setEnabled(isExistNewVersion);
         getViewDataBinding().llVersionMain.setOnClickListener(new View.OnClickListener() {
@@ -112,10 +111,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                             return;
                         }
                     }
-                    getViewModel().downloadUrl(event.str);
-                } else {
-                    getViewModel().downloadUrl(event.str);
                 }
+                getViewModel().downloadUrl(event.str);
                 break;
         }
     }
