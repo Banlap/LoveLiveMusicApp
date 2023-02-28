@@ -7,8 +7,20 @@
 <div align="center"><b>LoveLive音乐播放器 </b></div>
 <div align="center"><b>LoveLiveMusicPlayer for Android</b></div>
 
+
+# 目录
+
+ * [简介](#简介)
+ * [App的功能](#App的功能)
+ * [预览图](#预览图)
+ * [如何下载使用](#如何下载使用)
+ * [联系](#联系)
 #
-### 目前app的功能：
+### 简介：
+<p align="start">一款在线播放lovelive音乐的app，该app收录了最新的专辑和Liyuu个人歌曲，并能够在app里面添加本地歌曲，目前仅支持mp3格式的导入，后续会更新该app的其他内容和功能等</p>
+
+#
+### App的功能：
 <p align="start">1. 在线播放音乐</p>
 <p align="start">2. 各团歌曲分类</p>
 <p align="start">3. 中日歌词滚动显示</p>
@@ -33,7 +45,7 @@
 
 <p align="start">
   <img width="275" height="550" src="https://user-images.githubusercontent.com/12729772/216499250-78d6e09b-a78a-4e74-9d83-f058f9a2cb92.png">
-  <img width="275" height="550" src="https://user-images.githubusercontent.com/12729772/216499256-2994ea6c-ddbd-4086-9e32-f13fff460b8e.png">
+  <img width="275" height="550" src="https://user-images.githubusercontent.com/12729772/221791498-9abff23f-24ac-45af-adf0-caacb7bb11c3.png">
 </p>
 
 
