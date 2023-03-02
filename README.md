@@ -52,6 +52,8 @@
 
 #
 ### 如何下载使用：
+<p align="start">点击链接后下载apk文件安装即可</p>
+
 [点击这里跳转](https://github.com/Banlap/LoveLiveMusicApp/releases)
 
 #
