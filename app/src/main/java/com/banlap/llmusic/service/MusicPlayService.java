@@ -26,6 +26,7 @@ import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
+import com.danikula.videocache.HttpProxyCacheServer;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -135,11 +136,10 @@ public class MusicPlayService extends Service {
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
-        public void player(final Music dataSource, final boolean isLoop, final String lyric, final List<MusicLyric> musicLyrics) {
+        public void player(final Music dataSource, final boolean isLoop, final HttpProxyCacheServer proxyCacheServer, final List<MusicLyric> musicLyrics) {
             try {
 
                 stop();
-                //callBack.viewSeekBarResume();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
 
                 mediaPlayer = new MediaPlayer();
@@ -151,7 +151,13 @@ public class MusicPlayService extends Service {
                 }
                 mMusicLyricList.addAll(musicLyrics);
 
-                mediaPlayer.setDataSource(dataSource.musicURL);
+                //设置当前歌曲加载后存入缓存（目前先下载再缓存）
+                String url = proxyCacheServer.getProxyUrl(dataSource.musicURL);
+                if(dataSource.isLocal) { //判断当前歌曲是否本地，则不使用缓存方法
+                    url = dataSource.musicURL;
+                }
+
+                mediaPlayer.setDataSource(url);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.prepareAsync();
                 mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -201,7 +207,7 @@ public class MusicPlayService extends Service {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
                     NotificationHelper.getInstance().createRemoteViews(context, musicName, musicSinger, bitmap, false);
                 }
-                updateWidgetUI(mediaPlayer.isPlaying());
+                updateWidgetUI(mediaPlayer.isPlaying(), true);
             } else {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             }
@@ -331,7 +337,7 @@ public class MusicPlayService extends Service {
     }
 
     /** 更新小组件UI */
-    private void updateWidgetUI(boolean isPlaying) {
+    private void updateWidgetUI(boolean isPlaying, boolean isLoading) {
         if(isPlaying) {
             stopAppWidgetRunnable();
             appWidgetRunnable = new Runnable() {

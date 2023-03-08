@@ -58,8 +58,8 @@
     <color name="alpha">#00FFFFFF</color>
     <color name="alpha_10">#1AFFFFFF</color>
     <color name="alpha_30">#4DFFFFFF</color>
-    <color name="alpha_50">#807B7B7B</color>
     <color name="alpha_40">#66B6B6B6</color>
+    <color name="alpha_50">#807B7B7B</color>
     <color name="alpha_70">#B37B7B7B</color>
     <color name="alpha_90">#E6616161</color>
 

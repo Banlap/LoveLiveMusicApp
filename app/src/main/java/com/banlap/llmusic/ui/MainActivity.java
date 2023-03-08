@@ -21,6 +21,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
@@ -38,6 +39,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -56,6 +58,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -71,6 +74,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
+import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityMainBinding;
 import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
 import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
@@ -98,12 +102,16 @@ import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
+import com.banlap.llmusic.utils.snow.SnowDrawThread;
+import com.banlap.llmusic.utils.snow.SnowFactory;
+import com.banlap.llmusic.utils.snow.SnowFlake;
 import com.banlap.llmusic.widget.CenterLayoutManager;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -185,6 +193,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     private DialogLocalFileBinding dialogLocalFileBinding;
 
+    private BaseApplication baseApplication;
+    private HttpProxyCacheServer proxyCacheServer;
+
+    private SnowFactory snowFactory;
+    private TextureView snowTextureView;
+    private SnowDrawThread snowDrawThread;
+
     /** MediaSession框架回掉 用于返回耳机实体按钮操作 */
     private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
         @Override
@@ -221,6 +236,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         if(spList.size()>0){
             playList.addAll(spList);
             setPlayListDefault(playList);
+        } else {
+            SPUtil.setListValue(context, "PlayListData", playList);
         }
 
         if(SPUtil.getStrValue(this, "SavePlayMode")!=null) {
@@ -235,6 +252,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
 
         mCharacterName = CharacterHelper.CHARACTER_NAME_KEKE;
+
+        //
+        baseApplication = (BaseApplication) getApplication();
+        proxyCacheServer = baseApplication.getProxy(this);
+
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
@@ -256,6 +278,38 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         //初始化碎片
         initFragment();
 
+       /* snowFactory = new SnowFactory(this);
+        snowTextureView = new TextureView(this);
+        snowTextureView.setOpaque(false);
+        snowTextureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(@NonNull SurfaceTexture surface, int width, int height) {
+                snowDrawThread = new SnowDrawThread(snowFactory, snowTextureView);
+                snowDrawThread.start();
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {
+
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
+                snowDrawThread.stopThread();
+                snowFactory.clear();
+                return true;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
+
+            }
+        });
+
+        ConstraintLayout constraintLayout = getViewDataBinding().clBg;
+        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT);
+        constraintLayout.addView(snowTextureView, layoutParams);*/
     }
 
 
@@ -1113,7 +1167,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     musicLyricList.addAll(event.tList);
                 }
                 if(binder !=null) {
-                    binder.player(event.music, event.b, event.str, musicLyricList);
+                    binder.player(event.music, event.b, proxyCacheServer, musicLyricList);
                 }
                 break;
             case ThreadEvent.DOWNLOAD_APP_START:

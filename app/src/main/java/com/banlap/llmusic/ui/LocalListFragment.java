@@ -35,6 +35,7 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.uivm.LocalListFVM;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.SPUtil;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
@@ -43,9 +44,13 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalListBinding>
     implements LocalListFVM.LocalListCallBack {
@@ -361,15 +366,17 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
                 if(null != localFileList.get(position).pic) {
                     byte[] b = localFileList.get(position).pic;
-                    Bitmap bitMap = BitmapFactory.decodeByteArray(b, 0, localFileList.get(position).pic.length);
-                    binding.ivMusicImg.setImageBitmap(bitMap);
-                   /* Glide.with(binding.ivMusicImg.getContext())
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, localFileList.get(position).pic.length);
+                    //binding.ivMusicImg.setImageBitmap(bitmap);
+
+                    Glide.with(binding.ivMusicImg.getContext())
                             .setDefaultRequestOptions(requestOptions)
-                            .load(bitMap)
+                            .load(bitmap)
+                            .transform(new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL))
                             .skipMemoryCache(true)//跳过内存缓存
                             .diskCacheStrategy(DiskCacheStrategy.NONE)
                             .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(binding.ivMusicImg);*/
+                            .into(binding.ivMusicImg);
                     int tag = (int) binding.ivMusicImg.getTag(R.id.img_load);
                     Log.e(TAG, "tag: " + tag);
 

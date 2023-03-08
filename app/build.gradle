@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 151
+        versionCode 152
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -115,6 +115,10 @@ android {
         //1.调整ui：欢迎页视频、首页分类图
         //2.使用网络框架管理url请求
         //3.更新小组件ui
+        versionName "1.5.2"
+        //1.小组件更新：添加4x1透明组件、更新4x2组件UI
+        //2.新增功能：播放歌曲预缓存功能，缓存后的歌曲可离线播放，同时在设置中添加清理缓存功能
+        //3.修复问题：本地歌曲显示图片质量过大闪退
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -143,11 +147,13 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation files('libs\\mysql-connector-java-5.1.49.jar')
+    implementation 'com.google.ar:core:1.25.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation 'com.google.code.gson:gson:2.8.9'
+    compile 'com.alibaba:fastjson:2.0.19.android'
 
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     /** 图片加载框架 Glide*/
@@ -160,10 +166,12 @@ dependencies {
     implementation 'jp.co.cyberagent.android:gpuimage:2.1.0'
     /** okhttp 框架*/
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
+    /** 音频视频缓冲 */
+    implementation 'com.danikula:videocache:2.7.0'
 
     implementation 'com.google.android.material:material:1.1.0'
 
     implementation 'com.lzp:FlycoTabLayoutZ:1.3.3'
 
-    compile 'com.alibaba:fastjson:2.0.19.android'
+
 }

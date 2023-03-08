@@ -106,10 +106,10 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
 
         if(bitmap !=null) {
-            remoteViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
             byte[] bitmapByte = baos.toByteArray();
+            remoteViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
         } else {
             remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));

@@ -2,6 +2,8 @@ package com.banlap.llmusic.uivm;
 
 import android.app.Application;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
@@ -18,6 +20,7 @@ import com.banlap.llmusic.utils.FileUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -139,6 +142,7 @@ public class LocalListFVM extends AndroidViewModel {
         }
     }
 
+    /** 获取音乐信息 */
     private void getMusicData(String path, boolean isPost) {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         try {
@@ -149,9 +153,26 @@ public class LocalListFVM extends AndroidViewModel {
             String duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION); // 播放时长单位为毫秒
             Log.d(TAG, "title:" + title + "\n" + "album：" + album + "\n" + "artist：" + artist + "\n" + "duration：" + duration) ;
             byte[] pic = mmr.getEmbeddedPicture();
-            String picStr = "";
-            if(null != pic) {
-                picStr = new String(pic);
+
+            Bitmap picBitmap = pic != null? BitmapFactory.decodeByteArray(pic, 0, pic.length) : null;
+            if(null != picBitmap) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                if (MainVM.getBitmapSize(picBitmap) >= 900000) {  //本地导入的歌曲图片过大需要压缩质量
+                    //重新压缩图片
+                    BitmapFactory.Options optionsNew = new BitmapFactory.Options();
+                    optionsNew.inJustDecodeBounds = false;
+                    optionsNew.inSampleSize = 4;//宽和高变为原来的1/4，即图片压缩为原来的1/16
+                    Bitmap bitmapNew = BitmapFactory.decodeByteArray(pic, 0, pic.length, optionsNew);
+                    bitmapNew.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                } else {
+                    //使用工厂把网络的输入流生产Bitmap
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = false;
+                    options.inSampleSize = 1; // 1 不压缩, 4 为宽和高变为原来的1/4，即图片压缩为原来的1/16
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                }
+                pic = baos.toByteArray();
             }
 
             if(null != title) {

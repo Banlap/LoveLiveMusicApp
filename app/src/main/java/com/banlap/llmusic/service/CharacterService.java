@@ -261,11 +261,7 @@ public class CharacterService extends Service {
                         //判断时间
                         if (mCurrentTime - mLastTime < 500) {
                             //判断移动距离
-                            if (Math.abs(mStartX - mStopX) >= 10 || Math.abs(mStartY - mStopY) >= 10) {
-                                isMove = true;
-                            } else {
-                                isMove = false;
-                            }
+                            isMove = Math.abs(mStartX - mStopX) >= 10 || Math.abs(mStartY - mStopY) >= 10;
                         } else {
                             isMove = true;
                         }

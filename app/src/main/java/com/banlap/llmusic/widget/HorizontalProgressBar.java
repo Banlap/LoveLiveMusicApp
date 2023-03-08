@@ -97,7 +97,7 @@ public class HorizontalProgressBar extends View {
 
     private int linearGradientColor = R.color.light_ea;
     public void setLinearGradient(int color){
-        Log.e("LogByAB", "setLinearGradient getWidth: " + mWidth);
+        //Log.e("LogByAB", "setLinearGradient getWidth: " + mWidth);
         linearGradientColor = color;
         if(0 != color) {
             linearGradient = new LinearGradient(0, 0, mWidth, mHeight, new int[]{

@@ -964,7 +964,7 @@
                         </LinearLayout>
 
 
-                        <TextView
+                        <com.banlap.llmusic.widget.AlwaysMarqueeTextView
                             android:id="@+id/tv_singer_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -972,6 +972,7 @@
                             android:ellipsize="marquee"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
+                            android:scrollHorizontally="true"
                             android:marqueeRepeatLimit="marquee_forever"
                             android:singleLine="true"
                             android:text="SingerName"

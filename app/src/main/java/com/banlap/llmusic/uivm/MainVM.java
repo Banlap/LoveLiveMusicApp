@@ -56,10 +56,7 @@ import okhttp3.Response;
  */
 public class MainVM extends AndroidViewModel {
 
-    private final Object lock = new Object();
-    private boolean isStop = false;
     public MainCallBack callBack;
-    private MediaPlayer mediaPlayer;
     public static final int CHARACTER_NAME_KEKE_INT = 100;
     public static final int CHARACTER_NAME_KANON_INT = 101;
 
@@ -73,29 +70,6 @@ public class MainVM extends AndroidViewModel {
     public MainVM(@NonNull Application application) { super(application); }
 
     public void setCallBack(MainCallBack callBack) { this.callBack = callBack; }
-
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mediaPlayer != null) {
-                while (true) {
-                    while (isStop) {
-                        synchronized (lock) {
-                            try {
-                                lock.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    int currentPosition = mediaPlayer.getCurrentPosition();
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_CURRENT_TIME,  rebuildTime(currentPosition), currentPosition));
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_POS, currentPosition));
-                    //callBack.viewSeekBarPos(mediaPlayer.getCurrentPosition());
-                }
-            }
-        }
-    };
 
 
     private static final Handler talkHandler = new Handler(Objects.requireNonNull(Looper.myLooper())) {
@@ -230,6 +204,7 @@ public class MainVM extends AndroidViewModel {
                 @Override
                 public void onError(String e) {
                     Log.e("ABMediaPlay", "error: " + e);
+                    EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
                 }
             });
         } else {
@@ -308,7 +283,7 @@ public class MainVM extends AndroidViewModel {
         });
     }
 
-    /** 下载新版本App */
+    /** 开始下载新版本App */
     private void downloadApp(Response response) {
         try {
             //数据缓冲
@@ -355,33 +330,11 @@ public class MainVM extends AndroidViewModel {
         }
     }
 
+    /** 更改App下载状态：取消下载 */
     public void changeDownloadApp(boolean status){
         isDownloadStop = status;
     }
 
-
-    /** 关闭 */
-    public void stop() {
-        isStop = true;
-        if(mediaPlayer!=null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
-    }
-
-    /** 发送消息 */
-    public void showCharacterContent() {
-        android.os.Message message = new Message();
-        message.what = 3;
-        talkHandler.sendMessage(message);
-    }
-
-    public static void showContent() {
-        android.os.Message message = new Message();
-        message.what = 3;
-        talkHandler.sendMessage(message);
-    }
 
     /** 角色默认状态 */
     public static void initAnimatedCharacter(String characterName) {
@@ -470,18 +423,6 @@ public class MainVM extends AndroidViewModel {
         final int width = options.outWidth;
         int inSampleSize = 1;
 
-//		if (height > reqHeight || width > reqWidth) {
-//			//这里有两种压缩方式，可供选择。
-//			/**
-//			 * 压缩方式二
-//			 */
-//			// final int halfHeight = height / 2;
-//			// final int halfWidth = width / 2;
-//			// while ((halfHeight / inSampleSize) > reqHeight
-//			// && (halfWidth / inSampleSize) > reqWidth) {
-//			// inSampleSize *= 2;
-//			// }
-//
         /**
          * 压缩方式一
          */
@@ -490,7 +431,6 @@ public class MainVM extends AndroidViewModel {
                 / (float) reqHeight);
         final int widthRatio = Math.round((float) width / (float) reqWidth);
         inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
-//		}
 
         return inSampleSize;
     }

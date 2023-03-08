@@ -23,12 +23,14 @@ import androidx.databinding.DataBindingUtil;
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivitySettingsBinding;
+import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.uivm.MainVM;
 import com.banlap.llmusic.uivm.SettingsVM;
 import com.banlap.llmusic.utils.BluetoothUtil;
+import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.SPUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -88,6 +90,17 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 showUpgradeApp();
             }
         });
+
+
+        String cacheAllSize = CacheUtil.getTotalCacheSize(this);
+        getViewDataBinding().tvCacheValue.setText(cacheAllSize);
+        getViewDataBinding().llCleanCache.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cleanCache();
+            }
+        });
+
         getViewDataBinding().llAbout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -209,6 +222,37 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mAlertDialog.show();
     }
 
+    /** 清理缓存 */
+    private void cleanCache() {
+        DialogDeleteListAllBinding deleteListAllBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_delete_list_all, null, false);
+
+        deleteListAllBinding.dialogSelectTitle.setText("是否清理缓存？");
+        //取消
+        deleteListAllBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.dismiss();
+            }
+        });
+
+        //清理缓存
+        deleteListAllBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.dismiss();
+                String cache = CacheUtil.clearAllCacheAfter(v.getContext());
+                getViewDataBinding().tvCacheValue.setText(cache);
+            }
+        });
+
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setView(deleteListAllBinding.getRoot())
+                .create();
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        mAlertDialog.show();
+    }
+
     /** 关于 */
     private void showAboutApp() {
         DialogMessageBinding messageBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
@@ -309,10 +353,14 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
+
         } else if(rId == R.id.ll_theme_dark) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color6);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back);
@@ -329,30 +377,36 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.white));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.white));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.white));
         } else if(rId == R.id.ll_theme_white) {
             getViewDataBinding().clBg.setBackgroundResource(R.color.background_color_F2);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_purple);
             getViewDataBinding().ivArrowInto.setBackgroundResource(R.drawable.ic_arrow_into_purple);
             getViewDataBinding().tvTheme.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvSettings.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.gray_purple_ac));
+            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().rlSettingsBar.setBackgroundResource(R.drawable.shape_button_black_alpha_2);
             getViewDataBinding().llThemeMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
+            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.shape_button_black_alpha);
             getViewDataBinding().llAbout.setBackgroundResource(R.drawable.shape_button_black_alpha);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.purple));
+            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.purple));
             getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.gray_purple_ac));
         } else if(rId == R.id.ll_theme_orange) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color7);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_orange);
@@ -369,10 +423,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.orange_0b));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.orange_0b));
+            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.orange_0b));
+            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.orange_0b));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.orange_0b));
         } else if(rId == R.id.ll_theme_light) {
             getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color4);
             getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
@@ -389,10 +446,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
             getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.light_ff));
+            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
         }
     }
 

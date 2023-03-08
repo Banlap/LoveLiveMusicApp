@@ -21,11 +21,11 @@
                 android:id="@+id/dialog_select_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:text="是否清空当前播放列表"
-                android:textSize="17dp"
-                android:textStyle="bold"
                 android:textColor="@color/black"
-                android:layout_centerHorizontal="true" />
+                android:textSize="17dp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 

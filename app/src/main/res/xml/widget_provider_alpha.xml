@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    小组件高度：70*n-30
+-->
+<appwidget-provider
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="300dp"
+    android:minHeight="40dp"
+    android:previewImage="@mipmap/ic_widget_ll_music_3"
+    android:initialLayout="@layout/layout_widget_llmusic_alpha"
+    android:updatePeriodMillis="1800000"
+    android:resizeMode="none"
+    android:widgetCategory="home_screen">
+
+</appwidget-provider>
