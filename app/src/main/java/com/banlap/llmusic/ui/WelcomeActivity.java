@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivityWelcomeBinding;
 import com.banlap.llmusic.uivm.WelcomeVM;
+import com.banlap.llmusic.utils.SPUtil;
 
 public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBinding>
     implements WelcomeVM.WelcomeCallBack {
@@ -26,9 +28,21 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     protected void initView() {
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
+        launchVideo();
+    }
 
+    /** 判断是否显示启动动画 */
+    private void launchVideo() {
+        //是否显示启动动画
+        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), "CloseLaunchVideo");
+        if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
+            Intent intent = new Intent(getApplication(), MainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        //启动动画
         initVideo();
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -38,6 +52,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
             }
         }, 5000);
     }
+
     /** 视频保持宽高比 */
     private void setDimension() {
         float videoProportion = getVideoProportion();
@@ -62,8 +77,13 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     /** 循环播放欢迎页视频 */
     private void initVideo() {
         setDimension();
-        getViewDataBinding().vvWelcomeVideo.setVideoURI(
-                Uri.parse("android.resource://"+getPackageName()+"/"+R.raw.welcomeliella));
+        //判断是否使用了自定义启动动画
+        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), "LaunchVideoPath");
+        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.welcomeliella);
+        if(!TextUtils.isEmpty(launchVideoPath)) {
+            uri = Uri.parse(launchVideoPath);
+        }
+        getViewDataBinding().vvWelcomeVideo.setVideoURI(uri);
         getViewDataBinding().vvWelcomeVideo.start();
         getViewDataBinding().vvWelcomeVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override

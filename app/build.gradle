@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 152
+        versionCode 154
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -119,6 +119,12 @@ android {
         //1.小组件更新：添加4x1透明组件、更新4x2组件UI
         //2.新增功能：播放歌曲预缓存功能，缓存后的歌曲可离线播放，同时在设置中添加清理缓存功能
         //3.修复问题：本地歌曲显示图片质量过大闪退
+        versionName "1.5.3"
+        //1.修复问题：部分ui修正、小组件ui修正
+        //2.新增功能：添加莲之空女学园偶像俱乐部企划、设置启动动画
+        versionName "1.5.4"
+        //1.更改问题：ui播放列表添加logo、调整部分ui、代码优化
+        //2.修复问题：切换播放本地歌曲图片名称不同步、部分bug
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

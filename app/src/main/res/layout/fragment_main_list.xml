@@ -25,12 +25,41 @@
                   android:orientation="vertical">
 
                   <RelativeLayout
+                      android:id="@+id/ll_list_7"
+                      android:layout_width="match_parent"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
+                      android:layout_marginTop="10dp"
+                      android:layout_marginEnd="15dp"
+                      android:layout_marginBottom="10dp">
+
+
+                      <com.banlap.llmusic.widget.CircleImageView
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:scaleType="centerCrop"
+                          android:src="@drawable/selector_click_album_haus" />
+
+                      <TextView
+                          android:id="@+id/tv_haus"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_centerVertical="true"
+                          android:layout_marginStart="15dp"
+                          android:text="haus"
+                          android:textColor="@color/white"
+                          android:textSize="36dp"
+                          android:visibility="gone" />
+
+                  </RelativeLayout>
+
+                  <RelativeLayout
                       android:id="@+id/ll_list_1"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
 
@@ -56,10 +85,10 @@
                   <RelativeLayout
                       android:id="@+id/ll_list_2"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
                       <com.banlap.llmusic.widget.CircleImageView
@@ -84,10 +113,10 @@
                   <RelativeLayout
                       android:id="@+id/ll_list_3"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
                       <com.banlap.llmusic.widget.CircleImageView
@@ -113,10 +142,10 @@
                   <RelativeLayout
                       android:id="@+id/ll_list_4"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
 
@@ -143,10 +172,10 @@
                   <RelativeLayout
                       android:id="@+id/ll_list_5"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
 
@@ -173,10 +202,10 @@
                   <RelativeLayout
                       android:id="@+id/ll_list_6"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
 
@@ -202,10 +231,10 @@
                   <RelativeLayout
                       android:id="@+id/ll_list_null"
                       android:layout_width="match_parent"
-                      android:layout_height="150dp"
-                      android:layout_marginStart="20dp"
+                      android:layout_height="155dp"
+                      android:layout_marginStart="15dp"
                       android:layout_marginTop="10dp"
-                      android:layout_marginEnd="20dp"
+                      android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp">
 
 

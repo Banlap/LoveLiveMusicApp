@@ -7,6 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Scroller;
 
+/**
+ *  已弃用
+ * */
+@Deprecated
 public class LyricScrollViewGroup extends ViewGroup {
     private Scroller scroller;
     private int mScreenHeight; //屏幕的高度

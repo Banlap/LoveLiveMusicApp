@@ -38,7 +38,7 @@
             android:id="@+id/cl_album_detail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/ll_title_bar"
@@ -134,7 +134,7 @@
                             android:layout_width="120dp"
                             android:layout_height="80dp"
                             android:scaleType="centerCrop"
-                            android:background="@mipmap/ic_album_liella" />
+                            android:background="@mipmap/ic_album_liella_3" />
 
                         <LinearLayout
                             android:id="@+id/ll_music_list_msg"
@@ -437,7 +437,7 @@
             android:id="@+id/cl_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <LinearLayout
                 android:id="@+id/ll_tittle_bar_1"
@@ -581,7 +581,7 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="10dp"
-                        android:layout_marginEnd="20dp"
+                        android:layout_marginEnd="15dp"
                         android:background="@drawable/selector_normal_selected"
                         android:gravity="center"
                         android:onClick="showMainMenu"
@@ -638,230 +638,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/ll_tittle_bar_1"
                 app:layout_constraintVertical_bias="1.0"/>
 
-           <!-- <ScrollView
-                android:id="@+id/nsv_main"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ll_tittle_bar_1"
-                app:layout_constraintVertical_bias="1.0">
-
-                <LinearLayout
-                    android:id="@+id/ll_main"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_1"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/selector_click_album_liella" />
-
-                        <TextView
-                            android:id="@+id/tv_liella_music"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text="Liella!"
-                            android:textColor="@color/white"
-                            android:textSize="36dp"
-                            android:visibility="gone" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_2"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/selector_click_album_four_yuu" />
-
-                        <TextView
-                            android:id="@+id/tv_four_yuu"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text="Fo(u)r YuU"
-                            android:textColor="@color/white"
-                            android:textSize="36dp"
-                            android:visibility="gone" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_3"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/selector_click_album_sunny_passion"
-                            android:visibility="visible" />
-
-                        <TextView
-                            android:id="@+id/tv_sunny_passion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text="SunnyPassion"
-                            android:textColor="@color/white"
-                            android:textSize="36dp"
-                            android:visibility="gone" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_4"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/selector_click_album_nijigasaki"
-                            android:visibility="visible" />
-
-                        <TextView
-                            android:id="@+id/tv_nijigasaki"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text="Nijigasaki"
-                            android:textColor="@color/white"
-                            android:textSize="36dp"
-                            android:visibility="gone" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_5"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/selector_click_album_aqours"
-                            android:visibility="visible" />
-
-                        <TextView
-                            android:id="@+id/tv_aqours"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text="Aqours"
-                            android:textColor="@color/white"
-                            android:textSize="36dp"
-                            android:visibility="gone" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_6"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/selector_click_album_us" />
-
-                        <TextView
-                            android:id="@+id/tv_us"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text="u's"
-                            android:textColor="@color/white"
-                            android:textSize="36dp"
-                            android:visibility="gone" />
-
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/ll_list_null"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginEnd="20dp"
-                        android:layout_marginBottom="10dp">
-
-
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop" />
-
-                        <TextView
-                            android:id="@+id/tv_null"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="15dp"
-                            android:text=""
-                            android:textColor="@color/white"
-                            android:textSize="36dp" />
-
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-            </ScrollView>-->
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 灰色背景 用于禁止触摸 -->
@@ -888,9 +664,11 @@
 
             <RelativeLayout
                 android:id="@+id/rl_play_controller_in"
+                android:elevation="30dp"
                 android:background="@drawable/shape_button_white_3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:layout_alignParentTop="true"
                 android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
@@ -931,11 +709,11 @@
                         android:orientation="vertical">
 
                         <ProgressBar
-                            android:visibility="visible"
                             android:id="@+id/pb_loading_music"
                             android:layout_width="15dp"
                             android:layout_height="15dp"
-                            android:indeterminateTint="@color/light_ea" />
+                            android:indeterminateTint="@color/light_ea"
+                            android:visibility="visible" />
 
                         <LinearLayout
                             android:id="@+id/ll_music"
@@ -949,12 +727,12 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="5dp"
-                                android:singleLine="true"
                                 android:ellipsize="marquee"
                                 android:focusable="true"
                                 android:focusableInTouchMode="true"
-                                android:scrollHorizontally="true"
                                 android:marqueeRepeatLimit="marquee_forever"
+                                android:scrollHorizontally="true"
+                                android:singleLine="true"
                                 android:text="MusicName"
                                 android:textColor="@color/black"
                                 android:textSize="17dp"
@@ -972,8 +750,8 @@
                             android:ellipsize="marquee"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
-                            android:scrollHorizontally="true"
                             android:marqueeRepeatLimit="marquee_forever"
+                            android:scrollHorizontally="true"
                             android:singleLine="true"
                             android:text="SingerName"
                             android:textColor="@color/black"
@@ -1027,7 +805,6 @@
                         android:onClick="playButtonClick" />
 
                     <Button
-                        android:visibility="gone"
                         android:id="@+id/bt_change_play_mode"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
@@ -1035,7 +812,8 @@
                         android:layout_marginEnd="10dp"
                         android:layout_toStartOf="@+id/bt_current_list"
                         android:background="@drawable/ic_order_play"
-                        android:onClick="changePlayModeButtonClick" />
+                        android:onClick="changePlayModeButtonClick"
+                        android:visibility="gone" />
 
                     <Button
                         android:id="@+id/bt_current_list"
@@ -1071,6 +849,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="375dp"
                 android:layout_below="@+id/rl_play_controller_in"
+                android:elevation="30dp"
                 android:visibility="gone">
 
                 <!-- 音乐控制面板 -->

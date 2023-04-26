@@ -3,168 +3,189 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:orientation="horizontal">
 
-        <RelativeLayout
-            android:visibility="visible"
-            android:clickable="true"
-            android:focusable="true"
-            android:id="@+id/rl_music_all"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/selector_tab_selected3">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <LinearLayout
+            <RelativeLayout
                 android:visibility="visible"
-                android:id="@+id/ll_music_all"
+                android:clickable="true"
+                android:focusable="true"
+                android:id="@+id/rl_music_all"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center|start">
-
-                <ImageView
-                    android:id="@+id/iv_music_img"
-                    android:layout_width="65dp"
-                    android:layout_height="65dp"
-                    android:layout_margin="5dp"
-                    android:background="@drawable/ic_music_cover"/>
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/selector_tab_selected3">
 
                 <LinearLayout
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
+                    android:visibility="visible"
+                    android:id="@+id/ll_music_all"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:gravity="center|start">
 
-                    <com.banlap.llmusic.widget.AlwaysMarqueeTextView
-                        android:id="@+id/tv_music_name"
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:id="@+id/iv_music_img"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_margin="5dp"
+                        android:src="@drawable/ic_music_cover"/>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_music_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:text="MusicName"
+                            android:textSize="17dp"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_singer_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:text="SingerName"
+                            android:textSize="14dp"
+                            android:textColor="@color/light_ff"
+                            />
+
+                    </LinearLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/ll_add"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:singleLine="true"
-                        android:ellipsize="marquee"
-                        android:scrollHorizontally="true"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:text="MusicName"
-                        android:textSize="17dp"
-                        android:textColor="@color/light_ff"
-                        android:textStyle="bold"
-                        />
+                        android:background="@drawable/selector_tab_selected2">
 
-                    <com.banlap.llmusic.widget.AlwaysMarqueeTextView
-                        android:id="@+id/tv_singer_name"
+                        <ImageView
+                            android:id="@+id/iv_add"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="10dp"
+                            android:layout_marginBottom="8dp"
+                            android:background="@drawable/ic_add_light" />
+
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/iv_add_animator_black"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/ic_add_black"/>
+
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/iv_add_animator"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/ic_add_purple"/>
+
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/iv_add_animator_orange"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/ic_add_orange_hover"/>
+
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/iv_add_animator_light_1"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/ic_add_light_1"/>
+
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/iv_add_animator_light_2"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/ic_add_light_2"/>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:visibility="gone"
+                        android:id="@+id/ll_delete"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:singleLine="true"
-                        android:ellipsize="marquee"
-                        android:scrollHorizontally="true"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:text="SingerName"
-                        android:textSize="14dp"
-                        android:textColor="@color/light_ff"
-                        />
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp">
+
+                        <ImageView
+                            android:id="@+id/iv_delete"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/selector_delete_selected_2"/>
+
+                    </RelativeLayout>
 
                 </LinearLayout>
 
-                <RelativeLayout
-                    android:id="@+id/ll_add"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/selector_tab_selected2">
+            </RelativeLayout>
 
-                    <ImageView
-                        android:id="@+id/iv_add"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/ic_add_light" />
+            <RelativeLayout
+                android:visibility="visible"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/selector_tab_selected"
+                />
 
-                    <ImageView
-                        android:visibility="gone"
-                        android:id="@+id/iv_add_animator_black"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_add_black"/>
+        </LinearLayout>
 
-                    <ImageView
-                        android:visibility="gone"
-                        android:id="@+id/iv_add_animator"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_add_purple"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="100dp"
+            android:layout_height="100dp">
 
-                    <ImageView
-                        android:visibility="gone"
-                        android:id="@+id/iv_add_animator_orange"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_add_orange_hover"/>
+            <TextView
+                android:id="@+id/item_delete"
+                android:text="删除"
+                android:background="#D52619"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textAlignment="center"
+                android:layout_width="100dp"
+                android:layout_height="match_parent" />
 
-                    <ImageView
-                        android:visibility="gone"
-                        android:id="@+id/iv_add_animator_light_1"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_add_light_1"/>
-
-                    <ImageView
-                        android:visibility="gone"
-                        android:id="@+id/iv_add_animator_light_2"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/ic_add_light_2"/>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:visibility="gone"
-                    android:id="@+id/ll_delete"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp">
-
-                    <ImageView
-                        android:id="@+id/iv_delete"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_margin="5dp"
-                        android:background="@drawable/selector_delete_selected_2"/>
-
-                </RelativeLayout>
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:visibility="visible"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/selector_tab_selected"
-            />
-
+        </LinearLayout>
 
     </LinearLayout>
+
 
 
 </layout>

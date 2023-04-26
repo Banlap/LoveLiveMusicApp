@@ -47,7 +47,7 @@ public class CircleImageView extends AppCompatImageView {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (width >= 150 && height > 150) {
+        if (width >= 100 && height > 100) {
             Path path = new Path();
             //四个圆角
             path.moveTo(15, 0);
@@ -64,7 +64,6 @@ public class CircleImageView extends AppCompatImageView {
         }
         super.onDraw(canvas);
     }
-
 
     private OnTouchListener onTouchListener=new OnTouchListener() {
         @Override
@@ -87,6 +86,7 @@ public class CircleImageView extends AppCompatImageView {
             return true;
         }
     };
+
     private void changeLight() {
         int brightness=-80;
         ColorMatrix matrix = new ColorMatrix();

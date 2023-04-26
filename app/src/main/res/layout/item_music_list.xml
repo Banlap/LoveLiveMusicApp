@@ -43,30 +43,26 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.banlap.llmusic.widget.AlwaysMarqueeTextView
+                    <TextView
                         android:id="@+id/tv_music_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:singleLine="true"
                         android:ellipsize="marquee"
-                        android:scrollHorizontally="true"
-                        android:marqueeRepeatLimit="marquee_forever"
                         android:text="MusicName"
                         android:textSize="17dp"
                         android:textColor="@color/light_ff"
                         android:textStyle="bold"
                         />
 
-                    <com.banlap.llmusic.widget.AlwaysMarqueeTextView
+                    <TextView
                         android:id="@+id/tv_singer_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:singleLine="true"
                         android:ellipsize="marquee"
-                        android:scrollHorizontally="true"
-                        android:marqueeRepeatLimit="marquee_forever"
                         android:text="SingerName"
                         android:textSize="14dp"
                         android:textColor="@color/light_ff"

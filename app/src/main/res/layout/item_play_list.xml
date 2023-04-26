@@ -71,58 +71,87 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_vertical"
             android:layout_weight="1">
 
-            <com.banlap.llmusic.widget.AlwaysMarqueeTextView
-                android:id="@+id/tv_music_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:layout_marginStart="15dp"
-                android:layout_marginBottom="5dp"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:scrollHorizontally="true"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:text="MusiName"
-                android:textColor="@color/white"
-                android:textSize="17dp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_singer_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginBottom="5dp"
-                android:text="SingerName"
-                android:textColor="@color/white"
-                android:textSize="14dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="@drawable/selector_tab_selected2">
-
             <ImageView
-                android:id="@+id/iv_delete"
-                android:layout_width="28dp"
-                android:layout_height="23dp"
-                android:layout_marginStart="5dp"
-                android:layout_marginEnd="5dp"
-                android:background="@drawable/selector_delete_selected" />
+                android:id="@+id/iv_show_logo"
+                android:layout_width="120dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical|end"
+                android:scaleType="centerInside"
+                android:alpha="0.2"
+                android:src="@mipmap/ic_album_liella_3"
+                />
 
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tv_music_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
+                        android:text="MusiName"
+                        android:textColor="@color/black"
+                        android:textSize="17dp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_singer_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
+                        android:text="SingerName"
+                        android:textColor="@color/black"
+                        android:textSize="14dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_gravity="end"
+                    android:gravity="center|end"
+                    android:background="@drawable/selector_tab_selected2">
+
+                    <ImageView
+                        android:id="@+id/iv_delete"
+                        android:layout_width="28dp"
+                        android:layout_height="23dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/selector_delete_selected" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+
+        </FrameLayout>
+
+
 
     </LinearLayout>
 

@@ -52,7 +52,9 @@ public class MysqlHelper {
                 if(rs.next()) {
                     size = rs.getInt(1);
                 }
+                rs.close();
             }
+            cn.close();
             Log.e("MYSQL", "musicListSize: " + size);
         } catch (Exception e) {
             e.printStackTrace();
@@ -103,7 +105,9 @@ public class MysqlHelper {
                 if(rs.next()) {
                     size = rs.getInt(1);
                 }
+                rs.close();
             }
+            cn.close();
             Log.e("MYSQL", "musicListSize: " + size);
         } catch (Exception e) {
             e.printStackTrace();

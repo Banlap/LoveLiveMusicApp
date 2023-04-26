@@ -18,7 +18,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -29,13 +28,9 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.Editable;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -45,11 +40,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -59,16 +52,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -83,7 +73,6 @@ import com.banlap.llmusic.databinding.DialogLocalFileBinding;
 import com.banlap.llmusic.databinding.DialogMainMenuBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
-import com.banlap.llmusic.databinding.ItemLyricListBinding;
 import com.banlap.llmusic.databinding.ItemMusicListBinding;
 import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.fixed.LiellaMusic;
@@ -104,8 +93,6 @@ import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.snow.SnowDrawThread;
 import com.banlap.llmusic.utils.snow.SnowFactory;
-import com.banlap.llmusic.utils.snow.SnowFlake;
-import com.banlap.llmusic.widget.CenterLayoutManager;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -113,8 +100,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -122,8 +107,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.net.URI;
-import java.nio.ByteBuffer;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -138,7 +121,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         implements MainVM.MainCallBack {
-
+    private final String TAG = MainActivity.class.getSimpleName();
     private final Context context = MainActivity.this;
     private List<Music> musicList;                      //按类型的所有歌曲
     private List<Music> tempMusicList;                  //临时音乐列表
@@ -161,11 +144,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     public static boolean isPlay = false;               //判断是否播放音乐
     public static String currentMusicName ="";          //当前歌曲的歌名
     public static String currentMusicSinger ="";        //当前歌曲的歌手
-    private String currentMusicImg ="";                 //当前歌曲的图片
+    public static String currentMusicImg ="";           //当前歌曲的图片
     public static Bitmap currentBitmap = null;          //当前歌曲Bitmap图
     private AlertDialog mAlertDialog;                   //弹窗
     private int musicListSize = 0;                      //获取总播放列表数
-    private int playMode = 0;                           //播放模式: 0顺序播放 1随机播放 2单曲循环
+    public static int playMode = 0;                           //播放模式: 0顺序播放 1随机播放 2单曲循环
     private int currentAllTime = 0;                     //当前歌曲总时间
     private final int panelMoveAxis = 750;              //面板移动值
     private int rThemeId =0;                            //当前主题
@@ -190,6 +173,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     public static final int REQUEST_CODE_DOWNLOAD_APP = 101;            //检查下载app时需要的权限
     public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 102;         //检查扫描文件所需要的权限
     public static final int REQUEST_CODE_SELECT_LOCAL_FILE = 103;       //检查选择文件所需要的权限
+
+    //专辑类型
+    public static final String MUSIC_TYPE_LIELLA = "Liella";
+    public static final String MUSIC_TYPE_LIYUU = "Fo(u)rYuU";
+    public static final String MUSIC_TYPE_SUNNYPASSION = "SunnyPassion";
+    public static final String MUSIC_TYPE_NIJIGASAKI = "Nijigasaki";
+    public static final String MUSIC_TYPE_AQOURS = "Aqours";
+    public static final String MUSIC_TYPE_US = "μs";
+    public static final String MUSIC_TYPE_HASUNOSORA = "Hasunosora";
 
     private DialogLocalFileBinding dialogLocalFileBinding;
 
@@ -277,8 +269,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         BluetoothUtil.getInstance().registerBluetoothReceiver(this);
         //初始化碎片
         initFragment();
+        //initSnowFactory();
+    }
 
-       /* snowFactory = new SnowFactory(this);
+    /** 初始化表情雨特效 */
+    private void initSnowFactory() {
+        snowFactory = new SnowFactory(this);
         snowTextureView = new TextureView(this);
         snowTextureView.setOpaque(false);
         snowTextureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
@@ -309,9 +305,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         ConstraintLayout constraintLayout = getViewDataBinding().clBg;
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT);
-        constraintLayout.addView(snowTextureView, layoutParams);*/
+        constraintLayout.addView(snowTextureView, layoutParams);
     }
-
 
     /** 初始化主页内容 */
     private void initMainView(){
@@ -396,7 +391,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
                 //Log.e("PageScrolled", "position: " + position + " positionOffset: " + positionOffset + " positionOffsetPixels: " + positionOffsetPixels);
-
             }
         });
 
@@ -540,7 +534,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                                     .into(getViewDataBinding().ivBg);
                             Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
                         } catch (Exception e) {
-
+                            Log.e(TAG, "e: " + e.getMessage());
                         }
                     }
                 });
@@ -582,9 +576,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     /** 是否已经开启弹窗权限*/
     private boolean isCanDrawOverlays() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!Settings.canDrawOverlays(this)) {
-                return false;
-            }
+            return Settings.canDrawOverlays(this);
         }
         return true;
     }
@@ -704,9 +696,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 Log.e("MYSQL", "mysql connect success");
                 if (!isSelect) {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_APP_VERSION));
-                    //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_MESSAGE));
-                    //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_COUNT));
-                    //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST));
                     isSelect = true;
                 }
                 break;
@@ -751,8 +740,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_nijigasaki_3);
                     getViewDataBinding().tvTitleBar.setText("虹ヶ咲学園スクールアイドル同好会");
-                    getViewDataBinding().tvListMsgName1.setText("Nijigasaki HighSchool IdolClub");
-                    getViewDataBinding().tvListMsgName2.setText("虹ヶ咲学園スクールアイドル同好会");
+                    getViewDataBinding().tvListMsgName1.setText("虹ヶ咲学園スクールアイドル同好会");
+                    getViewDataBinding().tvListMsgName2.setText("Nijigasaki HighSchool IdolClub");
                 } else if(ThreadEvent.ALBUM_AQOURS.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_aqours_3);
@@ -765,6 +754,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     getViewDataBinding().tvTitleBar.setText("μ's");
                     getViewDataBinding().tvListMsgName1.setText("μ's");
                     getViewDataBinding().tvListMsgName2.setText("国立音ノ木坂学院");
+                } else if(ThreadEvent.ALBUM_HASUNOSORA.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_hasu_2);
+                    getViewDataBinding().tvTitleBar.setText("蓮ノ空女学院スクールアイドルクラブ");
+                    getViewDataBinding().tvListMsgName1.setText("蓮ノ空女学院スクールアイドルクラブ");
+                    getViewDataBinding().tvListMsgName2.setText("Hasunosora Jogakuin School Idol Club");
                 }
                 break;
             case ThreadEvent.GET_COUNT_SUCCESS:
@@ -830,21 +825,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                                 playList.get(0).isPlaying = true;
                                 playMusicListAdapter.notifyDataSetChanged();
                             }
-                            if(rThemeId!=0) {
-                                if(rThemeId == R.id.ll_theme_normal) {
-                                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
-                                } else if(rThemeId == R.id.ll_theme_dark) {
-                                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.ic_play_2_white);
-                                } else if(rThemeId == R.id.ll_theme_white) {
-                                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_purple_selected);
-                                } else if(rThemeId == R.id.ll_theme_orange) {
-                                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_orange_selected);
-                                } else if(rThemeId == R.id.ll_theme_light) {
-                                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_light_selected);
-                                }
-
-                            }
-
+                            //变更主题
+                            ThemeHelper.getInstance().playButtonTheme(rThemeId, getViewDataBinding());
                             if (objectAnimator != null) {
                                 objectAnimator.pause();
                             }
@@ -879,19 +861,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             break;
                     }
                 } else {
-                    if(rThemeId!=0) {
-                        if(rThemeId == R.id.ll_theme_normal) {
-                            getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
-                        } else if(rThemeId == R.id.ll_theme_dark) {
-                            getViewDataBinding().btPlay.setBackgroundResource(R.drawable.ic_play_2_white);
-                        } else if(rThemeId == R.id.ll_theme_white) {
-                            getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_purple_selected);
-                        } else if(rThemeId == R.id.ll_theme_orange) {
-                            getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_orange_selected);
-                        } else if(rThemeId == R.id.ll_theme_light) {
-                            getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_light_selected);
-                        }
-                    }
+                    //变更主题
+                    ThemeHelper.getInstance().playButtonTheme(rThemeId, getViewDataBinding());
                     if (objectAnimator != null) {
                         objectAnimator.pause();
                     }
@@ -992,31 +963,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     CharacterService.isPlayMusic(!event.b);
                 }
 
-                if(rThemeId!=0) {
-                    Log.e("LogByAB","rThemeId: " + rThemeId);
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
-                        getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.selector_play_circle_black_selected : R.drawable.selector_pause_circle_black_selected);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.ic_play_2_white : R.drawable.ic_pause_2_white);
-                        getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.ic_play_circle_white : R.drawable.ic_pause_circle_white);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.selector_play_purple_selected : R.drawable.selector_pause_purple_selected);
-                        getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.selector_play_circle_purple_selected : R.drawable.selector_pause_circle_purple_selected);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.selector_play_orange_selected : R.drawable.selector_pause_orange_selected);
-                        getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.selector_play_circle_orange_selected : R.drawable.selector_pause_circle_orange_selected);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.selector_play_light_selected : R.drawable.selector_pause_light_selected);
-                        getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.selector_play_circle_light_selected : R.drawable.selector_pause_circle_light_selected);
-                    } else {
-                        getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
-                        getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.selector_play_circle_black_selected : R.drawable.selector_pause_circle_black_selected);
-                    }
-                } else {
-                    getViewDataBinding().btPlay.setBackgroundResource(event.b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(event.b ? R.drawable.selector_play_circle_black_selected : R.drawable.selector_pause_circle_black_selected);
-                }
+                //变更主题
+                ThemeHelper.getInstance().playButtonStatusTheme(rThemeId, getViewDataBinding(), event.b);
+
                 if (objectAnimator != null) {
                     if (!event.b) {
                         objectAnimator.resume();
@@ -1044,80 +993,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
                 currentMusicImg = event.music.getMusicImg();
 
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-
-                        Glide.with(getApplication())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.isLocal?
-                                                (null != event.music.musicImgByte?
-                                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                                )
-                                .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivMusicImg);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-
-                        Glide.with(getApplication())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.isLocal?
-                                        (null != event.music.musicImgByte?
-                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                                )
-                                .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.white)))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivMusicImg);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        Glide.with(getApplication())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.isLocal?
-                                        (null != event.music.musicImgByte?
-                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                                )
-                                .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple_light)))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivMusicImg);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        Glide.with(getApplication())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.isLocal?
-                                        (null != event.music.musicImgByte?
-                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                                )
-                                .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.orange_0b)))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivMusicImg);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        Glide.with(getApplication())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.isLocal?
-                                        (null != event.music.musicImgByte?
-                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                                )
-                                .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_b5)))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivMusicImg);
-                    } else {
-                        Glide.with(getApplication())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(event.music.isLocal?
-                                        (null != event.music.musicImgByte?
-                                                BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                                )
-                                .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivMusicImg);
-                    }
-                } else {
-                    Glide.with(getApplication())
-                            .load(event.music.isLocal?
-                                    (null != event.music.musicImgByte?
-                                            BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.drawable.ic_music_default) : event.music.getMusicImg()
-                            )
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(getViewDataBinding().ivMusicImg);
-                }
+                //变更主题
+                ThemeHelper.getInstance().musicBarMusicImgTheme(this, rThemeId, getViewDataBinding(), event.music);
 
                 if (objectAnimator != null) {
                     objectAnimator.cancel();
@@ -1135,6 +1012,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
+                            currentMusicName = event.music.musicName;
+                            currentMusicSinger = event.music.musicSinger;
+                            currentBitmap = null;
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
                             updateWidgetUI(false);
                         }
@@ -1142,6 +1022,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                         if(!event.music.musicImg.equals("")) {
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
+                            currentMusicName = event.music.musicName;
+                            currentMusicSinger = event.music.musicSinger;
+                            currentMusicImg = "";
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
                             updateWidgetUI(false);
                         }
@@ -1156,6 +1039,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 currentBitmap = event.bitmap;
 
                 NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
+
                 updateWidgetUI(false);
                 break;
             case ThreadEvent.VIEW_LYRIC:
@@ -1308,33 +1192,38 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LIELLA:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_LIELLA));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Liella")));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Liella")));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_LIELLA)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_LIELLA)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_FOUR_YUU:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_FOUR_YUU));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Fo(u)rYuU")));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Fo(u)rYuU")));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_LIYUU)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_LIYUU)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_SUNNY_PASSION:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_SUNNY_PASSION));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("SunnyPassion")));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("SunnyPassion")));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_SUNNYPASSION)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_SUNNYPASSION)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_NIJIGASAKI:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_NIJIGASAKI));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Nijigasaki")));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Nijigasaki")));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_NIJIGASAKI)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_NIJIGASAKI)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_AQOURS:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_AQOURS));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("Aqours")));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("Aqours")));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_AQOURS)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_AQOURS)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_US:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_US));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql("μs")));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount("μs")));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_US)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_US)));
+                break;
+            case ThreadEvent.GET_DATA_LIST_BY_HASUNOSORA:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_HASUNOSORA));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_HASUNOSORA)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_HASUNOSORA)));
                 break;
             case ThreadEvent.GET_MUSIC_LYRIC:
                 getViewModel().showLyric(event.music, event.b);
@@ -1375,7 +1264,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 searchCancel();
             } else if (v.getId() == R.id.ll_settings) {
                 intoSettings();
-
             } else if(v.getId() == R.id.ll_back) {
                 searchCancel();
                 ObjectAnimator mainPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, true, getViewDataBinding().clMain);
@@ -1383,8 +1271,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 mainPanelChangeObjectAnimator.start();
                 detailPanelChangeObjectAnimator.start();
                 isNotMain = false;
-
-
             }
         }
     }
@@ -1404,7 +1290,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     /** 更新小组件UI */
     private void updateWidgetUI(boolean isLoading) {
-        if(binder.isPlay()) {
+        if(binder != null && binder.isPlay()) {
             MusicPlayService.stopAppWidgetRunnable();
             MusicPlayService.appWidgetRunnable = new Runnable() {
                 @Override
@@ -1520,485 +1406,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     /** 改变主题 */
     private void changeTheme(int rId) {
-        if(rId == R.id.ll_theme_normal) {
-            getViewDataBinding().rlPlayControllerIn.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_white);
-            getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvListMsgName2.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvSingle.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCount.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.light_ff));
-
-            getViewDataBinding().tvMusicName.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvSingerName.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvPlayMode.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.black));
-            getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.black));
-
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color5);
-            //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_alpha_50);
-            getViewDataBinding().btCurrentList.setBackgroundResource(R.drawable.selector_music_list_2_selected);
-
-            getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
-
-            getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_light);
-            getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_light);
-            getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_light);
-            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
-            getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_black);
-            getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_light);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
-            getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.selector_last_2_selected);
-            getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.selector_next_2_selected);
-            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_black);
-
-            getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.light_ff));
-
-            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
-
-            if(playMode == 0) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-            } else if (playMode == 1) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-            } else if (playMode == 2) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-            }
-
-            if(binder!=null) {
-                if (binder.isPlay()) {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_pause_black_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_pause_circle_black_selected);
-                } else {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
-                }
-            } else {
-                getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
-                getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
-            }
-            if(currentMusicImg!=null) {
-                if (!currentMusicImg.equals("")) {
-                    Glide.with(getApplication())
-                            .setDefaultRequestOptions(requestOptions)
-                            .load(currentMusicImg)
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(getViewDataBinding().ivMusicImg);
-                }
-            }
-            //解决seekBar滚动条变形问题
-            Rect r = getViewDataBinding().sbMusicBar.getProgressDrawable().getBounds();
-            getViewDataBinding().sbMusicBar.setThumb(getResources().getDrawable(R.drawable.shape_seek_bar_thumb));
-            getViewDataBinding().sbMusicBar.setProgressDrawable(getResources().getDrawable(R.drawable.layer_seek_bar));
-            getViewDataBinding().sbMusicBar.getProgressDrawable().setBounds(r);
-            //getViewDataBinding().sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
-            //loading加载颜色
-            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.light_ea), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.light_ea), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().hpvProgress.setLinearGradient(R.color.light_ea);
-        } else if(rId == R.id.ll_theme_dark) {
-            getViewDataBinding().rlPlayControllerIn.setBackgroundResource(R.drawable.shape_button_black_2);
-            getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_black_2);
-            getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_black_2);
-            getViewDataBinding().pbLoadingMusic.setProgressDrawable(getResources().getDrawable(R.color.gray_36));
-            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_white);
-            getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.white));
-
-            getViewDataBinding().tvListMsgName2.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvSingle.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvCount.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvMusicName.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvSingerName.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvPlayMode.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.white));
-
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color6);
-            //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_orange_alpha_50);
-            getViewDataBinding().btCurrentList.setBackgroundResource(R.drawable.ic_music_list);
-
-            getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
-
-            getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_white);
-            getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search);
-            getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort);
-            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings);
-            getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete);
-            getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back);
-            getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.ic_last);
-            getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.ic_next);
-            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode);
-
-            getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.white));
-
-            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
-
-            if(playMode == 0) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
-            } else if (playMode == 1) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play);
-            } else if (playMode == 2) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play);
-            }
-
-            if(binder!=null) {
-                if (binder.isPlay()) {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.ic_pause_2_white);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.ic_pause_circle_white);
-                } else {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.ic_play_2_white);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
-                }
-            } else {
-                getViewDataBinding().btPlay.setBackgroundResource(R.drawable.ic_play_2_white);
-                getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
-            }
-            if(currentMusicImg!=null) {
-                if(!currentMusicImg.equals("")) {
-                    Glide.with(getApplication())
-                            .setDefaultRequestOptions(requestOptions)
-                            .load(currentMusicImg)
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.white)))
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(getViewDataBinding().ivMusicImg);
-                }
-            }
-            //解决seekBar滚动条变形问题
-            Rect r = getViewDataBinding().sbMusicBar.getProgressDrawable().getBounds();
-            getViewDataBinding().sbMusicBar.setThumb(getResources().getDrawable(R.drawable.shape_seek_bar_thumb));
-            getViewDataBinding().sbMusicBar.setProgressDrawable(getResources().getDrawable(R.drawable.layer_seek_bar_dark));
-            getViewDataBinding().sbMusicBar.getProgressDrawable().setBounds(r);
-            //getViewDataBinding().sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
-            //loading加载颜色
-            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().hpvProgress.setLinearGradient(R.color.white);
-        } else if(rId == R.id.ll_theme_white) {
-            getViewDataBinding().rlPlayControllerIn.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_purple);
-            getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvMusicName.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvPlayMode.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.purple));
-
-            getViewDataBinding().tvListMsgName2.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvSingle.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvCount.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvSingerName.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-
-            getViewDataBinding().clBg.setBackgroundResource(R.color.background_color_F2);
-            //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_white_alpha_50);
-            getViewDataBinding().btCurrentList.setBackgroundResource(R.drawable.ic_music_list_purple);
-
-            getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_white_theme_selected);
-            getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_white_theme_selected);
-
-
-            getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_purple);
-            getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_purple);
-            getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_purple);
-            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_purple);
-            getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_purple);
-            getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_purple);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_purple);
-            getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.ic_last_purple);
-            getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.ic_next_purple);
-            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_purple);
-
-            getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.gray_purple_ac));
-            getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.purple));
-
-            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.shape_button_white_4);
-            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu_purple);
-
-            if(playMode == 0) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
-            } else if (playMode == 1) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_purple);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_purple);
-            } else if (playMode == 2) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_purple);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_purple);
-            }
-
-            if(binder!=null) {
-                if (binder.isPlay()) {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_pause_purple_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_pause_circle_purple_selected);
-                } else {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_purple_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
-                }
-            } else {
-                getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_purple_selected);
-                getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
-            }
-            if(currentMusicImg!=null) {
-                if (!currentMusicImg.equals("")) {
-                    Glide.with(getApplication())
-                            .setDefaultRequestOptions(requestOptions)
-                            .load(currentMusicImg)
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple)))
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(getViewDataBinding().ivMusicImg);
-                }
-            }
-            //解决seekBar滚动条变形问题
-            Rect r = getViewDataBinding().sbMusicBar.getProgressDrawable().getBounds();
-            getViewDataBinding().sbMusicBar.setThumb(getResources().getDrawable(R.drawable.shape_seek_bar_thumb));
-            getViewDataBinding().sbMusicBar.setProgressDrawable(getResources().getDrawable(R.drawable.layer_seek_bar_purple));
-            getViewDataBinding().sbMusicBar.getProgressDrawable().setBounds(r);
-            //getViewDataBinding().sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
-            //loading加载颜色
-            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().hpvProgress.setLinearGradient(R.color.purple);
-        } else if(rId == R.id.ll_theme_orange) {
-            getViewDataBinding().rlPlayControllerIn.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().pbLoadingMusic.setProgressDrawable(getResources().getDrawable(R.color.orange_0b));
-            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_orange);
-            getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.orange_0b));
-
-            getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.orange_0b));
-
-            getViewDataBinding().tvListMsgName2.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvSingle.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvCount.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvMusicName.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvSingerName.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvPlayMode.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.orange_0b));
-
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color7);
-            //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_orange_alpha_50);
-            getViewDataBinding().btCurrentList.setBackgroundResource(R.drawable.ic_music_list_orange);
-
-            getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
-
-            getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_orange);
-            getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_orange);
-            getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_orange);
-            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_orange);
-            getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_orange);
-            getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_orange);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_orange);
-            getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.selector_last_orange_selected);
-            getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.selector_next_orange_selected);
-            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_orange);
-
-            getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.orange_0b));
-
-            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu_orange);
-
-            if(playMode == 0) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
-            } else if (playMode == 1) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_orange);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_orange);
-            } else if (playMode == 2) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_orange);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_orange);
-            }
-
-            if(binder!=null) {
-                if (binder.isPlay()) {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_pause_orange_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_pause_circle_orange_selected);
-                } else {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_orange_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
-                }
-            } else {
-                getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_orange_selected);
-                getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
-            }
-            if(currentMusicImg!=null) {
-                if(!currentMusicImg.equals("")) {
-                    Glide.with(getApplication())
-                            .setDefaultRequestOptions(requestOptions)
-                            .load(currentMusicImg)
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.orange_0b)))
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(getViewDataBinding().ivMusicImg);
-                }
-            }
-            //解决seekBar滚动条变形问题
-            Rect r = getViewDataBinding().sbMusicBar.getProgressDrawable().getBounds();
-            getViewDataBinding().sbMusicBar.setThumb(getResources().getDrawable(R.drawable.shape_seek_bar_thumb));
-            getViewDataBinding().sbMusicBar.setProgressDrawable(getResources().getDrawable(R.drawable.layer_seek_bar_orange));
-            getViewDataBinding().sbMusicBar.getProgressDrawable().setBounds(r);
-            //getViewDataBinding().sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
-            //loading加载颜色
-            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().hpvProgress.setLinearGradient(R.color.orange_0b);
-        } else if(rId == R.id.ll_theme_light) {
-            getViewDataBinding().rlPlayControllerIn.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            getViewDataBinding().tvDiscover.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvLocal.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().vLine.setBackgroundResource(R.drawable.shape_button_white);
-            getViewDataBinding().tvTitleBar.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvListMsgName1.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvPlayAll.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCancel.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvListMsgName2.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvSingle.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCount.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.light_ff));
-
-            getViewDataBinding().tvPlayMode.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvListSize.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvMusicName.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvSingerName.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvStartTime.setTextColor(getResources().getColor(R.color.light_b5));
-            getViewDataBinding().tvAllTime.setTextColor(getResources().getColor(R.color.light_b5));
-
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color4);
-            //getViewDataBinding().rlPlayController.setBackgroundResource(R.drawable.shape_button_light_alpha_50);
-            getViewDataBinding().btCurrentList.setBackgroundResource(R.drawable.ic_music_list_light);
-
-            getViewDataBinding().llAllPlay.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearch.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSort.setBackgroundResource(R.drawable.selector_normal_selected);
-            //getViewDataBinding().llSettings.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llSearchBar.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCancel.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llBack.setBackgroundResource(R.drawable.selector_normal_selected);
-
-            getViewDataBinding().ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_light);
-            getViewDataBinding().ivSearch.setBackgroundResource(R.drawable.ic_search_light);
-            getViewDataBinding().ivSort.setBackgroundResource(R.drawable.ic_sort_light);
-            //getViewDataBinding().ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
-            getViewDataBinding().ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_light);
-            getViewDataBinding().ivSearchMusic.setBackgroundResource(R.drawable.ic_search_light);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
-            getViewDataBinding().ivPanelLast.setBackgroundResource(R.drawable.ic_last_purple_light);
-            getViewDataBinding().ivPanelNext.setBackgroundResource(R.drawable.ic_next_light);
-            getViewDataBinding().ivBgMode.setBackgroundResource(R.drawable.ic_bg_mode_light);
-            getViewDataBinding().etSearchMusic.setHintTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().etSearchMusic.setTextColor(getResources().getColor(R.color.light_ff));
-
-            getViewDataBinding().llMainMenuBt.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().ivMainMenuBt.setBackgroundResource(R.drawable.ic_menu);
-
-            if(playMode == 0) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
-            } else if (playMode == 1) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_light);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_light);
-            } else if (playMode == 2) {
-                getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_light);
-                getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_light);
-            }
-
-            if(binder!=null) {
-                if (binder.isPlay()) {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_pause_light_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_pause_circle_light_selected);
-                } else {
-                    getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_light_selected);
-                    getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
-                }
-            } else {
-                getViewDataBinding().btPlay.setBackgroundResource(R.drawable.selector_play_light_selected);
-                getViewDataBinding().ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
-            }
-            if(currentMusicImg!=null) {
-                if (!currentMusicImg.equals("")) {
-                    Glide.with(getApplication())
-                            .setDefaultRequestOptions(requestOptions)
-                            .load(currentMusicImg)
-                            .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_b5)))
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(getViewDataBinding().ivMusicImg);
-                }
-            }
-            //解决seekBar滚动条变形问题
-            Rect r = getViewDataBinding().sbMusicBar.getProgressDrawable().getBounds();
-            getViewDataBinding().sbMusicBar.setThumb(getResources().getDrawable(R.drawable.shape_seek_bar_thumb));
-            getViewDataBinding().sbMusicBar.setProgressDrawable(getResources().getDrawable(R.drawable.layer_seek_bar_light));
-            getViewDataBinding().sbMusicBar.getProgressDrawable().setBounds(r);
-            //getViewDataBinding().sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
-            //loading加载颜色
-            getViewDataBinding().pbLoadingMusic.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().prLoading.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
-            getViewDataBinding().hpvProgress.setLinearGradient(R.color.light_b5);
-        }
+        ThemeHelper.getInstance().changeTheme(this, rId, getViewDataBinding(), binder);
         musicListAdapter.notifyDataSetChanged();
         playMusicListAdapter.notifyDataSetChanged();
     }
@@ -2012,72 +1420,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 PxUtil.getInstance().dp2px(110, this),  WindowManager.LayoutParams.WRAP_CONTENT, true);
         menuPopupWindow.setTouchable(true);
 
-        if(rThemeId != 0) {
-            if(rThemeId == R.id.ll_theme_normal) {
-                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else if(rThemeId == R.id.ll_theme_dark) {
-                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
-                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else if(rThemeId == R.id.ll_theme_white) {
-                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_white));
-                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.purple));
-                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.purple));
-                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.purple));
-                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.purple));
-                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.purple));
-                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.purple));
-                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.purple));
-            } else if(rThemeId == R.id.ll_theme_orange) {
-                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_orange));
-                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else if(rThemeId == R.id.ll_theme_light) {
-                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_light));
-                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else {
-                menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
-                mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            }
-        } else {
-            menuPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-            mainMenuBinding.tvSettings.setTextColor(getResources().getColor(R.color.white));
-            mainMenuBinding.tvCharacter.setTextColor(getResources().getColor(R.color.white));
-            mainMenuBinding.tvBackground.setTextColor(getResources().getColor(R.color.white));
-            mainMenuBinding.tvLocalMusic.setTextColor(getResources().getColor(R.color.white));
-            mainMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            mainMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            mainMenuBinding.vLine3.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-        }
+        //变更主题
+        ThemeHelper.getInstance().menuPopupWindowTheme(this, rThemeId, menuPopupWindow, mainMenuBinding);
+
         menuPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, this),  PxUtil.getInstance().dp2px(10, this));
 
         mainMenuBinding.llSettings.setOnClickListener(new View.OnClickListener() {
@@ -2113,44 +1458,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 PopupWindow characterPopupWindow  = new PopupWindow(characterMenuBinding.getRoot(),
                         PxUtil.getInstance().dp2px(110, v.getContext()),  WindowManager.LayoutParams.WRAP_CONTENT, true);
                 characterPopupWindow.setTouchable(true);
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
-                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_white));
-                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.purple));
-                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.purple));
-                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.purple));
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_orange));
-                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_light));
-                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                    } else {
-                        characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                        characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
-                        characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                    }
-                } else {
-                    characterPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                    characterMenuBinding.tvCharacterByKeke.setTextColor(getResources().getColor(R.color.white));
-                    characterMenuBinding.tvCharacterByKanon.setTextColor(getResources().getColor(R.color.white));
-                    characterMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                }
+
+                //变更主题
+                ThemeHelper.getInstance().characterPopupWindowTheme(v.getContext(), rThemeId, characterPopupWindow, characterMenuBinding);
+
                 characterPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, v.getContext()),  PxUtil.getInstance().dp2px(10, v.getContext()));
             }
         });
@@ -2160,16 +1471,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 menuPopupWindow.dismiss();
                 Intent intentPhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                // 获得当前手机版本
-                if(Build.VERSION.SDK_INT<=19) {
-                    intentPhoto.setAction(Intent.ACTION_PICK);
-                    intentPhoto.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                } else{
+                intentPhoto.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                intentPhoto.addCategory(Intent.CATEGORY_OPENABLE);
+                intentPhoto.setType("image/*");
 
-                    intentPhoto.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                    intentPhoto.addCategory(Intent.CATEGORY_OPENABLE);
-                    intentPhoto.setType("image/*");
-                }
                 intentTakePhotoLauncher.launch(intentPhoto);
             }
         });
@@ -2281,7 +1586,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     /** 点击当前音乐img */
     public void musicImgClick(View view) {
-        //Toast.makeText(this, "click img", Toast.LENGTH_SHORT).show();
         showOrHideMusicPlayerPanel();
     }
 
@@ -2300,7 +1604,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     /** 点击播放按钮 */
     public void playButtonClick(View view)  {
-        //getViewModel().pause();
         binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
     }
 
@@ -2348,15 +1651,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             if (isNext) {
                                 if (i + 1 < playList.size()) {
                                     playList.get(i).isPlaying = false;
-                                    //getViewModel().player(playList.get(i + 1), (playMode == 2));
-                                    //binder.player(playList.get(i+1), (playMode == 2));
                                     binder.showLyric(playList.get(i + 1), false);
                                     playList.get(i + 1).isPlaying = true;
                                     playMusicListAdapter.notifyDataSetChanged();
                                 } else {
                                     playList.get(i).isPlaying = false;
-                                    //getViewModel().player(playList.get(0), (playMode == 2));
-                                    //binder.player(playList.get(0), (playMode == 2));
                                     binder.showLyric(playList.get(0), false);
                                     playList.get(0).isPlaying = true;
                                 }
@@ -2469,8 +1768,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             isClick = !isClick;
         }
         isShowMusicPanel = !isShowMusicPanel;
-
-
     }
 
     /** 隐藏所有播放View */
@@ -2535,22 +1832,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             sortMenuBinding.ivSortBySingerType.setVisibility(View.VISIBLE);
         }
 
-        if(rThemeId!=0) {
-            if(rThemeId == R.id.ll_theme_white) {
-                sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
-                sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
-                sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
-            } else {
-                sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-            }
-        } else {
-            sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-            sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-            sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-        }
-
+        //变更主题
+        ThemeHelper.getInstance().sortMenuButtonTheme(rThemeId, sortMenuBinding, isUpSortByTime, isUpSortByName, isUpSortBySinger);
 
         /* 按时间排序 */
         sortMenuBinding.llSortByTime.setOnClickListener(new View.OnClickListener() {
@@ -2558,15 +1841,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 isUpSortByTime = !isUpSortByTime;
                 sortList(0);
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_white) {
-                        sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
-                    } else {
-                        sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                    }
-                } else {
-                    sortMenuBinding.ivSortByTimeType.setBackgroundResource(isUpSortByTime? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sortTypeButtonTheme(rThemeId, sortMenuBinding.ivSortByTimeType, isUpSortByTime);
+
                 sortMenuBinding.ivSortByTimeType.setVisibility(View.VISIBLE);
                 sortMenuBinding.ivSortByNameType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortBySingerType.setVisibility(View.INVISIBLE);
@@ -2580,15 +1857,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 isUpSortByName = !isUpSortByName;
                 sortList(1);
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_white) {
-                        sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
-                    } else {
-                        sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                    }
-                } else {
-                    sortMenuBinding.ivSortByNameType.setBackgroundResource(isUpSortByName? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sortTypeButtonTheme(rThemeId, sortMenuBinding.ivSortByNameType, isUpSortByName);
+
                 sortMenuBinding.ivSortByTimeType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortByNameType.setVisibility(View.VISIBLE);
                 sortMenuBinding.ivSortBySingerType.setVisibility(View.INVISIBLE);
@@ -2604,15 +1875,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             public void onClick(View v) {
                 isUpSortBySinger = !isUpSortBySinger;
                 sortList(2);
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_white) {
-                        sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up_purple : R.drawable.ic_sort_down_purple);
-                    } else {
-                        sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                    }
-                } else {
-                    sortMenuBinding.ivSortBySingerType.setBackgroundResource(isUpSortBySinger? R.drawable.ic_sort_up : R.drawable.ic_sort_down);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sortTypeButtonTheme(rThemeId, sortMenuBinding.ivSortBySingerType, isUpSortBySinger);
+
                 sortMenuBinding.ivSortByTimeType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortByNameType.setVisibility(View.INVISIBLE);
                 sortMenuBinding.ivSortBySingerType.setVisibility(View.VISIBLE);
@@ -2620,83 +1885,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
             }
         });
 
-        PopupWindow popupWindow  = new PopupWindow(sortMenuBinding.getRoot(),
+        PopupWindow sortMenuPopupWindow  = new PopupWindow(sortMenuBinding.getRoot(),
                 PxUtil.getInstance().dp2px(150, this),  WindowManager.LayoutParams.WRAP_CONTENT, true);
-        popupWindow.setTouchable(true);
-        if(rThemeId!=0) {
-            if(rThemeId == R.id.ll_theme_normal) {
-                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
-                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
-                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
-                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else if(rThemeId == R.id.ll_theme_dark) {
-                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu));
-                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
-                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
-                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
-                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else if(rThemeId == R.id.ll_theme_white) {
-                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_white));
-                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.purple));
-                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.purple));
-                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.purple));
-                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time_purple);
-                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name_purple);
-                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer_purple);
-                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.purple));
-                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.purple));
-            } else if(rThemeId == R.id.ll_theme_orange) {
-                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_orange));
-                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
-                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
-                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
-                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else if(rThemeId == R.id.ll_theme_light) {
-                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_light));
-                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
-                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
-                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
-                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            } else {
-                popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-                sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
-                sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
-                sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
-                sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
-                sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-                sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            }
-        } else {
-            popupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_menu_normal));
-            sortMenuBinding.tvSortByTime.setTextColor(getResources().getColor(R.color.white));
-            sortMenuBinding.tvSortByName.setTextColor(getResources().getColor(R.color.white));
-            sortMenuBinding.tvSortBySinger.setTextColor(getResources().getColor(R.color.white));
-            sortMenuBinding.ivSortByTime.setBackgroundResource(R.drawable.ic_sort_by_time);
-            sortMenuBinding.ivSortByName.setBackgroundResource(R.drawable.ic_sort_by_name);
-            sortMenuBinding.ivSortBySinger.setBackgroundResource(R.drawable.ic_sort_by_singer);
-            sortMenuBinding.vLine.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-            sortMenuBinding.vLine2.setBackgroundColor(getResources().getColor(R.color.gray_c9));
-        }
-        popupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-105, this),  PxUtil.getInstance().dp2px(10, this));
+        sortMenuPopupWindow.setTouchable(true);
+        //变更主题
+        ThemeHelper.getInstance().sortMenuTheme(this, rThemeId, sortMenuPopupWindow, sortMenuBinding);
+
+        sortMenuPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-105, this),  PxUtil.getInstance().dp2px(10, this));
     }
 
     /** 按类型排序歌曲 */
@@ -2779,90 +1974,21 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         switch (changePlayMode) {
             case 0: //顺序播放
                 binder.setSingePlayMode(false);
-                //getViewModel().setSingePlayMode(false);
                 getViewDataBinding().tvPlayMode.setText("顺序播放");
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
-                    } else {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                    }
-                } else {
-                    getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                    getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sequentialPlayButtonTheme(rThemeId, getViewDataBinding(), 0);
                 break;
             case 1: //随机播放
                 binder.setSingePlayMode(false);
-                //getViewModel().setSingePlayMode(false);
                 getViewDataBinding().tvPlayMode.setText("随机播放");
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_purple);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_purple);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_orange);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_light);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_light);
-                    } else {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                    }
-                } else {
-                    getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                    getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sequentialPlayButtonTheme(rThemeId, getViewDataBinding(), 1);
                 break;
             case 2: //单曲循环
                 binder.setSingePlayMode(true);
-                //getViewModel().setSingePlayMode(true);
                 getViewDataBinding().tvPlayMode.setText("单曲循环");
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_purple);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_purple);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_orange);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_light);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_light);
-                    } else {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                    }
-                } else {
-                    getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                    getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sequentialPlayButtonTheme(rThemeId, getViewDataBinding(), 2);
                 break;
         }
     }
@@ -2874,90 +2000,21 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         switch (playMode) {
             case 0: //顺序播放
                 binder.setSingePlayMode(false);
-                //getViewModel().setSingePlayMode(false);
                 getViewDataBinding().tvPlayMode.setText("顺序播放");
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
-                    } else {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                    }
-                } else {
-                    getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                    getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sequentialPlayButtonTheme(rThemeId, getViewDataBinding(), 0);
                 break;
             case 1: //随机播放
                 binder.setSingePlayMode(false);
-                //getViewModel().setSingePlayMode(false);
                 getViewDataBinding().tvPlayMode.setText("随机播放");
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_purple);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_purple);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_orange);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_light);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_light);
-                    } else {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                    }
-                } else {
-                    getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                    getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_random_play_black);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sequentialPlayButtonTheme(rThemeId, getViewDataBinding(), 1);
                 break;
             case 2: //单曲循环
                 binder.setSingePlayMode(true);
-                //getViewModel().setSingePlayMode(true);
                 getViewDataBinding().tvPlayMode.setText("单曲循环");
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play);
-                    } else if(rThemeId == R.id.ll_theme_white) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_purple);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_purple);
-                    } else if(rThemeId == R.id.ll_theme_orange) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_orange);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_light);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_light);
-                    } else {
-                        getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                        getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                    }
-                } else {
-                    getViewDataBinding().ivPlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                    getViewDataBinding().btChangePlayMode.setBackgroundResource(R.drawable.ic_single_play_black);
-                }
+                //变更主题
+                ThemeHelper.getInstance().sequentialPlayButtonTheme(rThemeId, getViewDataBinding(), 2);
                 break;
         }
 
@@ -2991,13 +2048,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 .create();
         Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
         mAlertDialog.show();
-
-       /* PopupWindow  deleteAllWindow  = new PopupWindow(deleteListAllBinding.getRoot(),
-                WindowManager.LayoutParams.WRAP_CONTENT,  WindowManager.LayoutParams.WRAP_CONTENT, true);
-        deleteAllWindow.setTouchable(true);
-        deleteAllWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.shape_button_white_2));
-        deleteAllWindow.showAsDropDown(view);*/
-
 
     }
 
@@ -3166,58 +2216,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         getViewDataBinding().tvMusicName.setText(musicMsg);
         getViewDataBinding().tvSingerName.setText(source.musicSinger);
         //变更主题
-        if(rThemeId!=0) {
-            if(rThemeId == R.id.ll_theme_normal) {
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(getViewDataBinding().ivMusicImg);
-            } else if(rThemeId == R.id.ll_theme_dark) {
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.white)))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(getViewDataBinding().ivMusicImg);
-            } else if(rThemeId == R.id.ll_theme_white) {
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.purple)))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(getViewDataBinding().ivMusicImg);
-            } else if(rThemeId == R.id.ll_theme_orange) {
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.orange_0b)))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(getViewDataBinding().ivMusicImg);
-            } else if(rThemeId == R.id.ll_theme_light) {
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_b5)))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(getViewDataBinding().ivMusicImg);
-            } else {
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(source.getMusicImg())
-                        .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(getViewDataBinding().ivMusicImg);
-            }
-        } else {
-            Glide.with(getApplication())
-                    .setDefaultRequestOptions(requestOptions)
-                    .load(source.getMusicImg())
-                    .transform(new CropCircleWithBorderTransformation(5, getResources().getColor(R.color.light_ea)))
-                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                    .into(getViewDataBinding().ivMusicImg);
-        }
+        ThemeHelper.getInstance().musicBarMusicImg2Theme(this, rThemeId, getViewDataBinding(), source);
 
         if (objectAnimator != null) {
             objectAnimator.cancel();
@@ -3270,41 +2269,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         public void onBindViewHolder(@NonNull MusicListViewHolder holder, @SuppressLint("RecyclerView") final int position) {
             final ItemMusicListBinding binding = DataBindingUtil.getBinding(holder.itemView);
             if (binding != null) {
-
                 //变更主题
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.white));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.white));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add);
-                    } else if (rThemeId == R.id.ll_theme_white) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_white_theme_selected2);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.purple));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_gray_purple);
-                    } else if (rThemeId == R.id.ll_theme_orange) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.orange_0b));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.orange_0b));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                    } else {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                    }
-                }
+                ThemeHelper.getInstance().musicListAddButtonTheme(getApplication(), rThemeId, binding);
+
                 binding.rlMusicAll.setVisibility(list.get(position).getMusicType().equals(" ") ? GONE : View.VISIBLE);
                 Glide.with(getApplication())
                         .setDefaultRequestOptions(requestOptions)
@@ -3350,69 +2317,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 binding.llAdd.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
                         //变更主题
-                        if(rThemeId!=0) {
-                            if (rThemeId == R.id.ll_theme_normal) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                                animatorSet.start();
-                            } else if(rThemeId == R.id.ll_theme_dark) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlack);
-                                animatorSet.start();
-
-                            } else if (rThemeId == R.id.ll_theme_white) {
-                                binding.ivAddAnimator.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimator);
-                                animatorSet.start();
-                            } else if (rThemeId == R.id.ll_theme_orange) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorOrange);
-                                animatorSet.start();
-                            } else if(rThemeId == R.id.ll_theme_light) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight2);
-                                animatorSet.start();
-                            } else {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                                animatorSet.start();
-                            }
-                        } else {
-                            binding.ivAddAnimator.setVisibility(View.GONE);
-                            binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                            binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                            binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                            binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                            animatorSet.start();
-                        }
-
+                        ThemeHelper.getInstance().musicListAddButtonAnimatorTheme(rThemeId, binding);
 
                         playList.add(setMusicMsg(list.get(position), false));
 
@@ -3512,83 +2418,28 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 binding.tvMusicName.setText(list.get(position).musicName);
                 binding.tvSingerName.setText(list.get(position).musicSinger);
 
-                //变更主题
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                        binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                        binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                        binding.ivDelete.setBackgroundResource(R.drawable.selector_delete_selected_2);
-                        binding.ivMusicRail.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                        binding.ivMusicRailDark.setVisibility(View.GONE);
-                        binding.ivMusicRailPurple.setVisibility(View.GONE);
-                        binding.ivMusicRailOrange.setVisibility(View.GONE);
-                        binding.ivMusicRailLight.setVisibility(View.GONE);
-                    } else if (rThemeId == R.id.ll_theme_dark) {
-                        binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.black) : getResources().getColor(R.color.white));
-                        binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.black) : getResources().getColor(R.color.white));
-                        binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.black) : getResources().getColor(R.color.white));
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete);
-                        binding.ivMusicRail.setVisibility(View.GONE);
-                        binding.ivMusicRailDark.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                        binding.ivMusicRailPurple.setVisibility(View.GONE);
-                        binding.ivMusicRailOrange.setVisibility(View.GONE);
-                        binding.ivMusicRailLight.setVisibility(View.GONE);
-                    } else if (rThemeId == R.id.ll_theme_white) {
-                        binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.purple_light) : getResources().getColor(R.color.purple));
-                        binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.purple_light) : getResources().getColor(R.color.purple));
-                        binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.purple_light) : getResources().getColor(R.color.gray_purple_ac));
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_purple);
-                        binding.ivMusicRail.setVisibility(View.GONE);
-                        binding.ivMusicRailDark.setVisibility(View.GONE);
-                        binding.ivMusicRailPurple.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                        binding.ivMusicRailOrange.setVisibility(View.GONE);
-                        binding.ivMusicRailLight.setVisibility(View.GONE);
-                    } else if (rThemeId == R.id.ll_theme_orange) {
-                        binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.orange_f4) : getResources().getColor(R.color.orange_0b));
-                        binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.orange_f4) : getResources().getColor(R.color.orange_0b));
-                        binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.orange_f4) : getResources().getColor(R.color.orange_0b));
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_orange);
-                        binding.ivMusicRail.setVisibility(View.GONE);
-                        binding.ivMusicRailDark.setVisibility(View.GONE);
-                        binding.ivMusicRailPurple.setVisibility(View.GONE);
-                        binding.ivMusicRailOrange.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                        binding.ivMusicRailLight.setVisibility(View.GONE);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_8a) : getResources().getColor(R.color.light_b5));
-                        binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_8a) : getResources().getColor(R.color.light_b5));
-                        binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_8a) : getResources().getColor(R.color.light_b5));
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_light);
-                        binding.ivMusicRail.setVisibility(View.GONE);
-                        binding.ivMusicRailDark.setVisibility(View.GONE);
-                        binding.ivMusicRailPurple.setVisibility(View.GONE);
-                        binding.ivMusicRailOrange.setVisibility(View.GONE);
-                        binding.ivMusicRailLight.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-
-                    } else {
-                        binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                        binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                        binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                        binding.ivMusicRail.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                        binding.ivDelete.setBackgroundResource(R.drawable.selector_delete_selected_2);
-                        binding.ivMusicRail.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                        binding.ivMusicRailDark.setVisibility(View.GONE);
-                        binding.ivMusicRailPurple.setVisibility(View.GONE);
-                        binding.ivMusicRailOrange.setVisibility(View.GONE);
-                        binding.ivMusicRailLight.setVisibility(View.GONE);
-                    }
-                } else {
-                    binding.tvOrderNum.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                    binding.tvMusicName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                    binding.tvSingerName.setTextColor(list.get(position).isPlaying? getResources().getColor(R.color.light_ea) : getResources().getColor(R.color.black));
-                    binding.ivMusicRail.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                    binding.ivDelete.setBackgroundResource(R.drawable.selector_delete_selected_2);
-                    binding.ivMusicRail.setVisibility(list.get(position).isPlaying? View.VISIBLE : GONE);
-                    binding.ivMusicRailDark.setVisibility(View.GONE);
-                    binding.ivMusicRailPurple.setVisibility(View.GONE);
-                    binding.ivMusicRailOrange.setVisibility(View.GONE);
-                    binding.ivMusicRailLight.setVisibility(View.GONE);
+                //展示各团Logo
+                binding.ivShowLogo.setVisibility(list.get(position).isLocal? View.GONE : View.VISIBLE);
+                binding.ivShowLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                if(MUSIC_TYPE_LIELLA.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_liella_3);
+                } else if (MUSIC_TYPE_LIYUU.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_liyuu);
+                } else if (MUSIC_TYPE_SUNNYPASSION.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_sunny_passion);
+                    binding.ivShowLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                } else if (MUSIC_TYPE_NIJIGASAKI.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_nijigasaki_3);
+                } else if (MUSIC_TYPE_AQOURS.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_aqours_3);
+                } else if (MUSIC_TYPE_US.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_us_3);
+                } else if (MUSIC_TYPE_HASUNOSORA.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_hasu_2);
                 }
+
+                //变更主题
+                ThemeHelper.getInstance().playListTheme(context, rThemeId, binding, list.get(position).isPlaying);
 
                 //点击播放列表的歌曲
                 binding.getRoot().setOnClickListener(new View.OnClickListener() {

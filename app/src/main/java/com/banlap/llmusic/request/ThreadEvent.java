@@ -21,6 +21,7 @@ public class ThreadEvent<T> {
     public static String ALBUM_NIJIGASAKI = "ALBUM_NIJIGASAKI";
     public static String ALBUM_AQOURS = "ALBUM_AQOURS";
     public static String ALBUM_US = "ALBUM_US";
+    public static String ALBUM_HASUNOSORA = "ALBUM_HASUNOSORA";
     public static final int CONNECT_MYSQL = 0x10;
     public static final int CONNECT_MYSQL_LOADING = 0x101;
     public static final int CONNECT_MYSQL_SUCCESS = 0x11;
@@ -40,6 +41,7 @@ public class ThreadEvent<T> {
     public static final int GET_DATA_LIST_BY_NIJIGASAKI = 0x204;
     public static final int GET_DATA_LIST_BY_AQOURS = 0x205;
     public static final int GET_DATA_LIST_BY_US = 0x206;
+    public static final int GET_DATA_LIST_BY_HASUNOSORA = 0x207;
 
     public static final int GET_DATA_LIST_COUNT = 0x21;
     public static final int GET_DATA_LIST_MESSAGE = 0x22;
@@ -99,6 +101,8 @@ public class ThreadEvent<T> {
     public static final int VIEW_IMAGE_URL = 0x57;
     public static final int VIEW_SPANNABLE_LYRIC = 0x58;
     public static final int VIEW_CHANGE_THEME = 0x59;
+    public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 0x60;
+    public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 0x601;
 
     /** 蓝牙部分控制 */
     public static final int BLUETOOTH_DISCONNECT = 0x70;

@@ -21,8 +21,13 @@ import com.banlap.llmusic.service.MusicIsPauseService;
 import com.banlap.llmusic.service.MusicLastService;
 import com.banlap.llmusic.service.MusicNextService;
 import com.banlap.llmusic.ui.MainActivity;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.io.ByteArrayOutputStream;
+
+import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation;
 
 public class NotificationHelper {
     public static final int LL_MUSIC_PLAYER = 0x01;

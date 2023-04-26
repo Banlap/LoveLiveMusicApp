@@ -10,12 +10,18 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
@@ -26,11 +32,14 @@ import com.banlap.llmusic.databinding.ActivitySettingsBinding;
 import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
+import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.uivm.LocalListFVM;
 import com.banlap.llmusic.uivm.MainVM;
 import com.banlap.llmusic.uivm.SettingsVM;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CacheUtil;
+import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.SPUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -41,19 +50,24 @@ import java.util.Objects;
 
 public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsBinding>
     implements SettingsVM.SettingsCallBack {
+    private static final String TAG = SettingsActivity.class.getSimpleName();
 
     private AlertDialog mAlertDialog;                   //弹窗
     private DialogDownloadBinding downloadBinding;
-    private boolean isExistNewVersion = false;
-    private String newVersionUrl = "";
-    private String newVersionTitle = "";
-    private String newVersionContent = "";
+    private String newVersionUrl = "";          //新版本路径
+    private String newVersionTitle = "";        //新版本标题
+    private String newVersionContent = "";      //新版本内容
+
+    private DialogSettingVideoBinding settingVideoBinding;
+    private ActivityResultLauncher<Intent> intentActivityResultLauncher;
+    private String mNormalLaunchVideoUrl; //默认启动动画UI
 
     @Override
     protected int getLayoutId() { return R.layout.activity_settings; }
 
     @Override
     protected void initData() {
+        mNormalLaunchVideoUrl = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella;
         String strThemeId = SPUtil.getStrValue(getApplicationContext(), "SaveThemeId");
         if(strThemeId!=null) {
             if(!strThemeId.equals("")) {
@@ -70,7 +84,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
 
-        isExistNewVersion = getIntent().getBooleanExtra("IsExistNewVersion", false);
+        boolean isExistNewVersion = getIntent().getBooleanExtra("IsExistNewVersion", false);
         newVersionUrl = getIntent().getStringExtra("NewVersionUrl");
         newVersionTitle = getIntent().getStringExtra("NewVersionTitle");
         newVersionContent = getIntent().getStringExtra("NewVersionContent");
@@ -81,10 +95,17 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         getViewDataBinding().llThemeWhite.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeOrange.setOnClickListener(new ButtonClickListener());
 
+        getViewDataBinding().llSettingWelcomeVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showSettingVideo();
+            }
+        });
+
         getViewDataBinding().tvVersionValue.setText("V" + getAppVersionName(this));
-        getViewDataBinding().tvNewVersion.setVisibility(isExistNewVersion? View.VISIBLE : View.GONE);
+        getViewDataBinding().tvNewVersion.setVisibility(isExistNewVersion ? View.VISIBLE : View.GONE);
         getViewDataBinding().llVersionMain.setEnabled(isExistNewVersion);
-        getViewDataBinding().llVersionMain.setOnClickListener(new View.OnClickListener() {
+        getViewDataBinding().llVersionMain.setOnClickListener(new View.OnClickListener() { //版本
             @Override
             public void onClick(View view) {
                 showUpgradeApp();
@@ -94,19 +115,38 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
         String cacheAllSize = CacheUtil.getTotalCacheSize(this);
         getViewDataBinding().tvCacheValue.setText(cacheAllSize);
-        getViewDataBinding().llCleanCache.setOnClickListener(new View.OnClickListener() {
+        getViewDataBinding().llCleanCache.setOnClickListener(new View.OnClickListener() { //清除缓存
             @Override
             public void onClick(View v) {
                 cleanCache();
             }
         });
 
-        getViewDataBinding().llAbout.setOnClickListener(new View.OnClickListener() {
+        getViewDataBinding().llAbout.setOnClickListener(new View.OnClickListener() { //关于
             @Override
             public void onClick(View v) {
                 showAboutApp();
             }
         });
+
+        intentActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if(null != result.getData()) {
+                            Intent intent = result.getData();
+                            Uri uri = intent.getData();
+                            if(null != uri) {
+                                String path = FileUtil.getInstance().getPath(getApplication(), uri);
+                                Log.e(TAG, "path: " + path);
+                                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS, path));
+                                return;
+                            }
+                        }
+                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_ERROR));
+                    }
+                });
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -169,6 +209,15 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 }
                 Toast.makeText(this, "app下载失败，请重新下载", Toast.LENGTH_SHORT).show();
                 break;
+            case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS:
+                if(!TextUtils.isEmpty(event.str)) {
+                    SPUtil.setStrValue(getApplicationContext(), "LaunchVideoPath", event.str);
+                    updateLaunchVideoSelectUI(false);
+                }
+                break;
+            case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_ERROR:
+                Log.e(TAG, "设置启动动画失败");
+                break;
         }
     }
 
@@ -185,10 +234,87 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         return versionName;
     }
 
+    /** 设置启动动画 */
+    private void showSettingVideo() {
+        settingVideoBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_setting_video, null, false);
+
+        settingVideoBinding.tvTitle.setText("设置启动动画");
+        //设置是否开启启动动画
+        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), "CloseLaunchVideo");
+        if(TextUtils.isEmpty(isLaunchVideo)) {
+            settingVideoBinding.switchVideo.setChecked(true);
+        } else {
+            settingVideoBinding.switchVideo.setChecked(!"0".equals(isLaunchVideo));
+        }
+        settingVideoBinding.switchVideo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SPUtil.setStrValue(getApplicationContext(), "CloseLaunchVideo", settingVideoBinding.switchVideo.isChecked()? "1" : "0");
+            }
+        });
+
+        //选择启动动画ui默认值
+        updateLaunchVideoSelectUI(true);
+
+        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), "LaunchVideoPath");
+        if(!TextUtils.isEmpty(launchVideoPath)) {
+            if(!mNormalLaunchVideoUrl.equals(launchVideoPath)) {
+                updateLaunchVideoSelectUI(false);
+            }
+        }
+
+        //选择默认启动动画
+        settingVideoBinding.llSelectVideoNormal.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SPUtil.setStrValue(getApplicationContext(), "LaunchVideoPath", mNormalLaunchVideoUrl);
+                updateLaunchVideoSelectUI(true);
+            }
+        });
+
+        //选择自定义启动动画
+        settingVideoBinding.llSelectVideoAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                intent.setType("video/mp4");
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intentActivityResultLauncher.launch(intent);
+            }
+        });
+
+        settingVideoBinding.btCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.dismiss();
+            }
+        });
+
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setView(settingVideoBinding.getRoot())
+                .create();
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        mAlertDialog.show();
+    }
+
+    /**
+     *  选择启动动画ui默认值
+     *  @param isNormal true: 默认启动视频UI false: 自定义启动视频UI
+     * */
+    private void updateLaunchVideoSelectUI(boolean isNormal) {
+        if(settingVideoBinding != null) {
+            settingVideoBinding.ivLaunchVideoNormalSelected.setVisibility(isNormal ? View.VISIBLE : View.INVISIBLE);
+            settingVideoBinding.ivLaunchVideoCustomSelected.setVisibility(isNormal ? View.INVISIBLE : View.VISIBLE);
+            settingVideoBinding.civLaunchVideoAdd.setVisibility(isNormal ? View.VISIBLE : View.GONE);
+            settingVideoBinding.civLaunchVideoCustom.setVisibility(isNormal ? View.GONE : View.VISIBLE);
+            settingVideoBinding.tvLaunchVideoCustom.setText(isNormal ? "" : "已设定视频");
+        }
+    }
 
     /** 显示弹窗更新App */
     private void showUpgradeApp() {
-
         DialogMessageBinding messageBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_message, null, false);
 
@@ -337,123 +463,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     private void changeTheme(int rId) {
         SPUtil.setStrValue(getApplicationContext(), "SaveThemeId", String.valueOf(rId));
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
-        if(rId == R.id.ll_theme_normal) {
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color5);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
-            getViewDataBinding().ivArrowInto.setBackgroundResource(R.drawable.ic_arrow_into_light);
-            getViewDataBinding().tvSettings.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvTheme.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().rlSettingsBar.setBackgroundResource(R.drawable.shape_button_white_alpha);
-            getViewDataBinding().llThemeMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
-
-        } else if(rId == R.id.ll_theme_dark) {
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color6);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back);
-            getViewDataBinding().ivArrowInto.setBackgroundResource(R.drawable.ic_arrow_into);
-            getViewDataBinding().tvSettings.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvTheme.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().rlSettingsBar.setBackgroundResource(R.drawable.shape_button_white_alpha);
-            getViewDataBinding().llThemeMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.white));
-        } else if(rId == R.id.ll_theme_white) {
-            getViewDataBinding().clBg.setBackgroundResource(R.color.background_color_F2);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_purple);
-            getViewDataBinding().ivArrowInto.setBackgroundResource(R.drawable.ic_arrow_into_purple);
-            getViewDataBinding().tvTheme.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvSettings.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().rlSettingsBar.setBackgroundResource(R.drawable.shape_button_black_alpha_2);
-            getViewDataBinding().llThemeMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
-            getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
-            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.shape_button_black_alpha);
-            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.shape_button_black_alpha);
-            getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.purple));
-        } else if(rId == R.id.ll_theme_orange) {
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color7);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_orange);
-            getViewDataBinding().ivArrowInto.setBackgroundResource(R.drawable.ic_arrow_into_orange);
-            getViewDataBinding().tvSettings.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvTheme.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().rlSettingsBar.setBackgroundResource(R.drawable.shape_button_white_alpha);
-            getViewDataBinding().llThemeMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.orange_0b));
-        } else if(rId == R.id.ll_theme_light) {
-            getViewDataBinding().clBg.setBackgroundResource(R.mipmap.ic_gradient_color4);
-            getViewDataBinding().ivBack.setBackgroundResource(R.drawable.ic_arrow_back_light);
-            getViewDataBinding().ivArrowInto.setBackgroundResource(R.drawable.ic_arrow_into_light);
-            getViewDataBinding().tvSettings.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvTheme.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeNormal.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeDark.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeWhite.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeOrange.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvThemeLight.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().rlSettingsBar.setBackgroundResource(R.drawable.shape_button_white_alpha);
-            getViewDataBinding().llThemeMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
-            getViewDataBinding().tvVersion.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvVersionValue.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCleanCache.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvCacheValue.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvAbout.setTextColor(getResources().getColor(R.color.light_ff));
-        }
+        //主题变更
+        ThemeHelper.getInstance().settingActivityTheme(this, rId, getViewDataBinding());
     }
 
     @Override

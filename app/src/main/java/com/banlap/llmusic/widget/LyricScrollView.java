@@ -271,15 +271,6 @@ public class LyricScrollView extends View {
                 mPaint.setFakeBoldText(i == currentPosition);
                 canvas.drawText(musicLyrics.get(i).lyricContext, lyricX, lyricY + mPaddingY * i, mPaint);
 
-
-                /*mPaint2.setStrokeWidth((float) 1.0);              //设置线宽
-                mPaint2.setColor(getResources().getColor(R.color.alpha));
-                if(isTouchLyric) {
-                    mPaint2.setColor(i == currentPosition? highLightLyricColor : getResources().getColor(R.color.alpha));
-                }
-                canvas.drawLine(0, lyricY + mPaddingY * i,  100, lyricY + mPaddingY * i, mPaint2);
-*/
-
                 //绘制副歌词
                 String lyricText2 = musicLyrics.get(i).lyricContext2;
                 if(null != lyricText2 && !"".equals(lyricText2)) {

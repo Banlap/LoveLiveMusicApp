@@ -21,6 +21,7 @@ import java.util.List;
 /**
  *  已弃用
  * */
+@Deprecated
 public class LyricView extends View {
 
     private List<MusicLyric> musicLyrics;

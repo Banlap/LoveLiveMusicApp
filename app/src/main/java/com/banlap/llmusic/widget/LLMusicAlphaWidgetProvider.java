@@ -13,14 +13,25 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.service.MusicIsPauseService;
 import com.banlap.llmusic.service.MusicLastService;
 import com.banlap.llmusic.service.MusicNextService;
 import com.banlap.llmusic.ui.MainActivity;
 import com.banlap.llmusic.utils.NotificationHelper;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import java.io.ByteArrayOutputStream;
+
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
 
@@ -104,11 +115,25 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         intentServiceIsPause.putExtra("MusicName", musicName);
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
 
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+        requestOptions.format(DecodeFormat.PREFER_RGB_565);
+
         if(bitmap !=null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
             byte[] bitmapByte = baos.toByteArray();
-            remoteViews.setImageViewBitmap(R.id.iv_music_img, bitmap);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .asBitmap()
+                    .load(bitmap)
+                    .transform(new RoundedCornersTransformation(15, 0, RoundedCornersTransformation.CornerType.ALL))
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            remoteViews.setImageViewBitmap(R.id.iv_music_img, resource);
+                        }
+                    });
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
         } else {
             remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));

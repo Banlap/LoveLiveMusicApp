@@ -35,6 +35,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         getViewDataBinding().llList4.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList5.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList6.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llList7.setOnClickListener(new ButtonClickListener());
     }
 
     @Override
@@ -59,7 +60,9 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_AQOURS));
             } else if (v.getId() == R.id.ll_list_6) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_US));
-            }
+           } else if (v.getId() == R.id.ll_list_7) {
+               EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_HASUNOSORA));
+           }
         }
     }
 

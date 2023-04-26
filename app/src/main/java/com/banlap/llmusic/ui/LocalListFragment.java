@@ -201,38 +201,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             }
         }
     }
+    /**
+     * 变更主题
+     * */
     private void changeTheme(int rThemeId) {
-        if(rThemeId == R.id.ll_theme_normal) {
-            getViewDataBinding().tvSingleMusic.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvNullLocalList.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvEditDelete.setTextColor(getResources().getColor(R.color.light_ff));
-        } else if(rThemeId == R.id.ll_theme_dark) {
-            getViewDataBinding().tvSingleMusic.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvNullLocalList.setTextColor(getResources().getColor(R.color.white));
-            getViewDataBinding().tvEditDelete.setTextColor(getResources().getColor(R.color.white));
-        } else if(rThemeId == R.id.ll_theme_white) {
-            getViewDataBinding().tvSingleMusic.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvNullLocalList.setTextColor(getResources().getColor(R.color.purple));
-            getViewDataBinding().tvEditDelete.setTextColor(getResources().getColor(R.color.purple));
-        } else if(rThemeId == R.id.ll_theme_orange) {
-            getViewDataBinding().tvSingleMusic.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvNullLocalList.setTextColor(getResources().getColor(R.color.orange_0b));
-            getViewDataBinding().tvEditDelete.setTextColor(getResources().getColor(R.color.orange_0b));
-        } else if(rThemeId == R.id.ll_theme_light) {
-            getViewDataBinding().tvSingleMusic.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvNullLocalList.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvEditDelete.setTextColor(getResources().getColor(R.color.light_ff));
-        } else {
-            getViewDataBinding().tvSingleMusic.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvMusicCount.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvNullLocalList.setTextColor(getResources().getColor(R.color.light_ff));
-            getViewDataBinding().tvEditDelete.setTextColor(getResources().getColor(R.color.light_ff));
-        }
+        //主题变更
+        ThemeHelper.getInstance().localListFragmentTheme(getContext(), rThemeId, getViewDataBinding());
         if(null != localListAdapter) {
             localListAdapter.notifyDataSetChanged();
         }
@@ -306,87 +280,21 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         public void onBindViewHolder(@NonNull LocalListViewHolder holder, @SuppressLint("RecyclerView") final int position) {
             final ItemLocalMusicListBinding binding = DataBindingUtil.getBinding(holder.itemView);
             if (binding != null) {
-
                 //变更主题
-                if(rThemeId!=0) {
-                    if(rThemeId == R.id.ll_theme_normal) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_light_ff);
-                    } else if(rThemeId == R.id.ll_theme_dark) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.white));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.white));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add);
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete);
-                    } else if (rThemeId == R.id.ll_theme_white) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_white_theme_selected2);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.purple));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.gray_purple_ac));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_gray_purple);
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_purple_ac);
-                    } else if (rThemeId == R.id.ll_theme_orange) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.orange_0b));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.orange_0b));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_orange);
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_orange);
-                    } else if(rThemeId == R.id.ll_theme_light) {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                    } else {
-                        binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                        binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                        binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                        binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_light_ff);
-                    }
-                } else {
-                    binding.rlMusicAll.setBackgroundResource(R.drawable.selector_tab_selected3);
-                    binding.tvMusicName.setTextColor(getResources().getColor(R.color.light_ff));
-                    binding.tvSingerName.setTextColor(getResources().getColor(R.color.light_ff));
-                    binding.ivAdd.setBackgroundResource(R.drawable.ic_add_light);
-                    binding.ivDelete.setBackgroundResource(R.drawable.ic_delete_light_ff);
-                }
+                ThemeHelper.getInstance().localListTheme(context, rThemeId, binding);
 
                 binding.llDelete.setVisibility(localFileList.get(position).isDelete? View.VISIBLE :View.GONE);
                 binding.rlMusicAll.setVisibility(localFileList.get(position).title !=null? View.VISIBLE :View.GONE);
                 binding.tvMusicName.setText(localFileList.get(position).title);
                 binding.tvSingerName.setText(localFileList.get(position).artist);
 
-                binding.ivMusicImg.setTag(R.id.img_load, position);
-                Log.e(TAG, "position: " + position + " pic: " + localFileList.get(position).pic +
-                        " new pic: " + mLocalMusicList.get(position).pic);
-
-                binding.ivMusicImg.setImageBitmap(null);
-
                 if(null != localFileList.get(position).pic) {
                     byte[] b = localFileList.get(position).pic;
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, localFileList.get(position).pic.length);
-                    //binding.ivMusicImg.setImageBitmap(bitmap);
-
-                    Glide.with(binding.ivMusicImg.getContext())
-                            .setDefaultRequestOptions(requestOptions)
-                            .load(bitmap)
-                            .transform(new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL))
-                            .skipMemoryCache(true)//跳过内存缓存
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                            .into(binding.ivMusicImg);
-                    int tag = (int) binding.ivMusicImg.getTag(R.id.img_load);
-                    Log.e(TAG, "tag: " + tag);
-
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+                    binding.ivMusicImg.setImageBitmap(bitmap);
                 } else {
-                    binding.ivMusicImg.setImageBitmap(null);
-                    //Glide.with(binding.ivMusicImg.getContext()).clear(binding.ivMusicImg);
-                    int tag = (int) binding.ivMusicImg.getTag(R.id.img_load);
-                    Log.e(TAG, "tag: " + tag);
+                    binding.ivMusicImg.setImageResource(R.mipmap.ic_llmp);
                 }
-
 
                 binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -408,66 +316,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     @Override
                     public void onClick(View v) {
                         //变更主题
-                        if(rThemeId!=0) {
-                            if (rThemeId == R.id.ll_theme_normal) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                                animatorSet.start();
-                            } else if(rThemeId == R.id.ll_theme_dark) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlack);
-                                animatorSet.start();
-
-                            } else if (rThemeId == R.id.ll_theme_white) {
-                                binding.ivAddAnimator.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimator);
-                                animatorSet.start();
-                            } else if (rThemeId == R.id.ll_theme_orange) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.VISIBLE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorOrange);
-                                animatorSet.start();
-                            } else if(rThemeId == R.id.ll_theme_light) {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight2);
-                                animatorSet.start();
-                            } else {
-                                binding.ivAddAnimator.setVisibility(View.GONE);
-                                binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                                binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                                binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                                AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                                animatorSet.start();
-                            }
-                        } else {
-                            binding.ivAddAnimator.setVisibility(View.GONE);
-                            binding.ivAddAnimatorBlack.setVisibility(View.GONE);
-                            binding.ivAddAnimatorOrange.setVisibility(View.GONE);
-                            binding.ivAddAnimatorLight1.setVisibility(View.GONE);
-                            binding.ivAddAnimatorLight2.setVisibility(View.GONE);
-                            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                            animatorSet.start();
-                        }
+                        ThemeHelper.getInstance().localListAddButtonAnimatorTheme(rThemeId, binding);
 
                         int id = new Random().nextInt(99999) + 10000;
                         Music music = new Music();
@@ -500,8 +349,4 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             return localFileList.size();
         }
     }
-
-
-
-
 }
