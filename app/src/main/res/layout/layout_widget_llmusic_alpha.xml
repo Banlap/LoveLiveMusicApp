@@ -18,8 +18,8 @@
 
         <ImageView
             android:id="@+id/iv_music_img"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@mipmap/ic_llmp_2" />
 
         <LinearLayout
@@ -81,7 +81,7 @@
                         android:focusable="true"
                         android:focusableInTouchMode="true"
                         android:marqueeRepeatLimit="marquee_forever"
-                        android:maxEms="5"
+                        android:maxEms="20"
                         android:singleLine="true"
                         android:text="LLSinger"
                         android:textColor="@color/white"

@@ -252,7 +252,7 @@ public class LyricScrollView extends View {
                     defaultLyricColor = getResources().getColor(R.color.light_b5);
                 } else {
                     highLightLyricColor = getResources().getColor(R.color.light_ea);
-                    defaultLyricColor = getResources().getColor(R.color.white);
+                    defaultLyricColor = getResources().getColor(R.color.black);
                 }
             } else {
                 highLightLyricColor = getResources().getColor(R.color.light_ea);

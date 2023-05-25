@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/ll_edit_favorite_dialog"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/selector_button_selected"
+        android:padding="7dp">
+
+        <LinearLayout
+            android:id="@+id/ll_inform"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/tv_music_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="MusicName"
+                android:textColor="@color/light_ff"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_music_singer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="MusicSinger"
+                android:textColor="@color/light_ff"
+                android:textSize="12sp" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="visible"
+            android:id="@+id/ll_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/ll_inform">
+
+            <View
+                android:id="@+id/v_line_0"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@color/gray_ea" />
+
+            <LinearLayout
+                android:id="@+id/ll_add_favorite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_tab_selected2"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <ImageView
+                    android:id="@+id/iv_favorite"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/ic_favorite_light"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/tv_favorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="默认收藏"
+                    android:textColor="@color/light_ff"
+                    android:textSize="16sp" />
+
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/v_line"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@color/gray_ea" />
+
+            <LinearLayout
+                android:id="@+id/ll_add_local_play_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_tab_selected2"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <ImageView
+                    android:id="@+id/iv_add_local_play_list"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/ic_music_list_light_ff"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/tv_add_local_play_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="添加到歌单"
+                    android:textColor="@color/light_ff"
+                    android:textSize="16sp" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/ll_list_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/ll_inform">
+
+            <View
+                android:visibility="visible"
+                android:id="@+id/v_line2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@color/gray_ea" />
+
+            <LinearLayout
+                android:visibility="visible"
+                android:id="@+id/ll_delete_music"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/selector_tab_selected2"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <ImageView
+                    android:id="@+id/iv_delete_music"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/ic_delete_light_ff"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/tv_delete_music"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="移除该歌曲"
+                    android:textColor="@color/light_ff"
+                    android:textSize="16sp" />
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</layout>

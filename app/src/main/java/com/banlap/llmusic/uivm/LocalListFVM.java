@@ -54,7 +54,7 @@ public class LocalListFVM extends AndroidViewModel {
         final String rootPath = Environment.getExternalStorageDirectory().getAbsolutePath();
 
         /*要扫描的文件后缀名*/
-        final String endFilter = ".mp3";
+        final String[] fileType = { ".mp3", ".flac" };
         final File dir = new File(rootPath);
         if(null != localFileList) {
             localFileList.clear();
@@ -64,7 +64,7 @@ public class LocalListFVM extends AndroidViewModel {
         scanThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                scanFile(dir, endFilter);
+                scanFile(dir, fileType);
             }
         });
         /*判断扫描是否完成 其实就是个定时任务 时间可以自己设置  每2s获取一下扫描线程的状态  如果线程状态为结束就说明扫描完成*/
@@ -93,39 +93,37 @@ public class LocalListFVM extends AndroidViewModel {
 
     /**
      * 扫描文件
+     * @param fileType 文件后缀类型，可设置多个。如：{".mp3",".wav"}
      * */
-    private void scanFile(File dir, String endFilter) {
+    private void scanFile(File dir, String... fileType) {
         File[] files = dir.listFiles();
-
         if (files != null && files.length > 0) {
-
             for (final File file : files) {
-                if (file.getName().toUpperCase().endsWith(endFilter.toUpperCase())) {
-                    /*是符合后缀名的文件  添加到列表中*/
-                    try {
-                        String name = file.getName();
-                        String path = file.getPath();
-                        long totalSpace = file.getTotalSpace();
-                        long useSpace = file.getUsableSpace();
-                        String absolutePath = file.getAbsolutePath();
+                for (String s : fileType) {
+                    if (file.getName().toUpperCase().endsWith(s.toUpperCase())) {
+                        /*是符合后缀名的文件  添加到列表中*/
+                        try {
+                            String name = file.getName();
+                            String path = file.getPath();
+                            long totalSpace = file.getTotalSpace();
+                            long useSpace = file.getUsableSpace();
+                            String absolutePath = file.getAbsolutePath();
 
-                        getMusicData(path, false);
+                            getMusicData(path, false);
 
-                    } catch (Exception e) {
-                        Log.e(TAG, "e: " + e.getMessage());
+                        } catch (Exception e) {
+                            Log.e(TAG, "e: " + e.getMessage());
+                        }
                     }
                 }
                 /*是目录*/
                 if (file.isDirectory()) {
                     /*递归扫描*/
-                    scanFile(file, endFilter);
+                    scanFile(file, fileType);
                 }
             }
-
         }
-
     }
-
 
     /**
      * 选择文件
@@ -197,7 +195,7 @@ public class LocalListFVM extends AndroidViewModel {
 
     }
 
-
+    /** 取消扫描任务 */
     private void cancelTask() {
 
         Log.i("cancelTask","结束任务");

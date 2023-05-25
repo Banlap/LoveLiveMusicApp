@@ -16,6 +16,7 @@ public class Music implements Serializable {
     public int musicFavorite;
     public boolean isPlaying;
     public boolean isLocal;
+    public boolean isDelete;
     public byte[] musicImgByte;
 
     public int getMusicId() { return musicId; }

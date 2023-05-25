@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/ll_edit_favorite_dialog"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/selector_button_selected"
+        android:padding="7dp">
+
+        <LinearLayout
+            android:id="@+id/ll_inform"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/tv_music_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:text="添加到本地歌单"
+                android:textColor="@color/light_ff"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/v_line_0"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_inform"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_ea" />
+
+        <LinearLayout
+            android:id="@+id/ll_add_favorite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/v_line_0"
+            android:background="@drawable/selector_tab_selected2"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_local_music_list"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"/>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</layout>

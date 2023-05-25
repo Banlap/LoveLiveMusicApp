@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/ll_edit_play_list_dialog"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/selector_button_selected"
+        android:padding="7dp">
+
+        <LinearLayout
+            android:id="@+id/ll_inform"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/tv_play_list_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="name"
+                android:textColor="@color/light_ff"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tv_play_list_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="0 首"
+                android:textColor="@color/light_ff"
+                android:textSize="12sp" />
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/v_line_0"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_inform"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_ea" />
+
+        <LinearLayout
+            android:id="@+id/ll_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:layout_below="@+id/v_line_0"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            >
+
+            <ImageView
+                android:visibility="visible"
+                android:id="@+id/iv_edit"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/ic_edit_light_ff" />
+
+            <TextView
+                android:id="@+id/tv_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="编辑"
+                android:textColor="@color/light_ff"
+                android:textSize="16sp" />
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/v_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_edit"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_ea" />
+
+        <LinearLayout
+            android:id="@+id/ll_delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/v_line"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            >
+
+            <ImageView
+                android:visibility="visible"
+                android:id="@+id/iv_character_by_kanon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/ic_delete_light_ff" />
+
+            <TextView
+                android:id="@+id/tv_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="删除"
+                android:textColor="@color/light_ff"
+                android:textSize="16sp" />
+
+
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</layout>

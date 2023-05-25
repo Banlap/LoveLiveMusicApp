@@ -105,13 +105,13 @@ public class MyAnimationUtil {
         view.setPivotX(0);
         ObjectAnimator animatorXStart = ObjectAnimator.ofFloat(view, "scaleX", 1, 2);
         ObjectAnimator animatorXEnd = ObjectAnimator.ofFloat(view, "scaleX", 2, 1);
-        ObjectAnimator animatorMove = ObjectAnimator.ofFloat(view, "translationX", 0, PxUtil.getInstance().dp2px(80, view.getContext()));
+        ObjectAnimator animatorMove = ObjectAnimator.ofFloat(view, "translationX", 0, PxUtil.getInstance().dp2px(90, view.getContext()));
         animatorXStart.setDuration(1000);
         animatorXEnd.setDuration(1000);
 
         if(!isRun) {
             view.setPivotX(view.getWidth());
-            animatorMove = ObjectAnimator.ofFloat(view, "translationX", PxUtil.getInstance().dp2px(80, view.getContext()), 0);
+            animatorMove = ObjectAnimator.ofFloat(view, "translationX", PxUtil.getInstance().dp2px(90, view.getContext()), 0);
         }
 
         AnimatorSet animatorSet = new AnimatorSet();

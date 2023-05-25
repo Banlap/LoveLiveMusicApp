@@ -7,7 +7,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -18,9 +17,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
@@ -31,10 +27,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -51,10 +47,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
-import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -66,16 +60,20 @@ import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityMainBinding;
+import com.banlap.llmusic.databinding.DialogAddMusicToLocalListBinding;
 import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
 import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogLocalFileBinding;
 import com.banlap.llmusic.databinding.DialogMainMenuBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
+import com.banlap.llmusic.databinding.DialogMoreMenuBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
+import com.banlap.llmusic.databinding.ItemAddMusicLocalListBinding;
 import com.banlap.llmusic.databinding.ItemMusicListBinding;
 import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.fixed.LiellaMusic;
+import com.banlap.llmusic.model.LocalPlayList;
 import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
@@ -91,8 +89,6 @@ import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
-import com.banlap.llmusic.utils.snow.SnowDrawThread;
-import com.banlap.llmusic.utils.snow.SnowFactory;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -112,11 +108,11 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
@@ -129,8 +125,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private List<MusicLyric> musicLyricList;            //当前播放歌曲的歌词列表
     private List<Message> messageList;                  //消息列表
     private List<Version> versionList;                  //版本列表
+    private List<LocalPlayList> localPlayList;          //自建歌单数据列表
     private MusicListAdapter musicListAdapter;          //音乐列表适配器
     private PlayMusicListAdapter playMusicListAdapter;  //播放列表适配器
+    private AddMusicLocalListAdapter addMusicLocalListAdapter; //点击添加到自建列表 适配器
     private ObjectAnimator objectAnimator;              //动画效果
     private MusicPlayService.MusicBinder binder;        //用于绑定服务
     private ServiceConn conn;                           //用于绑定服务
@@ -147,8 +145,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     public static String currentMusicImg ="";           //当前歌曲的图片
     public static Bitmap currentBitmap = null;          //当前歌曲Bitmap图
     private AlertDialog mAlertDialog;                   //弹窗
+    private PopupWindow mPopupWindow;                   //弹窗
     private int musicListSize = 0;                      //获取总播放列表数
-    public static int playMode = 0;                           //播放模式: 0顺序播放 1随机播放 2单曲循环
+    public static int playMode = 0;                     //播放模式: 0顺序播放 1随机播放 2单曲循环
     private int currentAllTime = 0;                     //当前歌曲总时间
     private final int panelMoveAxis = 750;              //面板移动值
     private int rThemeId =0;                            //当前主题
@@ -157,6 +156,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
     private ActivityResultLauncher<Intent> intentTakePhotoLauncher;
     private DialogDownloadBinding downloadBinding;
+    private int clickLocalPlayListId = 0;                 //点击自建歌单数据列表的ID号
+    private boolean isClickLocalPlayList = false;         //是否点击了自建歌单数据列表
+    private boolean isClickLocalOrFavorite = false;       //是否点击了本地歌曲或收藏列表
     private boolean isExistNewVersion = false;            //是否存在新版本app
     private boolean isFinishAnimator = true;              //是否执行标题栏文本显示动画
     private boolean isChangeScrollRange = false;          //解决重复高度时刷新appBar的标题文字动画
@@ -168,11 +170,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private int clickSortType = 0;                        //当前点击的排序类型
     private LyricScrollView lyricScrollView;              //
     private MediaSession mSession;                        //用于获取按键事件
-    public boolean isFirstBluetoothControl = true;
+    public boolean isFirstBluetoothControl = true;        //首次蓝牙控制标记
     private MainFragmentStateAdapter  mainFragmentStateAdapter;
     public static final int REQUEST_CODE_DOWNLOAD_APP = 101;            //检查下载app时需要的权限
     public static final int REQUEST_CODE_SCAN_LOCAL_FILE = 102;         //检查扫描文件所需要的权限
     public static final int REQUEST_CODE_SELECT_LOCAL_FILE = 103;       //检查选择文件所需要的权限
+    public static final int REQUEST_CODE_SELECT_IMG_FILE = 104;       //检查选择图片所需要的权限
 
     //专辑类型
     public static final String MUSIC_TYPE_LIELLA = "Liella";
@@ -188,9 +191,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private BaseApplication baseApplication;
     private HttpProxyCacheServer proxyCacheServer;
 
-    private SnowFactory snowFactory;
+    /*private SnowFactory snowFactory;
     private TextureView snowTextureView;
-    private SnowDrawThread snowDrawThread;
+    private SnowDrawThread snowDrawThread;*/
 
     /** MediaSession框架回掉 用于返回耳机实体按钮操作 */
     private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
@@ -223,6 +226,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         musicLyricList = new ArrayList<>();
         messageList = new ArrayList<>();
         versionList = new ArrayList<>();
+        localPlayList = new ArrayList<>();
+
         //本地缓存列表
         List<Music> spList = SPUtil.getListValue(this, "PlayListData", Music.class);
         if(spList.size()>0){
@@ -273,7 +278,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     }
 
     /** 初始化表情雨特效 */
-    private void initSnowFactory() {
+   /* private void initSnowFactory() {
         snowFactory = new SnowFactory(this);
         snowTextureView = new TextureView(this);
         snowTextureView.setOpaque(false);
@@ -306,7 +311,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT);
         constraintLayout.addView(snowTextureView, layoutParams);
-    }
+    }*/
 
     /** 初始化主页内容 */
     private void initMainView(){
@@ -335,7 +340,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         getViewDataBinding().rvPlayList.setLayoutManager(new LinearLayoutManager(this));
         getViewDataBinding().rvPlayList.setAdapter(playMusicListAdapter);
         playMusicListAdapter.notifyDataSetChanged();
-
 
         Glide.with(getApplication())
                 .setDefaultRequestOptions(requestOptions)
@@ -497,7 +501,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     @Override
                     public void onActivityResult(ActivityResult result) {
                         //此处是跳转的result回调方法
-                        if(isCanDrawOverlays()) {
+                        if(MainVM.isCanDrawOverlays(getApplication())) {
                             if(null != mAlertDialog) {
                                 mAlertDialog.dismiss();
                             }
@@ -523,7 +527,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                             //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
                             //getViewDataBinding().ivBg.setImageBitmap(bitmap);
 
-                            if(null != uri) {
+                            if(uri != null) {
                                 SPUtil.setStrValue(context,"BackgroundUri",uri.toString());
                             }
 
@@ -572,43 +576,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         startForegroundService(intentService);
     }
 
-
-    /** 是否已经开启弹窗权限*/
-    private boolean isCanDrawOverlays() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return Settings.canDrawOverlays(this);
-        }
-        return true;
-    }
-
     /** 初始化角色服务*/
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void startCharacterService(String characterName) {
         intentCharacterService.putExtra("IsPlayMusic", isPlay);
         intentCharacterService.putExtra("CharacterName", characterName);
         startForegroundService(intentCharacterService);
-    }
-
-    /**
-     * 判断服务是否开启
-     *
-     * @param mContext 上下文
-     * @param className 服务class名
-     * @return true:开启 false:未开启
-     */
-    public static boolean isWorked(Context mContext, String className) {
-        ActivityManager myManager = (ActivityManager) mContext
-                .getApplicationContext().getSystemService(
-                        Context.ACTIVITY_SERVICE);
-        ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
-                .getRunningServices(30);
-        for (int i = 0; i < runningService.size(); i++) {
-            if (runningService.get(i).service.getClassName().toString()
-                    .equals(className)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /** 初始化通知栏消息 */
@@ -716,51 +689,44 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 detailPanelChangeObjectAnimator.start();
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
                 isNotMain = true;
+                isClickLocalOrFavorite = false;
                 break;
             case ThreadEvent.GET_ALBUM_SUCCESS:
                 if(ThreadEvent.ALBUM_LIELLA.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_liella_3);
-                    getViewDataBinding().tvTitleBar.setText("Liella!");
-                    getViewDataBinding().tvListMsgName1.setText("Liella!");
-                    getViewDataBinding().tvListMsgName2.setText("LoveLive!Superstar!!");
+                    updateMusicDetailMessage("Liella!", "Liella!", "LoveLive!Superstar!!", getViewDataBinding().ivLogo, R.mipmap.ic_album_liella_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_FOUR_YUU.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_liyuu);
-                    getViewDataBinding().tvTitleBar.setText("Liyuu");
-                    getViewDataBinding().tvListMsgName1.setText("Liyuu");
-                    getViewDataBinding().tvListMsgName2.setText("Liyuu");
+                    updateMusicDetailMessage("Liyuu", "Liyuu", "Liyuu", getViewDataBinding().ivLogo, R.mipmap.ic_album_liyuu, 120, 80);
                 } else if(ThreadEvent.ALBUM_SUNNY_PASSION.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_sunny_passion);
-                    getViewDataBinding().tvTitleBar.setText("SunnyPassion");
-                    getViewDataBinding().tvListMsgName1.setText("SunnyPassion");
-                    getViewDataBinding().tvListMsgName2.setText("サニーパッション");
+                    updateMusicDetailMessage("サニーパッション", "サニーパッション", "SunnyPassion", getViewDataBinding().ivLogo, R.mipmap.ic_album_sunny_passion, 120, 80);
                 } else if(ThreadEvent.ALBUM_NIJIGASAKI.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_nijigasaki_3);
-                    getViewDataBinding().tvTitleBar.setText("虹ヶ咲学園スクールアイドル同好会");
-                    getViewDataBinding().tvListMsgName1.setText("虹ヶ咲学園スクールアイドル同好会");
-                    getViewDataBinding().tvListMsgName2.setText("Nijigasaki HighSchool IdolClub");
+                    updateMusicDetailMessage("虹ヶ咲学園スクールアイドル同好会", "虹ヶ咲学園スクールアイドル同好会", "Nijigasaki HighSchool IdolClub", getViewDataBinding().ivLogo, R.mipmap.ic_album_nijigasaki_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_AQOURS.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_aqours_3);
-                    getViewDataBinding().tvTitleBar.setText("Aqours");
-                    getViewDataBinding().tvListMsgName1.setText("Aqours");
-                    getViewDataBinding().tvListMsgName2.setText("LoveLive!Sunshine!!");
+                    updateMusicDetailMessage("Aqours", "Aqours", "LoveLive!Sunshine!!", getViewDataBinding().ivLogo, R.mipmap.ic_album_aqours_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_US.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_us_3);
-                    getViewDataBinding().tvTitleBar.setText("μ's");
-                    getViewDataBinding().tvListMsgName1.setText("μ's");
-                    getViewDataBinding().tvListMsgName2.setText("国立音ノ木坂学院");
+                    updateMusicDetailMessage("μ's", "μ's", "LoveLive!", getViewDataBinding().ivLogo, R.mipmap.ic_album_us_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_HASUNOSORA.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                    getViewDataBinding().ivLogo.setBackgroundResource(R.mipmap.ic_album_hasu_2);
-                    getViewDataBinding().tvTitleBar.setText("蓮ノ空女学院スクールアイドルクラブ");
-                    getViewDataBinding().tvListMsgName1.setText("蓮ノ空女学院スクールアイドルクラブ");
-                    getViewDataBinding().tvListMsgName2.setText("Hasunosora Jogakuin School Idol Club");
+                    updateMusicDetailMessage("蓮ノ空女学院スクールアイドルクラブ", "蓮ノ空女学院スクールアイドルクラブ", "Hasunosora Jogakuin School Idol Club", getViewDataBinding().ivLogo, R.mipmap.ic_album_hasu_2, 120, 80);
                 }
+                isClickLocalPlayList = false;
+                break;
+            case ThreadEvent.GET_LOCAL_PLAY_LIST_SUCCESS:
+                updateMusicDetailMessage(event.str, event.str, "", getViewDataBinding().ivLogo, R.drawable.ic_music_cover, 80, 80);
+                if(event.byteArray != null && event.byteArray.length >0) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(event.byteArray, 0, event.byteArray.length);
+                    getViewDataBinding().ivLogo.setImageBitmap(bitmap);
+                }
+                getViewDataBinding().tvCount.setText("" + event.i);
+                getViewDataBinding().tvMusicCount.setText("" + event.i);
+                musicListSize = event.i;
+                clickLocalPlayListId = event.i2;
+                isClickLocalPlayList = true;
                 break;
             case ThreadEvent.GET_COUNT_SUCCESS:
                 getViewDataBinding().tvCount.setText(""+event.i);
@@ -877,42 +843,31 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
                 }
                 break;
-            case ThreadEvent.PLAY_LOCAL_MUSIC:   //点击了本地歌曲并添加
-                //binder.showLyric(event.music, event.b);
-                if(playList.size()>0){
-                    for(int i=0; i<playList.size(); i++) {
-                        if(playList.get(i).isPlaying) {
-                            playList.get(i).isPlaying = false;
-                            binder.showLyric(event.music, (playMode == 2));
-                            playList.add(i+1, setMusicMsg(event.music, true));
-                            playMusicListAdapter.notifyDataSetChanged();
-
-                            SPUtil.setListValue(context, "PlayListData", playList);
-                            return;
-                        }
-                    }
-                    binder.showLyric(event.music, (playMode == 2));
-                    playList.add(playList.size(), setMusicMsg(event.music, true));
-                } else {
-                    binder.showLyric(event.music, (playMode == 2));
-                    playList.add(setMusicMsg(event.music, true));
+            case ThreadEvent.PLAY_LOCAL_MUSIC:   //点击了本地歌曲并添加到播放列表
+                if(event.music != null) {
+                    List<Music> list = new ArrayList<>();
+                    list.add(event.music);
+                    playMusic(list, 0);
                 }
-                playMusicListAdapter.notifyDataSetChanged();
-                SPUtil.setListValue(context, "PlayListData", playList);
                 break;
-            case ThreadEvent.ADD_LOCAL_MUSIC:   //添加了本地歌曲并添加
-                playList.add(setMusicMsg(event.music, false));
-
-                if(playList.size()==1) {
-                    playList.get(0).isPlaying = true;
-                    binder.showLyric(playList.get(0), (playMode == 2));
-                } else {
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC));
+            case ThreadEvent.ADD_LOCAL_MUSIC:   //点击添加本地歌曲到播放列表
+                if(event.music != null) {
+                    List<Music> list = new ArrayList<>();
+                    list.add(event.music);
+                    addMusic(list, 0);
                 }
-                playMusicListAdapter.notifyDataSetChanged();
-
-                SPUtil.setListValue(context, "PlayListData", playList);
-
+                break;
+            case ThreadEvent.PLAY_FAVORITE_MUSIC:    //点击了收藏歌曲并添加到播放列表
+                if(event.tList != null & event.tList.size()>0) {
+                    List<Music> list = event.tList;
+                    playMusic(list, event.i);
+                }
+                break;
+            case ThreadEvent.ADD_FAVORITE_MUSIC:     //点击添加收藏歌曲到播放列表
+                if(event.tList != null & event.tList.size()>0) {
+                    List<Music> list = event.tList;
+                    addMusic(list, event.i);
+                }
                 break;
             case ThreadEvent.MUSIC_IS_PAUSE:
                 if(binder!=null) {
@@ -950,7 +905,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 isPlay = !event.b;
                 lyricScrollView.posLock(event.b);
                 //角色服务存在时 对角色服务做处理
-                if(isWorked(this, CharacterService.class.getPackage().getName()
+                if(MainVM.isWorked(this, CharacterService.class.getPackage().getName()
                         + "." + CharacterService.class.getSimpleName())) {
                     //根据播放或暂停 对角色状态变更
                     MainVM.stopHandler();
@@ -989,7 +944,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 String musicMsg = event.music.musicName;
                 getViewDataBinding().tvMusicName.setText(musicMsg);
                 getViewDataBinding().tvSingerName.setText(event.music.musicSinger);
-                getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
+                getViewDataBinding().tvListSize.setText("(" + playList.size() + ")");
 
                 currentMusicImg = event.music.getMusicImg();
 
@@ -1046,7 +1001,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 if(null != event.tList) {
                     //将歌词数据方法lyricScrollView显示
                     lyricScrollView.setMusicLyrics(event.tList);
-
                     musicLyricList.clear();
                     musicLyricList.addAll(event.tList);
                 }
@@ -1155,7 +1109,38 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 }
                 break;
 
+            case ThreadEvent.VIEW_SHOW_OR_HIDE_MASKING_BACKGROUND:
+                getViewDataBinding().rlDisableClick2.setVisibility(event.b? View.VISIBLE : GONE);
+                break;
+            case ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS:
+                Toast.makeText(getApplication(), "添加成功", Toast.LENGTH_SHORT).show();
+                break;
+            case ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS:
+                if(musicListSize>0) {
+                    --musicListSize;
+                    getViewDataBinding().tvMusicCount.setText(""+ (musicListSize));
+                    getViewDataBinding().tvCount.setText(""+ (musicListSize));
+                }
+                break;
+
+            case ThreadEvent.VIEW_CLICK_LOCAL_OR_FAVORITE:
+                isClickLocalOrFavorite = true;
+                break;
         }
+    }
+
+    /** 更新专辑详细信息 */
+    private void updateMusicDetailMessage(String titleName, String msgName1, String msgName2, ImageView imageView, int resId, int width, int height) {
+        getViewDataBinding().ivLogo.setImageBitmap(null);
+        getViewDataBinding().ivLogo.setBackgroundResource(resId);
+        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+        layoutParams.width = PxUtil.getInstance().dp2px(width, context);
+        layoutParams.height = PxUtil.getInstance().dp2px(height, context);
+        getViewDataBinding().ivLogo.setLayoutParams(layoutParams);
+
+        getViewDataBinding().tvTitleBar.setText(titleName);
+        getViewDataBinding().tvListMsgName1.setText(msgName1);
+        getViewDataBinding().tvListMsgName2.setText(msgName2);
     }
 
     @Subscribe(threadMode = ThreadMode.ASYNC)
@@ -1225,11 +1210,19 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_HASUNOSORA)));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_HASUNOSORA)));
                 break;
+            case ThreadEvent.GET_DATA_LIST_BY_LOCAL_PLAY:
+                if(event.t != null) {
+                    LocalPlayList localPlayList = (LocalPlayList) event.t;
+                    List<Music> musicList1 = new ArrayList<>();
+                    if(localPlayList.getMusicList() != null && localPlayList.getMusicList().size() >0) {
+                        musicList1.addAll(localPlayList.getMusicList());
+                    }
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, musicList1));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_LOCAL_PLAY_LIST_SUCCESS, localPlayList.getPlayListName(), localPlayList.getPlayListCount(), localPlayList.getPlayListId(), localPlayList.getPlayListImgByte()));
+                }
+                break;
             case ThreadEvent.GET_MUSIC_LYRIC:
                 getViewModel().showLyric(event.music, event.b);
-                break;
-            case ThreadEvent.SCROLL_LYRIC:
-
                 break;
             case ThreadEvent.SHOW_IMAGE_URL:  //设置状态栏显示对应图片
                 if(event.b) {
@@ -1238,7 +1231,47 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     getViewModel().showImageURL(event.str, event.str2, event.str3);
                 }
                 break;
+            case ThreadEvent.ADD_MUSIC_TO_LOCAL_PLAY_LIST:   //添加在线音乐到自建歌单里面
+                if(event.music != null) {
+                    List<LocalPlayList> localPlayLists = SPUtil.getListValue(this, "LocalPlayListData", LocalPlayList.class);
+                    if(localPlayLists.size() >0) {
+                        for(int i=0; i<localPlayLists.size(); i++) {
+                            if(localPlayLists.get(i).playListId == event.i) {
+                                if(localPlayLists.get(i).getMusicList() != null) {
+                                    List<Music> musicList1 = localPlayLists.get(i).getMusicList();
+                                    musicList1.add(event.music);
+                                    localPlayLists.get(i).setMusicList(musicList1);
+                                    localPlayLists.get(i).setPlayListCount(localPlayLists.get(i).getMusicList().size());
+                                    SPUtil.setListValue(this, "LocalPlayListData", localPlayLists);
+                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST));
+                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+                break;
 
+            case ThreadEvent.DELETE_MUSIC_IN_LOCAL_PLAY_LIST:  //删除自建歌单里面到某一首歌曲
+                if(event.tList != null) {
+                    List<LocalPlayList> localPlayLists = SPUtil.getListValue(this, "LocalPlayListData", LocalPlayList.class);
+                    if (localPlayLists.size() > 0) {
+                        for (int i = 0; i < localPlayLists.size(); i++) {
+                            if (localPlayLists.get(i).playListId == event.i) {
+                                if (localPlayLists.get(i).getMusicList() != null) {
+                                    localPlayLists.get(i).setMusicList(event.tList);
+                                    localPlayLists.get(i).setPlayListCount(localPlayLists.get(i).getPlayListCount()-1);
+                                    SPUtil.setListValue(getApplicationContext(), "LocalPlayListData", localPlayLists);
+                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST));
+                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+                break;
         }
     }
 
@@ -1526,8 +1559,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     /** 点击展示授权悬浮窗显示角色系统 */
     public void showCharacterAuth(final String characterName) {
         //判断是否已经授权显示悬浮窗
-        if(isCanDrawOverlays()) {
-             if(isWorked(this, CharacterService.class.getPackage().getName()
+        if(MainVM.isCanDrawOverlays(this)) {
+             if(MainVM.isWorked(this, CharacterService.class.getPackage().getName()
                         + "." + CharacterService.class.getSimpleName())) {
 
                  stopService(intentCharacterService);
@@ -1894,8 +1927,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         sortMenuPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-105, this),  PxUtil.getInstance().dp2px(10, this));
     }
 
-    /** 按类型排序歌曲 */
-    public  void sortList(final int sortType) {
+    /**
+     * 按类型排序歌曲
+     * @param sortType 1：顺序 2：反序
+     * */
+    public void sortList(final int sortType) {
         //将空数据提取 排序后再放到列表最底部
         List<Music> nullData = new ArrayList<>();
         for (Music music : musicList) {
@@ -2129,7 +2165,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     /** 屏蔽返回键 */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
-        if(keyCode == KeyEvent.KEYCODE_BACK) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) { //物理返回键
             if(isShowMusicPanel || isShowMusicList) {
                 hideAllMusicView();
                 return true;
@@ -2141,6 +2177,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 mainPanelChangeObjectAnimator.start();
                 detailPanelChangeObjectAnimator.start();
                 isNotMain = false;
+                return true;
+            }
+            if(isClickLocalOrFavorite) {
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_HIDE_LOCAL_OR_FAVORITE));
+                isClickLocalOrFavorite = false;
                 return true;
             }
         } else if (KeyEvent.KEYCODE_MEDIA_PLAY == keyCode&& keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
@@ -2166,7 +2207,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
             lastOrNextMusic(false);
         }
-
 
         return super.onKeyDown(keyCode, keyEvent);
     }
@@ -2285,31 +2325,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(playList.size()>0){
-                            for(int i=0; i<playList.size(); i++) {
-                                if(playList.get(i).isPlaying) {
-                                    playList.get(i).isPlaying = false;
-                                    binder.showLyric(list.get(position), (playMode == 2));
-                                    playList.add(i+1, setMusicMsg(list.get(position), true));
-                                    playMusicListAdapter.notifyDataSetChanged();
-
-                                    SPUtil.setListValue(context, "PlayListData", playList);
-                                    return;
-                                }
-                            }
-                            binder.showLyric(list.get(position), (playMode == 2));
-                            playList.add(playList.size(), setMusicMsg(list.get(position), true));
-                            playMusicListAdapter.notifyDataSetChanged();
-
-                            SPUtil.setListValue(context, "PlayListData", playList);
-                        } else {
-                            binder.showLyric(list.get(position), (playMode == 2));
-                            playList.add(setMusicMsg(list.get(position), true));
-                            playMusicListAdapter.notifyDataSetChanged();
-
-                            SPUtil.setListValue(context, "PlayListData", playList);
-                        }
-
+                        playMusic(list, position);
                     }
                 });
 
@@ -2319,25 +2335,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     public void onClick(View v) {
                         //变更主题
                         ThemeHelper.getInstance().musicListAddButtonAnimatorTheme(rThemeId, binding);
-
-                        playList.add(setMusicMsg(list.get(position), false));
-
-                        if(playList.size()==1) {
-                            playList.get(0).isPlaying = true;
-                            binder.showLyric(playList.get(0), (playMode == 2));
-                        } else {
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC));
-                        }
-                        playMusicListAdapter.notifyDataSetChanged();
-
-                        SPUtil.setListValue(context, "PlayListData", playList);
+                        addMusic(list, position);
                     }
                 });
 
-                binding.llFavorite.setOnClickListener(new View.OnClickListener() {
+                binding.llMore.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(context, "喜爱", Toast.LENGTH_SHORT).show();
+                        showMoreMenu(v, list, position);
                     }
                 });
             }
@@ -2358,21 +2363,141 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
 
     }
 
-    /** 默认存储Music值 */
-    private Music setMusicMsg(Music musicMsg, boolean isPlaying) {
-        Music music = new Music();
-        music.setMusicId(musicMsg.getMusicId());
-        music.setMusicName(musicMsg.getMusicName());
-        music.setMusicSinger(musicMsg.getMusicSinger());
-        music.setMusicType(musicMsg.getMusicType());
-        music.setMusicImg(musicMsg.getMusicImg());
-        music.setMusicURL(musicMsg.getMusicURL());
-        music.setMusicFavorite(musicMsg.getMusicFavorite());
-        music.setMusicLyric(musicMsg.getMusicLyric());
-        music.setMusicImgByte(musicMsg.getMusicImgByte());
-        music.setLocal(musicMsg.isLocal);
-        music.isPlaying = isPlaying;
-        return music;
+    /** 播放当前点击的歌曲 */
+    private void playMusic(List<Music> list, int position) {
+        if(playList.size()>0){
+            for(int i=0; i<playList.size(); i++) {
+                if(playList.get(i).isPlaying) {
+                    playList.get(i).isPlaying = false;
+                    binder.showLyric(list.get(position), (playMode == 2));
+                    playList.add(i+1, MainVM.setMusicMsg(list.get(position), true));
+                    playMusicListAdapter.notifyDataSetChanged();
+                    SPUtil.setListValue(context, "PlayListData", playList);
+                    return;
+                }
+            }
+            binder.showLyric(list.get(position), (playMode == 2));
+            playList.add(playList.size(), MainVM.setMusicMsg(list.get(position), true));
+        } else {
+            binder.showLyric(list.get(position), (playMode == 2));
+            playList.add(MainVM.setMusicMsg(list.get(position), true));
+        }
+        playMusicListAdapter.notifyDataSetChanged();
+        SPUtil.setListValue(context, "PlayListData", playList);
+    }
+
+    /** 添加当前点击的歌曲 */
+    private void addMusic(List<Music> list, int position) {
+        playList.add(MainVM.setMusicMsg(list.get(position), false));
+
+        if(playList.size()==1) {
+            playList.get(0).isPlaying = true;
+            binder.showLyric(playList.get(0), (playMode == 2));
+        } else {
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC));
+        }
+        playMusicListAdapter.notifyDataSetChanged();
+
+        SPUtil.setListValue(context, "PlayListData", playList);
+    }
+
+    /** 在线歌曲item点击展示更多菜单 */
+    private void showMoreMenu(View v, List<Music> list, int position) {
+        getViewDataBinding().rlDisableClick2.setVisibility(View.VISIBLE);
+        DialogMoreMenuBinding dialogMoreMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this), R.layout.dialog_more_menu, null, false);
+
+        dialogMoreMenuBinding.llList.setVisibility(isClickLocalPlayList? View.GONE : View.VISIBLE);
+        dialogMoreMenuBinding.llList2.setVisibility(isClickLocalPlayList? View.VISIBLE : View.GONE);
+
+        if(mPopupWindow != null) {
+            mPopupWindow.dismiss();
+        }
+        mPopupWindow  = new PopupWindow(dialogMoreMenuBinding.getRoot(),
+                PxUtil.getInstance().dp2px(200, v.getContext()),  WindowManager.LayoutParams.WRAP_CONTENT, true);
+        mPopupWindow.setTouchable(true);
+        mPopupWindow.showAtLocation(v, Gravity.CENTER, 0,0);
+
+        mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                getViewDataBinding().rlDisableClick2.setVisibility(View.GONE);
+            }
+        });
+
+        dialogMoreMenuBinding.tvMusicName.setText(list.get(position).musicName);
+        dialogMoreMenuBinding.tvMusicSinger.setText(list.get(position).musicSinger);
+
+        dialogMoreMenuBinding.llAddFavorite.setOnClickListener(new View.OnClickListener() {  //在线歌曲添加到收藏列表
+            @Override
+            public void onClick(View v) {
+                if(mPopupWindow != null) {
+                    mPopupWindow.dismiss();
+                }
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_FAVORITE_MUSIC, list.get(position)));
+            }
+        });
+
+        dialogMoreMenuBinding.llAddLocalPlayList.setOnClickListener(new View.OnClickListener() {  //在线歌曲添加到自建列表
+            @Override
+            public void onClick(View v) {
+                if(mPopupWindow != null) {
+                    mPopupWindow.dismiss();
+                }
+
+                //展示自建列表
+                getViewDataBinding().rlDisableClick2.setVisibility(View.VISIBLE);
+                DialogAddMusicToLocalListBinding dialogAddMusicToLocalListBinding = DataBindingUtil.inflate(LayoutInflater.from(v.getContext()), R.layout.dialog_add_music_to_local_list, null, false);
+
+                addMusicLocalListAdapter = new AddMusicLocalListAdapter(v.getContext(), localPlayList, list.get(position));
+                dialogAddMusicToLocalListBinding.rvLocalMusicList.setLayoutManager(new LinearLayoutManager(v.getContext()));
+                dialogAddMusicToLocalListBinding.rvLocalMusicList.setAdapter(addMusicLocalListAdapter);
+                localPlayList.clear();
+                List<LocalPlayList> list = SPUtil.getListValue(v.getContext(), "LocalPlayListData", LocalPlayList.class);
+                if(list.size() >0) {
+                    localPlayList.addAll(list);
+                }
+                addMusicLocalListAdapter.notifyDataSetChanged();
+
+
+                mPopupWindow  = new PopupWindow(dialogAddMusicToLocalListBinding.getRoot(),
+                        PxUtil.getInstance().dp2px(300, v.getContext()),  WindowManager.LayoutParams.WRAP_CONTENT, true);
+                mPopupWindow.setTouchable(true);
+                mPopupWindow.showAtLocation(v, Gravity.CENTER, 0,0);
+
+                mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                    @Override
+                    public void onDismiss() {
+                        getViewDataBinding().rlDisableClick2.setVisibility(View.GONE);
+                    }
+                });
+
+            }
+        });
+
+        dialogMoreMenuBinding.llDeleteMusic.setOnClickListener(new View.OnClickListener() { //自建歌曲列表中删除该歌曲
+            @Override
+            public void onClick(View v) {
+                if(mPopupWindow != null) {
+                    mPopupWindow.dismiss();
+                }
+
+                list.remove(position);
+                musicListAdapter.notifyItemRemoved(position);
+                musicListAdapter.notifyItemRangeChanged(position, musicList.size());
+
+                List<Music> list1 = new ArrayList<>();
+                list1.addAll(list);
+                Iterator<Music> iterator = list1.listIterator();
+                while (iterator.hasNext()) {
+                    if(iterator.next().musicName.equals(" ")) {
+                        iterator.remove();
+                    }
+                }
+                if(clickLocalPlayListId != 0) {
+                    EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.DELETE_MUSIC_IN_LOCAL_PLAY_LIST, list1, clickLocalPlayListId));
+                }
+            }
+        });
     }
 
     /** 存储列表时默认所有歌单为未播放状态 */
@@ -2475,6 +2600,65 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
         }
     }
 
+    public static class AddMusicLocalListViewHolder extends RecyclerView.ViewHolder {
+        public AddMusicLocalListViewHolder(@NonNull View itemView) { super(itemView); }
+    }
+    /** 点击添加到自建列表 适配器*/
+    public class AddMusicLocalListAdapter extends RecyclerView.Adapter<AddMusicLocalListViewHolder>{
+
+        private Context context;
+        private List<LocalPlayList> list;
+        private Music music;
+
+        public AddMusicLocalListAdapter(Context context, List<LocalPlayList> list, Music music) {
+            this.context = context;
+            this.list = list;
+            this.music = music;
+        }
+
+        @NonNull
+        @Override
+        public AddMusicLocalListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ItemAddMusicLocalListBinding binding = DataBindingUtil.inflate(LayoutInflater.from(context),
+                    R.layout.item_add_music_local_list, parent, false);
+            return new AddMusicLocalListViewHolder(binding.getRoot());
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull AddMusicLocalListViewHolder holder, @SuppressLint("RecyclerView") int position) {
+            ItemAddMusicLocalListBinding binding = DataBindingUtil.getBinding(holder.itemView);
+            if(binding != null) {
+                if(TextUtils.isEmpty(list.get(position).getPlayListName())) {
+                    binding.llMusicAll.setVisibility(View.GONE);
+                } else {
+                    binding.llMusicAll.setVisibility(View.VISIBLE);
+                    binding.tvMusicListName.setText(list.get(position).playListName);
+                    if(list.get(position).playListImgByte != null) {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(list.get(position).playListImgByte, 0, list.get(position).playListImgByte.length);
+                        binding.civImage.setImageBitmap(bitmap);
+                    } else {
+                        binding.civImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover));
+                    }
+                    //点击添加到该自建歌单
+                    binding.llMusicAll.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if(mPopupWindow != null) {
+                                mPopupWindow.dismiss();
+                            }
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.ADD_MUSIC_TO_LOCAL_PLAY_LIST, music, list.get(position).playListId));
+                        }
+                    });
+                }
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return list.size();
+        }
+    }
+
     /** 关闭软键盘 */
     public void hintKeyBoard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -2487,34 +2671,44 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     /** 根据权限对应实现功能 */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-        if(REQUEST_CODE_DOWNLOAD_APP== requestCode) {
-            for (int i=0; i<permissions.length; i++) {
-                if(permissions[i].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP, versionList.get(0).versionUrl));
+        switch (requestCode) {
+            case REQUEST_CODE_DOWNLOAD_APP:
+                for (int i=0; i<permissions.length; i++) {
+                    if(permissions[i].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP, versionList.get(0).versionUrl));
+                        }
                     }
                 }
-            }
-        } else if(REQUEST_CODE_SCAN_LOCAL_FILE == requestCode) {
-            for (int i=0; i<permissions.length; i++) {
-                if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "scan"));
+                break;
+            case REQUEST_CODE_SCAN_LOCAL_FILE:
+                for (int i=0; i<permissions.length; i++) {
+                    if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "scan"));
+                        }
                     }
                 }
-            }
-        } else if(REQUEST_CODE_SELECT_LOCAL_FILE == requestCode) {
-            for (int i=0; i<permissions.length; i++) {
-                if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
-                    if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "select"));
+                break;
+            case REQUEST_CODE_SELECT_LOCAL_FILE:
+                for (int i=0; i<permissions.length; i++) {
+                    if(permissions[i].equals(Manifest.permission.READ_EXTERNAL_STORAGE)){
+                        if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION,  "select"));
+                        }
                     }
                 }
-            }
+                break;
+
+            case REQUEST_CODE_SELECT_IMG_FILE:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SELECT_IMG_FILE_SUCCESS, permissions));
+                break;
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+
 
     /** 在线与本地页面碎片切换 */
     private static class MainFragmentStateAdapter extends FragmentStateAdapter {

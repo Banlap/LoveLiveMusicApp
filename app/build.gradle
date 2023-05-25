@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 154
+        versionCode 155
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -125,6 +125,9 @@ android {
         versionName "1.5.4"
         //1.更改问题：ui播放列表添加logo、调整部分ui、代码优化
         //2.修复问题：切换播放本地歌曲图片名称不同步、部分bug
+        versionName "1.5.5"
+        //1.修复问题：歌词显示颜色问题、4x1透明组件图片问题
+        //2.新增功能：自建歌单、收藏，并重新设计ui
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -174,9 +177,11 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     /** 音频视频缓冲 */
     implementation 'com.danikula:videocache:2.7.0'
+    /** 图片裁剪 */
+    implementation 'com.github.yalantis:ucrop:2.2.6'
 
+    /** tabLayout */
     implementation 'com.google.android.material:material:1.1.0'
-
     implementation 'com.lzp:FlycoTabLayoutZ:1.3.3'
 
 

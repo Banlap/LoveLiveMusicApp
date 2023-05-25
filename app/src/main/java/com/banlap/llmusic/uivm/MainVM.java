@@ -1,7 +1,9 @@
 package com.banlap.llmusic.uivm;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -14,6 +16,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.SeekBar;
 
@@ -57,13 +60,14 @@ import okhttp3.Response;
 public class MainVM extends AndroidViewModel {
 
     public MainCallBack callBack;
-    public static final int CHARACTER_NAME_KEKE_INT = 100;
-    public static final int CHARACTER_NAME_KANON_INT = 101;
+    public static final int CHARACTER_NAME_KEKE_INT = 100;     //角色：唐可可
+    public static final int CHARACTER_NAME_KANON_INT = 101;    //角色：涩谷香音
 
-    private static final int NORMAL_STATUS_CHARACTER = 1001;
-    private static final int MOVE_STATUS_CHARACTER = 1002;
-    private static final int LISTEN_STATUS_CHARACTER_LEFT = 1003;
-    private static final int LISTEN_STATUS_CHARACTER_RIGHT = 1004;
+    private static final int NORMAL_STATUS_CHARACTER = 1001;    //角色正常状态
+    private static final int MOVE_STATUS_CHARACTER = 1002;      //角色动态状态
+    private static final int LISTEN_STATUS_CHARACTER_LEFT = 1003;   //角色听歌状态 左
+    private static final int LISTEN_STATUS_CHARACTER_RIGHT = 1004;  //角色听歌状态 右
+    private static final int IMG_BITMAP_LIMIT_SIZE = 900000;      //显示图片的最大限值 （超过该值则需要压缩）
     private boolean isDownloadStop = false;  //是否取消下载app
 
 
@@ -71,7 +75,7 @@ public class MainVM extends AndroidViewModel {
 
     public void setCallBack(MainCallBack callBack) { this.callBack = callBack; }
 
-
+    /** 角色对话handler */
     private static final Handler talkHandler = new Handler(Objects.requireNonNull(Looper.myLooper())) {
         @Override
         public void handleMessage(@NonNull android.os.Message msg) {
@@ -83,6 +87,7 @@ public class MainVM extends AndroidViewModel {
         }
     };
 
+    /** 角色Handler */
     private static final Handler animatedHandler = new Handler(Objects.requireNonNull(Looper.myLooper())) {
         @Override
         public void handleMessage(@NonNull android.os.Message msg) {
@@ -131,6 +136,7 @@ public class MainVM extends AndroidViewModel {
 
         }
     };
+
     /** 获取歌词文本 */
     public void showLyric(Music dataSource, final boolean isLoop) {
         List<MusicLyric> musicLyricList = new ArrayList<>();
@@ -212,7 +218,6 @@ public class MainVM extends AndroidViewModel {
         }
     }
 
-
     /** 获取网络图片 */
     public void showImageURL(String musicName, String musicSinger, String dataSource) {
 
@@ -241,7 +246,7 @@ public class MainVM extends AndroidViewModel {
                     //计算当前bitmap大小
                     Log.e("LogByAB", "bitmap: " + getBitmapSize(bitmap));
                     Log.e("LogByAB", "bitmapNew: " + getBitmapSize(bitmapNew));
-                    if (getBitmapSize(bitmap) >= 900000) {
+                    if (getBitmapSize(bitmap) >= IMG_BITMAP_LIMIT_SIZE) {
                         Log.e("LogByAB", "bitmap: resize");
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmapNew));
                     } else {
@@ -337,7 +342,6 @@ public class MainVM extends AndroidViewModel {
         isDownloadStop = status;
     }
 
-
     /** 角色默认状态 */
     public static void initAnimatedCharacter(String characterName) {
         android.os.Message message = new Message();
@@ -372,6 +376,54 @@ public class MainVM extends AndroidViewModel {
     /** 角色默认状态 */
     public static void stopTalkHandler() {
         talkHandler.removeCallbacksAndMessages(null);
+    }
+
+    /** 是否已经开启弹窗权限*/
+    public static boolean isCanDrawOverlays(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(context);
+        }
+        return true;
+    }
+
+    /**
+     * 判断服务是否开启
+     *
+     * @param mContext 上下文
+     * @param className 服务class名
+     * @return true:开启 false:未开启
+     */
+    public static boolean isWorked(Context mContext, String className) {
+        ActivityManager myManager = (ActivityManager) mContext
+                .getApplicationContext().getSystemService(
+                        Context.ACTIVITY_SERVICE);
+        ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
+                .getRunningServices(30);
+        for (int i = 0; i < runningService.size(); i++) {
+            if (runningService.get(i).service.getClassName().toString()
+                    .equals(className)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /** 默认存储Music值 */
+    public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {
+        Music music = new Music();
+        music.setMusicId(musicMsg.getMusicId());
+        music.setMusicName(musicMsg.getMusicName());
+        music.setMusicSinger(musicMsg.getMusicSinger());
+        music.setMusicType(musicMsg.getMusicType());
+        music.setMusicImg(musicMsg.getMusicImg());
+        music.setMusicURL(musicMsg.getMusicURL());
+        music.setMusicFavorite(musicMsg.getMusicFavorite());
+        music.setMusicLyric(musicMsg.getMusicLyric());
+        music.setMusicImgByte(musicMsg.getMusicImgByte());
+        music.setLocal(musicMsg.isLocal);
+        music.isPlaying = isPlaying;
+        return music;
     }
 
     /** 转换成时间格式*/

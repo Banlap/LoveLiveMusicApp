@@ -28,6 +28,7 @@ public class ThreadEvent<T> {
     public static final int CONNECT_MYSQL_ERROR = 0x12;
     public static final int GET_SUCCESS = 0x13;
     public static final int GET_ALBUM_SUCCESS = 0x131;
+    public static final int GET_LOCAL_PLAY_LIST_SUCCESS = 0x132;
     public static final int GET_ERROR = 0x14;
     public static final int GET_COUNT_SUCCESS = 0x15;
     public static final int GET_MESSAGE_SUCCESS = 0x16;
@@ -42,6 +43,7 @@ public class ThreadEvent<T> {
     public static final int GET_DATA_LIST_BY_AQOURS = 0x205;
     public static final int GET_DATA_LIST_BY_US = 0x206;
     public static final int GET_DATA_LIST_BY_HASUNOSORA = 0x207;
+    public static final int GET_DATA_LIST_BY_LOCAL_PLAY = 0x255;
 
     public static final int GET_DATA_LIST_COUNT = 0x21;
     public static final int GET_DATA_LIST_MESSAGE = 0x22;
@@ -53,6 +55,7 @@ public class ThreadEvent<T> {
     public static final int SCAN_LOCAL_FILE_BY_CHECK_PERMISSION = 0x2404;
     public static final int SELECT_LOCAL_FILE_SUCCESS = 0x2405;
     public static final int SELECT_LOCAL_FILE_ERROR = 0x2406;
+    public static final int SELECT_IMG_FILE_SUCCESS = 0x2407;
     public static final int DOWNLOAD_APP_START = 0x241;
     public static final int DOWNLOAD_APP_LOADING = 0x242;
     public static final int DOWNLOAD_APP_SUCCESS = 0x243;
@@ -72,13 +75,15 @@ public class ThreadEvent<T> {
     public static final int PLAY_MUSIC = 0x33;
     public static final int PLAY_LOCAL_MUSIC = 0x331;
     public static final int ADD_LOCAL_MUSIC = 0x332;
+    public static final int PLAY_FAVORITE_MUSIC = 0x333;
+    public static final int ADD_FAVORITE_MUSIC = 0x334;
+    public static final int ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x335;
+    public static final int DELETE_MUSIC_IN_LOCAL_PLAY_LIST = 0x336;
     public static final int GET_MUSIC_LYRIC = 0x34;
-    public static final int SCROLL_LYRIC = 0x35;
     public static final int SHOW_IMAGE_URL = 0x36;
     public static final int MUSIC_IS_NEXT = 0x37;
     public static final int MUSIC_IS_LAST = 0x38;
     public static final int MUSIC_IS_PAUSE = 0x39;
-    public static final int REMOVE_TIME_BY_LYRIC = 0x40;
 
     public static final int VIEW_SHOW_CHARACTER_TALK = 0x41;
     public static final int VIEW_SHOW_CHARACTER_TALK_CONTENT = 0x411;
@@ -95,14 +100,26 @@ public class ThreadEvent<T> {
     public static final int VIEW_SHOW_FRAGMENT = 0x522;
     public static final int VIEW_MUSIC_MSG = 0x53;
     public static final int VIEW_ADD_MUSIC = 0x54;
+    public static final int VIEW_ADD_FAVORITE_MUSIC = 0x541;
+    public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x542;
+    public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 0x543;
     public static final int VIEW_DELETE_MUSIC = 0x55;
     public static final int VIEW_DELETE_LOCAL_MUSIC = 0x551;
+    public static final int VIEW_DELETE_FAVORITE_MUSIC = 0x552;
+    public static final int VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST = 0x553;
+    public static final int VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 0x554;
     public static final int VIEW_LYRIC = 0x56;
     public static final int VIEW_IMAGE_URL = 0x57;
-    public static final int VIEW_SPANNABLE_LYRIC = 0x58;
+    public static final int VIEW_SHOW_OR_HIDE_MASKING_BACKGROUND = 0x58;
     public static final int VIEW_CHANGE_THEME = 0x59;
     public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 0x60;
     public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 0x601;
+    public static final int VIEW_CROPPING_IMG = 0x61;
+    public static final int VIEW_CROPPING_IMG_2 = 0x611;
+    public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 0x62;
+    public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 0x621;
+
+
 
     /** 蓝牙部分控制 */
     public static final int BLUETOOTH_DISCONNECT = 0x70;
@@ -113,12 +130,14 @@ public class ThreadEvent<T> {
     public List<Message> messageList;
 
     public List<T> tList;
+    public T t;
 
     public String str;
     public String str2;
     public String str3;
     public int[] intArray;
     public String[] strArray;
+    public byte[] byteArray;
     public int i;
     public int i2;
     public boolean b;
@@ -131,24 +150,30 @@ public class ThreadEvent<T> {
 
     public ThreadEvent(int msgCode) { this.msgCode = msgCode; }
     public ThreadEvent(int msgCode, List<Music> musicList) { this.msgCode = msgCode; this.musicList = musicList; }
+    public ThreadEvent(int msgCode, List<T> tList, int i) { this.msgCode = msgCode; this.tList = tList; this.i = i; }
     public ThreadEvent(int msgCode, List<T> tList, String str) { this.msgCode = msgCode; this.tList = tList; this.str = str;}
     public ThreadEvent(int msgCode, String str) { this.msgCode = msgCode; this.str = str; }
+    public ThreadEvent(int msgCode, String str, String str2) { this.msgCode = msgCode; this.str = str; this.str2 = str2; }
     public ThreadEvent(int msgCode, String str, String str2, String str3) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3;}
     public ThreadEvent(int msgCode, String str, String str2, String str3,  Bitmap bitmap, boolean b) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3; this.bitmap = bitmap; this.b = b; }
     public ThreadEvent(int msgCode, String str, String str2, String str3, boolean b) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3; this.b = b; }
     public ThreadEvent(int msgCode, String str, int i) { this.msgCode = msgCode; this.str = str; this.i = i;}
+    public ThreadEvent(int msgCode, String str, int i, int i2, byte[] byteArray) { this.msgCode = msgCode; this.str = str; this.i = i; this.i2 = i2; this.byteArray = byteArray; }
     public ThreadEvent(int msgCode, Double d) { this.msgCode = msgCode; this.d = d; }
     public ThreadEvent(int msgCode, int i) { this.msgCode = msgCode; this.i = i; }
     public ThreadEvent(int msgCode, int i, int i2) { this.msgCode = msgCode; this.i = i; this.i2 = i2;}
     public ThreadEvent(int msgCode, int i, int i2, String str) { this.msgCode = msgCode; this.i = i; this.i2 = i2; this.str = str;}
     public ThreadEvent(int msgCode, boolean b) { this.msgCode = msgCode; this.b = b; }
     public ThreadEvent(int msgCode, boolean b, File file) { this.msgCode = msgCode; this.b = b; this.file = file;}
+    public ThreadEvent(int msgCode, T t) { this.msgCode = msgCode; this.t = t; }
+    public ThreadEvent(int msgCode, Music music) { this.msgCode = msgCode; this.music = music; }
     public ThreadEvent(int msgCode, Music music, int i) { this.msgCode = msgCode; this.music = music; this.i = i; }
     public ThreadEvent(int msgCode, Music music, boolean b) { this.msgCode = msgCode; this.music = music; this.b = b; }
     public ThreadEvent(int msgCode, Music music, boolean b, String str, String str2) { this.msgCode = msgCode; this.music = music; this.b = b; this.str = str; this.str2 = str2; }
     public ThreadEvent(int msgCode, Music music, boolean b, String str, String str2, List<T> tList) { this.msgCode = msgCode; this.music = music; this.b = b; this.str = str; this.str2 = str2; this.tList = tList; }
     public ThreadEvent(int msgCode, String str, String str2, Bitmap bitmap) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.bitmap = bitmap; }
     public ThreadEvent(int msgCode, SpannableStringBuilder ssb) { this.msgCode = msgCode; this.ssb = ssb; }
+    public ThreadEvent(int msgCode, String[] strArray) { this.msgCode = msgCode; this.strArray = strArray; }
     public ThreadEvent(int msgCode, int[] intArray, String[] strArray) { this.msgCode = msgCode; this.intArray = intArray; this.strArray = strArray; }
     public ThreadEvent(int msgCode, KeyEvent kt) { this.msgCode = msgCode; this.kt = kt; };
 }

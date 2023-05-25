@@ -38,7 +38,7 @@
             android:id="@+id/cl_album_detail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <RelativeLayout
                 android:id="@+id/ll_title_bar"
@@ -91,8 +91,6 @@
 
             </RelativeLayout>
 
-
-
             <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -126,15 +124,21 @@
                         app:layout_scrollFlags="scroll"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        >
+                        app:layout_constraintEnd_toEndOf="parent">
 
-                        <com.banlap.llmusic.widget.CircleImageView
-                            android:id="@+id/iv_logo"
+                        <RelativeLayout
                             android:layout_width="120dp"
                             android:layout_height="80dp"
-                            android:scaleType="centerCrop"
-                            android:background="@mipmap/ic_album_liella_3" />
+                            android:gravity="center">
+
+                            <com.banlap.llmusic.widget.CircleImageView
+                                android:id="@+id/iv_logo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:scaleType="centerCrop"
+                                android:background="@mipmap/ic_album_liella_3" />
+
+                        </RelativeLayout>
 
                         <LinearLayout
                             android:id="@+id/ll_music_list_msg"
@@ -437,7 +441,7 @@
             android:id="@+id/cl_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:id="@+id/ll_tittle_bar_1"
@@ -479,7 +483,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         android:layout_marginStart="30dp"
-                        android:text="Discover"
+                        android:text="Discover "
                         android:textSize="18dp"
                         android:textStyle="bold"
                         android:textColor="@color/white"
@@ -496,9 +500,9 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="15dp"
                         android:layout_marginEnd="20dp"
-                        android:text="Local"
+                        android:text="Playlists "
                         android:textSize="18dp"
                         android:textStyle="bold"
                         android:textColor="@color/white"
@@ -643,6 +647,18 @@
         <!-- 灰色背景 用于禁止触摸 -->
         <RelativeLayout
             android:id="@+id/rl_disable_click"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/alpha_40"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 灰色背景 用于菜单 -->
+        <RelativeLayout
+            android:id="@+id/rl_disable_click_2"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:background="@color/alpha_40"
