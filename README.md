@@ -20,7 +20,7 @@
 ### 简介：
 <p align="start">一款在线播放lovelive音乐的app，该app收录了最新的专辑和Liyuu个人歌曲，并能够在app里面添加本地歌曲，目前支持mp3、flac格式的导入，持续更新app的其他内容和功能，不断优化代码等</p>
 
-#
+
 ### 最近更新：
 <p align="start">1. 添加收藏夹</p>
 <p align="start">2. 每日推荐功能</p>
