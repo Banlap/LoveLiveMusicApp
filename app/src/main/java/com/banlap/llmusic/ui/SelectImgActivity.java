@@ -71,7 +71,7 @@ public class SelectImgActivity extends AppCompatActivity {
      * 初始化系统回调
      * */
     private void initActivityResultListener() {
-        intentTakePhotoLauncher = registerForActivityResult(
+        intentTakePhotoLauncher = registerForActivityResult(  //选择图片回调
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
@@ -91,7 +91,7 @@ public class SelectImgActivity extends AppCompatActivity {
                     }
                 });
 
-        intentCroppingPhotoLauncher = registerForActivityResult(
+        intentCroppingPhotoLauncher = registerForActivityResult(  //裁剪图片回调
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
                     @Override

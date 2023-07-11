@@ -8,12 +8,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
@@ -29,7 +26,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.NotificationTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
@@ -37,6 +33,9 @@ import java.io.ByteArrayOutputStream;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
+/**
+ * 音乐播放器小组件 4x2
+ * */
 public class LLMusicWidgetProvider extends AppWidgetProvider {
 
     public static final String WIDGET_PROVIDER_REFRESH_MUSIC_MSG = "WIDGET_PROVIDER_REFRESH_MUSIC_MSG";

@@ -1,24 +1,20 @@
 package com.banlap.llmusic.widget;
 
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
-
-import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
 
+/**
+ * 水平进度条
+ * */
 public class HorizontalProgressBar extends View {
 
     private float maxCount = 100; //进度条最大值

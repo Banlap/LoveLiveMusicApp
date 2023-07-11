@@ -41,64 +41,70 @@ public class MysqlHelper {
         return cn;
     }
 
+    /** 查询所有数据总数 */
     public int findMusicCount() {
-        int size=0;
-        try {
-            Connection cn= connectDB();
-            String sql = "select count(*) from music where music_name not in ('')";
-            PreparedStatement ps = cn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            if(rs!=null) {
-                if(rs.next()) {
-                    size = rs.getInt(1);
-                }
-                rs.close();
-            }
-            cn.close();
-            Log.e("MYSQL", "musicListSize: " + size);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return size;
-    }
-
-    /** 查询所有数据 */
-    public List<Music> findMusicSql() {
-        List<Music> musicList = new ArrayList<>();
-        try {
-            Connection cn= connectDB();
-            String sql = "select * from music";
-            PreparedStatement ps = cn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
-            if(rs != null) {
-                //Log.e("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
-                while (rs.next()) {
-                    Music music = new Music();
-                    music.setMusicId(rs.getInt("music_id"));
-                    music.setMusicType(rs.getString("music_type"));
-                    music.setMusicName(rs.getString("music_name"));
-                    music.setMusicSinger(rs.getString("music_singer"));
-                    music.setMusicImg(rs.getString("music_img"));
-                    music.setMusicURL(rs.getString("music_url"));
-                    music.setMusicLyric(rs.getString("music_lyric"));
-                    musicList.add(music);
-                }
-                rs.close();
-            }
-            cn.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        Log.e("MYSQL", "musicList: " + musicList.size() + " musicList1: " + musicList.get(0).getMusicName());
-        return musicList;
+        return findMusicCountBySql("select count(*) from music where music_name not in ('')");
     }
 
     /** 根据musicType查询总数 */
     public int findMusicByMusicTypeCount(String musicType) {
+        return findMusicCountBySql("select count(*) from music where music_name not in ('') and music_type = '" + musicType + "'");
+    }
+
+    /** 根据musicType和musicSinger查询总数 */
+    public int findMusicByMusicTypeAndMusicSingerCount(String musicType, String musicSinger) {
+        return findMusicCountBySql("select count(*) from music where music_name not in ('') and music_type = '" + musicType + "' and music_singer = '" + musicSinger + "'");
+    }
+
+    /** 查询所有数据 */
+    public List<Music> findMusicAll() {
+        return findMusicBySql("select * from music");
+    }
+
+    /** 根据musicType查询数据 */
+    public List<Music> findMusicByMusicTypeSql(String musicType) {
+        return findMusicBySql("select * from music where music_type = '" + musicType + "'");
+    }
+
+    /** 根据musicType和musicSinger查询数据 */
+    public List<Music> findMusicByMusicTypeAndMusicSingerSql(String musicType, String musicSinger) {
+        return findMusicBySql("select * from music where music_type = '" + musicType + "' and music_singer = '" + musicSinger + "'");
+    }
+
+    /** 根据MusicId查询数据 */
+    public List<Music> findMusicByMusicIdSql(String... musicId) {
+        List<Music> musicList = new ArrayList<>();
+
+        if(musicId.length >0) {
+            StringBuilder musicIdListStr = new StringBuilder();
+            musicIdListStr.append("(");
+            for (int i = 0; i < musicId.length; i++) {
+                if (i == musicId.length - 1) {
+                    musicIdListStr.append("'").append(musicId[i]).append("'");
+                } else {
+                    musicIdListStr.append("'").append(musicId[i]).append("',");
+                }
+            }
+            musicIdListStr.append(")");
+            String sql = "select * from music where music_id in " + musicIdListStr;
+            return findMusicBySql(sql);
+        }
+        return musicList;
+    }
+
+    /**
+     * 随机查询数据
+     * @param count 指定查询多少条
+     * */
+    public List<Music> findMusicByRandomSql(int count) {
+        return findMusicBySql("select * from music where music_name != '' order by rand() limit " + count);
+    }
+
+    /** 通过sql查询music表数据总数 */
+    public int findMusicCountBySql(String sql) {
         int size=0;
         try {
             Connection cn= connectDB();
-            String sql = "select count(*) from music where music_name not in ('') and music_type = '" + musicType + "'";
             PreparedStatement ps = cn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             if(rs!=null) {
@@ -115,12 +121,11 @@ public class MysqlHelper {
         return size;
     }
 
-    /** 根据musicType查询数据 */
-    public List<Music> findMusicByMusicTypeSql(String musicType) {
+    /** 通过sql查询music表数据 */
+    public List<Music> findMusicBySql(String sql) {
         List<Music> musicList = new ArrayList<>();
         try {
             Connection cn= connectDB();
-            String sql = "select * from music where music_type = '" + musicType + "'";
             PreparedStatement ps = cn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             if(rs != null) {

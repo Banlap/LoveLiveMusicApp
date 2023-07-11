@@ -129,6 +129,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             }
         });
 
+
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {

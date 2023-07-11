@@ -2,6 +2,9 @@ package com.banlap.llmusic.utils;
 
 import android.content.Context;
 
+/**
+ * 像素转换工具类
+ * */
 public class PxUtil {
 
     public static PxUtil getInstance() {

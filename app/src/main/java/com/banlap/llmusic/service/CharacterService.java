@@ -41,6 +41,9 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.Objects;
 import java.util.Random;
 
+/**
+ * 角色服务
+ * */
 public class CharacterService extends Service {
 
     private WindowManager.LayoutParams wmParams;

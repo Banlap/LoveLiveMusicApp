@@ -33,6 +33,9 @@ import java.io.ByteArrayOutputStream;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
+/**
+ * 音乐播放器小组件 4x1
+ * */
 public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
 
     public static final String WIDGET_PROVIDER_REFRESH_MUSIC_MSG = "WIDGET_PROVIDER_REFRESH_MUSIC_MSG";

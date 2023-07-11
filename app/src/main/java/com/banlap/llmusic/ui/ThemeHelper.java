@@ -19,6 +19,7 @@ import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
 import com.banlap.llmusic.databinding.DialogMainMenuBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
 import com.banlap.llmusic.databinding.FragmentLocalListBinding;
+import com.banlap.llmusic.databinding.FragmentMainListBinding;
 import com.banlap.llmusic.databinding.ItemLocalMusicListBinding;
 import com.banlap.llmusic.databinding.ItemLocalPlayListAddBinding;
 import com.banlap.llmusic.databinding.ItemLocalPlayListBinding;
@@ -1362,6 +1363,46 @@ public class ThemeHelper {
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.light_ff));
+        }
+    }
+
+    /**
+     * MainListFragment主题改变
+     * */
+    public void mainListFragmentTheme(Context context, int rThemeId, FragmentMainListBinding vdb) {
+        if(rThemeId == R.id.ll_theme_normal) {
+            vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.light_ff));
+        } else if(rThemeId == R.id.ll_theme_dark) {
+            vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.white));
+        } else if(rThemeId == R.id.ll_theme_white) {
+            vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.purple));
+        } else if(rThemeId == R.id.ll_theme_orange) {
+            vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.orange_0b));
+
+        } else if(rThemeId == R.id.ll_theme_light) {
+            vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.light_ff));
+
+        } else {
+            vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.light_ff));
+
         }
     }
 

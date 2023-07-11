@@ -23,7 +23,9 @@ import com.banlap.llmusic.model.MusicLyric;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * 歌词滚动View
+ * */
 public class LyricScrollView extends View {
 
     private List<MusicLyric> musicLyrics;

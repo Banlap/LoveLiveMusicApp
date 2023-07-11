@@ -1,14 +1,13 @@
 package com.banlap.llmusic.utils;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.banlap.llmusic.ui.MainActivity;
-
+/**
+ * 权限检查工具类
+ * */
 public class PermissionUtil {
 
     public static PermissionUtil getInstance() { return new PermissionUtil(); }

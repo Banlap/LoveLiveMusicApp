@@ -29,6 +29,9 @@ import java.io.ByteArrayOutputStream;
 
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation;
 
+/**
+ * 通知栏帮助类 展示LLMusic通知
+ * */
 public class NotificationHelper {
     public static final int LL_MUSIC_PLAYER = 0x01;
     public static final int LL_MUSIC_CHARACTER= 0x02;

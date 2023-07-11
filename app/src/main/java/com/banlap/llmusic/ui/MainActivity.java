@@ -89,6 +89,7 @@ import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
+import com.banlap.llmusic.utils.TimeUtil;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -185,6 +186,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     public static final String MUSIC_TYPE_AQOURS = "Aqours";
     public static final String MUSIC_TYPE_US = "μs";
     public static final String MUSIC_TYPE_HASUNOSORA = "Hasunosora";
+    public static final String MUSIC_TYPE_SAINT_SNOW = "Saint Snow";
+    public static final String MUSIC_TYPE_A_RISE = "A-RISE";
 
     private DialogLocalFileBinding dialogLocalFileBinding;
 
@@ -195,7 +198,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
     private TextureView snowTextureView;
     private SnowDrawThread snowDrawThread;*/
 
-    /** MediaSession框架回掉 用于返回耳机实体按钮操作 */
+
+    /** MediaSession框架回调 用于返回耳机实体按钮操作 */
     private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
         @Override
         public boolean onMediaButtonEvent(@NonNull Intent intent) {
@@ -669,6 +673,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 Log.e("MYSQL", "mysql connect success");
                 if (!isSelect) {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_APP_VERSION));
+                    //每日推荐
+                    MainVM.showRecommendData(getApplicationContext());
                     isSelect = true;
                 }
                 break;
@@ -713,6 +719,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 } else if(ThreadEvent.ALBUM_HASUNOSORA.equals(event.str)) {
                     getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("蓮ノ空女学院スクールアイドルクラブ", "蓮ノ空女学院スクールアイドルクラブ", "Hasunosora Jogakuin School Idol Club", getViewDataBinding().ivLogo, R.mipmap.ic_album_hasu_2, 120, 80);
+                } else if(ThreadEvent.ALBUM_SAINT_SNOW.equals(event.str)) {
+                        getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                        updateMusicDetailMessage("セイントスノー", "セイントスノー", "Saint Snow", getViewDataBinding().ivLogo, R.mipmap.ic_album_saint_snow_2, 120, 80);
+                } else if(ThreadEvent.ALBUM_A_RISE.equals(event.str)) {
+                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+                    updateMusicDetailMessage("アライズ", "アライズ", "A-RISE", getViewDataBinding().ivLogo, R.mipmap.ic_album_a_rise_2, 120, 50);
                 }
                 isClickLocalPlayList = false;
                 break;
@@ -843,7 +855,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
                 }
                 break;
-            case ThreadEvent.PLAY_LOCAL_MUSIC:   //点击了本地歌曲并添加到播放列表
+            case ThreadEvent.PLAY_RECOMMEND_MUSIC:   //点击播放每日推荐的歌曲 并添加到播放列表
+            case ThreadEvent.PLAY_LOCAL_MUSIC:   //点击播放本地歌曲 并添加到播放列表
                 if(event.music != null) {
                     List<Music> list = new ArrayList<>();
                     list.add(event.music);
@@ -857,7 +870,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                     addMusic(list, 0);
                 }
                 break;
-            case ThreadEvent.PLAY_FAVORITE_MUSIC:    //点击了收藏歌曲并添加到播放列表
+            case ThreadEvent.PLAY_FAVORITE_MUSIC:    //点击播放收藏歌曲 并添加到播放列表
                 if(event.tList != null & event.tList.size()>0) {
                     List<Music> list = event.tList;
                     playMusic(list, event.i);
@@ -1164,13 +1177,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 getViewModel().downloadUrl(event.str);
                 break;
             case ThreadEvent.GET_DATA_LIST:
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicSql()));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicAll()));
                 break;
             case ThreadEvent.GET_DATA_LIST_COUNT:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicCount()));
                 break;
             case ThreadEvent.GET_DATA_APP_VERSION:
                 EventBus.getDefault().post(new ThreadEvent<Version>(ThreadEvent.GET_APP_VERSION_SUCCESS, MysqlHelper.getInstance().findVersionSql(),""));
+                break;
+            case ThreadEvent.GET_DATA_RECOMMEND:
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, MysqlHelper.getInstance().findMusicByRandomSql(3)));
                 break;
             case ThreadEvent.GET_DATA_LIST_MESSAGE:
                 EventBus.getDefault().post(new ThreadEvent<Message>(ThreadEvent.GET_MESSAGE_SUCCESS, MysqlHelper.getInstance().findMessageSql(), ""));
@@ -1209,6 +1225,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding>
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_HASUNOSORA));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_HASUNOSORA)));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_HASUNOSORA)));
+                break;
+            case ThreadEvent.GET_DATA_LIST_BY_SAINT_SNOW:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_SAINT_SNOW));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MUSIC_TYPE_AQOURS, MUSIC_TYPE_SAINT_SNOW)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MUSIC_TYPE_AQOURS, MUSIC_TYPE_SAINT_SNOW)));
+                break;
+            case ThreadEvent.GET_DATA_LIST_BY_A_RISE:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_A_RISE));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MUSIC_TYPE_US, MUSIC_TYPE_A_RISE)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MUSIC_TYPE_US, MUSIC_TYPE_A_RISE)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LOCAL_PLAY:
                 if(event.t != null) {

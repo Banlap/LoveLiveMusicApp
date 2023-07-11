@@ -47,6 +47,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
+ * 音乐播放服务
  * @author Banlap on 2021/12/6
  */
 public class MusicPlayService extends Service {
@@ -132,13 +133,14 @@ public class MusicPlayService extends Service {
 
     public class MusicBinder extends Binder {
 
+        /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final Music dataSource, final boolean isLoop) {
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
+        /** 播放歌曲整体流程2：播放歌曲 */
         public void player(final Music dataSource, final boolean isLoop, final HttpProxyCacheServer proxyCacheServer, final List<MusicLyric> musicLyrics) {
             try {
-
                 stop();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
 
@@ -238,7 +240,7 @@ public class MusicPlayService extends Service {
             }
         }
 
-
+        /** 是否单曲循环 */
         public void setSingePlayMode(boolean isOpen) {
             if(mediaPlayer!=null) {
                 mediaPlayer.setLooping(isOpen);

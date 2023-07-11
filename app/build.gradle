@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 155
+        versionCode 156
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -129,6 +129,9 @@ android {
         //1.修复问题：歌词显示颜色问题、4x1透明组件图片问题
         //2.新增功能：自建歌单、收藏，并重新设计ui
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionName "1.5.6"
+        //1.更改问题：重新设计主页面ui
+        //2.新增功能：新增每日推荐功能
     }
 
     android.applicationVariants.all {
@@ -184,5 +187,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.lzp:FlycoTabLayoutZ:1.3.3'
 
+    /** 内存泄露查询工具 使用后安装app之后会出现检测软件 */
+    /*debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:2.7'*/
 
 }

@@ -13,6 +13,9 @@ import com.banlap.llmusic.R;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * 角色帮助类
+ * */
 public class CharacterHelper {
 
     private static ImageView mImageView;

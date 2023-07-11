@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.SeekBar;
 
@@ -27,8 +28,11 @@ import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.OkhttpUtil;
+import com.banlap.llmusic.utils.SPUtil;
+import com.banlap.llmusic.utils.TimeUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -384,6 +388,24 @@ public class MainVM extends AndroidViewModel {
             return Settings.canDrawOverlays(context);
         }
         return true;
+    }
+
+    /**
+     * 展示每日推荐
+     * */
+    public static void showRecommendData(Context context) {
+        String recommendDate = SPUtil.getStrValue(context, "RecommendDate");
+        if(!TextUtils.isEmpty(recommendDate) && !TimeUtil.isCheckTime(recommendDate, 24)) {
+            //本地缓存列表
+            List<Music> spList = SPUtil.getListValue(context, "RecommendListData", Music.class);
+            if(spList.size() >0){
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, spList));
+            }
+            return;
+        }
+        //获取最新的每日推荐数据
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
+        SPUtil.setStrValue(context, "RecommendDate", TimeUtil.getCurrentDateStr());
     }
 
     /**

@@ -8,12 +8,16 @@ import android.content.IntentFilter;
 
 import com.banlap.llmusic.receiver.BluetoothStateBroadcastReceiver;
 
+/**
+ * 蓝牙工具类
+ * */
 public class BluetoothUtil {
 
     private BluetoothStateBroadcastReceiver mReceiver;
 
     public static BluetoothUtil getInstance() { return new BluetoothUtil(); }
 
+    //注册蓝牙广播
     public void registerBluetoothReceiver(Context context) {
         mReceiver = new BluetoothStateBroadcastReceiver();
         IntentFilter intentFilter = new IntentFilter();

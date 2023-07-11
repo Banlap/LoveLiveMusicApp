@@ -400,6 +400,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             }
         }
     }
+
     /**
      * 变更主题
      * */
@@ -940,4 +941,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

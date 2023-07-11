@@ -10,11 +10,9 @@ import com.danikula.videocache.file.FileNameGenerator;
 
 import java.io.File;
 
-import jp.wasabeef.glide.transformations.internal.Utils;
 
 public class BaseApplication extends Application {
     private HttpProxyCacheServer proxy;
-
 
     public static HttpProxyCacheServer getProxy(Context context) {
         BaseApplication baseApplication = (BaseApplication) context.getApplicationContext();

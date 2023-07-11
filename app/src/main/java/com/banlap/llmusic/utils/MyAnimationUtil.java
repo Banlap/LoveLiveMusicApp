@@ -22,6 +22,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.google.android.material.tabs.TabLayout;
 
 /**
+ * 动画工具类
  * @author Banlap on 2021/12/1
  */
 public class MyAnimationUtil {

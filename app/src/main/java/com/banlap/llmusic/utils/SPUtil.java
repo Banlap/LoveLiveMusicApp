@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 数据缓存工具类
  * @author Banlap on 2021/8/19
  */
 public class SPUtil {

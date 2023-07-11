@@ -21,6 +21,9 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * 文件工具类
+ * */
 public class FileUtil {
 
     private static final String TAG = FileUtil.class.getSimpleName();

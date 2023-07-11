@@ -6,6 +6,9 @@ import android.util.Log;
 
 import java.io.File;
 
+/**
+ * 文件缓存工具类
+ * */
 public class CacheUtil {
     private static final String TAG = "LogByAB: " + CacheUtil.class.getSimpleName();
     /**

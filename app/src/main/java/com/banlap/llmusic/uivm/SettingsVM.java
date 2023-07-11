@@ -38,11 +38,11 @@ public class SettingsVM extends AndroidViewModel {
     public void viewBack() { callBack.viewBack(); }
 
     /** 下载新版本App */
-    public void downloadUrl(String dataSource) {
+    public void downloadUrl(String url) {
         isDownloadStop = false;
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START2));
 
-        OkhttpUtil.newInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
+        OkhttpUtil.newInstance().request(url, new OkhttpUtil.OkHttpCallBack() {
             @Override
             public void onSuccess(Response response) {
                downloadApp(response);
