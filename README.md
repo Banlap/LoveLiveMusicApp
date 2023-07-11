@@ -47,9 +47,10 @@
 #
 ### 预览图：
 <p align="start">
-  <img width="275" height="550" src="https://user-images.githubusercontent.com/12729772/222320305-cdf174f9-857c-484d-8831-ac7a0cce98b6.png">
+  <img width="275" height="550" alt="image" src="https://github.com/Banlap/LoveLiveMusicApp/assets/12729772/1ce535e1-6cae-4a96-8a0d-106f4114cc02">
   <img width="275" height="550" src="https://user-images.githubusercontent.com/12729772/216499174-680550fd-1f4a-4f88-ab66-1441776a9c16.png">
 </p>
+
 
 <p align="start">
   <img width="275" height="550" src="https://user-images.githubusercontent.com/12729772/216499250-78d6e09b-a78a-4e74-9d83-f058f9a2cb92.png">
