@@ -112,7 +112,7 @@ public class LocalListFVM extends AndroidViewModel {
                             getMusicData(path, false);
 
                         } catch (Exception e) {
-                            Log.e(TAG, "e: " + e.getMessage());
+                            Log.i(TAG, "e: " + e.getMessage());
                         }
                     }
                 }
@@ -190,7 +190,7 @@ public class LocalListFVM extends AndroidViewModel {
             }
 
         } catch(Exception e) {
-            Log.e(TAG, "e: " + e.getMessage());
+            Log.i(TAG, "e: " + e.getMessage());
         }
 
     }

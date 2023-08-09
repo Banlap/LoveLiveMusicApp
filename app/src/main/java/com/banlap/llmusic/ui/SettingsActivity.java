@@ -10,6 +10,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -40,14 +41,19 @@ import com.banlap.llmusic.uivm.SettingsVM;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.FileUtil;
+import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SPUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.Objects;
 
+/**
+ * 设置页面
+ * */
 public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsBinding>
     implements SettingsVM.SettingsCallBack {
     private static final String TAG = SettingsActivity.class.getSimpleName();
@@ -68,7 +74,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     @Override
     protected void initData() {
         mNormalLaunchVideoUrl = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella;
-        String strThemeId = SPUtil.getStrValue(getApplicationContext(), "SaveThemeId");
+        String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
         if(strThemeId!=null) {
             if(!strThemeId.equals("")) {
                 int rId = Integer.parseInt(strThemeId);
@@ -90,6 +96,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         newVersionContent = getIntent().getStringExtra("NewVersionContent");
 
         getViewDataBinding().llThemeNormal.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llThemeBlue.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeDark.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeLight.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeWhite.setOnClickListener(new ButtonClickListener());
@@ -129,7 +136,6 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             }
         });
 
-
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -140,7 +146,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                             Uri uri = intent.getData();
                             if(null != uri) {
                                 String path = FileUtil.getInstance().getPath(getApplication(), uri);
-                                Log.e(TAG, "path: " + path);
+                                Log.i(TAG, "path: " + path);
                                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS, path));
                                 return;
                             }
@@ -181,6 +187,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             case ThreadEvent.DOWNLOAD_APP_LOADING2:
                 if(null != downloadBinding) {
                     downloadBinding.tvValue.setText(""+event.i);
+                    downloadBinding.hpvProgress.setCurrentCount(event.i);
                 }
                 break;
             case ThreadEvent.DOWNLOAD_APP_SUCCESS2:
@@ -191,7 +198,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 if(event.b) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    Log.e("LogByAB","file: " + event.file.toString());
+                    Log.i("LogByAB","file: " + event.file.toString());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Uri contentUri = FileProvider.getUriForFile(getApplicationContext(),"com.banlap.llmusic.fileProvider", event.file);
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -212,12 +219,12 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 break;
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS:
                 if(!TextUtils.isEmpty(event.str)) {
-                    SPUtil.setStrValue(getApplicationContext(), "LaunchVideoPath", event.str);
+                    SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, event.str);
                     updateLaunchVideoSelectUI(false);
                 }
                 break;
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_ERROR:
-                Log.e(TAG, "设置启动动画失败");
+                Log.i(TAG, "设置启动动画失败");
                 break;
         }
     }
@@ -242,7 +249,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
         settingVideoBinding.tvTitle.setText("设置启动动画");
         //设置是否开启启动动画
-        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), "CloseLaunchVideo");
+        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
         if(TextUtils.isEmpty(isLaunchVideo)) {
             settingVideoBinding.switchVideo.setChecked(true);
         } else {
@@ -251,14 +258,14 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         settingVideoBinding.switchVideo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SPUtil.setStrValue(getApplicationContext(), "CloseLaunchVideo", settingVideoBinding.switchVideo.isChecked()? "1" : "0");
+                SPUtil.setStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo, settingVideoBinding.switchVideo.isChecked()? "1" : "0");
             }
         });
 
         //选择启动动画ui默认值
         updateLaunchVideoSelectUI(true);
 
-        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), "LaunchVideoPath");
+        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
         if(!TextUtils.isEmpty(launchVideoPath)) {
             if(!mNormalLaunchVideoUrl.equals(launchVideoPath)) {
                 updateLaunchVideoSelectUI(false);
@@ -269,7 +276,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         settingVideoBinding.llSelectVideoNormal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SPUtil.setStrValue(getApplicationContext(), "LaunchVideoPath", mNormalLaunchVideoUrl);
+                SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl);
                 updateLaunchVideoSelectUI(true);
             }
         });
@@ -407,6 +414,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     }
 
+    /** 展示下载进度 */
     private void showLoadingApp() {
         if(null != mAlertDialog) {
             mAlertDialog.dismiss();
@@ -414,6 +422,15 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
         downloadBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_download, null, false);
+
+        downloadBinding.hpvProgress.setMaxCount(100);
+        String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
+        if(strThemeId!=null) {
+            if(!strThemeId.equals("")) {
+                int rId = Integer.parseInt(strThemeId);
+                ThemeHelper.getInstance().settingActivityProgressTheme(LLActivityManager.getInstance().getTopActivity(), rId, downloadBinding.hpvProgress);
+            }
+        }
 
         downloadBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -446,6 +463,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         public void onClick(View v) {
             if(v.getId() == R.id.ll_theme_normal) {
                 changeTheme(R.id.ll_theme_normal);
+            } else if(v.getId() == R.id.ll_theme_blue) {
+                changeTheme(R.id.ll_theme_blue);
             } else if(v.getId() == R.id.ll_theme_dark) {
                 changeTheme(R.id.ll_theme_dark);
             } else if(v.getId() == R.id.ll_theme_white) {
@@ -462,7 +481,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     /** 改变主题 */
     private void changeTheme(int rId) {
-        SPUtil.setStrValue(getApplicationContext(), "SaveThemeId", String.valueOf(rId));
+        SPUtil.setStrValue(getApplicationContext(), SPUtil.SaveThemeId, String.valueOf(rId));
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
         //主题变更
         ThemeHelper.getInstance().settingActivityTheme(this, rId, getViewDataBinding());

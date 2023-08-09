@@ -136,7 +136,7 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_marginEnd="40dp"
-                    android:src="@drawable/selector_last_2_selected"/>
+                    android:src="@drawable/selector_last_black_selected"/>
 
                 <ImageView
                     android:id="@+id/bt_play"
@@ -149,7 +149,7 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_marginStart="40dp"
-                    android:src="@drawable/selector_next_2_selected"/>
+                    android:src="@drawable/selector_next_black_selected"/>
 
             </LinearLayout>
 

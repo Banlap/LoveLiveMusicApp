@@ -28,7 +28,7 @@ public class TimeUtil {
                 currentTimeStr = date;
             }
         } catch (Exception e) {
-            Log.e(TAG, "e: " + e.getMessage());
+            Log.i(TAG, "e: " + e.getMessage());
         }
         return currentTimeStr;
     }
@@ -52,12 +52,39 @@ public class TimeUtil {
                     }
                 }
             } catch (ParseException e) {
-                Log.e(TAG, "e: " + e.getMessage());
+                Log.i(TAG, "e: " + e.getMessage());
             }
         }
         return false;
     }
 
+
+    /**
+     * 转换成时间格式 long类型转换
+     * @return 分:秒  mm:ss
+     * */
+    public static String rebuildTime(long position) {
+        long minLong = position /1000/60;
+        long secLong = position /1000%60;
+        String minStr = minLong <10 ? "0"+minLong : ""+minLong;
+        String secStr = secLong <10 ? "0"+secLong : ""+secLong;
+        return minStr + ":" + secStr;
+    }
+
+    /**
+     * 转换为秒 long类型转换
+     * @return s
+     * */
+    public static int showSec(long position) {
+        long minLong = position /1000/60;
+        long secLong = position /1000%60;
+        String minStr = minLong <10 ? "0"+minLong : ""+minLong;
+        String secStr = secLong <10 ? "0"+secLong : ""+secLong;
+        if(minLong >0) {
+            return (Integer.parseInt(secStr) + (Integer.parseInt(minStr) * 60));
+        }
+        return Integer.parseInt(secStr);
+    }
 
 
 }

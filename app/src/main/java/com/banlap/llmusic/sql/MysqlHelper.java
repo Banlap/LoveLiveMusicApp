@@ -114,7 +114,7 @@ public class MysqlHelper {
                 rs.close();
             }
             cn.close();
-            Log.e("MYSQL", "musicListSize: " + size);
+            Log.i("MYSQL", "musicListSize: " + size);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -129,7 +129,7 @@ public class MysqlHelper {
             PreparedStatement ps = cn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             if(rs != null) {
-                //Log.e("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
+                //Log.i("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
                 while (rs.next()) {
                     Music music = new Music();
                     music.setMusicId(rs.getInt("music_id"));
@@ -147,7 +147,7 @@ public class MysqlHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //Log.e("MYSQL", "musicList: " + musicList.size() + " musicList1: " + musicList.get(0).getMusicName());
+        //Log.i("MYSQL", "musicList: " + musicList.size() + " musicList1: " + musicList.get(0).getMusicName());
         return musicList;
     }
 
@@ -160,7 +160,7 @@ public class MysqlHelper {
             PreparedStatement ps = cn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             if(rs != null) {
-                //Log.e("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
+                //Log.i("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
                 while (rs.next()) {
                     Message message = new Message();
                     message.setMessageId(rs.getInt("message_id"));
@@ -177,7 +177,7 @@ public class MysqlHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e("MYSQL", "messageList: " + messageList.size());
+        Log.i("MYSQL", "messageList: " + messageList.size());
         return messageList;
     }
 
@@ -190,7 +190,7 @@ public class MysqlHelper {
             PreparedStatement ps = cn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             if(rs != null) {
-                //Log.e("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
+                //Log.i("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
                 while (rs.next()) {
                     Version version = new Version();
                     version.setVersionId(rs.getInt("version_id"));
@@ -209,7 +209,7 @@ public class MysqlHelper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e("MYSQL", "versionList: " + versionList.size());
+        Log.i("MYSQL", "versionList: " + versionList.size());
         return versionList;
     }
 
@@ -219,7 +219,7 @@ public class MysqlHelper {
             String sql = "";
             PreparedStatement ps = cn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-            Log.e("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
+            Log.i("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
             cn.close();
             rs.close();
         } catch (Exception e) {

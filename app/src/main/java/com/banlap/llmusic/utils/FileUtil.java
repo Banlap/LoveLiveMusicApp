@@ -12,12 +12,18 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -37,7 +43,7 @@ public class FileUtil {
         File file = new File(path);
         //如果path是传递过来的参数，可以做一个非目录的判断
         if (file.isDirectory()) {
-            Log.e(TAG, "The File doesn't not exist.");
+            Log.i(TAG, "The File doesn't not exist.");
         } else {
             try {
                 InputStream instream = new FileInputStream(file);
@@ -52,9 +58,9 @@ public class FileUtil {
                     instream.close();
                 }
             } catch (java.io.FileNotFoundException e) {
-                Log.e(TAG, "The File doesn't not exist.");
+                Log.i(TAG, "The File doesn't not exist.");
             } catch (IOException e) {
-                Log.e(TAG, "e: " +e.getMessage());
+                Log.i(TAG, "e: " +e.getMessage());
             }
         }
         return content;
@@ -139,7 +145,7 @@ public class FileUtil {
                 b = file.delete();
             }
         }
-        Log.e(TAG, "file is exists: " + isExists + " file is delete: " + b + " url: " + url);
+        Log.i(TAG, "file is exists: " + isExists + " file is delete: " + b + " url: " + url);
         return b;
     }
 
@@ -157,6 +163,35 @@ public class FileUtil {
         return pathCursor.getString(pathCursor.getColumnIndex(MediaStore.Images.Media.DATA));
     }
 
+    /**
+     * 文件复制 TODO未完成
+     * */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void copyFile(Context context, File fromFile, File toFile) {
+        try {
+
+            if (fromFile.isDirectory()) {
+                if (!toFile.exists()) {
+                    toFile.mkdirs();
+                }
+
+                File[] files = fromFile.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        copyFile(context, file, toFile);
+                    }
+                }
+            } else {
+                if(fromFile.exists()) {
+                    Files.copy(fromFile.toPath(), toFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public File createImageFile(Context context) {
         try {
             // 创建一个临时文件，用于保存拍照的照片
@@ -171,7 +206,7 @@ public class FileUtil {
 
             return image;
         } catch (Exception e) {
-            Log.e(TAG, "e: " + e.getMessage());
+            Log.i(TAG, "e: " + e.getMessage());
             return null;
         }
     }

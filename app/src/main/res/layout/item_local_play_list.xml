@@ -80,7 +80,7 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="8dp"
-                    android:background="@drawable/ic_more_light" />
+                    android:background="@drawable/ic_more_light_ff" />
 
 
             </RelativeLayout>

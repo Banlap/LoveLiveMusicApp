@@ -268,7 +268,7 @@ public class CharacterService extends Service {
                         } else {
                             isMove = true;
                         }
-                        Log.e("LogByAB", "isMove: " + isMove);
+                        Log.i("LogByAB", "isMove: " + isMove);
                         break;
                 }
                 return isMove;

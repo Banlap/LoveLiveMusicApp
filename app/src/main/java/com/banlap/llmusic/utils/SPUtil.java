@@ -17,6 +17,19 @@ import java.util.List;
  * @author Banlap on 2021/8/19
  */
 public class SPUtil {
+    public static final String SaveThemeId = "SaveThemeId";  //保存主题ID
+    public static final String SavePlayMode = "SavePlayMode";  //保存播放模式
+    public static final String SaveControllerScene = "SaveControllerScene"; //保存控制器场景
+    public static final String BackgroundUri = "BackgroundUri";  //壁纸URI
+    public static final String CloseLaunchVideo = "CloseLaunchVideo"; //关闭启动视频标记
+    public static final String LaunchVideoPath = "LaunchVideoPath"; //启动视频自定义路径
+    public static final String RecommendDate = "RecommendDate";  //每日推荐的日期
+
+    public static final String LocalPlayListData = "LocalPlayListData"; //自建歌单缓存列表
+    public static final String LocalListData = "LocalListData"; //本地歌曲缓存列表
+    public static final String FavoriteListData = "FavoriteListData"; //最爱歌曲缓存列表
+    public static final String PlayListData = "PlayListData";  //播放的歌曲缓存列表
+    public static final String RecommendListData = "RecommendListData"; //每日歌曲缓存列表
 
     public static String getStrValue(Context context, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
@@ -29,7 +42,6 @@ public class SPUtil {
         editor.putString(key, value);
         editor.apply();
     }
-
 
     /*
      * 获取List<T>本地数据

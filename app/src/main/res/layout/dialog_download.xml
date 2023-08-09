@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@+id/rl_select_icon_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -44,26 +45,44 @@
                 android:id="@+id/tv_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="下载进度:"
                 android:textSize="17dp" />
 
-            <TextView
-                android:id="@+id/tv_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="5dp"
-                android:layout_toEndOf="@+id/tv_content"
-                android:text="0"
-                android:textSize="17dp" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="20dp"
-                android:layout_toEndOf="@+id/tv_value"
-                android:text="%"
-                android:textSize="17dp" />
+                <com.banlap.llmusic.widget.HorizontalProgressBar
+                    android:id="@+id/hpv_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp" />
+
+                <TextView
+                    android:id="@+id/tv_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@+id/tv_value2"
+                    android:layout_centerVertical="true"
+                    android:text="0"
+                    android:textSize="17dp" />
+
+                <TextView
+                    android:id="@+id/tv_value2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignEnd="@+id/hpv_progress"
+                    android:text="%"
+                    android:textSize="17dp" />
+
+            </RelativeLayout>
+
+
 
         </LinearLayout>
 

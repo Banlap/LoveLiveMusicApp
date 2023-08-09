@@ -46,7 +46,7 @@ public class WebViewActivity extends BaseActivity<WebViewVM, ActivityWebviewBind
         getViewDataBinding().wvUrl.getSettings().setBuiltInZoomControls(true);//是否显示缩放按钮，默认false
         getViewDataBinding().wvUrl.getSettings().setUseWideViewPort(true);//设置此属性，可任意比例缩放。大视图模式
         getViewDataBinding().wvUrl.getSettings().setLoadWithOverviewMode(true);//和setUseWideViewPort(true)一起解决网页自适应问题
-        getViewDataBinding().wvUrl.getSettings().setAppCacheEnabled(true);//是否使用缓存
+        //getViewDataBinding().wvUrl.getSettings().setAppCacheEnabled(true);//是否使用缓存
         getViewDataBinding().wvUrl.getSettings().setDomStorageEnabled(true);//DOM Storage
 
         getViewDataBinding().wvUrl.setWebViewClient(new WebViewClient() {

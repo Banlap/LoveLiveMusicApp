@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -31,8 +32,6 @@ public class MyAnimationUtil {
     public static ObjectAnimator objectAnimatorInit(Activity activity, ConstraintLayout constraintLayout) {
         WindowManager windowManager = activity.getWindowManager();
         Display display = windowManager.getDefaultDisplay();
-        int displayAxis = -display.getWidth() * 2 - 100;
-        float curTranslationX = constraintLayout.getTranslationX();
         ObjectAnimator animator = ObjectAnimator.ofFloat(constraintLayout, "translationX", 0, 0);
         animator.setDuration(500);
         return animator;
@@ -57,11 +56,15 @@ public class MyAnimationUtil {
         return animator;
     }
 
-    /** banlap: 添加动画效果 上下显示 */
-    public static ObjectAnimator objectAnimatorUpOrDown(Activity activity, boolean isUp, int moveAxis, RelativeLayout relativeLayout) {
-        ObjectAnimator animator = isUp ?
-                ObjectAnimator.ofFloat(relativeLayout, "translationY", 0, moveAxis)
-                : ObjectAnimator.ofFloat(relativeLayout, "translationY", moveAxis, 0);
+    /**
+     * banlap: 添加动画效果 上下显示
+     *
+     * @param isDown true 向下移动; false 向上移动
+     * */
+    public static ObjectAnimator objectAnimatorUpOrDown(Activity activity, boolean isDown, int moveAxis, ViewGroup viewGroup) {
+        ObjectAnimator animator = isDown ?
+                ObjectAnimator.ofFloat(viewGroup, "translationY", 0, moveAxis)
+                : ObjectAnimator.ofFloat(viewGroup, "translationY", moveAxis, 0);
         animator.setRepeatMode(ObjectAnimator.RESTART);
         animator.setDuration(500);
         return animator;

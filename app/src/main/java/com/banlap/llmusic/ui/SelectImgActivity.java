@@ -85,7 +85,7 @@ public class SelectImgActivity extends AppCompatActivity {
                                 return;
                             }
                         } catch (Exception e) {
-                            Log.e(TAG, "e: " + e.getMessage());
+                            Log.i(TAG, "e: " + e.getMessage());
                         }
                         finish();
                     }
@@ -102,11 +102,11 @@ public class SelectImgActivity extends AppCompatActivity {
                                 boolean b = FileUtil.getInstance().deleteFile(getApplication(), SelectImgHelper.DEFAULT_URL);
                                 mListener.onSuccess(bitmap);
                             } else {
-                                Log.e(TAG, "e: " + "uri = null");
+                                Log.i(TAG, "e: " + "uri = null");
                                 mListener.onError();
                             }
                         } catch (Exception e) {
-                            Log.e(TAG, "e: " + "uri = null");
+                            Log.i(TAG, "e: " + "uri = null");
                             mListener.onError();
                         }
                         finish();
@@ -161,7 +161,7 @@ public class SelectImgActivity extends AppCompatActivity {
     private void startCroppingImgNew(Uri uri) {
         UCrop.Options options = new UCrop.Options();
         // 修改标题栏颜色
-        options.setToolbarColor(getResources().getColor(R.color.light_ea));
+        options.setToolbarColor(getResources().getColor(R.color.light_f9));
         // 修改状态栏颜色
         options.setStatusBarColor(getResources().getColor(R.color.light_ff));
         // 隐藏底部工具
@@ -220,11 +220,11 @@ public class SelectImgActivity extends AppCompatActivity {
                         }
                         mListener.onSuccess(bitmap);
                     } else {
-                        Log.e(TAG, "e: " + "uri = null");
+                        Log.i(TAG, "e: " + "uri = null");
                         mListener.onError();
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "e: " + "uri = null");
+                    Log.i(TAG, "e: " + "uri = null");
                     mListener.onError();
                 }
                 finish();

@@ -21,10 +21,10 @@ public class MusicNextService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startId) {
-        Log.e("ABMusicPlayer", "StartMusicNextService");
+        Log.i("ABMusicPlayer", "StartMusicNextService");
         boolean isNext =  intent.getBooleanExtra("NextMusic", false);
         if(isNext) {
-            Log.e("ABMusicPlayer", "isNext");
+            Log.i("ABMusicPlayer", "isNext");
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_NEXT));
         }
         return super.onStartCommand(intent, flag, startId);

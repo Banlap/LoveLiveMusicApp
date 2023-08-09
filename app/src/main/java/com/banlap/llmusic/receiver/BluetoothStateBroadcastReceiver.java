@@ -19,10 +19,10 @@ public class BluetoothStateBroadcastReceiver extends BroadcastReceiver {
         if(action!=null) {
             switch (action) {
                 case BluetoothDevice.ACTION_ACL_CONNECTED:
-                    Log.e("ABMusicPlayer", "bluetooth connect");
+                    Log.i("ABMusicPlayer", "bluetooth connect");
                     break;
                 case BluetoothDevice.ACTION_ACL_DISCONNECTED:
-                    Log.e("ABMusicPlayer", "bluetooth disconnect");
+                    Log.i("ABMusicPlayer", "bluetooth disconnect");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.BLUETOOTH_DISCONNECT));
                     break;
             }

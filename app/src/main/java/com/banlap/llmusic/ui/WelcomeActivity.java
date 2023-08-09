@@ -13,6 +13,9 @@ import com.banlap.llmusic.databinding.ActivityWelcomeBinding;
 import com.banlap.llmusic.uivm.WelcomeVM;
 import com.banlap.llmusic.utils.SPUtil;
 
+/**
+ * 欢迎页
+ * */
 public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBinding>
     implements WelcomeVM.WelcomeCallBack {
 
@@ -34,7 +37,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     /** 判断是否显示启动动画 */
     private void launchVideo() {
         //是否显示启动动画
-        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), "CloseLaunchVideo");
+        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
         if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
             Intent intent = new Intent(getApplication(), MainActivity.class);
             startActivity(intent);
@@ -78,7 +81,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     private void initVideo() {
         setDimension();
         //判断是否使用了自定义启动动画
-        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), "LaunchVideoPath");
+        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.welcomeliella);
         if(!TextUtils.isEmpty(launchVideoPath)) {
             uri = Uri.parse(launchVideoPath);
@@ -88,7 +91,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
         getViewDataBinding().vvWelcomeVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.e("LogByAB", "onSuccess");
+                Log.i("LogByAB", "onSuccess");
                 mp.setVolume(0f,0f);
             }
         });
@@ -107,7 +110,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
                 *   MEDIA_ERROR_TIMED_OUT 一些操作使用了过长的时间，也就是超时了，通常是超过了3-5秒 值: -110 (0xffffff92)
                 *   MEDIA_ERROR_SYSTEM (-2147483648) - low-level system error.
                 * */
-                Log.e("LogByAB", "what: " + what + " extra: " + extra);
+                Log.i("LogByAB", "what: " + what + " extra: " + extra);
                 return false;
             }
         });

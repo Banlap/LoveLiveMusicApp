@@ -4,7 +4,6 @@ import static com.banlap.llmusic.utils.NotificationHelper.LL_MUSIC_PLAYER;
 
 import android.app.Notification;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -24,34 +22,23 @@ import androidx.annotation.Nullable;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
+import com.banlap.llmusic.utils.TimeUtil;
 import com.danikula.videocache.HttpProxyCacheServer;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * 音乐播放服务
  * @author Banlap on 2021/12/6
  */
 public class MusicPlayService extends Service {
-
+    public static final String TAG = MusicPlayService.class.getSimpleName();
     public MediaPlayer mediaPlayer;
     private boolean isStop = false;
     private final Object lock = new Object();
@@ -61,7 +48,7 @@ public class MusicPlayService extends Service {
     public static Handler appWidgetHandler = new Handler();
     public static Runnable appWidgetRunnable;
     public static final int DELAY_MILLIS = 1000;
-
+    public static int mAudioSessionId;
 
     Runnable runnable = new Runnable() {
         @Override
@@ -78,7 +65,7 @@ public class MusicPlayService extends Service {
                         }
                     }
                     int currentPosition = mediaPlayer.getCurrentPosition();
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_CURRENT_TIME,  rebuildTime(currentPosition)));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_CURRENT_TIME, TimeUtil.rebuildTime(currentPosition)));
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_POS, currentPosition));
 
                     mStartPosition = currentPosition;
@@ -99,9 +86,9 @@ public class MusicPlayService extends Service {
     public int onStartCommand(Intent intent, int flag, int startId) {
 
         boolean isPlayMusic = intent.getBooleanExtra("IsPlayMusic", false);
-        Log.e("ABMusicPlayer", "isPlayMusic: " + isPlayMusic);
+        Log.i("ABMusicPlayer", "isPlayMusic: " + isPlayMusic);
         if(!isPlayMusic) {
-            Notification notification = NotificationHelper.getInstance().createNotificationReturn(this, "LLMusic", "Singer", null, true);
+            Notification notification = NotificationHelper.getInstance().createRemoteViews(this, "LLMusic", "Singer", null, true);
             startForeground(LL_MUSIC_PLAYER, notification);
         } else {
             String musicName = intent.getStringExtra("MusicName");
@@ -112,7 +99,7 @@ public class MusicPlayService extends Service {
             if(res != null) {
                 bitmap = BitmapFactory.decodeByteArray(res, 0, res.length);
             }
-            Notification notification = NotificationHelper.getInstance().createNotificationReturn(this, musicName, musicSinger, bitmap, false);
+            Notification notification = NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, bitmap, false);
             startForeground(LL_MUSIC_PLAYER, notification);
         }
         return START_REDELIVER_INTENT;
@@ -127,7 +114,7 @@ public class MusicPlayService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e("ABMusicPlayer", "StopForeground");
+        Log.i("ABMusicPlayer", "StopForeground");
         stopForeground(true);
     }
 
@@ -145,6 +132,7 @@ public class MusicPlayService extends Service {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
 
                 mediaPlayer = new MediaPlayer();
+
 
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
@@ -168,23 +156,29 @@ public class MusicPlayService extends Service {
                         isStop = false;
                         mediaPlayer.start();
                         mAllPosition = mediaPlayer.getDuration();
+                        mAudioSessionId = mediaPlayer.getAudioSessionId();
+                        Log.i(TAG, "mAudioSessionId: " + mAudioSessionId);
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, isStop));
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, mediaPlayer.getDuration()));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_VISUALIZER));
+
                         new Thread(runnable).start();
+                        //AppExecutors.getInstance().networkIO().execute(runnable);
+                        //ThreadTask.getInstance().executorNetThread(runnable, 1);
                     }
                 });
                 mediaPlayer.setLooping(isLoop);
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        Log.e("ABMediaPlay","isDown");
+                        Log.i("ABMediaPlay","isDown");
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_FINISH_SUCCESS));
                     }
                 });
                 mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                     @Override
                     public boolean onError(MediaPlayer mp, int what, int extra) {
-                        Log.e("ABMediaPlay","isError");
+                        Log.i("ABMediaPlay","isError");
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_ERROR));
                         return true;
                     }
@@ -202,11 +196,13 @@ public class MusicPlayService extends Service {
                     mediaPlayer.pause();
                     isStop = true;
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, true));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_STOP_VISUALIZER, true));
                     NotificationHelper.getInstance().createRemoteViews(context, musicName, musicSinger, bitmap, true);
                 } else {
                     mediaPlayer.start();
                     resumeThread();
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_STOP_VISUALIZER, false));
                     NotificationHelper.getInstance().createRemoteViews(context, musicName, musicSinger, bitmap, false);
                 }
                 updateWidgetUI(mediaPlayer.isPlaying(), true);
@@ -272,16 +268,17 @@ public class MusicPlayService extends Service {
             }
         }
 
+        /** 清除并销毁 */
         public void clearMedia() {
             stop();
         }
 
-        public MediaPlayer getMediaPlayer() {
-            if(null == mediaPlayer) {
-                return null;
-            }
-            return mediaPlayer;
-        }
+    }
+
+
+    /** 获取AudioSessionId */
+    public static int getAudioSessionId() {
+        return mAudioSessionId;
     }
 
     /** 恢复线程 */
@@ -292,7 +289,6 @@ public class MusicPlayService extends Service {
         }
     }
 
-
     /** 关闭 */
     public void stop() {
         isStop = true;
@@ -301,27 +297,6 @@ public class MusicPlayService extends Service {
             mediaPlayer.release();
             mediaPlayer = null;
         }
-    }
-
-    /** 转换成时间格式*/
-    public static String rebuildTime(long position) {
-        long minLong = position /1000/60;
-        long secLong = position /1000%60;
-        String minStr = minLong <10 ? "0"+minLong : ""+minLong;
-        String secStr = secLong <10 ? "0"+secLong : ""+secLong;
-        return minStr + ":" + secStr;
-    }
-
-    /** 转换为秒 */
-    public static int showSec(long position) {
-        long minLong = position /1000/60;
-        long secLong = position /1000%60;
-        String minStr = minLong <10 ? "0"+minLong : ""+minLong;
-        String secStr = secLong <10 ? "0"+secLong : ""+secLong;
-        if(minLong >0) {
-            return (Integer.parseInt(secStr) + (Integer.parseInt(minStr) * 60));
-        }
-        return Integer.parseInt(secStr);
     }
 
     /** 查询当前时间是否有对应歌词 */
@@ -374,23 +349,22 @@ public class MusicPlayService extends Service {
         intent.setPackage(getPackageName());
         intent.putExtra("IsLoading", false);
 
-        String startTime = rebuildTime(mStartPosition);
+        String startTime = TimeUtil.rebuildTime(mStartPosition);
         if(!TextUtils.isEmpty(startTime)) {
             intent.putExtra("StartTime", startTime);
         }
-        String allTime = rebuildTime(mAllPosition);
+        String allTime = TimeUtil.rebuildTime(mAllPosition);
         if(!TextUtils.isEmpty(allTime)) {
             intent.putExtra("AllTime", allTime);
         }
 
-        BigDecimal bd1 = new BigDecimal(showSec(mStartPosition));
-        BigDecimal bd2 = new BigDecimal(showSec(mAllPosition));
+        BigDecimal bd1 = new BigDecimal(TimeUtil.showSec(mStartPosition));
+        BigDecimal bd2 = new BigDecimal(TimeUtil.showSec(mAllPosition));
 
         int progress = bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).intValue();
         intent.putExtra("MusicProgress", progress);
-        //Log.e("LogByAB", "mStartPosition: " + showSec(mStartPosition) + " mAllPosition: " +  showSec(mAllPosition) + " /: " +  bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)));
+        //Log.i("LogByAB", "mStartPosition: " + showSec(mStartPosition) + " mAllPosition: " +  showSec(mAllPosition) + " /: " +  bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)));
         sendBroadcast(intent);
     }
-
 
 }

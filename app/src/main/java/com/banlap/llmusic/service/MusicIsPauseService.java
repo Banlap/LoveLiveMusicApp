@@ -24,14 +24,14 @@ public class MusicIsPauseService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startId) {
-        Log.e("ABMusicPlayer", "StartMusicIsPauseService");
+        Log.i("ABMusicPlayer", "StartMusicIsPauseService");
         boolean isPause =  intent.getBooleanExtra("IsPauseMusic", false);
         String musicName = intent.getStringExtra("MusicName");
         String musicSinger = intent.getStringExtra("MusicSinger");
         byte[] bis = intent.getByteArrayExtra("MusicBitmap");
         Bitmap bitmap = bis != null? BitmapFactory.decodeByteArray(bis, 0, bis.length) : null;
         if(isPause) {
-            Log.e("ABMusicPlayer", "isPause");
+            Log.i("ABMusicPlayer", "isPause");
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_PAUSE, musicName, musicSinger, bitmap));
         }
         return super.onStartCommand(intent, flag, startId);

@@ -98,7 +98,7 @@ public class MainVM extends AndroidViewModel {
             //正常操作
             if(msg.what == 0) {
                 if(msg.arg1 == NORMAL_STATUS_CHARACTER) {
-                    //Log.e("LogByAB", "NORMAL");
+                    //Log.i("LogByAB", "NORMAL");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MOVE_STATUS_CHARACTER, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -106,7 +106,7 @@ public class MainVM extends AndroidViewModel {
                     message.arg2 = msg.arg2;
                     animatedHandler.sendMessage(message);
                 } else if(msg.arg1 == MOVE_STATUS_CHARACTER) {
-                    //Log.e("LogByAB", "MOVE");
+                    //Log.i("LogByAB", "MOVE");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_NORMAL_STATUS_CHARACTER, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -114,7 +114,7 @@ public class MainVM extends AndroidViewModel {
                     message.arg2 = msg.arg2;
                     animatedHandler.sendMessage(message);
                 } else if(msg.arg1 == LISTEN_STATUS_CHARACTER_LEFT) {
-                    //Log.e("LogByAB", "MOVE");
+                    //Log.i("LogByAB", "MOVE");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LISTEN_STATUS_CHARACTER_LEFT, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -122,7 +122,7 @@ public class MainVM extends AndroidViewModel {
                     message.arg2 = msg.arg2;
                     animatedHandler.sendMessage(message);
                 } else if (msg.arg1 == LISTEN_STATUS_CHARACTER_RIGHT) {
-                    //Log.e("LogByAB", "MOVE");
+                    //Log.i("LogByAB", "MOVE");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LISTEN_STATUS_CHARACTER_RIGHT, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -146,7 +146,7 @@ public class MainVM extends AndroidViewModel {
         List<MusicLyric> musicLyricList = new ArrayList<>();
         String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
         if(!lyricUrl.equals("")) {
-            OkhttpUtil.newInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
+            OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
                 @Override
                 public void onSuccess(Response response) {
                     try {
@@ -206,14 +206,14 @@ public class MainVM extends AndroidViewModel {
                             EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly, lyWithoutTime, musicLyricList));
                         }
                     } catch (Exception e) {
-                        Log.e("ABMediaPlay", "http error " + e.getMessage());
+                        Log.i("ABMediaPlay", "http error " + e.getMessage());
                         e.printStackTrace();
                     }
                 }
 
                 @Override
                 public void onError(String e) {
-                    Log.e("ABMediaPlay", "error: " + e);
+                    Log.i("ABMediaPlay", "error: " + e);
                     EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
                 }
             });
@@ -225,7 +225,7 @@ public class MainVM extends AndroidViewModel {
     /** 获取网络图片 */
     public void showImageURL(String musicName, String musicSinger, String dataSource) {
 
-        OkhttpUtil.newInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
+        OkhttpUtil.getInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
             @Override
             public void onSuccess(Response response) {
                 try {
@@ -248,23 +248,23 @@ public class MainVM extends AndroidViewModel {
                     //Bitmap bitmapNew = BitmapFactory.decodeStream(inputStream, null, optionsNew);
 
                     //计算当前bitmap大小
-                    Log.e("LogByAB", "bitmap: " + getBitmapSize(bitmap));
-                    Log.e("LogByAB", "bitmapNew: " + getBitmapSize(bitmapNew));
+                    Log.i("LogByAB", "bitmap: " + getBitmapSize(bitmap));
+                    Log.i("LogByAB", "bitmapNew: " + getBitmapSize(bitmapNew));
                     if (getBitmapSize(bitmap) >= IMG_BITMAP_LIMIT_SIZE) {
-                        Log.e("LogByAB", "bitmap: resize");
+                        Log.i("LogByAB", "bitmap: resize");
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmapNew));
                     } else {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
                     }
                 } catch (Exception e) {
-                    Log.e("ABMediaPlay", "error " + e.getMessage());
+                    Log.i("ABMediaPlay", "error " + e.getMessage());
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
                 }
             }
 
             @Override
             public void onError(String e) {
-                Log.e("ABMediaPlay", "error: " + e);
+                Log.i("ABMediaPlay", "error: " + e);
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
             }
         });
@@ -280,7 +280,7 @@ public class MainVM extends AndroidViewModel {
         isDownloadStop = false;
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START));
 
-        OkhttpUtil.newInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
+        OkhttpUtil.getInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
             @Override
             public void onSuccess(Response response) {
                 downloadApp(response);
@@ -288,7 +288,7 @@ public class MainVM extends AndroidViewModel {
 
             @Override
             public void onError(String e) {
-                Log.e("ABMediaPlay", "error " + e);
+                Log.i("ABMediaPlay", "error " + e);
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR));
             }
         });
@@ -321,7 +321,7 @@ public class MainVM extends AndroidViewModel {
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_LOADING, progress));
-                //Log.e("LogByAB","Download progress: " + (100 * (total / (double) contentLength)));
+                //Log.i("LogByAB","Download progress: " + (100 * (total / (double) contentLength)));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS, false));
@@ -336,7 +336,7 @@ public class MainVM extends AndroidViewModel {
             is.close();
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS, true, file));
         } catch (Exception e) {
-            Log.e("ABMediaPlay", "error " + e.getMessage());
+            Log.i("ABMediaPlay", "error " + e.getMessage());
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR));
         }
     }
@@ -394,10 +394,10 @@ public class MainVM extends AndroidViewModel {
      * 展示每日推荐
      * */
     public static void showRecommendData(Context context) {
-        String recommendDate = SPUtil.getStrValue(context, "RecommendDate");
+        String recommendDate = SPUtil.getStrValue(context, SPUtil.RecommendDate);
         if(!TextUtils.isEmpty(recommendDate) && !TimeUtil.isCheckTime(recommendDate, 24)) {
             //本地缓存列表
-            List<Music> spList = SPUtil.getListValue(context, "RecommendListData", Music.class);
+            List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
             if(spList.size() >0){
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, spList));
             }
@@ -405,7 +405,7 @@ public class MainVM extends AndroidViewModel {
         }
         //获取最新的每日推荐数据
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
-        SPUtil.setStrValue(context, "RecommendDate", TimeUtil.getCurrentDateStr());
+        SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
     }
 
     /**
@@ -458,10 +458,7 @@ public class MainVM extends AndroidViewModel {
     }
 
     public interface MainCallBack {
-        void viewSeekBarResume();
-        void viewPause(boolean isPause);
-        void viewMusicMsg(Music musicSource, int allPos);
-        void viewSeekBarPos(int pos);
+
     }
 
 

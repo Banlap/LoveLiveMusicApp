@@ -25,7 +25,7 @@ public class CacheUtil {
             }
             return getFormatSize(cacheSize);
         } catch (Exception e) {
-            Log.e(TAG, " e: " + e.getMessage());
+            Log.i(TAG, " e: " + e.getMessage());
             return "0.0M";
         }
 

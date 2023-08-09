@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:id="@+id/ll_dialog"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="7dp">
+
+        <LinearLayout
+            android:id="@+id/ll_controller_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/tv_controller_mode"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="播放页面"
+                android:textColor="@color/gray_c9"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/iv_character_by_keke"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_sort_up" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/v_line"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_controller_mode"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_c9" />
+
+        <LinearLayout
+            android:id="@+id/ll_bg_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/v_line"
+            android:background="@drawable/selector_tab_selected2"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/tv_bg_mode"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="壁纸页面"
+                android:textColor="@color/gray_c9"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:visibility="invisible"
+                android:id="@+id/iv_character_by_kanon"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/ic_sort_up" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+</layout>

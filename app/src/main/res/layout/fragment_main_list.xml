@@ -53,7 +53,6 @@
                       android:layout_marginEnd="15dp"
                       android:layout_marginBottom="10dp"
                       android:orientation="horizontal"
-                      android:background="@drawable/shape_button_alpha_2_hover"
                       >
 
                       <LinearLayout
@@ -63,7 +62,6 @@
                           android:layout_height="100dp"
                           android:orientation="vertical"
                           android:gravity="center"
-                          android:layout_marginStart="5dp"
                           android:layout_marginEnd="5dp"
                           android:background="@drawable/shape_button_alpha_2_hover"
                           >
@@ -94,7 +92,7 @@
                               android:layout_height="wrap_content"
                               android:singleLine="true"
                               android:ellipsize="marquee"
-                              android:text="aaa"
+                              android:text="MusicName1"
                               android:textColor="@color/light_ff"
                               android:textSize="12dp"/>
 
@@ -137,7 +135,7 @@
                               android:layout_height="wrap_content"
                               android:singleLine="true"
                               android:ellipsize="marquee"
-                              android:text="bbbb"
+                              android:text="MusicName2"
                               android:textColor="@color/light_ff"
                               android:textSize="12dp"/>
 
@@ -151,7 +149,6 @@
                           android:orientation="vertical"
                           android:gravity="center"
                           android:layout_marginStart="5dp"
-                          android:layout_marginEnd="5dp"
                           android:background="@drawable/shape_button_alpha_2_hover"
                           >
 
@@ -180,7 +177,7 @@
                               android:layout_height="wrap_content"
                               android:singleLine="true"
                               android:ellipsize="marquee"
-                              android:text="ccc"
+                              android:text="MusicName3"
                               android:textColor="@color/light_ff"
                               android:textSize="12dp"/>
 

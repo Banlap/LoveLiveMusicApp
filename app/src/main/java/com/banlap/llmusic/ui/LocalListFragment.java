@@ -49,6 +49,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.LocalPlayList;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.uivm.LocalListFVM;
+import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
@@ -72,6 +73,9 @@ import java.util.Random;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
+/**
+ * PlayList页面
+ * */
 public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalListBinding>
     implements LocalListFVM.LocalListCallBack {
 
@@ -110,7 +114,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     protected void initData() {
         mLocalPlayList = new ArrayList<>();
         //自建歌单缓存列表
-        List<LocalPlayList> list = SPUtil.getListValue(getContext(), "LocalPlayListData", LocalPlayList.class);
+        List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
         if(list.size() >0) {
             mLocalPlayList.addAll(list);
         } else {
@@ -118,12 +122,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             mLocalPlayList.add(nullLocalPlayList);
             mLocalPlayList.add(nullLocalPlayList);
             mLocalPlayList.add(nullLocalPlayList);
-            SPUtil.setListValue(getContext(), "LocalPlayListData", mLocalPlayList);
+            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
         }
 
         mLocalMusicList = new ArrayList<>();
-        //本地缓存列表
-        List<LocalFile> spList = SPUtil.getListValue(getContext(), "LocalListData", LocalFile.class);
+        //本地歌曲缓存列表
+        List<LocalFile> spList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, LocalFile.class);
         if(spList.size()>0){
             mLocalMusicList.addAll(spList);
         } else {
@@ -131,12 +135,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             LocalFile nullLocalFile2 = new LocalFile();
             mLocalMusicList.add(nullLocalFile);
             mLocalMusicList.add(nullLocalFile2);
-            SPUtil.setListValue(getContext(), "LocalListData", mLocalMusicList);
+            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
         }
 
         mFavoriteList = new ArrayList<>();
-        //本地缓存列表
-        List<Music> spList2 = SPUtil.getListValue(getContext(), "FavoriteListData", Music.class);
+        //最爱歌曲缓存列表
+        List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
         if(spList2.size()>0){
             mFavoriteList.addAll(spList2);
         } else {
@@ -144,7 +148,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             Music nullMusicFile2 = new Music();
             mFavoriteList.add(nullMusicFile);
             mFavoriteList.add(nullMusicFile2);
-            SPUtil.setListValue(getContext(), "FavoriteListData", mFavoriteList);
+            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
         }
 
         requestOptions = new RequestOptions();
@@ -212,6 +216,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 if(null != mLocalMusicList) {
                     int musicCount = mLocalMusicList.size()-2;
                     getViewDataBinding().tvMusicCount.setText("" + musicCount);
+                    getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
                 }
                 //编辑按钮重置
                 if(null != mLocalMusicList && mLocalMusicList.size() >0) {
@@ -237,6 +242,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 if(null != mFavoriteList) {
                     int musicCount = mFavoriteList.size()-2;
                     getViewDataBinding().tvMusicCount.setText("" + musicCount);
+                    getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
                 }
                 //编辑按钮重置
                 if(null != mFavoriteList && mFavoriteList.size() >0) {
@@ -302,7 +308,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
                     getViewDataBinding().tvMusicCount.setText("" + (mLocalMusicList.size()-2));
                     getViewDataBinding().tvLocalMusicCount.setText("" + (mLocalMusicList.size()-2));
-                    SPUtil.setListValue(getContext(), "LocalListData", mLocalMusicList);
+                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
                 }
                 break;
             case ThreadEvent.SCAN_LOCAL_FILE_ERROR:
@@ -321,18 +327,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
                     getViewDataBinding().tvMusicCount.setText("" + (mLocalMusicList.size()-2));
                     getViewDataBinding().tvLocalMusicCount.setText("" + (mLocalMusicList.size()-2));
-                    SPUtil.setListValue(getContext(), "LocalListData", mLocalMusicList);
+                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
                 }
                 break;
 
             case ThreadEvent.SELECT_IMG_FILE_SUCCESS:
-                if(event.strArray != null && event.strArray.length>0) {
-                    if(!PermissionUtil.getInstance().checkPermission(getContext(), event.strArray)) {
-                        if(selectImgListener != null) {
-                            SelectImgHelper.getInstance().startSelectImg(getContext(), selectImgListener);
-                            selectImgListener = null;
-                        }
-                    }
+                if(selectImgListener != null) {
+                    SelectImgHelper.getInstance().startSelectImg(getContext(), selectImgListener);
+                    selectImgListener = null;
                 }
                 break;
             case ThreadEvent.VIEW_CHANGE_THEME:
@@ -353,18 +355,31 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     List<Music> currentMusicList = new ArrayList<>();
                     currentMusicList.add(event.music);
                     mFavoriteList.addAll(currentMusicList);
-                    List<Music> spList2 = SPUtil.getListValue(getContext(), "FavoriteListData", Music.class);
+                    List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
                     mFavoriteList.addAll(spList2);
                     favoriteListAdapter.notifyDataSetChanged();
-                    SPUtil.setListValue(getContext(), "FavoriteListData", mFavoriteList);
+                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
                     Toast.makeText(getContext(), "添加收藏成功", Toast.LENGTH_SHORT).show();
                     getViewDataBinding().tvFavoriteMusicCount.setText(""+(mFavoriteList.size()-2));
+                }
+                break;
+            case ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC:
+                if(mFavoriteList.size() >0 ) {
+                    for(int i=0; i< mFavoriteList.size(); i++) {
+                        if(event.music.musicName.equals(mFavoriteList.get(i).musicName)) {
+                            mFavoriteList.remove(i);
+                            favoriteListAdapter.notifyItemRemoved(i);
+                            favoriteListAdapter.notifyItemRangeChanged(i, mFavoriteList.size());
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
+                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
+                        }
+                    }
                 }
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST:
             case ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST:
                 mLocalPlayList.clear();
-                List<LocalPlayList> list = SPUtil.getListValue(getContext(), "LocalPlayListData", LocalPlayList.class);
+                List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
                 mLocalPlayList.addAll(list);
                 playListAdapter.notifyDataSetChanged();
                 break;
@@ -392,7 +407,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
      * 改变主题
      * */
     private void changeTheme() {
-        String strThemeId = SPUtil.getStrValue(getContext(), "SaveThemeId");
+        String strThemeId = SPUtil.getStrValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.SaveThemeId);
         if(strThemeId!=null) {
             if(!strThemeId.equals("")) {
                 rThemeId = Integer.parseInt(strThemeId);
@@ -551,12 +566,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             }
 
                             mLocalPlayList.add(playList);
-                            List<LocalPlayList> list = SPUtil.getListValue(v.getContext(), "LocalPlayListData", LocalPlayList.class);
+                            List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
                             if(list.size()>0) {
                                 mLocalPlayList.addAll(list);
                             }
 
-                            SPUtil.setListValue(v.getContext(), "LocalPlayListData", mLocalPlayList);
+                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
                             playListAdapter.notifyDataSetChanged();
                         }
                     } else {
@@ -567,7 +582,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             byte[] bitmapByte = baos.toByteArray();
                             mLocalPlayList.get(position).setPlayListImgByte(bitmapByte);
                         }
-                        SPUtil.setListValue(v.getContext(), "LocalPlayListData", mLocalPlayList);
+                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
                         playListAdapter.notifyDataSetChanged();
                     }
                     
@@ -655,7 +670,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             mLocalPlayList.remove(position);
                             playListAdapter.notifyItemRemoved(position);  //移除了视图但没有进行重新bind的过程，所以此position还是之前的position，因此需要调用notifyItemRangeChanged
                             playListAdapter.notifyItemRangeChanged(position, mLocalPlayList.size());
-                            SPUtil.setListValue(v.getContext(), "LocalPlayListData", mLocalPlayList);
+                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
                         }
 
                     }
@@ -849,7 +864,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         localListAdapter.notifyItemRemoved(position);
                         localListAdapter.notifyItemRangeChanged(position, mLocalMusicList.size());
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_LOCAL_MUSIC));
-                        SPUtil.setListValue(v.getContext(), "LocalListData", localFileList);
+                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, localFileList);
                     }
                 });
             }
@@ -929,7 +944,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         favoriteListAdapter.notifyItemRemoved(position);
                         favoriteListAdapter.notifyItemRangeChanged(position, favoriteList.size());
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
-                        SPUtil.setListValue(v.getContext(), "FavoriteListData", favoriteList);
+                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, favoriteList);
                     }
                 });
             }

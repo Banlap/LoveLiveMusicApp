@@ -20,10 +20,10 @@ public class MusicLastService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flag, int startId) {
-        Log.e("ABMusicPlayer", "StartMusicLastService");
+        Log.i("ABMusicPlayer", "StartMusicLastService");
         boolean isLast =  intent.getBooleanExtra("LastMusic", false);
         if(isLast) {
-            Log.e("ABMusicPlayer", "isLast");
+            Log.i("ABMusicPlayer", "isLast");
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
         }
         return super.onStartCommand(intent, flag, startId);

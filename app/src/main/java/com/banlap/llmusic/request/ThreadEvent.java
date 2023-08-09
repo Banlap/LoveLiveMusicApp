@@ -87,8 +87,8 @@ public class ThreadEvent<T> {
     public static final int ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x335;
     public static final int DELETE_MUSIC_IN_LOCAL_PLAY_LIST = 0x336;
     public static final int PLAY_RECOMMEND_MUSIC = 0x337;
-    public static final int GET_MUSIC_LYRIC = 0x34;
-    public static final int SHOW_IMAGE_URL = 0x36;
+    public static final int GET_MUSIC_LYRIC = 0x34;   //获取音乐歌词
+    public static final int SHOW_IMAGE_URL = 0x36;    //展示音乐图片
     public static final int MUSIC_IS_NEXT = 0x37;
     public static final int MUSIC_IS_LAST = 0x38;
     public static final int MUSIC_IS_PAUSE = 0x39;
@@ -103,14 +103,15 @@ public class ThreadEvent<T> {
 
     public static final int VIEW_SEEK_BAR_POS = 0x50;
     public static final int VIEW_SEEK_BAR_RESUME = 0x51;
-    public static final int VIEW_PAUSE = 0x52;
-    public static final int VIEW_PLAY_LIST_FIRST =0x521;
-    public static final int VIEW_SHOW_FRAGMENT = 0x522;
-    public static final int VIEW_MUSIC_MSG = 0x53;
+    public static final int VIEW_PAUSE = 0x52;   //处理播放或暂停
+    public static final int VIEW_SHOW_VISUALIZER =0x521;
+    public static final int VIEW_SHOW_STOP_VISUALIZER = 0x522;
+    public static final int VIEW_MUSIC_MSG = 0x53;  //展示音乐信息
     public static final int VIEW_ADD_MUSIC = 0x54;
     public static final int VIEW_ADD_FAVORITE_MUSIC = 0x541;
     public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x542;
     public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 0x543;
+    public static final int VIEW_CANCEL_FAVORITE_MUSIC = 0x544;
     public static final int VIEW_DELETE_MUSIC = 0x55;
     public static final int VIEW_DELETE_LOCAL_MUSIC = 0x551;
     public static final int VIEW_DELETE_FAVORITE_MUSIC = 0x552;
@@ -122,11 +123,10 @@ public class ThreadEvent<T> {
     public static final int VIEW_CHANGE_THEME = 0x59;
     public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 0x60;
     public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 0x601;
-    public static final int VIEW_CROPPING_IMG = 0x61;
+    public static final int VIEW_CONTROLLER_MODE = 0x61;
     public static final int VIEW_CROPPING_IMG_2 = 0x611;
     public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 0x62;
     public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 0x621;
-
 
 
     /** 蓝牙部分控制 */

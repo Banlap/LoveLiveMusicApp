@@ -18,7 +18,7 @@ public class OkhttpUtil {
 
     private static OkHttpClient mClient;
 
-    public static OkhttpUtil newInstance() { return new OkhttpUtil(); }
+    public static OkhttpUtil getInstance() { return new OkhttpUtil(); }
 
     public OkhttpUtil() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder()

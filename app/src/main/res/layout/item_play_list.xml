@@ -39,7 +39,14 @@
                 android:id="@+id/iv_music_rail"
                 android:layout_width="28dp"
                 android:layout_height="20dp"
-                app:rail_color="@color/light_ea"/>
+                app:rail_color="@color/light_f9"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail_blue"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/blue_ac"/>
 
             <com.banlap.llmusic.widget.MusicLoadingView
                 android:visibility="gone"

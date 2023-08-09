@@ -3,6 +3,7 @@ package com.banlap.llmusic.widget;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -20,6 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.MusicLyric;
+import com.banlap.llmusic.utils.LLActivityManager;
+import com.banlap.llmusic.utils.PxUtil;
+import com.banlap.llmusic.utils.SystemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,20 +31,25 @@ import java.util.List;
  * 歌词滚动View
  * */
 public class LyricScrollView extends View {
-
+    private final String TAG = LyricScrollView.class.getSimpleName();
     private List<MusicLyric> musicLyrics;
     private int rThemeId =0;                                   //当前主题
     private Paint mPaint;
     private Paint mPaint2;
 
     private int currentPosition = 0, lastPosition = 0, playerCurrentPosition =0;
-    private final int lyricSize = 30;                          //歌词文字大小
-    private final int mPaddingY = 120;                         //歌词间距
-    private final int mSecondsPaddingY = 15;                   //副歌词间距
-    private final int secondsLyricSize = 25;                   //副歌词文字大小
+    private int lyricSize = 30;                          //歌词文字大小
+    private int zoomSize = 10;                           //歌词文字放大
+    private int mPaddingY = 150;                         //歌词间距
+    private int mSecondsPaddingY = 15;                   //副歌词间距
+    private int secondsLyricSize = 25;                   //副歌词文字大小
     private boolean isTouchLyric = false;                      //是否在触摸滚动歌词
     private boolean mIsRefreshDraw = false;                    //是否刷新绘制：用于拖动滚动条时刷新
     private boolean isStop = false;                            //是否暂停绘制歌词
+    private long mStartTime;
+    private int highLightLyricColor, defaultLyricColor;        //高亮颜色、默认颜色
+    private boolean isUseLyricDetailColor = false;
+    private LyricClickListener lyricClickListener;        //点击监听
 
     public LyricScrollView(@NonNull Context context) {
         super(context);
@@ -61,6 +70,14 @@ public class LyricScrollView extends View {
      * 初始化参数
      * */
     private void init() {
+        //适配小型设备
+        if(SystemUtil.getInstance().isSmallScaleDevice()) {
+            lyricSize = 20;
+            zoomSize = 10;
+            secondsLyricSize = 20;
+            mPaddingY = 100;
+            mSecondsPaddingY = 15;
+        }
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(lyricSize);
         mPaint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -86,11 +103,15 @@ public class LyricScrollView extends View {
         }
     }
 
-
     /**
      * 设置当前主题Id
      * */
     public void setThemeId(int themeId) { rThemeId = themeId; }
+
+    /**
+     * 是否转换颜色
+     * */
+    public void setIsUseLyricDetailColor(boolean isUse) { isUseLyricDetailColor = isUse; }
 
     /**
      * 设置当前歌曲的歌词
@@ -122,23 +143,8 @@ public class LyricScrollView extends View {
         float lyricY = height/2;
 
         if(null == musicLyrics || 0 == musicLyrics.size()) {
-            if(0 != rThemeId) {
-                if(rThemeId == R.id.ll_theme_normal) {
-                    mPaint.setColor(getResources().getColor(R.color.black));
-                } else if(rThemeId == R.id.ll_theme_dark) {
-                    mPaint.setColor(getResources().getColor(R.color.white));
-                } else if(rThemeId == R.id.ll_theme_white) {
-                    mPaint.setColor(getResources().getColor(R.color.gray_purple_ac));
-                } else if(rThemeId == R.id.ll_theme_orange) {
-                    mPaint.setColor(getResources().getColor(R.color.orange_0b));
-                } else if(rThemeId == R.id.ll_theme_light) {
-                    mPaint.setColor(getResources().getColor(R.color.light_b5));
-                } else {
-                    mPaint.setColor(getResources().getColor(R.color.black));
-                }
-            } else {
-                mPaint.setColor(getResources().getColor(R.color.black));
-            }
+            setLyricColor(isUseLyricDetailColor);
+            mPaint.setColor(defaultLyricColor);
             mPaint.setTextSize(lyricSize);
             mPaint.setTextAlign(Paint.Align.CENTER);
             canvas.drawText("当前没有歌词", lyricX, lyricY, mPaint);
@@ -147,7 +153,6 @@ public class LyricScrollView extends View {
 
         drawLyric(canvas, lyricX, lyricY);
 
-        //Log.e("LogByAB", "isStop: " + isStop + " mIsRefreshDraw: " + mIsRefreshDraw + " isTouchLyric: " + isTouchLyric);
         if(!isStop || mIsRefreshDraw || isTouchLyric) {
             if(!isTouchLyric) {
                 getMusicLyricPos();
@@ -155,7 +160,7 @@ public class LyricScrollView extends View {
                 float v = (playerCurrentPosition - start) >= 500 ?
                         currentPosition * mPaddingY :
                         lastPosition * mPaddingY + (currentPosition - lastPosition) * mPaddingY * ((playerCurrentPosition - start) / 500f);
-               /* Log.e("LogByAB", "v: " + v + " p:" + playerCurrentPosition
+               /* Log.i("LogByAB", "v: " + v + " p:" + playerCurrentPosition
                         + " s:" + start + " p-s:" + (playerCurrentPosition - start) + " c: " + currentPosition);
                 */
                 setScrollY((int) v);
@@ -163,6 +168,7 @@ public class LyricScrollView extends View {
                     lastPosition = currentPosition;
                 }
             } else {
+                //Log.i("LogByAB", "currentPosition: " + currentPosition + " mPaddingY: " + mPaddingY);
                 setScrollY((int) currentPosition * mPaddingY);
             }
             postInvalidateDelayed(100);
@@ -235,35 +241,10 @@ public class LyricScrollView extends View {
      * */
     private void drawLyric(Canvas canvas, float lyricX, float lyricY) {
         if(null != musicLyrics && musicLyrics.size() >0) {
-            int highLightLyricColor, defaultLyricColor;
-            if(0 != rThemeId) {
-                if(rThemeId == R.id.ll_theme_normal) {
-                    highLightLyricColor = getResources().getColor(R.color.light_ea);
-                    defaultLyricColor = getResources().getColor(R.color.black);
-                } else if(rThemeId == R.id.ll_theme_dark) {
-                    highLightLyricColor = getResources().getColor(R.color.black);
-                    defaultLyricColor = getResources().getColor(R.color.white);
-                } else if(rThemeId == R.id.ll_theme_white) {
-                    highLightLyricColor = getResources().getColor(R.color.purple);
-                    defaultLyricColor = getResources().getColor(R.color.gray_purple_ac);
-                } else if(rThemeId == R.id.ll_theme_orange) {
-                    highLightLyricColor = getResources().getColor(R.color.orange_f4);
-                    defaultLyricColor = getResources().getColor(R.color.orange_0b);
-                } else if(rThemeId == R.id.ll_theme_light) {
-                    highLightLyricColor = getResources().getColor(R.color.light_8a);
-                    defaultLyricColor = getResources().getColor(R.color.light_b5);
-                } else {
-                    highLightLyricColor = getResources().getColor(R.color.light_ea);
-                    defaultLyricColor = getResources().getColor(R.color.black);
-                }
-            } else {
-                highLightLyricColor = getResources().getColor(R.color.light_ea);
-                defaultLyricColor = getResources().getColor(R.color.black);
-            }
-
+            setLyricColor(isUseLyricDetailColor);
             for(int i=0; i< musicLyrics.size(); i++) {
                 //绘制主歌词
-                mPaint.setTextSize(lyricSize);
+                mPaint.setTextSize(i == currentPosition? lyricSize + zoomSize : lyricSize);
                 mPaint.setTextAlign(Paint.Align.CENTER);
                 if(!isStop && !isTouchLyric) {
                     mPaint.setColor(i == currentPosition? highLightLyricColor : defaultLyricColor);
@@ -271,6 +252,7 @@ public class LyricScrollView extends View {
                     mPaint.setColor(defaultLyricColor);
                 }
                 mPaint.setFakeBoldText(i == currentPosition);
+
                 canvas.drawText(musicLyrics.get(i).lyricContext, lyricX, lyricY + mPaddingY * i, mPaint);
 
                 //绘制副歌词
@@ -286,18 +268,57 @@ public class LyricScrollView extends View {
         }
     }
 
+    /**
+     *  绘制歌词颜色
+     * */
+    private void setLyricColor(boolean isLyricDetail) {
+        if(0 != rThemeId) {
+            if(rThemeId == R.id.ll_theme_normal) {
+                highLightLyricColor = getResources().getColor(isLyricDetail? R.color.blue_ed : R.color.light_f9);
+                defaultLyricColor = getResources().getColor(R.color.black);
+            } else if(rThemeId == R.id.ll_theme_blue) {
+                highLightLyricColor = getResources().getColor(isLyricDetail? R.color.light_f9 : R.color.blue_0E);
+                defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.blue_ed);
+            } else if(rThemeId == R.id.ll_theme_dark) {
+                highLightLyricColor = getResources().getColor(R.color.black);
+                defaultLyricColor = getResources().getColor(R.color.white);
+            } else if(rThemeId == R.id.ll_theme_white) {
+                highLightLyricColor = getResources().getColor(R.color.purple);
+                defaultLyricColor = getResources().getColor(R.color.gray_purple_ac);
+            } else if(rThemeId == R.id.ll_theme_orange) {
+                highLightLyricColor = getResources().getColor(R.color.orange_f4);
+                defaultLyricColor = getResources().getColor(R.color.orange_0b);
+            } else if(rThemeId == R.id.ll_theme_light) {
+                highLightLyricColor = getResources().getColor(R.color.light_8a);
+                defaultLyricColor = getResources().getColor(R.color.light_b5);
+            } else {
+                highLightLyricColor = getResources().getColor(R.color.light_f9);
+                defaultLyricColor = getResources().getColor(R.color.black);
+            }
+        } else {
+            highLightLyricColor = getResources().getColor(R.color.light_f9);
+            defaultLyricColor = getResources().getColor(R.color.black);
+        }
+    }
+
     private final int mMinMove = 10;                           //最小触摸距离
     private float mLastY;  //记录点击初始位置
+    private int mStartX, mStartY; //触摸时记录开始时的坐标 用于判断按下事件跟结束事件
+
     /**
      * 触摸滚动歌词
      **/
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if(null == musicLyrics || 0 == musicLyrics.size()) {
+            Log.i(TAG, "super.onTouchEvent(event)：" + super.onTouchEvent(event));
             return super.onTouchEvent(event);
         }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                mStartX = (int) event.getRawX();
+                mStartY = (int) event.getRawY();
+                mStartTime = System.currentTimeMillis();
                 isTouchLyric = true;
                 mLastY = event.getY();
                 postInvalidateOnAnimation();
@@ -308,6 +329,16 @@ public class LyricScrollView extends View {
                 handler.removeCallbacksAndMessages(null);
                 break;
             case MotionEvent.ACTION_UP:
+                long endTime = System.currentTimeMillis();
+                if(mStartTime - endTime <= 500) {
+                    int mStopX = (int) event.getRawX();
+                    int mStopY = (int) event.getRawY();
+                    if (Math.abs(mStartX - mStopX) <= 10 || Math.abs(mStartY - mStopY) <= 10) {
+                        if(lyricClickListener != null) {
+                            lyricClickListener.onSingleTap();
+                        }
+                    }
+                }
                 android.os.Message message = new Message();
                 message.what = 1;
                 handler.sendMessageDelayed(message, 2000);
@@ -328,6 +359,16 @@ public class LyricScrollView extends View {
     };
 
     /**
+     * 设置单点回调
+     * */
+    public void setOnLyricClickListener(LyricClickListener lyricClickListener) {
+        this.lyricClickListener = lyricClickListener;
+    }
+
+    public interface LyricClickListener {
+        void onSingleTap();
+    }
+    /**
      * 根据触摸滑动的距离滚动歌词
      * */
     private void seekLyricByTouchMove(MotionEvent event) {
@@ -339,7 +380,7 @@ public class LyricScrollView extends View {
         }
         //获取滚动歌词的行数
         int moveRow = Math.abs((int) moveY / lyricSize);
-        //Log.e("LogByAB", "moveY: " + moveY);
+        //Log.i("LogByAB", "moveY: " + moveY);
 
         if(moveY <0) {  //向上滚动
             currentPosition += moveRow;

@@ -42,7 +42,7 @@ public class SettingsVM extends AndroidViewModel {
         isDownloadStop = false;
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START2));
 
-        OkhttpUtil.newInstance().request(url, new OkhttpUtil.OkHttpCallBack() {
+        OkhttpUtil.getInstance().request(url, new OkhttpUtil.OkHttpCallBack() {
             @Override
             public void onSuccess(Response response) {
                downloadApp(response);
@@ -50,7 +50,7 @@ public class SettingsVM extends AndroidViewModel {
 
             @Override
             public void onError(String e) {
-                Log.e("ABMediaPlay", "error " + e);
+                Log.i("ABMediaPlay", "error " + e);
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
             }
         });
@@ -97,7 +97,7 @@ public class SettingsVM extends AndroidViewModel {
             is.close();
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, true, file));
         } catch (Exception e) {
-            Log.e("ABMediaPlay", "error " + e.getMessage());
+            Log.i("ABMediaPlay", "error " + e.getMessage());
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
         }
     }

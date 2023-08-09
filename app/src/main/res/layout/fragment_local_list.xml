@@ -33,6 +33,7 @@
                     app:elevation="0dp">
 
                     <LinearLayout
+                        android:id="@+id/ll_app_bar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
@@ -91,7 +92,7 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_marginTop="15dp"
-                                android:background="@drawable/ic_favorite_light"/>
+                                android:background="@drawable/ic_favorite_light_ff"/>
 
                             <TextView
                                 android:id="@+id/tv_favorite_music"
@@ -113,7 +114,6 @@
                                 />
 
                         </LinearLayout>
-
 
                     </LinearLayout>
 
@@ -323,6 +323,7 @@
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

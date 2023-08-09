@@ -1,19 +1,14 @@
 package com.banlap.llmusic.ui;
 
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.view.View;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseFragment;
 import com.banlap.llmusic.databinding.FragmentMainListBinding;
 import com.banlap.llmusic.model.Music;
-import com.banlap.llmusic.model.Version;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.uivm.MainListFVM;
-import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -29,6 +24,9 @@ import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
+/**
+ * Discover主页
+ * */
 public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainListBinding>
     implements MainListFVM.MainListCallBack {
 
@@ -79,7 +77,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
      * 改变主题
      * */
     private void changeTheme() {
-        String strThemeId = SPUtil.getStrValue(getContext(), "SaveThemeId");
+        String strThemeId = SPUtil.getStrValue(getContext(), SPUtil.SaveThemeId);
         if(strThemeId!=null) {
             if(!strThemeId.equals("")) {
                 rThemeId = Integer.parseInt(strThemeId);
@@ -109,7 +107,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                     recommendList.clear();
                     recommendList.addAll(event.musicList);
 
-                    SPUtil.setListValue(getContext(), "RecommendListData", recommendList);
+                    SPUtil.setListValue(getContext(), SPUtil.RecommendListData, recommendList);
 
                     Glide.with(getContext())
                             .setDefaultRequestOptions(requestOptions)

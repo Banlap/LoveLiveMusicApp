@@ -86,6 +86,14 @@
 
                     <ImageView
                         android:visibility="gone"
+                        android:id="@+id/iv_add_animator_blue"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_margin="5dp"
+                        android:background="@drawable/ic_add_blue_ac"/>
+
+                    <ImageView
+                        android:visibility="gone"
                         android:id="@+id/iv_add_animator_black"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
@@ -140,7 +148,7 @@
                         android:layout_marginTop="5dp"
                         android:layout_marginEnd="5dp"
                         android:layout_marginBottom="5dp"
-                        android:background="@drawable/ic_more_light" />
+                        android:background="@drawable/ic_more_light_ff" />
 
                 </RelativeLayout>
 
