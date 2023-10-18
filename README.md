@@ -22,8 +22,7 @@
 
 
 ### 最近更新：
-<p align="start">1. 添加收藏夹</p>
-<p align="start">2. 每日推荐功能</p>
+<p align="start">1. 定时关闭歌曲任务</p>
 
 #
 ### App的功能：
@@ -40,6 +39,8 @@
 <p align="start">11. 本地歌曲导入功能</p>
 <p align="start">12. 桌面小组件</p>
 <p align="start">13. 启动动画设置</p>
+<p align="start">14. 添加收藏夹</p>
+<p align="start">15. 每日推荐功能</p>
 
 
 **（本项目为开源项目，仅用于学习交流，请勿用于商业及非法用途）**
