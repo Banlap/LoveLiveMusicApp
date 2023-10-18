@@ -130,7 +130,7 @@
                     android:layout_height="5dp"
                     android:max="100"
                     android:progress="0"
-                    android:progressDrawable="@drawable/layer_progress_bar_white" />
+                    android:progressDrawable="@drawable/layer_progress_bar_default" />
 
                 <TextView
                     android:visibility="gone"

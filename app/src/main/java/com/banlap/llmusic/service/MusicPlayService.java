@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -23,6 +24,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.NotificationHelper;
+import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
 import com.danikula.videocache.HttpProxyCacheServer;
 
@@ -80,6 +82,7 @@ public class MusicPlayService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        SystemUtil.getInstance().registerScreenReceiver(getApplication());
     }
 
     @Override
@@ -116,6 +119,7 @@ public class MusicPlayService extends Service {
         super.onDestroy();
         Log.i("ABMusicPlayer", "StopForeground");
         stopForeground(true);
+        SystemUtil.getInstance().unRegisterScreenReceiver(getApplication());
     }
 
     public class MusicBinder extends Binder {
@@ -275,7 +279,6 @@ public class MusicPlayService extends Service {
 
     }
 
-
     /** 获取AudioSessionId */
     public static int getAudioSessionId() {
         return mAudioSessionId;
@@ -363,7 +366,7 @@ public class MusicPlayService extends Service {
 
         int progress = bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).intValue();
         intent.putExtra("MusicProgress", progress);
-        //Log.i("LogByAB", "mStartPosition: " + showSec(mStartPosition) + " mAllPosition: " +  showSec(mAllPosition) + " /: " +  bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)));
+        //Log.i("ABMusicPlayer", "mStartPosition: " + showSec(mStartPosition) + " mAllPosition: " +  showSec(mAllPosition) + " /: " +  bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)));
         sendBroadcast(intent);
     }
 

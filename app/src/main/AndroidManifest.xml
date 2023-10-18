@@ -12,9 +12,16 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <!-- 大于等于android 12版本 -->
-    <!--<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />-->
+    <!--<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 大于等于android 13版本 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions" />
@@ -56,6 +63,22 @@
             android:enabled="true"
             android:exported="true"/>
 
+        <service
+            android:name="com.banlap.llmusic.service.LockScreenService"
+            android:enabled="true"
+            android:exported="true"/>
+
+
+        <receiver
+            android:name=".receiver.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.banlap.llmusic.receiver.AlarmReceiver"/>
+            </intent-filter>
+        </receiver>
+
+
         <receiver
             android:name=".widget.LLMusicWidgetProvider"
             android:exported="true">
@@ -82,7 +105,7 @@
                 android:resource="@xml/widget_provider_alpha"/>
         </receiver>
 
-        <activity android:name=".ui.WelcomeActivity"
+        <activity android:name=".ui.activity.WelcomeActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             android:exported="true"
@@ -95,21 +118,32 @@
         </activity>
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.activity.LockFullScreenActivity"
+            android:showOnLockScreen="true"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="fullSensor"/>
+
+        <activity
+            android:name=".ui.activity.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name=".ui.WebViewActivity"
+            android:name=".ui.activity.CustomErrorActivity"
+            android:screenOrientation="portrait"
+            android:process=":error_activity" />
+
+        <activity
+            android:name=".ui.activity.WebViewActivity"
             android:screenOrientation="portrait"/>
 
         <activity
-            android:name=".ui.SelectImgActivity"
+            android:name=".ui.activity.SelectImgActivity"
             android:screenOrientation="portrait"/>
 
         <provider

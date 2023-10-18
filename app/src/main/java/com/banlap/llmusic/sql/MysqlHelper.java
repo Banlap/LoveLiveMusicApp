@@ -2,6 +2,7 @@ package com.banlap.llmusic.sql;
 
 import android.util.Log;
 
+import com.banlap.llmusic.BuildConfig;
 import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.Version;
@@ -21,9 +22,9 @@ import java.util.List;
  */
 public class MysqlHelper {
 
-    private static final String URL= "";
-    private static final String USERNAME= "";
-    private static final String PASSWORD= "";
+    private static final String URL= BuildConfig.MYSQL_URL;
+    private static final String USERNAME= BuildConfig.MYSQL_ACCOUNT;
+    private static final String PASSWORD= BuildConfig.MYSQL_PASSWORD;
 
     public static MysqlHelper getInstance() { return new MysqlHelper(); }
 

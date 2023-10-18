@@ -63,6 +63,9 @@ public class ThreadEvent<T> {
     public static final int SELECT_LOCAL_FILE_SUCCESS = 0x2405;
     public static final int SELECT_LOCAL_FILE_ERROR = 0x2406;
     public static final int SELECT_IMG_FILE_SUCCESS = 0x2407;
+
+    public static final int SELECT_VIDEO_FILE = 0x2408;
+
     public static final int DOWNLOAD_APP_START = 0x241;
     public static final int DOWNLOAD_APP_LOADING = 0x242;
     public static final int DOWNLOAD_APP_SUCCESS = 0x243;
@@ -87,6 +90,7 @@ public class ThreadEvent<T> {
     public static final int ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x335;
     public static final int DELETE_MUSIC_IN_LOCAL_PLAY_LIST = 0x336;
     public static final int PLAY_RECOMMEND_MUSIC = 0x337;
+    public static final int SAVE_LOCAL_MUSIC_LIST = 0x338;
     public static final int GET_MUSIC_LYRIC = 0x34;   //获取音乐歌词
     public static final int SHOW_IMAGE_URL = 0x36;    //展示音乐图片
     public static final int MUSIC_IS_NEXT = 0x37;
@@ -127,11 +131,13 @@ public class ThreadEvent<T> {
     public static final int VIEW_CROPPING_IMG_2 = 0x611;
     public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 0x62;
     public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 0x621;
+    public static final int VIEW_COUNT_DOWN_REFRESH = 0x631;
+    public static final int VIEW_COUNT_DOWN_FINISH = 0x632;
 
 
     /** 蓝牙部分控制 */
     public static final int BLUETOOTH_DISCONNECT = 0x70;
-    public static final int ACTION_MEDIA_BUTTON = 0x71;
+    public static final int ACTION_MEDIA_BUTTON = 0x71; //已使用onKeyDown方法实现
 
     public int msgCode;
     public List<Music> musicList;

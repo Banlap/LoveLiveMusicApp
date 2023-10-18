@@ -18,6 +18,7 @@ import com.banlap.llmusic.databinding.ActivitySettingsBinding;
 import com.banlap.llmusic.databinding.DialogChangeModeMenuBinding;
 import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
 import com.banlap.llmusic.databinding.DialogMainMenuBinding;
+import com.banlap.llmusic.databinding.DialogPanelMoreMenuBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
 import com.banlap.llmusic.databinding.FragmentLocalListBinding;
 import com.banlap.llmusic.databinding.FragmentMainListBinding;
@@ -28,6 +29,7 @@ import com.banlap.llmusic.databinding.ItemMusicListBinding;
 import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.service.MusicPlayService;
+import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.widget.HorizontalProgressBar;
 import com.bumptech.glide.Glide;
@@ -115,6 +117,7 @@ public class ThemeHelper {
             vdb.ivNewPanelLast.setBackgroundResource(R.drawable.selector_last_black_33_selected);
             vdb.ivNewPanelNext.setBackgroundResource(R.drawable.selector_next_black_33_selected);
             vdb.ivChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_black);
+            vdb.ivSettings.setBackgroundResource(R.drawable.ic_more_black);
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_black_33);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_black_33);
@@ -250,6 +253,7 @@ public class ThemeHelper {
             vdb.ivNewPanelLast.setBackgroundResource(R.drawable.selector_last_selected);
             vdb.ivNewPanelNext.setBackgroundResource(R.drawable.selector_next_selected);
             vdb.ivChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_blue);
+            vdb.ivSettings.setBackgroundResource(R.drawable.ic_more_blue);
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
@@ -385,6 +389,7 @@ public class ThemeHelper {
             vdb.ivNewPanelLast.setBackgroundResource(R.drawable.selector_last_selected);
             vdb.ivNewPanelNext.setBackgroundResource(R.drawable.selector_next_selected);
             vdb.ivChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
+            vdb.ivSettings.setBackgroundResource(R.drawable.ic_more);
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
@@ -520,6 +525,7 @@ public class ThemeHelper {
             vdb.ivNewPanelLast.setBackgroundResource(R.drawable.selector_last_purple_selected);
             vdb.ivNewPanelNext.setBackgroundResource(R.drawable.selector_next_purple_selected);
             vdb.ivChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_purple);
+            vdb.ivSettings.setBackgroundResource(R.drawable.ic_more_purple);
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_purple);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_purple);
@@ -588,7 +594,7 @@ public class ThemeHelper {
             vdb.sbMusicBar.getProgressDrawable().setBounds(r);
             Rect r2 = vdb.sbNewMusicBar.getProgressDrawable().getBounds();
             vdb.sbNewMusicBar.setThumb(context.getResources().getDrawable(R.drawable.shape_seek_bar_thumb_purple));
-            vdb.sbNewMusicBar.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_seek_bar_purple));
+            vdb.sbNewMusicBar.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_seek_bar_purple_dark));
             vdb.sbNewMusicBar.getProgressDrawable().setBounds(r2);
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
@@ -655,6 +661,7 @@ public class ThemeHelper {
             vdb.ivNewPanelLast.setBackgroundResource(R.drawable.selector_last_orange_selected);
             vdb.ivNewPanelNext.setBackgroundResource(R.drawable.selector_next_orange_selected);
             vdb.ivChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_orange);
+            vdb.ivSettings.setBackgroundResource(R.drawable.ic_more_orange);
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_orange);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_orange);
@@ -789,6 +796,7 @@ public class ThemeHelper {
             vdb.ivNewPanelLast.setBackgroundResource(R.drawable.selector_last_light_selected);
             vdb.ivNewPanelNext.setBackgroundResource(R.drawable.selector_next_light_selected);
             vdb.ivChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_light);
+            vdb.ivSettings.setBackgroundResource(R.drawable.ic_more_light);
             vdb.etSearchMusic.setHintTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.etSearchMusic.setTextColor(context.getResources().getColor(R.color.light_ff));
 
@@ -894,7 +902,7 @@ public class ThemeHelper {
      * */
     public void playButtonStatusTheme(int rThemeId, ActivityMainBinding vdb, boolean b) {
         if(rThemeId!=0) {
-            Log.i("LogByAB","rThemeId: " + rThemeId);
+            Log.i("ABMusicPlayer","rThemeId: " + rThemeId);
             if(rThemeId == R.id.ll_theme_normal) {
                 vdb.btPlay.setBackgroundResource(b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
                 vdb.btNewPlay.setBackgroundResource(b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
@@ -1143,27 +1151,33 @@ public class ThemeHelper {
                 mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             } else if(rThemeId == R.id.ll_theme_blue) {
                 menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_blue));
                 mainMenuBinding.tvSettings.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             } else if(rThemeId == R.id.ll_theme_dark) {
                 menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu));
                 mainMenuBinding.tvSettings.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             } else if(rThemeId == R.id.ll_theme_white) {
                 menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_white));
                 mainMenuBinding.tvSettings.setTextColor(context.getResources().getColor(R.color.purple));
@@ -1171,35 +1185,43 @@ public class ThemeHelper {
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.purple));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.purple));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.purple));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.purple));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.purple));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.purple));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.purple));
             } else if(rThemeId == R.id.ll_theme_orange) {
                 menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_orange));
                 mainMenuBinding.tvSettings.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             } else if(rThemeId == R.id.ll_theme_light) {
                 menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_light));
                 mainMenuBinding.tvSettings.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             } else {
                 menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_normal));
                 mainMenuBinding.tvSettings.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+                mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
                 mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
                 mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+                mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             }
         } else {
             menuPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_normal));
@@ -1207,9 +1229,11 @@ public class ThemeHelper {
             mainMenuBinding.tvCharacter.setTextColor(context.getResources().getColor(R.color.white));
             mainMenuBinding.tvBackground.setTextColor(context.getResources().getColor(R.color.white));
             mainMenuBinding.tvLocalMusic.setTextColor(context.getResources().getColor(R.color.white));
+            mainMenuBinding.tvTimeTasks.setTextColor(context.getResources().getColor(R.color.white));
             mainMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             mainMenuBinding.vLine2.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             mainMenuBinding.vLine3.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+            mainMenuBinding.vLine4.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
         }
     }
 
@@ -1293,7 +1317,7 @@ public class ThemeHelper {
                 changeModeMenuBinding.tvBgMode.setTextColor(context.getResources().getColor(R.color.white));
                 changeModeMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
             } else if(rThemeId == R.id.ll_theme_light) {
-                characterPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_light));
+                characterPopupWindow.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.shape_button_menu_light_7e));
                 changeModeMenuBinding.tvControllerMode.setTextColor(context.getResources().getColor(R.color.white));
                 changeModeMenuBinding.tvBgMode.setTextColor(context.getResources().getColor(R.color.white));
                 changeModeMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
@@ -1308,6 +1332,239 @@ public class ThemeHelper {
             changeModeMenuBinding.tvControllerMode.setTextColor(context.getResources().getColor(R.color.white));
             changeModeMenuBinding.tvBgMode.setTextColor(context.getResources().getColor(R.color.white));
             changeModeMenuBinding.vLine.setBackgroundColor(context.getResources().getColor(R.color.gray_c9));
+        }
+    }
+
+    /**
+     * MainActivity主题改变 - 面板ui菜单
+     * */
+
+    public void panelMenuPopupWindowTheme(Context context, int rThemeId, PopupWindow characterPopupWindow, DialogPanelMoreMenuBinding panelMoreMenuBinding) {
+        if(rThemeId!=0) {
+            if(rThemeId == R.id.ll_theme_normal) {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_normal);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
+            } else if(rThemeId == R.id.ll_theme_blue) {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_blue);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_blue));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_blue));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_blue));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
+            } else if(rThemeId == R.id.ll_theme_dark) {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_white));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_dark));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_white));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_dark));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_white));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_dark));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
+            } else if(rThemeId == R.id.ll_theme_white) {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_gray);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings_purple);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_purple));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_purple));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_purple));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.purple));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.purple));
+            } else if(rThemeId == R.id.ll_theme_orange) {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_orange);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_orange));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_orange));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_orange));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
+            } else if(rThemeId == R.id.ll_theme_light) {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_light_7e);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_light));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_light));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_light));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
+            } else {
+                panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_normal);
+                panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+                panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+                panelMoreMenuBinding.sbLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+                panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+                panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+                panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+                panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
+            }
+        } else {
+            panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_normal);
+            panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
+            panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.sbLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+            panelMoreMenuBinding.tvValue25.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvValue30.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvValue35.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvValue40.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvValue45.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvSingleLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.sbSingleLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+            panelMoreMenuBinding.sbSingleLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+            panelMoreMenuBinding.tvSingleValue25.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvSingleValue30.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvSingleValue35.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvSingleValue40.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvSingleValue45.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvDetailLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.sbDetailLyricSize.setProgressDrawable(context.getResources().getDrawable(R.drawable.layer_progress_bar_default));
+            panelMoreMenuBinding.sbDetailLyricSize.setThumb(context.getResources().getDrawable(R.drawable.shape_round_white));
+            panelMoreMenuBinding.tvDetailValue25.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvDetailValue30.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvDetailValue35.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvDetailValue40.setTextColor(context.getResources().getColor(R.color.white));
+            panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
         }
     }
 
@@ -1837,12 +2094,14 @@ public class ThemeHelper {
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvErrorLog.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.light_ff));
         } else if(rThemeId == R.id.ll_theme_blue) {
             vdb.clBg.setBackgroundResource(R.mipmap.ic_gradient_color8);
@@ -1863,12 +2122,14 @@ public class ThemeHelper {
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvErrorLog.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.white));
         } else if(rThemeId == R.id.ll_theme_dark) {
             vdb.clBg.setBackgroundResource(R.mipmap.ic_gradient_color6);
@@ -1889,12 +2150,14 @@ public class ThemeHelper {
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvErrorLog.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.white));
         } else if(rThemeId == R.id.ll_theme_white) {
             vdb.clBg.setBackgroundResource(R.color.background_color_F2);
@@ -1915,12 +2178,14 @@ public class ThemeHelper {
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llCleanCache.setBackgroundResource(R.drawable.shape_button_black_alpha);
+            vdb.llErrorLog.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llAbout.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvErrorLog.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.purple));
         } else if(rThemeId == R.id.ll_theme_orange) {
             vdb.clBg.setBackgroundResource(R.mipmap.ic_gradient_color7);
@@ -1941,12 +2206,14 @@ public class ThemeHelper {
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvErrorLog.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.orange_0b));
         } else if(rThemeId == R.id.ll_theme_light) {
             vdb.clBg.setBackgroundResource(R.mipmap.ic_gradient_color4);
@@ -1966,6 +2233,7 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -1973,6 +2241,7 @@ public class ThemeHelper {
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCacheValue.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvErrorLog.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvAbout.setTextColor(context.getResources().getColor(R.color.light_ff));
         }
     }

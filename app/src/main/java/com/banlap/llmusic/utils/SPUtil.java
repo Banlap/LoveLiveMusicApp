@@ -2,6 +2,7 @@ package com.banlap.llmusic.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -9,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +32,17 @@ public class SPUtil {
     public static final String FavoriteListData = "FavoriteListData"; //最爱歌曲缓存列表
     public static final String PlayListData = "PlayListData";  //播放的歌曲缓存列表
     public static final String RecommendListData = "RecommendListData"; //每日歌曲缓存列表
+
+    public static final String DefaultLyricSizeData = "DefaultLyricSizeData"; //默认歌词字体大小
+    public static final String SingleLyricSizeData = "SingleLyricSizeData"; //滚动行歌词字体大小
+    public static final String DetailLyricSizeData = "DetailLyricSizeData"; //明细歌词字体大小
+    public static final String TaskAfterMusicSwitch = "TaskAfterMusicSwitch"; //定时任务中歌曲播放后是否停止
+
+    /**
+     * ---------默认变量值----------------
+     * */
+    public static final String SaveControllerSceneValue_DefaultScene = "DefaultScene";
+    public static final String SaveControllerSceneValue_NewScene = "NewScene";
 
     public static String getStrValue(Context context, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
@@ -73,4 +86,5 @@ public class SPUtil {
         editor.putString(key, listJson);
         editor.apply();
     }
+
 }

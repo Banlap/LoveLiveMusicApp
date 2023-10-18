@@ -33,13 +33,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.uivm.MainVM;
+import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.CharacterHelper;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
-import java.util.Random;
 
 /**
  * 角色服务
@@ -268,7 +267,7 @@ public class CharacterService extends Service {
                         } else {
                             isMove = true;
                         }
-                        Log.i("LogByAB", "isMove: " + isMove);
+                        Log.i("ABMusicPlayer", "isMove: " + isMove);
                         break;
                 }
                 return isMove;

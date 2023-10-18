@@ -21,7 +21,7 @@ import com.banlap.llmusic.R;
 import com.banlap.llmusic.service.MusicIsPauseService;
 import com.banlap.llmusic.service.MusicLastService;
 import com.banlap.llmusic.service.MusicNextService;
-import com.banlap.llmusic.ui.MainActivity;
+import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -47,7 +47,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         String musicName, musicSinger;
         musicName = MainActivity.currentMusicName;
         musicSinger = MainActivity.currentMusicSinger;
-        Log.i("LogByAB", "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
+        Log.i("ABMusicPlayer", "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
         setRemoteViews(context, appWidgetManager, null);
     }
 
@@ -56,7 +56,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         String action = intent.getAction();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
-        //Log.i("LogByAB", "send success: " + intent.getIntExtra("MusicProgress", 0));
+        //Log.i("ABMusicPlayer", "send success: " + intent.getIntExtra("MusicProgress", 0));
 
         if (action.equals(WIDGET_PROVIDER_REFRESH_MUSIC_MSG)) {
             setRemoteViews(context, appWidgetManager, intent);
@@ -146,7 +146,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
 
         @SuppressLint("UnspecifiedImmutableFlag") //使用PendingIntent时 版本大于31时需要添加 FLAG_IMMUTABLE 或者 FLAG_MUTABLE
         PendingIntent pIntentIsPause = PendingIntent.getService(context, NotificationHelper.LL_MUSIC_PLAYER, intentServiceIsPause,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
 
@@ -155,7 +155,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         intentServiceLast.putExtra("LastMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentLast = PendingIntent.getService(context, NotificationHelper.LL_MUSIC_PLAYER, intentServiceLast,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
 
@@ -163,7 +163,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         intentServiceNext.putExtra("NextMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentNext = PendingIntent.getService(context, NotificationHelper.LL_MUSIC_PLAYER, intentServiceNext,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
 
@@ -173,7 +173,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         intentMain.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_NEW_TASK);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentMain = PendingIntent.getActivity(context, NotificationHelper.LL_MUSIC_PLAYER, intentMain,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.ll_widget_music, pIntentMain);
 

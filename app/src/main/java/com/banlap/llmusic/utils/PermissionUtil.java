@@ -1,7 +1,9 @@
 package com.banlap.llmusic.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import androidx.core.content.ContextCompat;
 
@@ -27,5 +29,14 @@ public class PermissionUtil {
             }
         }
         return false;
+    }
+
+    public void intoMIUIPermission(Context context) {
+        if (Build.MANUFACTURER.equals("Xiaomi")) {
+            Intent intent = new Intent("miui.intent.action.APP_PERM_EDITOR");
+            intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.PermissionsEditorActivity");
+            intent.putExtra("extra_pkgname", context.getPackageName());
+            context.startActivity(intent);
+        }
     }
 }

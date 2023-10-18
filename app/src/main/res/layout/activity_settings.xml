@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.banlap.llmusic.uivm.SettingsVM" />
+            type="com.banlap.llmusic.uivm.vm.SettingsVM" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -414,6 +414,31 @@
                         android:text="0.0M"
                         android:textColor="@color/light_ff"
                         android:textSize="17dp" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/ll_error_log"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/selector_normal_selected">
+
+                    <TextView
+                        android:id="@+id/tv_error_log"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="查看最近错误日志"
+                        android:textColor="@color/light_ff"
+                        android:textSize="17dp"
+                        android:layout_weight="1"/>
 
 
                 </LinearLayout>

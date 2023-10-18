@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="vm"
+            type="com.banlap.llmusic.uivm.vm.LockFullScreenVM" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical"
+        tools:context=".ui.activity.WelcomeActivity">
+
+        <LinearLayout
+            android:id="@+id/cl_top_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="center_horizontal"
+            >
+
+            <ImageView
+                android:layout_width="125dp"
+                android:layout_height="125dp"
+                android:background="@mipmap/ic_llmp_2"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</layout>

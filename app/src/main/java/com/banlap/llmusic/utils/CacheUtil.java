@@ -10,7 +10,7 @@ import java.io.File;
  * 文件缓存工具类
  * */
 public class CacheUtil {
-    private static final String TAG = "LogByAB: " + CacheUtil.class.getSimpleName();
+    private static final String TAG = CacheUtil.class.getSimpleName();
     /**
      * 获取整体缓存大小
      * @param context

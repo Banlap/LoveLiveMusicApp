@@ -1,18 +1,10 @@
 package com.banlap.llmusic.utils;
 
 import android.content.Context;
-import android.content.CursorLoader;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Environment;
-import android.provider.MediaStore;
-import android.text.TextUtils;
-import android.util.Log;
 
-import com.banlap.llmusic.ui.SelectImgActivity;
-
-import java.io.File;
+import com.banlap.llmusic.ui.activity.SelectImgActivity;
 
 /**
  * 裁剪图片启动类

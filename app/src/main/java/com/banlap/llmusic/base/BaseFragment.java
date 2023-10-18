@@ -1,7 +1,6 @@
 package com.banlap.llmusic.base;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,5 +46,18 @@ public abstract class BaseFragment<VM extends ViewModel, VDB extends ViewDataBin
 
     protected abstract void initData();
     protected abstract void initView();
+
+    /**
+     * 判断是否双击
+     * */
+    public boolean isDoubleClick() {
+        long currentTime = System.currentTimeMillis();
+        if(Math.abs(currentTime - BaseActivity.lastTime) < BaseActivity.TIME_500MS) {
+            BaseActivity.lastTime = currentTime;
+            return true;
+        }
+        BaseActivity.lastTime = currentTime;
+        return false;
+    }
 
 }

@@ -72,7 +72,7 @@ public class SingleVisualizerView extends View {
         mPaint.setAntiAlias(true);
         mPaint.setMaskFilter(new BlurMaskFilter(5, BlurMaskFilter.Blur.SOLID));
 
-        visualizerHelper = new VisualizerHelper();
+       /* visualizerHelper = new VisualizerHelper();
         visualizerHelper.setVisualizerCallback(new VisualizerHelper.VisualizerCallback() {
             @Override
             public void onDataReturn(float[] parseData) {
@@ -81,7 +81,7 @@ public class SingleVisualizerView extends View {
             }
         });
         visualizerHelper.setVisualCount(mSpectrumCount);
-        invalidate();
+        invalidate();*/
     }
 
     /**

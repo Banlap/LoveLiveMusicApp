@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.databinding.adapters.ViewBindingAdapter;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -32,12 +33,18 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
     public VM getViewModel() { return mViewModel; }
     public VDB getViewDataBinding() { return mViewDataBinding; }
 
+    protected void initWindow() {}
     @LayoutRes
     protected abstract int getLayoutId();
+
+    public static long lastTime;
+
+    public static final long TIME_500MS = 500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initWindow();
         setContentView(getLayoutId());
         mViewDataBinding = DataBindingUtil.setContentView(this, getLayoutId());
         mViewDataBinding.setLifecycleOwner(this);
@@ -50,7 +57,9 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
         init();
         initData();
         initView();
-        setStatusBar();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            setStatusBar();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -87,5 +96,18 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
     protected void onDestroy() {
         super.onDestroy();
         LLActivityManager.getInstance().removeActivity(this);
+    }
+
+    /**
+     * 判断是否双击
+     * */
+    public boolean isDoubleClick() {
+        long currentTime = System.currentTimeMillis();
+        if(Math.abs(currentTime - lastTime) < TIME_500MS) {
+            lastTime = currentTime;
+            return true;
+        }
+        lastTime = currentTime;
+        return false;
     }
 }

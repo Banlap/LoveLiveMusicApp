@@ -2,20 +2,21 @@ package com.banlap.llmusic.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.DisplayMetrics;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
+import com.banlap.llmusic.receiver.ScreenReceiver;
 
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
+/**
+ * 系统工具类
+ * */
 public class SystemUtil {
     private final String TAG = SystemUtil.class.getSimpleName();
+    private ScreenReceiver screenReceiver;
     public static SystemUtil getInstance() {
         return new SystemUtil();
     }
@@ -24,9 +25,13 @@ public class SystemUtil {
      * 获取DisplayMetrics
      * */
     public DisplayMetrics getDM(Activity activity) {
-        DisplayMetrics dm = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        return dm;
+        try {
+            DisplayMetrics dm = new DisplayMetrics();
+            activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+            return dm;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -53,8 +58,12 @@ public class SystemUtil {
      * 最小宽度范围：720dp 以上
      * */
     public int getScreenWidthDp(Activity activity) {
-        DisplayMetrics dm = getDM(activity);
-        return (int) (dm.widthPixels / dm.density);
+        try {
+            DisplayMetrics dm = getDM(activity);
+            return (int) (dm.widthPixels / dm.density);
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     /**
@@ -63,6 +72,30 @@ public class SystemUtil {
      * 最小宽度范围：320dp - 360dp
      * */
     public boolean isSmallScaleDevice() {
+        int getScreenWidthDp = getScreenWidthDp(LLActivityManager.getInstance().getTopActivity());
+        if(getScreenWidthDp == -1) return false;
         return (getScreenWidthDp(LLActivityManager.getInstance().getTopActivity()) <= 360);
     }
+
+    /**
+     * 注册屏幕监测广播
+     * */
+    public void registerScreenReceiver(Context context) {
+        screenReceiver = new ScreenReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+        intentFilter.addAction(Intent.ACTION_SCREEN_ON);
+        context.registerReceiver(screenReceiver, intentFilter);
+    }
+
+    /**
+     * 解除屏幕监测广播
+     * */
+    public void unRegisterScreenReceiver(Context context) {
+        if(screenReceiver != null) {
+            context.unregisterReceiver(screenReceiver);
+        }
+    }
+
+
 }

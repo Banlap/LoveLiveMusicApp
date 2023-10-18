@@ -11,33 +11,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 import android.widget.RemoteViews;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.service.MusicIsPauseService;
 import com.banlap.llmusic.service.MusicLastService;
 import com.banlap.llmusic.service.MusicNextService;
-import com.banlap.llmusic.ui.MainActivity;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DecodeFormat;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.AppWidgetTarget;
-import com.bumptech.glide.request.target.NotificationTarget;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
+import com.banlap.llmusic.ui.activity.MainActivity;
 
 import java.io.ByteArrayOutputStream;
-
-import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation;
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * 通知栏帮助类 展示LLMusic通知
@@ -46,12 +32,30 @@ public class NotificationHelper {
     private static final String TAG = NotificationHelper.class.getSimpleName();
     public static final int LL_MUSIC_PLAYER = 0x01;
     public static final int LL_MUSIC_CHARACTER= 0x02;
+    public static final int LL_MUSIC_FULL_SCREEN= 0x03;
     public Notification notification;
     public NotificationCompat.Builder builder;
     public NotificationManager manager;
+
     public Bitmap roundedBitmap;
     public static NotificationHelper getInstance() { return new NotificationHelper(); }
 
+
+    /**
+     * 打开通知权限
+     *
+     * @param context
+     */
+    public static void openNotificationSettingsForApp(Context context) {
+        // Links to this app's notification settings.
+        Intent intent = new Intent();
+        intent.setAction("android.settings.APP_NOTIFICATION_SETTINGS");
+        intent.putExtra("app_package", context.getPackageName());
+        intent.putExtra("app_uid", context.getApplicationInfo().uid);
+        // for Android 8 and above
+        intent.putExtra("android.provider.extra.APP_PACKAGE", context.getPackageName());
+        context.startActivity(intent);
+    }
 
     @SuppressLint("RemoteViewLayout")
     public Notification createRemoteViews(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isDefault) {
@@ -95,7 +99,7 @@ public class NotificationHelper {
         @SuppressLint("UnspecifiedImmutableFlag")
         //使用PendingIntent时 版本大于31时需要添加 FLAG_IMMUTABLE 或者 FLAG_MUTABLE
         PendingIntent pIntentIsPause = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceIsPause,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
         remoteBigViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
@@ -104,7 +108,7 @@ public class NotificationHelper {
         intentServiceNext.putExtra("NextMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentNext = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceNext,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
         remoteBigViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
@@ -113,7 +117,7 @@ public class NotificationHelper {
         intentServiceLast.putExtra("LastMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentLast = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceLast,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
         remoteBigViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
@@ -124,7 +128,7 @@ public class NotificationHelper {
         intentMain.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_NEW_TASK);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentMain = PendingIntent.getActivity(context, LL_MUSIC_PLAYER, intentMain,
-                //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.ll_music_all, pIntentMain);
         remoteBigViews.setOnClickPendingIntent(R.id.ll_music_all, pIntentMain);
@@ -132,6 +136,7 @@ public class NotificationHelper {
         manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("channel_1", "LLMusic_channel", NotificationManager.IMPORTANCE_LOW);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             manager.createNotificationChannel(channel);
             builder = new NotificationCompat.Builder(context, "channel_1");
         } else {
@@ -139,6 +144,8 @@ public class NotificationHelper {
         }
 
         builder.setPriority(NotificationCompat.PRIORITY_MAX);
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
         builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
@@ -200,4 +207,64 @@ public class NotificationHelper {
     }
 
 
+    public Notification createFullScreen(Context context) {
+        NotificationManager manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        NotificationCompat.Builder builder;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("channel_3", "LLMusic_FullScreen_channel", NotificationManager.IMPORTANCE_HIGH);
+            manager.createNotificationChannel(channel);
+            builder = new NotificationCompat.Builder(context, "channel_3");
+        } else {
+            builder = new NotificationCompat.Builder(context);
+        }
+        builder.setSmallIcon(android.R.drawable.btn_star);
+        builder.setContentTitle("This is title of notification");
+        builder.setContentText("This is a notification Text");
+        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher));
+        builder.setPriority(NotificationCompat.PRIORITY_MAX);
+        builder.setCategory(NotificationCompat.CATEGORY_ALARM);
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        builder.setAutoCancel(true);
+
+       /* Intent fullScreenIntent = new Intent(context, LockFullScreenActivity.class);
+        fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 111, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent(pendingIntent);
+        builder.setStyle(new NotificationCompat.BigPictureStyle());*/
+
+        Intent fullScreenIntent = new Intent(context, LockFullScreenActivity.class);
+        fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 111, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        builder.setContentIntent(pendingIntent);
+        builder.setFullScreenIntent(pendingIntent, true);
+        Notification notification = builder.build();
+        manager.notify(LL_MUSIC_FULL_SCREEN, notification);
+
+        return notification;
+    }
+
+    @SuppressLint("RemoteViewLayout")
+    public Notification createFullScreen2(Context context) {
+        RemoteViews customLayout1 = new RemoteViews(context.getPackageName(), R.layout.remote_view_lock_full_screen);
+
+        // 设置自定义布局中的内容
+        NotificationManager manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("channel_4", "Channel Name", NotificationManager.IMPORTANCE_HIGH);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC); // 设置锁定屏幕可见性
+            manager.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "channel_4")
+                .setSmallIcon(android.R.drawable.btn_star)
+                .setCustomContentView(customLayout1) // 设置自定义布局
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // 设置锁定屏幕可见性
+                // 其他通知设置
+
+        Notification notification = builder.build();
+        manager.notify(LL_MUSIC_FULL_SCREEN, notification);
+        return notification;
+    }
 }

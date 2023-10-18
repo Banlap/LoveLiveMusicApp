@@ -1,5 +1,6 @@
 package com.banlap.llmusic.utils;
 
+import android.annotation.SuppressLint;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -18,14 +19,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * 文件工具类
@@ -152,6 +157,7 @@ public class FileUtil {
     /**
      * 获取文件真实路径
      * */
+    @SuppressLint("Range")
     public String getRealPathByUri(Context context, Uri uri){
         if(null == uri)
             return "";
@@ -190,6 +196,47 @@ public class FileUtil {
             e.printStackTrace();
         }
     }
+
+
+    /**
+     * 保存异常错误日志到本地中
+     * */
+    public void saveCrashLogToFile(Throwable e) {
+        StringBuilder sb = new StringBuilder();
+
+        // 获取当前时间
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        String currentTime = sdf.format(new Date());
+
+        // 写入异常发生时间
+        sb.append("Crash Time: ").append(currentTime).append("\n\n");
+
+        // 写入异常信息
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String stackTrace = sw.toString();
+        sb.append(stackTrace);
+
+        // 将日志写入到本地文件
+        try {
+            String path="";
+            //Android 10以上使用 getExternalFilesDir(null)获取路径
+            path = LLActivityManager.getInstance().getTopActivity().getExternalFilesDir(null).getAbsolutePath() + "/LLMusicLog/crash.log";
+
+            File logFile = new File(path);
+            if(!logFile.exists()) {
+                logFile.getParentFile().mkdirs();
+            }
+
+            FileWriter writer = new FileWriter(logFile);
+            writer.write(sb.toString());
+            writer.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
 
 
     public File createImageFile(Context context) {

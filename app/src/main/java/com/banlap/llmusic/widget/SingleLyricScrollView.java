@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.MusicLyric;
+import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 
 import java.util.ArrayList;
@@ -30,17 +31,29 @@ import java.util.List;
 public class SingleLyricScrollView extends View {
     private final String TAG = SingleLyricScrollView.class.getSimpleName();
     private List<MusicLyric> musicLyrics;
+    private List<MusicLyric> musicLyricsTemp;
+
     private int rThemeId =0;                                   //当前主题
     private Paint mPaint;
+    private Paint mPaint2;
 
-    private int currentPosition = 0, playerCurrentPosition = 0;
+    private int currentPosition = 0, playerCurrentPosition = 0, lastPosition = 0;
     private int lyricSize = 30;                          //歌词文字大小
     private int lyricSmallSize = 25;                     //歌词副文字大小
+    private int zoomSize = 10;
+
+    private float yOffset = 90;                               //歌词绘制的纵向偏移量
+    private int ySmallOffset = 40;                            //主副歌词之间距离
+    private int yScrollOffset = 100;                          //滚动纵向偏移量
+
     private boolean mIsRefreshDraw = false;                    //是否刷新绘制：用于拖动滚动条时刷新
     private boolean isStop = false;                            //是否暂停绘制歌词
-    private float yOffset = 70;                               //歌词绘制的纵向偏移量
-    private int ySmallOffset = 50;                          //主副歌词之间距离
-    private ValueAnimator scrollAnimator;
+    private boolean mIsResetLyricSize = false;                  //是否刷新绘制：用于设置歌词字体大小时刷新
+    private boolean isCleanOnce = false;                       //是否清理一次滚动歌词的缓存
+
+    /** 处歌词理显示效果：先执行isFirstInto和isSecondInto后再做效果处理 */
+    private boolean isFirstInto = false;
+    private boolean isSecondInto = false;
 
     public SingleLyricScrollView(@NonNull Context context) {
         super(context);
@@ -65,15 +78,39 @@ public class SingleLyricScrollView extends View {
         if(SystemUtil.getInstance().isSmallScaleDevice()) {
             lyricSize = 20;
             lyricSmallSize = 15;
-            ySmallOffset = 30;
             yOffset = 50;
+            ySmallOffset = 30;
+            yScrollOffset = 80;
         }
         musicLyrics = new ArrayList<>();
+        musicLyricsTemp = new ArrayList<>();
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
         mPaint.setTextSize(lyricSize);
         mPaint.setTextAlign(Paint.Align.CENTER);
-        currentPosition = 0;
+
+        mPaint2 = new Paint();
+        mPaint2.setAntiAlias(true);
+        mPaint2.setTextSize(lyricSize);
+        mPaint2.setTextAlign(Paint.Align.CENTER);
+    }
+
+    /**
+     * 自定义设置歌词大小
+     * */
+    public void setLyricSize(int size) {
+        lyricSize = size + 5;
+        lyricSmallSize = size;
+
+        if(SystemUtil.getInstance().isSmallScaleDevice()) {
+            yOffset = size + 35;
+            ySmallOffset = size + 15;
+            yScrollOffset = size + 65;
+        } else {
+            yOffset = size + 65;
+            ySmallOffset = size + 15;
+            yScrollOffset = size + 75;
+        }
     }
 
 
@@ -91,9 +128,25 @@ public class SingleLyricScrollView extends View {
         mIsRefreshDraw = isRefreshDraw;
         if(mIsRefreshDraw) {
             invalidate();
+        } else {
+            musicLyricsTemp.clear();
+            Log.i(TAG,"SingleLyric currentPosition: " + currentPosition);
+            if(currentPosition <= 3) {
+                isFirstInto = false;
+                isSecondInto = false;
+            }
         }
     }
 
+    /**
+     * 设置状态：是否正在修改歌词字体大小
+     * */
+    public void setIsResetLyricSize(boolean isResetLyricSize) {
+        mIsResetLyricSize = isResetLyricSize;
+        if(mIsResetLyricSize) {
+            invalidate();
+        }
+    }
 
     /**
      * 设置当前主题Id
@@ -116,26 +169,14 @@ public class SingleLyricScrollView extends View {
      * 开启绘制歌词
      * */
     public void initView() {
+        Log.i(TAG,"SingleLyric initView");
         currentPosition = 0;
+        musicLyricsTemp.clear();
+        isFirstInto = false;
+        isSecondInto = false;
         setScrollY(0);
         invalidate();
     }
-
-    private void smoothScrollToOffset(float targetOffset) {
-        if (scrollAnimator != null && scrollAnimator.isRunning()) {
-            scrollAnimator.cancel();
-        }
-
-        scrollAnimator = ValueAnimator.ofFloat(yOffset, targetOffset);
-        scrollAnimator.setInterpolator(new LinearInterpolator());
-        scrollAnimator.addUpdateListener(animation -> {
-            yOffset = (float) animation.getAnimatedValue();
-            invalidate();
-        });
-        scrollAnimator.setDuration(300); // 设置动画时长
-        scrollAnimator.start();
-    }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -152,38 +193,115 @@ public class SingleLyricScrollView extends View {
             return;
         }
 
+        showLyric(canvas);
+    }
+
+
+    private void showLyric(Canvas canvas) {
         getMusicLyricPos();
         float centerY = getHeight() /4;
-
+        boolean isClear = false;
         // 绘制当前歌词和上下一行歌词
-        for (int i = 0; i <= 1; i++) {
+        for (int i = 0; i <= 2; i++) {
             int index = currentPosition + i;
             if (index >= 0 && index < musicLyrics.size()) {
-                setHighLightLyric(true);
                 float y = centerY + i * mPaint.getTextSize();
-                if(i == 1) {
-                    y = y + yOffset;
-                    mPaint.setTextSize(lyricSize);
-                    setHighLightLyric(false);
-                }
-                canvas.drawText(musicLyrics.get(index).lyricContext, getWidth() / 2, y, mPaint);
-                mPaint.setTextSize(i == 1? lyricSmallSize  : lyricSmallSize +10);
-                canvas.drawText(musicLyrics.get(index).lyricContext2, getWidth() / 2, y + ySmallOffset, mPaint);
 
+                if(i != 0) {
+                    setHighLightLyric(false);
+                    y += (i == 1) ? yOffset : yOffset*2;
+                } else {
+                    setHighLightLyric(true);
+                }
+
+                int start = timeToMill(musicLyrics.get(currentPosition).lyricTime);
+                //Log.i(TAG, "(playerCurrentPosition - start): " + ((playerCurrentPosition - start) <500));
+                if ((playerCurrentPosition - start) < 500) {
+                    //先执行一次isFirstInto和isSecondInto后再走显示效果
+                    if(!isFirstInto) {
+                        isFirstInto = true;
+                    } else {
+                        if(isSecondInto) {
+                            if(musicLyricsTemp.size()>=3) {
+                                float duration = (playerCurrentPosition - start) / 500f;
+                                if(i == 0) {
+                                    mPaint.setAlpha((int) (255 - (float) 255 * duration));
+                                    mPaint.setTextSize((lyricSize + zoomSize) - (zoomSize) * duration);
+
+                                } else if(i == 1) {
+                                    mPaint.setAlpha(255);
+                                    mPaint.setTextSize(lyricSize + (zoomSize * duration) );
+                                } else {
+                                    mPaint.setAlpha((int) (255 * duration));
+                                    mPaint.setTextSize(lyricSize);
+                                }
+
+                                y -= yScrollOffset * duration;
+                                if(y >300) {
+                                    y = 300;
+                                }
+
+                                canvas.drawText(musicLyricsTemp.get(i).lyricContext, getWidth() / 2, y, mPaint);
+
+                                if(i == 0) {
+                                    mPaint.setTextSize((lyricSmallSize + zoomSize) - (zoomSize) * duration);
+                                } else if(i == 1) {
+                                    mPaint.setTextSize(lyricSmallSize + (zoomSize * duration) );
+                                } else {
+                                    mPaint.setTextSize(lyricSmallSize);
+                                }
+                                canvas.drawText(musicLyricsTemp.get(i).lyricContext2, getWidth() / 2, y + ySmallOffset, mPaint);
+                            } else {
+                                mPaint.setAlpha((i == 2) ?  0 : 255);
+                                setLyricCanvas(canvas, i, index, y);
+                            }
+                        } else {
+                            mPaint.setAlpha((i == 2) ?  0 : 255);
+                            setLyricCanvas(canvas, i, index, y);
+                        }
+                    }
+
+                } else {
+                    if(isFirstInto) { isSecondInto = true; }
+                    mPaint.setAlpha(i != 2 ? 255 : 0);
+                    setLyricCanvas(canvas, i, index, y);
+                    isClear = true;
+                }
+                if(musicLyricsTemp.size() <=2) {
+                    musicLyricsTemp.add(musicLyrics.get(index));
+                }
             }
         }
 
-        if(!isStop || mIsRefreshDraw) {
-            postInvalidateDelayed(100);
+        //每次仅清理一次：歌词滚动完成后再清理
+        if(isClear) {
+            if(!isCleanOnce) {
+                musicLyricsTemp.clear();
+                isCleanOnce = true;
+            }
+        } else {
+            isCleanOnce = false;
         }
 
+        if(!isStop || mIsRefreshDraw || mIsResetLyricSize) {
+            postInvalidateDelayed(100);
+        }
+    }
+
+    /**
+     * 绘制歌词布局
+     * */
+    private void setLyricCanvas(Canvas canvas, int i, int index, float y) {
+        mPaint.setTextSize(i == 0 ? lyricSize + zoomSize : lyricSize);
+        canvas.drawText(musicLyrics.get(index).lyricContext, getWidth() / 2, y, mPaint);
+        mPaint.setTextSize(i == 0 ? lyricSmallSize + zoomSize : lyricSmallSize);
+        canvas.drawText(musicLyrics.get(index).lyricContext2, getWidth() / 2, y + ySmallOffset, mPaint);
     }
 
     /**
      * 设置高亮歌词颜色
      * */
     public void setHighLightLyric(boolean isHighLight) {
-        mPaint.setTextSize(isHighLight? lyricSize + 10 : lyricSize);
         if(0 != rThemeId) {
             if(rThemeId == R.id.ll_theme_normal) {
                 mPaint.setColor(getResources().getColor(isHighLight? R.color.blue_ed : R.color.black));
@@ -223,7 +341,7 @@ public class SingleLyricScrollView extends View {
     private void getMusicLyricPos() {
         try{
             int currentTime = playerCurrentPosition;
-            Log.i(TAG, "currentTime: " + currentTime);
+            //Log.i(TAG, "currentTime: " + currentTime);
             if(null != musicLyrics) {
 
                 if(!"".equals(musicLyrics.get(1).lyricTime)) {
@@ -255,8 +373,7 @@ public class SingleLyricScrollView extends View {
                     if(!"".equals(musicLyrics.get(i).lyricTime)&& !"".equals(musicLyrics.get(i).lyricEndTime) ) {
                         if(currentTime >= timeToSec(musicLyrics.get(i).lyricTime) && currentTime < timeToMill(musicLyrics.get(i).lyricEndTime)){
                             currentPosition = i;
-
-                            smoothScrollToOffset(yOffset);
+                            //smoothScrollToOffset(yOffset);
                             return;
                         }
                     }
@@ -264,7 +381,7 @@ public class SingleLyricScrollView extends View {
             }
 
         } catch (Exception e) {
-            Log.i(TAG, "v11");
+            Log.i(TAG, "e: " + e.getMessage());
             postInvalidateDelayed(100);
         }
     }

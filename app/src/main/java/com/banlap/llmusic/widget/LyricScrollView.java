@@ -46,6 +46,7 @@ public class LyricScrollView extends View {
     private boolean isTouchLyric = false;                      //是否在触摸滚动歌词
     private boolean mIsRefreshDraw = false;                    //是否刷新绘制：用于拖动滚动条时刷新
     private boolean isStop = false;                            //是否暂停绘制歌词
+    private boolean mIsResetLyricSize = false;                  //是否刷新绘制：用于设置歌词字体大小时刷新
     private long mStartTime;
     private int highLightLyricColor, defaultLyricColor;        //高亮颜色、默认颜色
     private boolean isUseLyricDetailColor = false;
@@ -74,7 +75,7 @@ public class LyricScrollView extends View {
         if(SystemUtil.getInstance().isSmallScaleDevice()) {
             lyricSize = 20;
             zoomSize = 10;
-            secondsLyricSize = 20;
+            secondsLyricSize = 15;
             mPaddingY = 100;
             mSecondsPaddingY = 15;
         }
@@ -85,6 +86,20 @@ public class LyricScrollView extends View {
         musicLyrics = new ArrayList<>();
     }
 
+    /**
+     * 自定义设置歌词大小
+     * */
+    public void setLyricSize(int size) {
+        lyricSize = size + 5;
+        secondsLyricSize = size;
+
+        if(SystemUtil.getInstance().isSmallScaleDevice()) {
+            mPaddingY = size + 85;
+        } else {
+            mPaddingY = size + 125;
+        }
+
+    }
 
     /**
      * 设置歌曲播放进度
@@ -99,6 +114,16 @@ public class LyricScrollView extends View {
     public void setIsRefreshDraw(boolean isRefreshDraw) {
         mIsRefreshDraw = isRefreshDraw;
         if(mIsRefreshDraw) {
+            invalidate();
+        }
+    }
+
+    /**
+     * 设置状态：是否正在修改歌词字体大小
+     * */
+    public void setIsResetLyricSize(boolean isResetLyricSize) {
+        mIsResetLyricSize = isResetLyricSize;
+        if(mIsResetLyricSize) {
             invalidate();
         }
     }
@@ -153,14 +178,14 @@ public class LyricScrollView extends View {
 
         drawLyric(canvas, lyricX, lyricY);
 
-        if(!isStop || mIsRefreshDraw || isTouchLyric) {
+        if(!isStop || mIsRefreshDraw || isTouchLyric || mIsResetLyricSize) {
             if(!isTouchLyric) {
                 getMusicLyricPos();
                 int start = timeToMill(musicLyrics.get(currentPosition).lyricTime);
                 float v = (playerCurrentPosition - start) >= 500 ?
                         currentPosition * mPaddingY :
                         lastPosition * mPaddingY + (currentPosition - lastPosition) * mPaddingY * ((playerCurrentPosition - start) / 500f);
-               /* Log.i("LogByAB", "v: " + v + " p:" + playerCurrentPosition
+               /* Log.i("ABMusicPlayer", "v: " + v + " p:" + playerCurrentPosition
                         + " s:" + start + " p-s:" + (playerCurrentPosition - start) + " c: " + currentPosition);
                 */
                 setScrollY((int) v);
@@ -168,7 +193,7 @@ public class LyricScrollView extends View {
                     lastPosition = currentPosition;
                 }
             } else {
-                //Log.i("LogByAB", "currentPosition: " + currentPosition + " mPaddingY: " + mPaddingY);
+                //Log.i("ABMusicPlayer", "currentPosition: " + currentPosition + " mPaddingY: " + mPaddingY);
                 setScrollY((int) currentPosition * mPaddingY);
             }
             postInvalidateDelayed(100);
@@ -258,7 +283,7 @@ public class LyricScrollView extends View {
                 //绘制副歌词
                 String lyricText2 = musicLyrics.get(i).lyricContext2;
                 if(null != lyricText2 && !"".equals(lyricText2)) {
-                    mPaint.setTextSize(secondsLyricSize);
+                    mPaint.setTextSize(i == currentPosition? secondsLyricSize + zoomSize : secondsLyricSize);
                     mPaint.setTextAlign(Paint.Align.CENTER);
                     float secondPadding = mSecondsPaddingY + secondsLyricSize;
                     canvas.drawText(musicLyrics.get(i).lyricContext2, lyricX, (lyricY + mPaddingY * i) + secondPadding, mPaint);
@@ -274,7 +299,7 @@ public class LyricScrollView extends View {
     private void setLyricColor(boolean isLyricDetail) {
         if(0 != rThemeId) {
             if(rThemeId == R.id.ll_theme_normal) {
-                highLightLyricColor = getResources().getColor(isLyricDetail? R.color.blue_ed : R.color.light_f9);
+                highLightLyricColor = getResources().getColor(R.color.blue_ed);
                 defaultLyricColor = getResources().getColor(R.color.black);
             } else if(rThemeId == R.id.ll_theme_blue) {
                 highLightLyricColor = getResources().getColor(isLyricDetail? R.color.light_f9 : R.color.blue_0E);
@@ -292,11 +317,11 @@ public class LyricScrollView extends View {
                 highLightLyricColor = getResources().getColor(R.color.light_8a);
                 defaultLyricColor = getResources().getColor(R.color.light_b5);
             } else {
-                highLightLyricColor = getResources().getColor(R.color.light_f9);
+                highLightLyricColor = getResources().getColor(R.color.blue_ed);
                 defaultLyricColor = getResources().getColor(R.color.black);
             }
         } else {
-            highLightLyricColor = getResources().getColor(R.color.light_f9);
+            highLightLyricColor = getResources().getColor(R.color.blue_ed);
             defaultLyricColor = getResources().getColor(R.color.black);
         }
     }
@@ -359,13 +384,14 @@ public class LyricScrollView extends View {
     };
 
     /**
-     * 设置单点回调
+     * 设置点击回调
      * */
     public void setOnLyricClickListener(LyricClickListener lyricClickListener) {
         this.lyricClickListener = lyricClickListener;
     }
 
     public interface LyricClickListener {
+        /** 点击回调 */
         void onSingleTap();
     }
     /**
@@ -380,7 +406,7 @@ public class LyricScrollView extends View {
         }
         //获取滚动歌词的行数
         int moveRow = Math.abs((int) moveY / lyricSize);
-        //Log.i("LogByAB", "moveY: " + moveY);
+        //Log.i("ABMusicPlayer", "moveY: " + moveY);
 
         if(moveY <0) {  //向上滚动
             currentPosition += moveRow;

@@ -8,7 +8,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.ui.MainActivity;
 
 import org.greenrobot.eventbus.EventBus;
 

@@ -3,16 +3,16 @@ import java.text.SimpleDateFormat
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdk 33
+    buildToolsVersion '33.0.0'
 
     buildFeatures.dataBinding = true
 
     defaultConfig {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 160
+        targetSdkVersion 33
+        versionCode 162
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -133,9 +133,20 @@ android {
         //2.新增功能：新增每日推荐功能
         versionName "1.6.0"
         //1.修复问题：切换主题ui每日推荐字体、调整部分主题颜色、歌词显示调整
-        //2.新增功能：新音乐界面切换、新增深蓝色、主题
+        //2.新增功能：新音乐界面切换、新增深蓝色主题
+        versionName "1.6.1"
+        //1.修复小组件点击进入时闪退问题、android13通知栏推送修复、查询歌曲UI更正
+        //2.更新歌词文本效果变化、添加错误日志输出及查看、添加歌词字体大小设置
+        versionName "1.6.2"
+        //1.修复本地歌曲添加多个后卡顿问题
+        //2.新增定时关闭歌曲任务，移除错误日志输出，添加全局异常报错框架
+
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        //gradle.properties配置对应信息
+        buildConfigField("String", "MYSQL_URL", "$MYSQL_URL")
+        buildConfigField("String", "MYSQL_ACCOUNT", "$MYSQL_ACCOUNT")
+        buildConfigField("String", "MYSQL_PASSWORD", "$MYSQL_PASSWORD")
     }
 
     android.applicationVariants.all {
@@ -186,6 +197,10 @@ dependencies {
     implementation 'com.danikula:videocache:2.7.0'
     /** 图片裁剪 */
     implementation 'com.github.yalantis:ucrop:2.2.6'
+
+    /** 崩溃异常处理 框架*/
+    implementation 'cat.ereza:customactivityoncrash:2.3.0'
+
 
     /** tabLayout */
     implementation 'com.google.android.material:material:1.1.0'
