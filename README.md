@@ -16,6 +16,7 @@
  * [预览图](#预览图)
  * [如何下载使用](#如何下载使用)
  * [联系](#联系)
+ * [开源许可](#开源许可)
 #
 ### 简介：
 <p align="start">一款在线播放lovelive音乐的app，该app收录了最新的专辑和Liyuu个人歌曲，并能够在app里面添加本地歌曲，目前支持mp3、flac格式的导入，持续更新app的其他内容和功能，不断优化代码等</p>
@@ -70,4 +71,8 @@
 ### 联系：
 <p align="start">b站up：圆圈AB https://space.bilibili.com/18177261</p>
 <p align="start">QQ交流或维护群：748504621</p>
+
+#
+### 开源许可：
+[Apache License 2.0](https://github.com/Banlap/LoveLiveMusicApp/blob/main/LICENSE)
 
