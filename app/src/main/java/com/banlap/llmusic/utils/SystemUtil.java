@@ -1,13 +1,18 @@
 package com.banlap.llmusic.utils;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 
 import com.banlap.llmusic.receiver.ScreenReceiver;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -97,5 +102,39 @@ public class SystemUtil {
         }
     }
 
+    /**
+     * 是否已经开启弹窗权限
+     * @return true 已开启
+     * */
+    public boolean isCanDrawOverlays(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return Settings.canDrawOverlays(context);
+        }
+        return true;
+    }
 
+    /**
+     * 判断服务是否开启
+     *
+     * @param mContext 上下文
+     * @param className 服务class名
+     * @return true:开启 false:未开启
+     */
+    public boolean isServiceWorked(Context mContext, String className) {
+        ArrayList<ActivityManager.RunningServiceInfo> runningService = getRunningService(mContext);
+        for (int i = 0; i < runningService.size(); i++) {
+            if (runningService.get(i).service.getClassName().toString()
+                    .equals(className)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ArrayList<ActivityManager.RunningServiceInfo> getRunningService(Context mContext) {
+        ActivityManager myManager = (ActivityManager) mContext
+                .getApplicationContext().getSystemService(
+                        Context.ACTIVITY_SERVICE);
+       return (ArrayList<ActivityManager.RunningServiceInfo>) myManager.getRunningServices(30);
+    }
 }

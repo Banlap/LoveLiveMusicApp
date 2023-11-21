@@ -17,7 +17,9 @@ import androidx.databinding.adapters.ViewBindingAdapter;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
 import com.banlap.llmusic.utils.LLActivityManager;
+import com.banlap.llmusic.utils.NotificationHelper;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
@@ -91,6 +93,12 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
 
     protected abstract void initData();
     protected abstract void initView();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        NotificationHelper.getInstance().cancelNotification(this, NotificationHelper.LL_MUSIC_FULL_SCREEN);
+    }
 
     @Override
     protected void onDestroy() {

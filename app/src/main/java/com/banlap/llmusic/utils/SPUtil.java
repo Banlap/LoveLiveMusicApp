@@ -3,6 +3,7 @@ package com.banlap.llmusic.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -44,6 +45,8 @@ public class SPUtil {
     public static final String SaveControllerSceneValue_DefaultScene = "DefaultScene";
     public static final String SaveControllerSceneValue_NewScene = "NewScene";
 
+    private static final String TAG = SPUtil.class.getSimpleName();
+
     public static String getStrValue(Context context, String key) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         return sharedPreferences.getString(key, "");
@@ -60,17 +63,22 @@ public class SPUtil {
      * 获取List<T>本地数据
      * */
     public static <T> List<T> getListValue(Context context, String key, Class<T> cls) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-
         List<T> list = new ArrayList<>();
-        String listJson = sharedPreferences.getString(key, null);
-        if(listJson == null) {
-            return list;
-        }
-        Gson gson = new Gson();
-        JsonArray array = new JsonParser().parse(listJson).getAsJsonArray();
-        for (JsonElement element : array) {
-            list.add(gson.fromJson(element,cls));
+        try {
+            SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+
+            String listJson = sharedPreferences.getString(key, null);
+            if(listJson == null) {
+                return list;
+            }
+            Gson gson = new Gson();
+            JsonArray array = new JsonParser().parse(listJson).getAsJsonArray();
+            for (JsonElement element : array) {
+                list.add(gson.fromJson(element,cls));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "获取本地数据异常(同时重置数据)：" + e.getMessage());
+            setListValue(context, key, list);
         }
         return list;
     }

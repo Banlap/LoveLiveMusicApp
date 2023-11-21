@@ -383,14 +383,6 @@ public class MainVM extends AndroidViewModel {
         talkHandler.removeCallbacksAndMessages(null);
     }
 
-    /** 是否已经开启弹窗权限*/
-    public static boolean isCanDrawOverlays(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return Settings.canDrawOverlays(context);
-        }
-        return true;
-    }
-
     /**
      * 展示每日推荐
      * */
@@ -408,29 +400,6 @@ public class MainVM extends AndroidViewModel {
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
         SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
     }
-
-    /**
-     * 判断服务是否开启
-     *
-     * @param mContext 上下文
-     * @param className 服务class名
-     * @return true:开启 false:未开启
-     */
-    public static boolean isWorked(Context mContext, String className) {
-        ActivityManager myManager = (ActivityManager) mContext
-                .getApplicationContext().getSystemService(
-                        Context.ACTIVITY_SERVICE);
-        ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) myManager
-                .getRunningServices(30);
-        for (int i = 0; i < runningService.size(); i++) {
-            if (runningService.get(i).service.getClassName().toString()
-                    .equals(className)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     /** 默认存储Music值 */
     public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {

@@ -7,9 +7,11 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.app.TimePickerDialog;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,7 +23,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.MediaMetadata;
 import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
@@ -162,7 +166,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private ServiceConn conn;                           //用于绑定服务
     private Intent intentService;                       //音乐服务
     private Intent intentCharacterService;              //角色服务
-    private Intent intentLockScreenService;             //锁屏页面服务
     private boolean isSelect = false;                   //查询一次数据
     private boolean isClick = false;                    //判断是否点击按钮
     private boolean isNotMain = false;                  //判断是否在主界面
@@ -328,7 +331,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     protected void initView() {
-
         EventBus.getDefault().register(this);
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
@@ -354,6 +356,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 统一检查权限 */
     private void initCheckPermission() {
+
         String[] permission = {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -372,6 +375,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         if(PermissionUtil.getInstance().checkPermission(this, permission)) {
             ActivityCompat.requestPermissions(MainActivity.this, permission, REQUEST_CODE_NEED_RUNNING_PERMISSION);
         }
+
     }
 
     /** 初始化主页内容 */
@@ -644,7 +648,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     @Override
                     public void onActivityResult(ActivityResult result) {
                         //此处是跳转的result回调方法
-                        if(MainVM.isCanDrawOverlays(getApplication())) {
+                        if(SystemUtil.getInstance().isCanDrawOverlays(getApplication())) {
                             if(null != mAlertDialog) {
                                 mAlertDialog.dismiss();
                             }
@@ -727,11 +731,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         startForegroundService(intentCharacterService);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    private void startLockScreenService() {
-        startForegroundService(intentLockScreenService);
-    }
-
     /** 初始化通知栏消息 */
     @SuppressLint("RemoteViewLayout")
     private void initNotificationHelper(String musicName, String musicSinger, String imgUrl) {
@@ -788,7 +787,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         if (mSession == null) {
             mSession = new MediaSession(context, MainActivity.class.getSimpleName());
             mSession.setCallback(mSessionCallback);
-            mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS);
+            mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
             mSession.setActive(true);
         }
     }
@@ -1057,7 +1057,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 lyricNewScrollDetailView.posLock(event.b);
                 lyricNewScrollView.posLock(event.b);
                 //角色服务存在时 对角色服务做处理
-                if(MainVM.isWorked(this, CharacterService.class.getPackage().getName()
+                if(SystemUtil.getInstance().isServiceWorked(this, CharacterService.class.getPackage().getName()
                         + "." + CharacterService.class.getSimpleName())) {
                     //根据播放或暂停 对角色状态变更
                     MainVM.stopHandler();
@@ -1391,6 +1391,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = !isShowControllerModePanel;
                 SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
                 break;
+
+
         }
     }
 
@@ -1554,6 +1556,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             case ThreadEvent.SAVE_LOCAL_MUSIC_LIST:  //在子线程中保存列表数据
                 List<Music> list = event.musicList;
                 SPUtil.setListValue(context, SPUtil.PlayListData, list);
+                break;
+            case ThreadEvent.VIEW_SCREEN_LOCK:
+                if(binder != null && binder.isPlay()) {
+                    NotificationHelper.getInstance().createFullScreen(getApplicationContext());
+                } else {
+                    NotificationHelper.getInstance().cancelNotification(getApplicationContext(), NotificationHelper.LL_MUSIC_FULL_SCREEN);
+                }
                 break;
         }
     }
@@ -2090,8 +2099,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 点击展示授权悬浮窗显示角色系统 */
     public void showCharacterAuth(final String characterName) {
         //判断是否已经授权显示悬浮窗
-        if(MainVM.isCanDrawOverlays(this)) {
-             if(MainVM.isWorked(this, CharacterService.class.getPackage().getName()
+        if(SystemUtil.getInstance().isCanDrawOverlays(this)) {
+             if(SystemUtil.getInstance().isServiceWorked(this, CharacterService.class.getPackage().getName()
                         + "." + CharacterService.class.getSimpleName())) {
 
                  stopService(intentCharacterService);
