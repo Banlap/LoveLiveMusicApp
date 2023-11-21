@@ -15,29 +15,14 @@ public class TimeUtil {
 
     private static final String TAG = TimeUtil.class.getSimpleName();
 
-    public static String getCurrentDateByTime() {
-        return getCurrentDateStr("HH:mm");
-    }
-
-    public static String getCurrentDateByMD() {
-        return getCurrentDateStr("YYYY年MM月dd日");
-    }
-
     /**
      * 获取当前时间
      * @return 日期 格式为 yyyy-MM-dd HH:mm:ss
      * */
     public static String getCurrentDateStr() {
-        return getCurrentDateStr("yyyy-MM-dd HH:mm:ss");
-    }
-    /**
-     * 获取当前时间
-     * @param type 根具类型获取时间
-     * */
-    public static String getCurrentDateStr(String type) {
         String currentTimeStr = "";
         try {
-            SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat(type, Locale.CHINA);
+            SimpleDateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
             String date = DEFAULT_DATE_FORMAT.format(new Date());
             if(!TextUtils.isEmpty(date)) {
                 currentTimeStr = date;

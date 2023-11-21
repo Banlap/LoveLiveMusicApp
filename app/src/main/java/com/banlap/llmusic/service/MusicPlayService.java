@@ -23,7 +23,6 @@ import androidx.annotation.Nullable;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
@@ -43,14 +42,14 @@ import java.util.List;
 public class MusicPlayService extends Service {
     public static final String TAG = MusicPlayService.class.getSimpleName();
     public MediaPlayer mediaPlayer;
-    private boolean isStop = false;  //是否暂停
-    private final Object lock = new Object();  //线程锁
+    private boolean isStop = false;
+    private final Object lock = new Object();
     private List<MusicLyric> mMusicLyricList = new ArrayList<>();
     public static int mStartPosition;  //当前歌曲播放时间
     public static int mAllPosition;    //当前歌曲总时间
     public static Handler appWidgetHandler = new Handler();
     public static Runnable appWidgetRunnable;
-    public static final int DELAY_MILLIS = 1000;  //延迟1s发送
+    public static final int DELAY_MILLIS = 1000;
     public static int mAudioSessionId;
 
     Runnable runnable = new Runnable() {
@@ -79,8 +78,6 @@ public class MusicPlayService extends Service {
     };
 
     public static MusicPlayService getInstance() { return new MusicPlayService(); }
-
-
 
     @Override
     public void onCreate() {
@@ -127,10 +124,6 @@ public class MusicPlayService extends Service {
 
     public class MusicBinder extends Binder {
 
-        public Service getService() {
-            return MusicPlayService.this;
-        }
-
         /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final Music dataSource, final boolean isLoop) {
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_LYRIC, dataSource, isLoop));
@@ -143,6 +136,7 @@ public class MusicPlayService extends Service {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
 
                 mediaPlayer = new MediaPlayer();
+
 
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
@@ -282,7 +276,6 @@ public class MusicPlayService extends Service {
         public void clearMedia() {
             stop();
         }
-
 
     }
 

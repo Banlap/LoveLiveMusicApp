@@ -1,24 +1,32 @@
 package com.banlap.llmusic.widget;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.Scroller;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.MusicLyric;
+import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 歌词滚动View - 显示两行
+ * 歌词滚动View
  * */
 public class SingleLyricScrollView extends View {
     private final String TAG = SingleLyricScrollView.class.getSimpleName();

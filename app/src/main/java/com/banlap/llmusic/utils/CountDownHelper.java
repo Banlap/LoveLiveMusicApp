@@ -35,9 +35,6 @@ public class CountDownHelper {
         }, 0, 1000);
     }
 
-    /**
-     * 倒计时立即暂停
-     * */
     public static void pauseImm() {
         if(timer != null) {
             timer.cancel();

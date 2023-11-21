@@ -10,7 +10,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -228,27 +227,17 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 }
                 //是否完成下载app
                 if(event.b) {
-                    try {
-                        Log.i("ABMusicPlayer","file: " + event.file.toString());
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            Uri contentUri = FileProvider.getUriForFile(getApplicationContext(),"com.banlap.llmusic.fileProvider", event.file);
-                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            intent.setDataAndType(contentUri, "application/vnd.android.package-archive");//设置类型
-                        } else {
-                            intent.setDataAndType(Uri.parse("file://"+event.file.toString()), "application/vnd.android.package-archive");//设置类型
-                        }
-                        startActivity(intent);
-                    } catch (Exception e) { //修复部分版本（大于N）安装问题
-                        Log.i(TAG,"安装出错: " + e.getMessage());
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Log.i("ABMusicPlayer","file: " + event.file.toString());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        Uri contentUri = FileProvider.getUriForFile(getApplicationContext(),"com.banlap.llmusic.fileProvider", event.file);
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        Uri contentUri = Uri.fromFile(event.file);
                         intent.setDataAndType(contentUri, "application/vnd.android.package-archive");//设置类型
-                        startActivity(intent);
+                    } else {
+                        intent.setDataAndType(Uri.parse("file://"+event.file.toString()), "application/vnd.android.package-archive");//设置类型
                     }
+                    startActivity(intent);
                 } else {
                     event.file.delete();
                 }

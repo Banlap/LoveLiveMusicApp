@@ -134,9 +134,6 @@ public class ThreadEvent<T> {
     public static final int VIEW_COUNT_DOWN_REFRESH = 0x631;
     public static final int VIEW_COUNT_DOWN_FINISH = 0x632;
 
-    public static final int VIEW_SCREEN_LOCK= 0x641;
-    public static final int VIEW_SCREEN_UNLOCK= 0x642;
-
 
     /** 蓝牙部分控制 */
     public static final int BLUETOOTH_DISCONNECT = 0x70;

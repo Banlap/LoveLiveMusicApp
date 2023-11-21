@@ -41,8 +41,7 @@
         <service
             android:name="com.banlap.llmusic.service.MusicPlayService"
             android:enabled="true"
-            android:exported="true"
-            />
+            android:exported="true"/>
 
         <service
             android:name="com.banlap.llmusic.service.MusicNextService"
@@ -63,6 +62,12 @@
             android:name="com.banlap.llmusic.service.CharacterService"
             android:enabled="true"
             android:exported="true"/>
+
+        <service
+            android:name="com.banlap.llmusic.service.LockScreenService"
+            android:enabled="true"
+            android:exported="true"/>
+
 
         <receiver
             android:name=".receiver.AlarmReceiver"
@@ -120,9 +125,8 @@
         <activity
             android:name=".ui.activity.LockFullScreenActivity"
             android:showOnLockScreen="true"
-            android:theme="@style/LockScreenBase"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="fullSensor"/>
 
         <activity
             android:name=".ui.activity.SettingsActivity"
@@ -150,7 +154,7 @@
 
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
+                android:resource="@xml/filepaths" />
         </provider>
 
         <activity

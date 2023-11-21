@@ -11,10 +11,18 @@ import java.util.concurrent.ThreadFactory;
 public class AppExecutors {
 
     private final Executor mNetworkIO;
-
+    private static AppExecutors instance;
+    private static Object object = new Object();
 
     public static AppExecutors getInstance() {
-        return new AppExecutors();
+        if (instance == null) {
+            synchronized (object) {
+                if (instance == null) {
+                    instance = new AppExecutors();
+                }
+            }
+        }
+        return instance;
     }
 
     public AppExecutors() {
