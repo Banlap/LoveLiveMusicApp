@@ -9,33 +9,198 @@
             type="com.banlap.llmusic.uivm.vm.LockFullScreenVM" />
     </data>
 
-    <LinearLayout
+    <com.banlap.llmusic.widget.SildingFinishLayout
+        android:id="@+id/sfl_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/alpha_50"
         android:orientation="vertical"
+        android:gravity="center"
         tools:context=".ui.activity.WelcomeActivity">
 
         <LinearLayout
-            android:id="@+id/cl_top_title"
+            android:id="@+id/ll_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:orientation="vertical"
             android:gravity="center_horizontal"
             >
 
-            <ImageView
-                android:layout_width="125dp"
-                android:layout_height="125dp"
-                android:background="@mipmap/ic_llmp_2"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="150dp"
+                android:text="12:00"
+                android:textColor="@color/white"
+                android:textSize="50sp"
+                />
+
+            <TextView
+                android:id="@+id/tv_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2023年10月20日"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                />
+
+            <View
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+
+                    <ImageView
+                        android:id="@+id/iv_music_img"
+                        android:layout_width="75dp"
+                        android:layout_height="75dp"
+                        android:background="@mipmap/ic_llmp_2"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="10dp"
+                        >
+
+                        <TextView
+                            android:id="@+id/tv_music_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MusicName"
+                            android:textColor="@color/white"
+                            android:textSize="20sp"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_music_singer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MusicSinger"
+                            android:textColor="@color/white"
+                            android:textSize="17sp"
+                            />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <SeekBar
+                    android:layout_weight="1"
+                    android:id="@+id/sb_new_music_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:progressDrawable="@drawable/layer_seek_bar"
+                    android:thumb="@drawable/shape_seek_bar_thumb" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    >
+
+                    <ImageView
+                        android:id="@+id/iv_new_panel_last"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="70dp"
+                        android:background="@drawable/selector_last_black_33_selected"
+                        android:onClick="lastMusicButtonClick"
+                        />
+
+                    <ImageView
+                        android:id="@+id/iv_new_panel_play"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:background="@drawable/selector_play_circle_black_33_selected"
+                        android:onClick="playButtonClick"
+                        />
+
+                    <ImageView
+                        android:id="@+id/iv_new_panel_next"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="70dp"
+                        android:background="@drawable/selector_next_black_33_selected"
+                        android:onClick="nextMusicButtonClick"
+                        />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:layout_marginBottom="50dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:background="@drawable/ic_scroll"
+                        />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:background="@drawable/ic_scroll"
+                        />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:background="@drawable/ic_scroll"
+                        />
+                    <ImageView
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:background="@drawable/ic_scroll"
+                        />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="滑动解锁"
+                        android:textSize="20sp"
+                        android:textColor="@color/white"
+                        />
+                </LinearLayout>
+
+
+
+            </FrameLayout>
+
 
         </LinearLayout>
 
 
-    </LinearLayout>
+    </com.banlap.llmusic.widget.SildingFinishLayout>
 
 </layout>

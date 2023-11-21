@@ -8,533 +8,535 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-         <ScrollView
-              android:id="@+id/nsv_main"
-              android:layout_width="match_parent"
-              android:layout_height="0dp"
-              app:layout_constraintBottom_toBottomOf="parent"
-              app:layout_constraintEnd_toEndOf="parent"
-              app:layout_constraintHorizontal_bias="1.0"
-              app:layout_constraintStart_toStartOf="parent"
-              app:layout_constraintVertical_bias="1.0">
-
-              <LinearLayout
-                  android:id="@+id/ll_main"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical">
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      android:layout_marginTop="10dp"
-                      >
-
-                      <TextView
-                          android:id="@+id/tv_group_0"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginStart="15dp"
-                          android:text="每日推荐"
-                          android:textColor="@color/light_ff"
-                          android:background="@drawable/selector_normal_selected"
-                          android:textSize="17sp"
-                          />
-
-                  </LinearLayout>
-
-                  <LinearLayout
-                      android:id="@+id/ll_recommend_group"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp"
-                      android:orientation="horizontal"
-                      >
-
-                      <LinearLayout
-                          android:layout_weight="1"
-                          android:id="@+id/ll_recommend_1"
-                          android:layout_width="match_parent"
-                          android:layout_height="100dp"
-                          android:orientation="vertical"
-                          android:gravity="center"
-                          android:layout_marginEnd="5dp"
-                          android:background="@drawable/shape_button_alpha_2_hover"
-                          >
-
-                          <LinearLayout
-                              android:layout_weight="1"
-                              android:layout_width="match_parent"
-                              android:layout_height="0dp"
-                              android:orientation="vertical"
-                              android:gravity="center">
-
-                              <ImageView
-                                  android:id="@+id/iv_recommend_1"
-                                  android:layout_width="match_parent"
-                                  android:layout_height="match_parent"
-                                  android:layout_marginTop="2dp"
-                                  android:layout_marginBottom="2dp"
-                                  android:src="@drawable/ic_music_default"
-                                  android:scaleType="fitCenter"
-                                  />
-
-                          </LinearLayout>
-
-
-                          <TextView
-                              android:id="@+id/tv_recommend_1"
-                              android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:singleLine="true"
-                              android:ellipsize="marquee"
-                              android:text="MusicName1"
-                              android:textColor="@color/light_ff"
-                              android:textSize="12dp"/>
-
-                      </LinearLayout>
-
-                      <LinearLayout
-                          android:layout_weight="1"
-                          android:id="@+id/ll_recommend_2"
-                          android:layout_width="match_parent"
-                          android:layout_height="100dp"
-                          android:orientation="vertical"
-                          android:gravity="center"
-                          android:layout_marginStart="5dp"
-                          android:layout_marginEnd="5dp"
-                          android:background="@drawable/shape_button_alpha_2_hover"
-                          >
-
-                          <LinearLayout
-                              android:layout_weight="1"
-                              android:layout_width="match_parent"
-                              android:layout_height="0dp"
-                              android:orientation="vertical"
-                              android:gravity="center">
-
-                              <ImageView
-                                  android:id="@+id/iv_recommend_2"
-                                  android:layout_width="match_parent"
-                                  android:layout_height="match_parent"
-                                  android:layout_marginTop="2dp"
-                                  android:layout_marginBottom="2dp"
-                                  android:src="@drawable/ic_music_default"
-                                  android:scaleType="fitCenter"
-                                  />
-
-                          </LinearLayout>
-
-                          <TextView
-                              android:id="@+id/tv_recommend_2"
-                              android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:singleLine="true"
-                              android:ellipsize="marquee"
-                              android:text="MusicName2"
-                              android:textColor="@color/light_ff"
-                              android:textSize="12dp"/>
-
-                      </LinearLayout>
-
-                      <LinearLayout
-                          android:layout_weight="1"
-                          android:id="@+id/ll_recommend_3"
-                          android:layout_width="match_parent"
-                          android:layout_height="100dp"
-                          android:orientation="vertical"
-                          android:gravity="center"
-                          android:layout_marginStart="5dp"
-                          android:background="@drawable/shape_button_alpha_2_hover"
-                          >
-
-                          <LinearLayout
-                              android:layout_weight="1"
-                              android:layout_width="match_parent"
-                              android:layout_height="0dp"
-                              android:orientation="vertical"
-                              android:gravity="center">
-
-                              <ImageView
-                                  android:id="@+id/iv_recommend_3"
-                                  android:layout_width="match_parent"
-                                  android:layout_height="match_parent"
-                                  android:layout_marginTop="2dp"
-                                  android:layout_marginBottom="2dp"
-                                  android:src="@drawable/ic_music_default"
-                                  android:scaleType="fitCenter"
-                                  />
-
-                          </LinearLayout>
-
-                          <TextView
-                              android:id="@+id/tv_recommend_3"
-                              android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:singleLine="true"
-                              android:ellipsize="marquee"
-                              android:text="MusicName3"
-                              android:textColor="@color/light_ff"
-                              android:textSize="12dp"/>
-
-                      </LinearLayout>
-
-                  </LinearLayout>
-
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      >
-
-                      <TextView
-                          android:id="@+id/tv_group_1"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginStart="15dp"
-                          android:text="企划"
-                          android:textColor="@color/light_ff"
-                          android:background="@drawable/selector_normal_selected"
-                          android:textSize="17sp"
-                          />
-
-                  </LinearLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_7"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_haus" />
-
-                      <TextView
-                          android:id="@+id/tv_haus"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="haus"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_1"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_liella" />
-
-                      <TextView
-                          android:id="@+id/tv_liella_music"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="Liella!"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_4"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_nijigasaki"
-                          android:visibility="visible" />
-
-                      <TextView
-                          android:id="@+id/tv_nijigasaki"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="Nijigasaki"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_5"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_aqours"
-                          android:visibility="visible" />
-
-                      <TextView
-                          android:id="@+id/tv_aqours"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="Aqours"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_6"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_us" />
-
-                      <TextView
-                          android:id="@+id/tv_us"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="u's"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      >
-
-                      <TextView
-                          android:id="@+id/tv_group_2"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginStart="15dp"
-                          android:text="团体"
-                          android:textColor="@color/light_ff"
-                          android:background="@drawable/selector_normal_selected"
-                          android:textSize="17sp"
-                          />
-
-                  </LinearLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_3"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_sunny_passion"
-                          android:visibility="visible" />
-
-                      <TextView
-                          android:id="@+id/tv_sunny_passion"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="SunnyPassion"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_8"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_saint_snow"
-                          android:visibility="visible" />
-
-                      <TextView
-                          android:id="@+id/tv_saint_snow"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="Saint Snow"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_9"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_a_rise"
-                          android:visibility="visible" />
-
-                      <TextView
-                          android:id="@+id/tv_a_rise"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="A-RISE"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-
-                  <LinearLayout
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal"
-                      >
-
-                      <TextView
-                          android:id="@+id/tv_group_3"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginStart="15dp"
-                          android:text="歌手"
-                          android:textColor="@color/light_ff"
-                          android:background="@drawable/selector_normal_selected"
-                          android:textSize="17sp"
-                          />
-
-                  </LinearLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_2"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop"
-                          android:src="@drawable/selector_click_album_four_yuu" />
-
-                      <TextView
-                          android:id="@+id/tv_four_yuu"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text="Fo(u)r YuU"
-                          android:textColor="@color/white"
-                          android:textSize="36dp"
-                          android:visibility="gone" />
-
-                  </RelativeLayout>
-
-                  <RelativeLayout
-                      android:id="@+id/ll_list_null"
-                      android:layout_width="match_parent"
-                      android:layout_height="155dp"
-                      android:layout_marginStart="15dp"
-                      android:layout_marginTop="10dp"
-                      android:layout_marginEnd="15dp"
-                      android:layout_marginBottom="10dp">
-
-
-                      <com.banlap.llmusic.widget.CircleImageView
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:scaleType="centerCrop" />
-
-                      <TextView
-                          android:id="@+id/tv_null"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="15dp"
-                          android:text=""
-                          android:textColor="@color/white"
-                          android:textSize="36dp" />
-
-                  </RelativeLayout>
-
-              </LinearLayout>
+        <ScrollView
+            android:id="@+id/nsv_main"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scrollbars="none"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            >
+
+            <LinearLayout
+                android:id="@+id/ll_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_group_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:text="每日推荐"
+                        android:textColor="@color/light_ff"
+                        android:background="@drawable/selector_normal_selected"
+                        android:textSize="17sp"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_recommend_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal"
+                    >
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:id="@+id/ll_recommend_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/shape_button_alpha_2_hover"
+                        >
+
+                        <LinearLayout
+                            android:layout_weight="1"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/iv_recommend_1"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginBottom="2dp"
+                                android:src="@drawable/ic_music_default"
+                                android:scaleType="fitCenter"
+                                />
+
+                        </LinearLayout>
+
+
+                        <TextView
+                            android:id="@+id/tv_recommend_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:text="MusicName1"
+                            android:textColor="@color/light_ff"
+                            android:textSize="12dp"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:id="@+id/ll_recommend_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/shape_button_alpha_2_hover"
+                        >
+
+                        <LinearLayout
+                            android:layout_weight="1"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/iv_recommend_2"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginBottom="2dp"
+                                android:src="@drawable/ic_music_default"
+                                android:scaleType="fitCenter"
+                                />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tv_recommend_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:text="MusicName2"
+                            android:textColor="@color/light_ff"
+                            android:textSize="12dp"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:id="@+id/ll_recommend_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginStart="5dp"
+                        android:background="@drawable/shape_button_alpha_2_hover"
+                        >
+
+                        <LinearLayout
+                            android:layout_weight="1"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/iv_recommend_3"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginTop="2dp"
+                                android:layout_marginBottom="2dp"
+                                android:src="@drawable/ic_music_default"
+                                android:scaleType="fitCenter"
+                                />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tv_recommend_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:ellipsize="marquee"
+                            android:text="MusicName3"
+                            android:textColor="@color/light_ff"
+                            android:textSize="12dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_group_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:text="企划"
+                        android:textColor="@color/light_ff"
+                        android:background="@drawable/selector_normal_selected"
+                        android:textSize="17sp"
+                        />
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_7"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_haus" />
+
+                    <TextView
+                        android:id="@+id/tv_haus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="haus"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_liella" />
+
+                    <TextView
+                        android:id="@+id/tv_liella_music"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="Liella!"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_4"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_nijigasaki"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_nijigasaki"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="Nijigasaki"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_5"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_aqours"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_aqours"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="Aqours"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_6"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_us" />
+
+                    <TextView
+                        android:id="@+id/tv_us"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="u's"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_group_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:text="团体"
+                        android:textColor="@color/light_ff"
+                        android:background="@drawable/selector_normal_selected"
+                        android:textSize="17sp"
+                        />
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_sunny_passion"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_sunny_passion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="SunnyPassion"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_8"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_saint_snow"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_saint_snow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="Saint Snow"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_9"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_a_rise"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_a_rise"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="A-RISE"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_group_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="15dp"
+                        android:text="歌手"
+                        android:textColor="@color/light_ff"
+                        android:background="@drawable/selector_normal_selected"
+                        android:textSize="17sp"
+                        />
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_four_yuu" />
+
+                    <TextView
+                        android:id="@+id/tv_four_yuu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text="Fo(u)r YuU"
+                        android:textColor="@color/white"
+                        android:textSize="36dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/ll_list_null"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop" />
+
+                    <TextView
+                        android:id="@+id/tv_null"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="15dp"
+                        android:text=""
+                        android:textColor="@color/white"
+                        android:textSize="36dp" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
 
           </ScrollView>
 

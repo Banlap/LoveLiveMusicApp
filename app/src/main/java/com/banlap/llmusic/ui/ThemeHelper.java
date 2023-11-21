@@ -244,8 +244,8 @@ public class ThemeHelper {
             vdb.ivSearch.setBackgroundResource(R.drawable.ic_search);
             vdb.ivSort.setBackgroundResource(R.drawable.ic_sort);
             //vdb.ivSettings.setBackgroundResource(R.drawable.ic_settings);
-            vdb.ivDeleteAll.setBackgroundResource(R.drawable.ic_delete);
-            vdb.ivNewDeleteAll.setBackgroundResource(R.drawable.ic_delete);
+            vdb.ivDeleteAll.setBackgroundResource(R.drawable.ic_delete_blue);
+            vdb.ivNewDeleteAll.setBackgroundResource(R.drawable.ic_delete_blue);
             vdb.ivSearchMusic.setBackgroundResource(R.drawable.ic_search);
             vdb.ivBack.setBackgroundResource(R.drawable.ic_arrow_back);
             vdb.ivPanelLast.setBackgroundResource(R.drawable.selector_last_blue_selected);
