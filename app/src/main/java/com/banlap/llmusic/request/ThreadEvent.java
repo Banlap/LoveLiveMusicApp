@@ -116,6 +116,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x542;
     public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 0x543;
     public static final int VIEW_CANCEL_FAVORITE_MUSIC = 0x544;
+    public static final int VIEW_FRESH_FAVORITE_MUSIC = 0x545;
     public static final int VIEW_DELETE_MUSIC = 0x55;
     public static final int VIEW_DELETE_LOCAL_MUSIC = 0x551;
     public static final int VIEW_DELETE_FAVORITE_MUSIC = 0x552;

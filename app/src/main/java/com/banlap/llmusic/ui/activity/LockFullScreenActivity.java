@@ -2,16 +2,23 @@ package com.banlap.llmusic.ui.activity;
 
 import android.graphics.Color;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.view.GestureDetectorCompat;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivityLockFullScreenBinding;
 import com.banlap.llmusic.uivm.vm.LockFullScreenVM;
 import com.banlap.llmusic.utils.CountDownHelper;
+import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.TimeUtil;
 import com.banlap.llmusic.widget.SildingFinishLayout;
@@ -24,8 +31,9 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, ActivityLockFullScreenBinding>
     implements LockFullScreenVM.LockFullScreenCallBack {
-
     private static final String TAG = LockFullScreenActivity.class.getSimpleName();
+    private float startX;
+
     @Override
     protected int getLayoutId() {
         return R.layout.activity_lock_full_screen;
@@ -56,16 +64,10 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         window.setStatusBarColor(Color.TRANSPARENT);
 
-
-        getViewDataBinding().sflMain.setOnSildingFinishListener(new SildingFinishLayout.OnSildingFinishListener() {
-            @Override
-            public void onSildingFinish() {
-                NotificationHelper.getInstance().cancelNotification(getApplicationContext(), NotificationHelper.LL_MUSIC_FULL_SCREEN);
-                CountDownHelper.pauseImm();
-                finish();
-            }
+        getViewDataBinding().getRoot().setOnTouchListener((view, motionEvent) -> {
+            handleTouch(motionEvent);
+            return true;
         });
-        getViewDataBinding().sflMain.setTouchView(getViewDataBinding().sflMain);
 
         getViewDataBinding().tvDate.setText(TimeUtil.getCurrentDateByMD());
         setTime();
@@ -94,7 +96,6 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
 
     private void setTime() {
         runOnUiThread(() -> {
-            Toast.makeText(this, "已刷新", Toast.LENGTH_SHORT).show();
             getViewDataBinding().tvTime.setText(TimeUtil.getCurrentDateByTime());
         });
         CountDownHelper.startCountTime(5, new CountDownHelper.CountDownCallBack() {
@@ -111,11 +112,40 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
     }
 
 
-
     @Override
     public void onBackPressed() {
         NotificationHelper.getInstance().cancelNotification(getApplicationContext(), NotificationHelper.LL_MUSIC_FULL_SCREEN);
         CountDownHelper.pauseImm();
         super.onBackPressed();
+    }
+
+    private void handleTouch(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                startX = event.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float moveX = event.getX() - startX;
+                // Move the view as the user swipes
+                float viewMove = getViewDataBinding().getRoot().getX() + moveX;
+                if(viewMove >=0) {
+                    getViewDataBinding().getRoot().setX(viewMove);
+                }
+                //startX = event.getX();
+                break;
+            case MotionEvent.ACTION_UP:
+                float endX = event.getX() - startX;
+                Log.e(TAG, "startX: " + startX + " endX: " + event.getX() + " value: " + endX);
+                if(endX > -100) {
+                    CountDownHelper.pauseImm();
+                    finish();
+                    MyAnimationUtil.objectAnimatorLeftOrRight(this, false, true, getViewDataBinding().llMain);
+                    //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                } else {
+                    getViewDataBinding().getRoot().setX(0);
+                }
+                // Handle the touch release event if needed
+                break;
+        }
     }
 }

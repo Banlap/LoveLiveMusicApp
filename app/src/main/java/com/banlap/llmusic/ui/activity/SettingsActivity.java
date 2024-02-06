@@ -67,6 +67,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     private DialogSettingVideoBinding settingVideoBinding;
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
     private String mNormalLaunchVideoUrl; //默认启动动画UI
+    private String mNormalLaunchVideoUrl2; //启动动画UI 5nd
 
     private static final int REQUEST_CODE_DOWNLOAD_APP_2 = 201;
     private static final int REQUEST_CODE_SELECT_VIDEO_FILE_2 = 202;
@@ -83,6 +84,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     @Override
     protected void initData() {
         mNormalLaunchVideoUrl = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella;
+        mNormalLaunchVideoUrl2 = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella5nd;
         String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
         if(strThemeId!=null) {
             if(!strThemeId.equals("")) {
@@ -110,6 +112,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         getViewDataBinding().llThemeLight.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeWhite.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeOrange.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llThemeRed.setOnClickListener(new ButtonClickListener());
 
         getViewDataBinding().llSettingWelcomeVideo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -262,7 +265,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS:
                 if(!TextUtils.isEmpty(event.str)) {
                     SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, event.str);
-                    updateLaunchVideoSelectUI(false);
+                    updateLaunchVideoSelectUI(false, "");
                 }
                 break;
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_ERROR:
@@ -305,12 +308,15 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         });
 
         //选择启动动画ui默认值
-        updateLaunchVideoSelectUI(true);
+        updateLaunchVideoSelectUI(true, "1");
 
         String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
         if(!TextUtils.isEmpty(launchVideoPath)) {
-            if(!mNormalLaunchVideoUrl.equals(launchVideoPath)) {
-                updateLaunchVideoSelectUI(false);
+            if(!mNormalLaunchVideoUrl.equals(launchVideoPath) && !mNormalLaunchVideoUrl2.equals(launchVideoPath)) {
+                updateLaunchVideoSelectUI(false, "");
+            }
+            if(mNormalLaunchVideoUrl2.equals(launchVideoPath)) {
+                updateLaunchVideoSelectUI(true, "2");
             }
         }
 
@@ -319,7 +325,16 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             @Override
             public void onClick(View v) {
                 SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl);
-                updateLaunchVideoSelectUI(true);
+                updateLaunchVideoSelectUI(true, "1");
+            }
+        });
+
+        //选择默认启动动画2
+        settingVideoBinding.llSelectVideoNormal2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl2);
+                updateLaunchVideoSelectUI(true, "2");
             }
         });
 
@@ -349,13 +364,23 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
      *  选择启动动画ui默认值
      *  @param isNormal true: 默认启动视频UI false: 自定义启动视频UI
      * */
-    private void updateLaunchVideoSelectUI(boolean isNormal) {
+    private void updateLaunchVideoSelectUI(boolean isNormal, String type) {
         if(settingVideoBinding != null) {
-            settingVideoBinding.ivLaunchVideoNormalSelected.setVisibility(isNormal ? View.VISIBLE : View.INVISIBLE);
-            settingVideoBinding.ivLaunchVideoCustomSelected.setVisibility(isNormal ? View.INVISIBLE : View.VISIBLE);
-            settingVideoBinding.civLaunchVideoAdd.setVisibility(isNormal ? View.VISIBLE : View.GONE);
-            settingVideoBinding.civLaunchVideoCustom.setVisibility(isNormal ? View.GONE : View.VISIBLE);
-            settingVideoBinding.tvLaunchVideoCustom.setText(isNormal ? "" : "已设定视频");
+            if(isNormal) {
+                settingVideoBinding.ivLaunchVideoNormalSelected.setVisibility(type.equals("1") ? View.VISIBLE : View.INVISIBLE);
+                settingVideoBinding.ivLaunchVideoNormal2Selected.setVisibility(type.equals("1") ? View.INVISIBLE : View.VISIBLE);
+                settingVideoBinding.ivLaunchVideoCustomSelected.setVisibility(View.INVISIBLE);
+                settingVideoBinding.civLaunchVideoAdd.setVisibility(View.VISIBLE);
+                settingVideoBinding.civLaunchVideoCustom.setVisibility(View.GONE);
+                settingVideoBinding.tvLaunchVideoCustom.setText("");
+            } else {
+                settingVideoBinding.ivLaunchVideoNormalSelected.setVisibility(View.INVISIBLE);
+                settingVideoBinding.ivLaunchVideoNormal2Selected.setVisibility(View.INVISIBLE);
+                settingVideoBinding.ivLaunchVideoCustomSelected.setVisibility(View.VISIBLE);
+                settingVideoBinding.civLaunchVideoAdd.setVisibility(View.GONE);
+                settingVideoBinding.civLaunchVideoCustom.setVisibility(View.VISIBLE);
+                settingVideoBinding.tvLaunchVideoCustom.setText("已设定视频");
+            }
         }
     }
 
@@ -544,6 +569,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 changeTheme(R.id.ll_theme_orange);
             } else if(v.getId() == R.id.ll_theme_light) {
                 changeTheme(R.id.ll_theme_light);
+            } else if(v.getId() == R.id.ll_theme_red) {
+                changeTheme(R.id.ll_theme_red);
             }
         }
     }

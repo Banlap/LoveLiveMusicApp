@@ -158,6 +158,35 @@
                             </LinearLayout>
 
                             <LinearLayout
+                                android:id="@+id/ll_theme_red"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:paddingTop="10dp"
+                                android:paddingBottom="10dp"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginEnd="5dp"
+                                android:background="@drawable/selector_normal_selected">
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="10dp"
+                                    android:layout_marginBottom="10dp"
+                                    android:background="@drawable/shape_round_red"/>
+
+                                <TextView
+                                    android:id="@+id/tv_theme_red"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="红色主题"
+                                    android:textColor="@color/light_ff"
+                                    android:textSize="14dp"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
                                 android:id="@+id/ll_theme_blue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

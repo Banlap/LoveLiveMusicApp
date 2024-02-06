@@ -315,7 +315,7 @@
                     android:id="@+id/tv_null_local_list"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="点击上方的菜单按钮添加本地歌曲"
+                    android:text="点击上方的菜单按钮导入本地歌曲"
                     android:textSize="14dp"
                     android:textColor="@color/light_ff"
                     />

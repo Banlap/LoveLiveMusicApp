@@ -33,7 +33,7 @@ public class MyAnimationUtil {
         WindowManager windowManager = activity.getWindowManager();
         Display display = windowManager.getDefaultDisplay();
         ObjectAnimator animator = ObjectAnimator.ofFloat(constraintLayout, "translationX", 0, 0);
-        animator.setDuration(500);
+        animator.setDuration(300);
         return animator;
 
     }
@@ -44,15 +44,15 @@ public class MyAnimationUtil {
      * @param isLeft true 设置向左; false 设置向右
      * @param isRun true 设置移动到中间; false 设置移动到两边(根据isLeft值判断)
      * */
-    public static ObjectAnimator objectAnimatorLeftOrRight(Activity activity, boolean isLeft, boolean isRun, ConstraintLayout constraintLayout) {
+    public static ObjectAnimator objectAnimatorLeftOrRight(Activity activity, boolean isLeft, boolean isRun, ViewGroup viewGroup) {
         WindowManager windowManager = activity.getWindowManager();
         Display display = windowManager.getDefaultDisplay();
         int displayAxis = isLeft ? -display.getWidth() * 2 - 100 : display.getWidth() * 2 - 100;
 
         ObjectAnimator animator = isRun ?
-                ObjectAnimator.ofFloat(constraintLayout, "translationX", displayAxis, 0)
-                : ObjectAnimator.ofFloat(constraintLayout, "translationX", 0, displayAxis);
-        animator.setDuration(500);
+                ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
+                : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
+        animator.setDuration(300);
         return animator;
     }
 
@@ -66,7 +66,7 @@ public class MyAnimationUtil {
                 ObjectAnimator.ofFloat(viewGroup, "translationY", 0, moveAxis)
                 : ObjectAnimator.ofFloat(viewGroup, "translationY", moveAxis, 0);
         animator.setRepeatMode(ObjectAnimator.RESTART);
-        animator.setDuration(500);
+        animator.setDuration(300);
         return animator;
     }
 
@@ -88,7 +88,7 @@ public class MyAnimationUtil {
     public static ObjectAnimator objectAnimatorShowOrHide(Activity activity, float startAxis, float endAxis, TextView textView) {
         ObjectAnimator animator = ObjectAnimator.ofFloat(textView, "alpha", startAxis, endAxis);
         animator.setRepeatMode(ObjectAnimator.RESTART);
-        animator.setDuration(200);
+        animator.setDuration(120);
         return animator;
     }
 
@@ -99,7 +99,7 @@ public class MyAnimationUtil {
 
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animatorX, animatorY);
-        animatorSet.setDuration(150);
+        animatorSet.setDuration(120);
         return animatorSet;
     }
 
@@ -120,7 +120,7 @@ public class MyAnimationUtil {
 
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animatorXStart, animatorMove, animatorXEnd);
-        animatorSet.setDuration(200);
+        animatorSet.setDuration(120);
         return animatorSet;
     }
 

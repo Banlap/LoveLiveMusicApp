@@ -95,10 +95,10 @@
                         android:gravity="center">
 
                         <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="100dp"
+                            android:layout_width="80dp"
                             android:layout_height="120dp"
                             android:scaleType="centerCrop"
-                            android:src="@mipmap/ic_video_normal" />
+                            android:src="@mipmap/ic_video_normal_1" />
 
                         <ImageView
                             android:id="@+id/iv_launch_video_normal_selected"
@@ -111,8 +111,34 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/ll_select_video_add"
+                        android:id="@+id/ll_select_video_normal_2"
                         android:layout_width="100dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="15dp"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <com.banlap.llmusic.widget.CircleImageView
+                            android:layout_width="80dp"
+                            android:layout_height="120dp"
+                            android:scaleType="centerCrop"
+                            android:src="@mipmap/ic_video_normal_2" />
+
+                        <ImageView
+                            android:id="@+id/iv_launch_video_normal_2_selected"
+                            android:visibility="invisible"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/ic_click_ok"
+                            />
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/ll_select_video_add"
+                        android:layout_width="80dp"
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center_horizontal"

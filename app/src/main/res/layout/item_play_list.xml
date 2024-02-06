@@ -71,6 +71,13 @@
 
             <com.banlap.llmusic.widget.MusicLoadingView
                 android:visibility="gone"
+                android:id="@+id/iv_music_rail_red"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/red_3a"/>
+
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
                 android:id="@+id/iv_music_rail_light"
                 android:layout_width="28dp"
                 android:layout_height="20dp"
@@ -87,6 +94,7 @@
                 android:id="@+id/iv_show_logo"
                 android:layout_width="120dp"
                 android:layout_height="50dp"
+                android:layout_marginEnd="40dp"
                 android:layout_gravity="center_vertical|end"
                 android:scaleType="centerInside"
                 android:alpha="0.2"
@@ -131,6 +139,25 @@
                         android:text="SingerName"
                         android:textColor="@color/black"
                         android:textSize="14dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_favorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_gravity="end"
+                    android:gravity="center|end"
+                    android:background="@drawable/selector_tab_selected2">
+
+                    <ImageView
+                        android:id="@+id/iv_favorite"
+                        android:layout_width="23dp"
+                        android:layout_height="23dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:background="@drawable/ic_favorite_red" />
 
                 </LinearLayout>
 

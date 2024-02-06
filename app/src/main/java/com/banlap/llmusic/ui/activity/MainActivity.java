@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
@@ -28,6 +29,8 @@ import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -64,6 +67,7 @@ import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -107,6 +111,7 @@ import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
+import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
@@ -129,6 +134,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.CollationKey;
@@ -238,7 +244,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public static final String MUSIC_TYPE_SUNNYPASSION = "SunnyPassion";
     public static final String MUSIC_TYPE_NIJIGASAKI = "Nijigasaki";
     public static final String MUSIC_TYPE_AQOURS = "Aqours";
-    public static final String MUSIC_TYPE_US = "μs";
+    public static final String MUSIC_TYPE_US = "us";
     public static final String MUSIC_TYPE_HASUNOSORA = "Hasunosora";
     public static final String MUSIC_TYPE_SAINT_SNOW = "Saint Snow";
     public static final String MUSIC_TYPE_A_RISE = "A-RISE";
@@ -279,6 +285,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         messageList = new ArrayList<>();
         versionList = new ArrayList<>();
         localPlayList = new ArrayList<>();
+        mFavoriteList = new ArrayList<>();
 
         //本地缓存列表
         List<Music> spList = SPUtil.getListValue(this, SPUtil.PlayListData, Music.class);
@@ -289,8 +296,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             SPUtil.setListValue(context, SPUtil.PlayListData, playList);
         }
 
-
-        mFavoriteList = new ArrayList<>();
         //最爱歌曲缓存列表
         List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
         if(spList2.size()>0){
@@ -302,6 +307,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             mFavoriteList.add(nullMusicFile2);
             SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
         }
+
+        //播放列表使用图标显示收藏的歌曲
+        setMusicFavorite(mFavoriteList);
 
         if(SPUtil.getStrValue(this, SPUtil.SavePlayMode) != null) {
             if (!(SPUtil.getStrValue(this, SPUtil.SavePlayMode).equals(""))) {
@@ -328,6 +336,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     }
 
+
+
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     protected void initView() {
@@ -347,6 +357,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         BluetoothUtil.getInstance().registerBluetoothReceiver(this);
         //初始化碎片
         initFragment();
+        //
+
     }
 
     @Override
@@ -438,6 +450,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         playMusicListAdapter = new PlayMusicListAdapter(this, playList);
         getViewDataBinding().rvPlayList.setLayoutManager(new LinearLayoutManager(this));
         getViewDataBinding().rvPlayList.setAdapter(playMusicListAdapter);
+
+        //长按移动列表其中一个item
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(playMusicListAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(getViewDataBinding().rvPlayList);
+
+        ItemTouchHelper.Callback touchNewCallback = new ItemTouchHelperCallback(playMusicListAdapter);
+        ItemTouchHelper touchNewHelper = new ItemTouchHelper(touchNewCallback);
+        touchNewHelper.attachToRecyclerView(getViewDataBinding().rvNewPlayList);
 
         getViewDataBinding().rvNewPlayList.setLayoutManager(new LinearLayoutManager(this));
         getViewDataBinding().rvNewPlayList.setAdapter(playMusicListAdapter);
@@ -1117,40 +1138,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(getViewModel().rebuildTime(event.i));
                 getViewDataBinding().tvNewAllTime.setText(getViewModel().rebuildTime(event.i));
-                String musicMsg = event.music.musicName;
-                getViewDataBinding().tvMusicName.setText(musicMsg);
-                getViewDataBinding().tvNewMusicName.setText(musicMsg);
-                getViewDataBinding().tvNewPlayMusicName.setText(musicMsg);
+                String musicName = event.music.musicName;
+                getViewDataBinding().tvMusicName.setText(musicName);
+                getViewDataBinding().tvNewMusicName.setText(musicName);
+                getViewDataBinding().tvNewPlayMusicName.setText(musicName);
                 getViewDataBinding().tvSingerName.setText(event.music.musicSinger);
                 getViewDataBinding().tvNewSingerName.setText(event.music.musicSinger);
                 getViewDataBinding().tvListSize.setText("(" + playList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("(" + playList.size() + ")");
                 currentMusicDetail = event.music;
-
-                isFavorite = false;
-
-                mFavoriteList.clear();
-                List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                if(spList2.size() >0){
-                    mFavoriteList.addAll(spList2);
-                }
-
-                if(mFavoriteList.size() >0) {
-                    for(int i=0; i < mFavoriteList.size(); i++) {
-                        String favoriteMusicName = mFavoriteList.get(i).musicName;
-                        if(!TextUtils.isEmpty(favoriteMusicName)) {
-                            if(favoriteMusicName.equals(musicMsg)){
-                                isFavorite = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                //变更主题
-                ThemeHelper.getInstance().musicBarMusicFavoriteTheme(this, rThemeId, getViewDataBinding(), isFavorite);
-
                 currentMusicImg = event.music.getMusicImg();
+                currentMusicName = event.music.musicName;
+
+                //刷新播放列表的收藏歌曲显示ui
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
 
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
@@ -1392,7 +1393,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
                 break;
 
+            case ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC:
+                List<Music> spTempList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
+                if(spTempList.size() >0){
+                    setMusicFavorite(spTempList);
+                }
 
+                playMusicListAdapter.notifyDataSetChanged();
+                //刷新新播放界面是否收藏歌曲
+                setCurrentMusicFavorite(spTempList, currentMusicName);
+                break;
         }
     }
 
@@ -1630,8 +1640,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     } else {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC, currentMusicDetail));
                     }
-                    isFavorite = !isFavorite;
-                    ThemeHelper.getInstance().musicBarMusicFavoriteTheme(context, rThemeId, getViewDataBinding(), isFavorite);
                 }
             } else if(v.getId() == R.id.lv_new_show_lyric) {
                 showOrHideNewLyricDetailView(true);
@@ -3130,6 +3138,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
         playMusicListAdapter.notifyDataSetChanged();
         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SAVE_LOCAL_MUSIC_LIST, playList));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
         //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
     }
 
@@ -3166,6 +3175,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     mPopupWindow.dismiss();
                 }
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_FAVORITE_MUSIC, list.get(position)));
+
             }
         });
 
@@ -3232,6 +3242,43 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         });
     }
 
+    /** 设置播放列表使用图标显示收藏的歌 */
+    private void setMusicFavorite(List<Music> favoriteList) {
+        for(int i = 0; i< playList.size(); i++) {
+            boolean isShowMusicFavorite = false;
+            for(int j = 0; j< favoriteList.size(); j++) {
+                if(!TextUtils.isEmpty(playList.get(i).musicName) && !TextUtils.isEmpty(favoriteList.get(j).musicName)) {
+                    if(playList.get(i).musicName.equals(favoriteList.get(j).musicName)) {
+                        playList.get(i).setMusicFavorite(1);
+                        isShowMusicFavorite =true;
+                        break;
+                    }
+                }
+            }
+            if(!isShowMusicFavorite) {
+                playList.get(i).setMusicFavorite(0);
+            }
+        }
+    }
+
+    private void setCurrentMusicFavorite(List<Music> favoriteMusicList, String currentMusic) {
+        isFavorite = false;
+
+        if(favoriteMusicList.size() >0) {
+            for(int i=0; i < favoriteMusicList.size(); i++) {
+                String favoriteMusicName = favoriteMusicList.get(i).musicName;
+                if(!TextUtils.isEmpty(favoriteMusicName)) {
+                    if(favoriteMusicName.equals(currentMusic)){
+                        isFavorite = true;
+                        break;
+                    }
+                }
+            }
+        }
+        //变更主题
+        ThemeHelper.getInstance().musicBarMusicFavoriteTheme(this, rThemeId, getViewDataBinding(), isFavorite);
+    }
+
     /** 存储列表时默认所有歌单为未播放状态 */
     private void setPlayListDefault(List<Music> playList) {
         List<Music> list = playList;
@@ -3245,7 +3292,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         public PlayMusicListViewHolder(@NonNull View itemView) { super(itemView); }
     }
     /** 播放列表Adapter */
-    public class PlayMusicListAdapter extends RecyclerView.Adapter<PlayMusicListViewHolder> {
+    public class PlayMusicListAdapter extends RecyclerView.Adapter<PlayMusicListViewHolder>
+            implements ItemTouchHelperAdapter {
 
         private Context context;
         private List<Music> list;
@@ -3295,6 +3343,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_hasu_2);
                 }
 
+                binding.llFavorite.setVisibility(list.get(position).musicFavorite == 1? View.VISIBLE : View.GONE);
+
                 //变更主题
                 ThemeHelper.getInstance().playListTheme(context, rThemeId, binding, list.get(position).isPlaying);
 
@@ -3311,7 +3361,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     }
                 });
                 //当前播放的歌曲列表不显示删除按钮
-                binding.llDelete.setVisibility(list.get(position).isPlaying? View.GONE : View.VISIBLE);
+                binding.llDelete.setVisibility(list.get(position).isPlaying? View.INVISIBLE : View.VISIBLE);
                 binding.llDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -3329,6 +3379,77 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         @Override
         public int getItemCount() {
             return list.size();
+        }
+
+        @Override
+        public void onItemMove(int fromPosition, int toPosition) {
+            Collections.swap(list, fromPosition, toPosition);
+            notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void onItemDismiss(int position) {
+
+        }
+
+    }
+
+    private interface ItemTouchHelperAdapter {
+        void onItemMove(int fromPosition, int toPosition);
+
+        void onItemDismiss(int position);
+    }
+
+    /** item触摸移动处理 */
+    private class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
+
+        private final ItemTouchHelperAdapter adapter;
+
+        public ItemTouchHelperCallback(ItemTouchHelperAdapter adapter) {
+            this.adapter = adapter;
+        }
+
+        @Override
+        public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+            return makeMovementFlags(dragFlags, 0);
+
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            adapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+            return true;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            adapter.onItemDismiss(viewHolder.getAdapterPosition());
+        }
+
+        @Override
+        public boolean isLongPressDragEnabled() {
+            return true;
+        }
+
+        @Override
+        public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+            if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
+                if (viewHolder instanceof PlayMusicListViewHolder) {
+                    PlayMusicListViewHolder itemViewHolder = (PlayMusicListViewHolder) viewHolder;
+                    itemViewHolder.itemView.setBackgroundColor(getResources().getColor(R.color.alpha_30));
+                }
+            }
+            super.onSelectedChanged(viewHolder, actionState);
+        }
+
+        @Override
+        public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            super.clearView(recyclerView, viewHolder);
+            if (viewHolder instanceof PlayMusicListViewHolder) {
+                PlayMusicListViewHolder itemViewHolder = (PlayMusicListViewHolder) viewHolder;
+                itemViewHolder.itemView.setBackgroundColor(0);
+            }
         }
     }
 

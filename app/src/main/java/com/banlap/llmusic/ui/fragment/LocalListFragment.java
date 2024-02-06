@@ -207,6 +207,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 getViewDataBinding().rvFavoriteMusicList.setVisibility(View.GONE);
                 getViewDataBinding().clLocalMusicMain.setVisibility(View.VISIBLE);
 
+                getViewDataBinding().tvNullLocalList.setText("点击上方的菜单按钮导入本地歌曲");
+
                 if(null != mLocalMusicList) {
                     int musicCount = mLocalMusicList.size()-2;
                     getViewDataBinding().tvMusicCount.setText("" + musicCount);
@@ -233,6 +235,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 getViewDataBinding().rvFavoriteMusicList.setVisibility(View.VISIBLE);
                 getViewDataBinding().clLocalMusicMain.setVisibility(View.VISIBLE);
 
+                getViewDataBinding().tvNullLocalList.setText("当前没有收藏歌曲");
                 if(null != mFavoriteList) {
                     int musicCount = mFavoriteList.size()-2;
                     getViewDataBinding().tvMusicCount.setText("" + musicCount);
@@ -355,6 +358,13 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
                     Toast.makeText(getContext(), "添加收藏成功", Toast.LENGTH_SHORT).show();
                     getViewDataBinding().tvFavoriteMusicCount.setText(""+(mFavoriteList.size()-2));
+                    getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
+                    //刷新ui
+                    if(null != mFavoriteList) {
+                        int musicCount = mFavoriteList.size()-2;
+                        getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
+                    }
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                 }
                 break;
             case ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC:
@@ -368,6 +378,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
                         }
                     }
+
+                    //刷新ui
+                    int musicCount = mFavoriteList.size()-2;
+                    getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
+
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                 }
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST:
@@ -943,6 +959,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         favoriteListAdapter.notifyItemRangeChanged(position, favoriteList.size());
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
                         SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, favoriteList);
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                     }
                 });
             }

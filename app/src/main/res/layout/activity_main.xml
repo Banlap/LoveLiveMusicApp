@@ -862,7 +862,7 @@
                         android:id="@+id/iv_new_my_favorite"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
-                        android:background="@drawable/ic_favorite_empty_black_33"
+                        android:background="@drawable/ic_favorite_empty_red"
                         />
 
                     <ImageView

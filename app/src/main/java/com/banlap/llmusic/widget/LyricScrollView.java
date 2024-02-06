@@ -316,6 +316,9 @@ public class LyricScrollView extends View {
             } else if(rThemeId == R.id.ll_theme_light) {
                 highLightLyricColor = getResources().getColor(R.color.light_8a);
                 defaultLyricColor = getResources().getColor(R.color.light_b5);
+            } else if(rThemeId == R.id.ll_theme_red) {
+                highLightLyricColor = getResources().getColor(isLyricDetail? R.color.red_1a : R.color.red_3a);
+                defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.red_4d);
             } else {
                 highLightLyricColor = getResources().getColor(R.color.blue_ed);
                 defaultLyricColor = getResources().getColor(R.color.black);
