@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.core.splashscreen.SplashScreen;
+
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivityWelcomeBinding;
@@ -23,6 +25,12 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     protected int getLayoutId() { return R.layout.activity_welcome; }
 
     @Override
+    protected void beforeOnCreate() {
+        //显示闪屏页
+        SplashScreen.installSplashScreen(this);
+    }
+
+    @Override
     protected void initData() {
 
     }
@@ -31,6 +39,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     protected void initView() {
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
+
         launchVideo();
     }
 

@@ -30,7 +30,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseFragment;
-import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
+import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogInputContentBinding;
 import com.banlap.llmusic.databinding.DialogLocalPlayListMenuBinding;
 import com.banlap.llmusic.databinding.FragmentLocalListBinding;
@@ -49,6 +49,7 @@ import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SelectImgHelper;
+import com.banlap.llmusic.utils.SystemUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -661,10 +662,10 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             @Override
             public void onClick(View v) {
                 localPlayListMenuPopup.dismiss();
-                DialogDeleteListAllBinding deleteListAllBinding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.dialog_delete_list_all, null, false);
-                deleteListAllBinding.dialogSelectTitle.setText("是否删除当前歌单？");
+                DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.dialog_default, null, false);
+                defaultBinding.dialogSelectTitle.setText("是否删除当前歌单？");
 
-                deleteListAllBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
+                defaultBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(mAlertDialog != null) {
@@ -674,7 +675,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 });
 
                 //删除当前歌单
-                deleteListAllBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+                defaultBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(mAlertDialog != null) {
@@ -691,11 +692,13 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 });
 
                 mAlertDialog = new AlertDialog.Builder(getContext())
-                        .setView(deleteListAllBinding.getRoot())
+                        .setView(defaultBinding.getRoot())
                         .create();
 
                 Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
                 mAlertDialog.show();
+                mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(LLActivityManager.getInstance().getTopActivity()).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
+
             }
         });
     }

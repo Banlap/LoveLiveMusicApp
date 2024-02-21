@@ -9,6 +9,13 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
+    <!-- 启动页闪屏 -->
+    <style name="SplashTheme" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_llmp_3</item>
+        <item name="postSplashScreenTheme">@style/NormalTheme</item>
+    </style>
+
     <style name="NormalTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:windowTranslucentStatus">true</item>
@@ -44,6 +51,30 @@
         <item name="android:activityOpenExitAnimation">@anim/slide_out_right</item>
         <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
         <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
+
+    <!-- 主页菜单动画 -->
+    <style name="showPopupMenuAnimation" parent="android:Animation">
+        <item name="android:windowExitAnimation">@anim/popup_menu_exit</item>
+        <item name="android:windowEnterAnimation">@anim/popup_menu_enter</item>
+    </style>
+
+    <!-- 播放模式菜单动画 -->
+    <style name="showPopupChangeModeAnimation" parent="android:Animation">
+        <item name="android:windowExitAnimation">@anim/popup_change_mode_exit</item>
+        <item name="android:windowEnterAnimation">@anim/popup_change_mode_enter</item>
+    </style>
+
+    <!--面板里面的更多菜单动画-->
+    <style name="showPopupMoreMenuAnimation" parent="android:Animation">
+        <item name="android:windowExitAnimation">@anim/popup_more_menu_exit</item>
+        <item name="android:windowEnterAnimation">@anim/popup_more_menu_enter</item>
+    </style>
+
+    <!--新模式面板里面的更多菜单动画-->
+    <style name="showPopupNewMoreMenuAnimation" parent="android:Animation">
+        <item name="android:windowExitAnimation">@anim/popup_new_more_menu_exit</item>
+        <item name="android:windowEnterAnimation">@anim/popup_new_more_menu_enter</item>
     </style>
 
 </resources>

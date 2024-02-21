@@ -1493,40 +1493,62 @@
                     android:layout_height="50dp"
                     android:background="@drawable/ic_music_default" />
 
-                <com.banlap.llmusic.widget.AlwaysMarqueeTextView
-                    android:layout_weight="1"
-                    android:id="@+id/tv_new_play_music_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
-                    android:text="MusicName"
-                    android:textSize="17dp"
-                    android:textColor="@color/black"
-                    />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                <Button
-                    android:id="@+id/bt_new_play"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginEnd="15dp"
-                    android:background="@drawable/selector_play_black_selected"
-                    android:onClick="playButtonClick" />
+                    <ProgressBar
+                        android:visibility="visible"
+                        android:id="@+id/pb_new_loading_music"
+                        android:layout_marginTop="2dp"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:indeterminateTint="@color/light_f9"
+                        />
 
-                <Button
-                    android:id="@+id/bt_new_current_list"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="@drawable/selector_music_list_2_selected"
-                    android:onClick="newCurrentListButtonClick"
-                    />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.banlap.llmusic.widget.AlwaysMarqueeTextView
+                            android:layout_weight="1"
+                            android:id="@+id/tv_new_play_music_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:ellipsize="marquee"
+                            android:focusable="true"
+                            android:focusableInTouchMode="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:scrollHorizontally="true"
+                            android:singleLine="true"
+                            android:text="MusicName"
+                            android:textSize="17dp"
+                            android:textColor="@color/black"
+                            />
+
+                        <Button
+                            android:id="@+id/bt_new_play"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginEnd="15dp"
+                            android:background="@drawable/selector_play_black_selected"
+                            android:onClick="playButtonClick" />
+
+                        <Button
+                            android:id="@+id/bt_new_current_list"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginEnd="20dp"
+                            android:background="@drawable/selector_music_list_2_selected"
+                            android:onClick="newCurrentListButtonClick"
+                            />
+
+                    </LinearLayout>
+                </RelativeLayout>
 
             </LinearLayout>
 

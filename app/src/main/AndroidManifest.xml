@@ -101,6 +101,7 @@
         </receiver>
 
         <activity android:name=".ui.activity.WelcomeActivity"
+            android:theme="@style/SplashTheme"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             android:exported="true"

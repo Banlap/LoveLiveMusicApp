@@ -7,30 +7,19 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.app.TimePickerDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
-import android.media.MediaMetadata;
 import android.media.session.MediaSession;
-import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -80,7 +69,7 @@ import com.banlap.llmusic.databinding.ActivityMainBinding;
 import com.banlap.llmusic.databinding.DialogAddMusicToLocalListBinding;
 import com.banlap.llmusic.databinding.DialogChangeModeMenuBinding;
 import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
-import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
+import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogLocalFileBinding;
 import com.banlap.llmusic.databinding.DialogMainMenuBinding;
@@ -99,7 +88,6 @@ import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.model.Version;
-import com.banlap.llmusic.receiver.AlarmReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.CharacterService;
 import com.banlap.llmusic.service.MusicPlayService;
@@ -111,7 +99,6 @@ import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
-import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
@@ -121,6 +108,7 @@ import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
 import com.banlap.llmusic.widget.LyricScrollView;
+import com.banlap.llmusic.utils.RecyclerViewUtils;
 import com.banlap.llmusic.widget.SingleLyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -134,13 +122,10 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -149,6 +134,7 @@ import java.util.Objects;
 import java.util.Random;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+import okhttp3.OkHttpClient;
 
 /**
  * 主页界面
@@ -401,6 +387,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().clNewCurrentMusicList.setVisibility(View.VISIBLE);
 
         getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+        getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
         getViewDataBinding().tvVersion.setVisibility(View.GONE);
 
         //动画：初始化将详细页面移走
@@ -443,8 +430,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         musicListAdapter = new MusicListAdapter(this, musicList);
         getViewDataBinding().rvMusicList.setLayoutManager(new LinearLayoutManager(this));
-        //setMusicListHeader(getViewDataBinding().rvMusicList);
         getViewDataBinding().rvMusicList.setAdapter(musicListAdapter);
+
+        //当滑动列表时停止加载图片资源，不滑动时继续加载图片资源
+        RecyclerViewUtils.scrollSuspend(this, getViewDataBinding().rvMusicList);
+        //加大RecyclerView 的缓存，用空间换时间，来提高滚动的流畅性
+        RecyclerViewUtils.setViewCache(getViewDataBinding().rvMusicList);
+
         musicListAdapter.notifyDataSetChanged();
 
         playMusicListAdapter = new PlayMusicListAdapter(this, playList);
@@ -452,24 +444,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().rvPlayList.setAdapter(playMusicListAdapter);
 
         //长按移动列表其中一个item
-        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(playMusicListAdapter);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
-        touchHelper.attachToRecyclerView(getViewDataBinding().rvPlayList);
-
-        ItemTouchHelper.Callback touchNewCallback = new ItemTouchHelperCallback(playMusicListAdapter);
-        ItemTouchHelper touchNewHelper = new ItemTouchHelper(touchNewCallback);
-        touchNewHelper.attachToRecyclerView(getViewDataBinding().rvNewPlayList);
+        setItemTouchHelper(playMusicListAdapter);
+        //
 
         getViewDataBinding().rvNewPlayList.setLayoutManager(new LinearLayoutManager(this));
         getViewDataBinding().rvNewPlayList.setAdapter(playMusicListAdapter);
         playMusicListAdapter.notifyDataSetChanged();
 
-        Glide.with(getApplication())
+        Glide.with(this)
                 .setDefaultRequestOptions(requestOptions)
                 .load(getResources().getIdentifier("ic_music_3", "mipmap", getPackageName()))
                 .transform(new RoundedCornersTransformation(30, 0, RoundedCornersTransformation.CornerType.ALL))
                 .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                 .into(getViewDataBinding().ivMusicImg);
+
 
         getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
         getViewDataBinding().tvNewListSize.setText("("+ playList.size() + ")");
@@ -479,6 +467,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         lyricNewScrollDetailView = getViewDataBinding().lvNewShowLyricDetail;
         lyricNewScrollView = getViewDataBinding().lvNewShowLyric;
 
+    }
+
+    /** 设置播放列表长按移动item选项 */
+    private void setItemTouchHelper(PlayMusicListAdapter playMusicListAdapter) {
+        ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(playMusicListAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(getViewDataBinding().rvPlayList);
+
+        ItemTouchHelper.Callback touchNewCallback = new ItemTouchHelperCallback(playMusicListAdapter);
+        ItemTouchHelper touchNewHelper = new ItemTouchHelper(touchNewCallback);
+        touchNewHelper.attachToRecyclerView(getViewDataBinding().rvNewPlayList);
     }
 
     /** 适配机型ui */
@@ -850,32 +849,24 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isClickLocalOrFavorite = false;
                 break;
             case ThreadEvent.GET_ALBUM_SUCCESS:
+                getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                 if(ThreadEvent.ALBUM_LIELLA.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("Liella!", "Liella!", "LoveLive!Superstar!!", getViewDataBinding().ivLogo, R.mipmap.ic_album_liella_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_FOUR_YUU.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("Liyuu", "Liyuu", "Liyuu", getViewDataBinding().ivLogo, R.mipmap.ic_album_liyuu, 120, 80);
                 } else if(ThreadEvent.ALBUM_SUNNY_PASSION.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("サニーパッション", "サニーパッション", "SunnyPassion", getViewDataBinding().ivLogo, R.mipmap.ic_album_sunny_passion, 120, 80);
                 } else if(ThreadEvent.ALBUM_NIJIGASAKI.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("虹ヶ咲学園スクールアイドル同好会", "虹ヶ咲学園スクールアイドル同好会", "Nijigasaki HighSchool IdolClub", getViewDataBinding().ivLogo, R.mipmap.ic_album_nijigasaki_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_AQOURS.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("Aqours", "Aqours", "LoveLive!Sunshine!!", getViewDataBinding().ivLogo, R.mipmap.ic_album_aqours_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_US.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("μ's", "μ's", "LoveLive!", getViewDataBinding().ivLogo, R.mipmap.ic_album_us_3, 120, 80);
                 } else if(ThreadEvent.ALBUM_HASUNOSORA.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("蓮ノ空女学院スクールアイドルクラブ", "蓮ノ空女学院スクールアイドルクラブ", "Hasunosora Jogakuin School Idol Club", getViewDataBinding().ivLogo, R.mipmap.ic_album_hasu_2, 120, 80);
                 } else if(ThreadEvent.ALBUM_SAINT_SNOW.equals(event.str)) {
-                        getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
-                        updateMusicDetailMessage("セイントスノー", "セイントスノー", "Saint Snow", getViewDataBinding().ivLogo, R.mipmap.ic_album_saint_snow_2, 120, 80);
+                    updateMusicDetailMessage("セイントスノー", "セイントスノー", "Saint Snow", getViewDataBinding().ivLogo, R.mipmap.ic_album_saint_snow_2, 120, 80);
                 } else if(ThreadEvent.ALBUM_A_RISE.equals(event.str)) {
-                    getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
                     updateMusicDetailMessage("アライズ", "アライズ", "A-RISE", getViewDataBinding().ivLogo, R.mipmap.ic_album_a_rise_2, 120, 50);
                 }
                 isClickLocalPlayList = false;
@@ -903,7 +894,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 versionList.addAll(event.tList);
                 if(versionList.size()>0) {
                     int versionCode = Integer.parseInt(versionList.get(0).getVersionCode());
-                    if(getAppVersionCode(this) < versionCode) { //判断当前是否有新版本
+                    if(SystemUtil.getInstance().getAppVersionCode(this) < versionCode) { //判断当前是否有新版本
                         isExistNewVersion = true;
                         String versionType = versionList.get(0).getVersionType();
                         if("1".equals(versionType)) {
@@ -1001,6 +992,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             case ThreadEvent.PLAY_ERROR:
                 Toast.makeText(this, "播放失败", Toast.LENGTH_SHORT).show();
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+                getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
                 break;
             case ThreadEvent.PLAY_MUSIC:
                 if(binder!=null) {
@@ -1069,6 +1061,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().sbMusicBar.setProgress(0);
                 getViewDataBinding().sbNewMusicBar.setProgress(0);
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.VISIBLE);
+                getViewDataBinding().pbNewLoadingMusic.setVisibility(View.VISIBLE);
                 updateWidgetUI(true);
                 break;
 
@@ -1134,6 +1127,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbNewProgress.setMax(event.i);
 
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+                getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(getViewModel().rebuildTime(event.i));
@@ -1649,19 +1643,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
     }
 
-    /** 获取版本code */
-    public int getAppVersionCode(Context context) {
-        int versionCode=0;
-        try {
-            PackageManager pm = context.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
-            versionCode = pi.versionCode;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return versionCode;
-    }
-
     /** 更新小组件UI */
     private void updateWidgetUI(boolean isLoading) {
         if(binder != null && binder.isPlay()) {
@@ -1787,6 +1768,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 点击展示系统菜单 */
     public void showMainMenu(View view) {
+        if(isDoubleClick()) { return; }
         DialogMainMenuBinding mainMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_main_menu, null, false);
 
@@ -1796,7 +1778,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         //变更主题
         ThemeHelper.getInstance().menuPopupWindowTheme(this, rThemeId, menuPopupWindow, mainMenuBinding);
-
+        menuPopupWindow.setAnimationStyle(R.style.showPopupMenuAnimation);
         menuPopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(-60, this),  PxUtil.getInstance().dp2px(10, this));
 
         mainMenuBinding.llSettings.setOnClickListener(new View.OnClickListener() {
@@ -2130,13 +2112,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                  getViewDataBinding().ivCharacterStatus.setVisibility(View.VISIBLE);
              }
         } else {
-            DialogDeleteListAllBinding deleteListAllBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                    R.layout.dialog_delete_list_all, null, false);
+            DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                    R.layout.dialog_default, null, false);
 
-            deleteListAllBinding.dialogSelectTitle.setText("开启悬浮窗权限以展示角色系统");
+            defaultBinding.dialogSelectTitle.setText("开启悬浮窗权限以展示角色系统");
 
             //取消
-            deleteListAllBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
+            defaultBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mAlertDialog.dismiss();
@@ -2144,7 +2126,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             });
 
             //授权开启
-            deleteListAllBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+            defaultBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent();
@@ -2157,10 +2139,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             });
 
             mAlertDialog = new AlertDialog.Builder(this)
-                    .setView(deleteListAllBinding.getRoot())
+                    .setView(defaultBinding.getRoot())
                     .create();
-            Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+            Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
             mAlertDialog.show();
+            mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(this).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
     }
@@ -2170,8 +2153,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         showOrHideMusicPlayerPanel();
     }
 
-    /** 更改模式 */
+    /** 更改模式菜单 */
     public void changeModeClick(View view) {
+        if(isDoubleClick()) { return; }
         final DialogChangeModeMenuBinding changeModeMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_change_mode_menu, null, false);
 
@@ -2212,11 +2196,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         //变更主题
         ThemeHelper.getInstance().changeModePopupWindowTheme(this, rThemeId, changeModePopupWindow, changeModeMenuBinding);
+        changeModePopupWindow.setAnimationStyle(R.style.showPopupChangeModeAnimation);
         changeModePopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(0, this),  PxUtil.getInstance().dp2px(-140, this));
     }
 
     /** 面板里面的更多菜单 */
     public void panelMoreMenu(View view) {
+        if(isDoubleClick()) { return; }
         DialogPanelMoreMenuBinding panelMoreMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_panel_more_menu, null, false);
 
@@ -2309,7 +2295,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             if(controllerScene.equals("NewScene")) {
                 panelMoreMenuBinding.llDefaultLyricSizePanel.setVisibility(View.GONE);
                 panelMoreMenuBinding.llNewLyricSizePanel.setVisibility(View.VISIBLE);
-                popWindowY = -170;
+                popWindowY = -185;
 
                 String singleSize = SPUtil.getStrValue(MainActivity.this, SPUtil.SingleLyricSizeData);
                 if(!TextUtils.isEmpty(singleSize)) {
@@ -2341,6 +2327,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         panelMorePopupWindow.setTouchable(true);
         //变更主题
         ThemeHelper.getInstance().panelMenuPopupWindowTheme(this, rThemeId, panelMorePopupWindow, panelMoreMenuBinding);
+        panelMorePopupWindow.setAnimationStyle(R.style.showPopupMoreMenuAnimation);
+        if(!TextUtils.isEmpty(controllerScene) && controllerScene.equals("NewScene")) {
+            panelMorePopupWindow.setAnimationStyle(R.style.showPopupNewMoreMenuAnimation);
+        }
         panelMorePopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(0, this),  PxUtil.getInstance().dp2px(popWindowY, this));
 
     }
@@ -2815,18 +2805,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 点击删除当前歌单列表所有歌曲 */
     public void deletePlayListAll(View view) {
-        DialogDeleteListAllBinding deleteListAllBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.dialog_delete_list_all, null, false);
+        DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_default, null, false);
 
         //取消
-        deleteListAllBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
+        defaultBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAlertDialog.dismiss();
             }
         });
         //删除
-        deleteListAllBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+        defaultBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 playList.clear();
@@ -2837,10 +2827,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         });
         mAlertDialog = new AlertDialog.Builder(this)
-                .setView(deleteListAllBinding.getRoot())
+                .setView(defaultBinding.getRoot())
                 .create();
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
+        mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(this).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
 
     }
 
@@ -3019,6 +3010,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         private Context context;
         private List<Music> list;
         private View mViewHeader;
+        private OkHttpClient client;
 
         public static final int ITEM_TYPE_HEADER =0;
         public static final int ITEM_TYPE_CONTENT =1;
@@ -3026,12 +3018,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         public MusicListAdapter(Context context, List<Music> list) {
             this.context = context;
             this.list = list;
+            this.client = new OkHttpClient();
         }
 
         public void setHeaderView(View viewHeader) {
             mViewHeader = viewHeader;
             notifyItemInserted(0);
         }
+
 
         @NonNull
         @Override
@@ -3050,13 +3044,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 //变更主题
                 ThemeHelper.getInstance().musicListAddButtonTheme(getApplication(), rThemeId, binding);
 
+
                 binding.rlMusicAll.setVisibility(list.get(position).getMusicType().equals(" ") ? GONE : View.VISIBLE);
-                Glide.with(getApplication())
-                        .setDefaultRequestOptions(requestOptions)
+                Glide.with(context)
                         .load(list.get(position).getMusicImg())
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .apply(new RequestOptions().format(DecodeFormat.PREFER_RGB_565).diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .thumbnail(0.5f)
                         .into(binding.ivMusicImg);
+
+
                 binding.tvMusicName.setText(list.get(position).musicName);
                 binding.tvSingerName.setText(list.get(position).musicSinger);
                 //点击播放歌曲

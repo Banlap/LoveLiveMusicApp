@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 165
+        versionCode 166
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -150,6 +150,10 @@ android {
         //1.播放列表能长按拖动指定歌曲顺序
         //2.新增红色主题，修复部分ui、动画效果
         //3.添加新启动动画选择
+        versionName "1.6.6"
+        //1.解决首次进入音乐列表加载图片时滑动列表导致卡顿
+        //2.冷启动app时加入过渡动画
+        //3.优化部分ui
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息
@@ -182,11 +186,14 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation files('libs\\mysql-connector-java-5.1.49.jar')
     implementation 'com.google.ar:core:1.25.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    /** mysql数据库 */
+    implementation files('libs\\mysql-connector-java-5.1.49.jar')
+
+    implementation 'androidx.core:core-splashscreen:1.0.0-alpha01'
 
     implementation 'com.google.code.gson:gson:2.8.9'
     compile 'com.alibaba:fastjson:2.0.19.android'

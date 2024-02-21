@@ -6,6 +6,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
@@ -111,6 +113,22 @@ public class SystemUtil {
             return Settings.canDrawOverlays(context);
         }
         return true;
+    }
+
+    /**
+     * 获取当前app版本code
+     * @return 版本号
+     * */
+    public int getAppVersionCode(Context context) {
+        int versionCode=0;
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
+            versionCode = pi.versionCode;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return versionCode;
     }
 
     /**

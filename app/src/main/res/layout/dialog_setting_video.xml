@@ -114,7 +114,7 @@
                         android:id="@+id/ll_select_video_normal_2"
                         android:layout_width="100dp"
                         android:layout_height="match_parent"
-                        android:layout_marginStart="15dp"
+                        android:layout_marginStart="5dp"
                         android:orientation="vertical"
                         android:gravity="center">
 
@@ -142,7 +142,7 @@
                         android:layout_height="match_parent"
                         android:orientation="vertical"
                         android:gravity="center_horizontal"
-                        android:layout_marginStart="15dp">
+                        android:layout_marginStart="5dp">
 
                         <com.banlap.llmusic.widget.CircleImageView
                             android:visibility="visible"

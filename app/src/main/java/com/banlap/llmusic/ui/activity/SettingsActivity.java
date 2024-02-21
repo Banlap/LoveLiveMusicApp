@@ -10,12 +10,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
@@ -31,7 +31,7 @@ import androidx.databinding.DataBindingUtil;
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivitySettingsBinding;
-import com.banlap.llmusic.databinding.DialogDeleteListAllBinding;
+import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
@@ -43,6 +43,7 @@ import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.SPUtil;
+import com.banlap.llmusic.utils.SystemUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -421,12 +422,12 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     /** 清理缓存 */
     private void cleanCache() {
-        DialogDeleteListAllBinding deleteListAllBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.dialog_delete_list_all, null, false);
+        DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_default, null, false);
 
-        deleteListAllBinding.dialogSelectTitle.setText("是否清理缓存？");
+        defaultBinding.dialogSelectTitle.setText("是否清理缓存？");
         //取消
-        deleteListAllBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
+        defaultBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAlertDialog.dismiss();
@@ -434,7 +435,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         });
 
         //清理缓存
-        deleteListAllBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+        defaultBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAlertDialog.dismiss();
@@ -444,10 +445,12 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         });
 
         mAlertDialog = new AlertDialog.Builder(this)
-                .setView(deleteListAllBinding.getRoot())
+                .setView(defaultBinding.getRoot())
                 .create();
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
+        mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(this).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
+
     }
 
     /**

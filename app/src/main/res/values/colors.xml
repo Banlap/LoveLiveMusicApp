@@ -17,6 +17,7 @@
     <color name="blue_3c">#23303C</color>
     <color name="blue_ed">#648DB1</color>
     <color name="blue_ac">#427BAC</color>
+    <color name="blue_ac_alpha">#E6427BAC</color>
     <color name="blue_99">#296599</color>
     <color name="blue_0E">#0E5399</color>
     <color name="blue_f8">#CEF8F8</color>
@@ -54,6 +55,7 @@
 
     <color name="red_1a">#6A0F1A</color>
     <color name="red_2a">#8B1D2A</color>
+    <color name="red_2a_alpha">#E68B1D2A</color>
     <color name="red_3a">#ED213A</color>
     <color name="red_86">#FAB7BF</color>
     <color name="red_4d">#BC3D4D</color>

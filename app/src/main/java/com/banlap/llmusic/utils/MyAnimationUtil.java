@@ -93,7 +93,7 @@ public class MyAnimationUtil {
     }
 
     /** banlap: 添加动画效果 放大缩小 */
-    public static AnimatorSet animatorSetEnlarge(TextView textView, float startAxis,float endAxis) {
+    public static AnimatorSet animatorSetEnlarge(View textView, float startAxis,float endAxis) {
         ObjectAnimator animatorX = ObjectAnimator.ofFloat(textView, "scaleX", startAxis, endAxis);
         ObjectAnimator animatorY = ObjectAnimator.ofFloat(textView, "scaleY", startAxis, endAxis);
 

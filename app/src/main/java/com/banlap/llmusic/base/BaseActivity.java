@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.databinding.adapters.ViewBindingAdapter;
@@ -35,6 +36,7 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
     public VM getViewModel() { return mViewModel; }
     public VDB getViewDataBinding() { return mViewDataBinding; }
 
+    protected void beforeOnCreate() {}
     protected void initWindow() {}
     @LayoutRes
     protected abstract int getLayoutId();
@@ -45,6 +47,7 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        beforeOnCreate();
         super.onCreate(savedInstanceState);
         initWindow();
         setContentView(getLayoutId());

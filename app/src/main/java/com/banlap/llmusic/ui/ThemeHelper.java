@@ -191,6 +191,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.light_f9);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_light_f8));
@@ -199,7 +200,6 @@ public class ThemeHelper {
             vdb.clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             vdb.clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             vdb.clNewCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            vdb.pbLoadingMusic.setProgressDrawable(context.getResources().getDrawable(R.color.blue_0E));
             vdb.tvDiscover.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvLocal.setTextColor(context.getResources().getColor(R.color.white));
             vdb.vLine.setBackgroundResource(R.drawable.shape_button_white);
@@ -327,6 +327,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_ac), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_ac), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_ac), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.blue_0E);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_blue));
@@ -335,7 +336,6 @@ public class ThemeHelper {
             vdb.clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_black_2);
             vdb.clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_black_2);
             vdb.clNewCurrentMusicList.setBackgroundResource(R.drawable.shape_button_black_2);
-            vdb.pbLoadingMusic.setProgressDrawable(context.getResources().getDrawable(R.color.gray_36));
             vdb.tvDiscover.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvLocal.setTextColor(context.getResources().getColor(R.color.white));
             vdb.vLine.setBackgroundResource(R.drawable.shape_button_white);
@@ -463,6 +463,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.white);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_black));
@@ -599,6 +600,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.purple);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_purple));
@@ -607,7 +609,6 @@ public class ThemeHelper {
             vdb.clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             vdb.clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             vdb.clNewCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            vdb.pbLoadingMusic.setProgressDrawable(context.getResources().getDrawable(R.color.orange_0b));
             vdb.tvDiscover.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvLocal.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.vLine.setBackgroundResource(R.drawable.shape_button_orange);
@@ -735,6 +736,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.orange_0b);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_orange));
@@ -869,6 +871,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.light_b5);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_light));
@@ -877,7 +880,6 @@ public class ThemeHelper {
             vdb.clCurrentMusicPanel.setBackgroundResource(R.drawable.shape_button_white_3);
             vdb.clCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
             vdb.clNewCurrentMusicList.setBackgroundResource(R.drawable.shape_button_white_3);
-            vdb.pbLoadingMusic.setProgressDrawable(context.getResources().getDrawable(R.color.red_3a));
             vdb.tvDiscover.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvLocal.setTextColor(context.getResources().getColor(R.color.white));
             vdb.vLine.setBackgroundResource(R.drawable.shape_button_white);
@@ -1005,6 +1007,7 @@ public class ThemeHelper {
             //vdb.sbMusicBar.setProgressTintMode(PorterDuff.Mode.SRC_ATOP);
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.red_4d), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.red_4d), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.red_4d), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.red_3a);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_red));
