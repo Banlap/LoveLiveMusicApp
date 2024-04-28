@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -26,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,8 +35,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.ui.activity.SettingsActivity;
 import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.CharacterHelper;
+import com.banlap.llmusic.utils.GameXOHelper;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -44,32 +48,63 @@ import java.util.Objects;
  * 角色服务
  * */
 public class CharacterService extends Service {
+    private static final String TAG = CharacterService.class.getSimpleName();
 
     private WindowManager.LayoutParams wmParams;
     private WindowManager mWindowManager;
 
-    private RelativeLayout rlCharacter;
+    private RelativeLayout rlCharacter, rlGameXO;
+    private LinearLayout llGameTitle, llIsLast;
+    private TextView tvPlayerWin, tvAiWin;
     private ConstraintLayout clCharacter;
     private ImageView ivCharacter;
     private static LinearLayout llCharacterTalk;
     private LinearLayout llSayHello, llSayGood, llGame;
     private LinearLayout llLastMusic, llPlayMusic, llNextMusic;
     private static ImageView ivPlayMusic;
+    /**
+     * 井字游戏
+     * */
+    private RelativeLayout rlChessTopLeft, rlChessTop, rlChessTopRight,
+            rlChessCenterLeft, rlChessCenter, rlChessCenterRight,
+            rlChessBottomLeft, rlChessBottom, rlChessBottomRight;
+    private ImageView ivChessTopLeft, ivChessTop, ivChessTopRight,
+            ivChessCenterLeft, ivChessCenter, ivChessCenterRight,
+            ivChessBottomLeft, ivChessBottom, ivChessBottomRight;
+    /**
+     * 统计分数
+     * */
+    private int playerWin =0, aiWin =0;
+    private boolean isClickIsLast = false;
+    private ImageView  ivGameResult;
+
     private TextView tvCharacterTalk;
-    //当前屏幕宽高
+    /**
+     * 当前屏幕宽高
+     * */
     private int deviceWidth, deviceHeight;
 
-    private String mCharacterName;   //当前角色
+    /**
+     * 当前角色
+     * */
+    private String mCharacterName;
+
     //角色视图
     private float sx;
     private float sy;
     private boolean isMove = false;
-    //触摸时记录开始时的坐标 用于判断按下事件跟结束事件
+    /**
+     * 触摸时记录开始时的坐标 用于判断按下事件跟结束事件
+     * */
     private int mStartX, mStartY;
-    //触摸时记录开始时的时间 用于判断按下事件跟结束事件
+    /**
+     * 触摸时记录开始时的时间 用于判断按下事件跟结束事件
+     * */
     private long mLastTime;
 
-    //文本倒计时
+    /**
+     * 文本倒计时
+     * */
     private static final Handler talkHandler = new Handler(Objects.requireNonNull(Looper.myLooper())) {
         @Override
         public void handleMessage(@NonNull android.os.Message msg) {
@@ -134,6 +169,34 @@ public class CharacterService extends Service {
         ivPlayMusic = rlCharacter.findViewById(R.id.iv_play_music);
         llNextMusic = rlCharacter.findViewById(R.id.ll_next_music);
         tvCharacterTalk = rlCharacter.findViewById(R.id.tv_character_talk);
+        rlGameXO = rlCharacter.findViewById(R.id.rl_game_xo);
+        llGameTitle = rlCharacter.findViewById(R.id.ll_game_title);
+        llIsLast = rlCharacter.findViewById(R.id.ll_is_last);
+        tvPlayerWin = rlCharacter.findViewById(R.id.tv_player_win);
+        tvAiWin = rlCharacter.findViewById(R.id.tv_ai_win);
+
+        rlChessTopLeft = rlCharacter.findViewById(R.id.rl_chess_top_left);
+        rlChessTop = rlCharacter.findViewById(R.id.rl_chess_top);
+        rlChessTopRight = rlCharacter.findViewById(R.id.rl_chess_top_right);
+        rlChessCenterLeft = rlCharacter.findViewById(R.id.rl_chess_center_left);
+        rlChessCenter = rlCharacter.findViewById(R.id.rl_chess_center);
+        rlChessCenterRight  = rlCharacter.findViewById(R.id.rl_chess_center_right);
+        rlChessBottomLeft = rlCharacter.findViewById(R.id.rl_chess_bottom_left);
+        rlChessBottom = rlCharacter.findViewById(R.id.rl_chess_bottom);
+        rlChessBottomRight = rlCharacter.findViewById(R.id.rl_chess_bottom_right);
+
+        ivChessTopLeft = rlCharacter.findViewById(R.id.iv_chess_top_left);
+        ivChessTop = rlCharacter.findViewById(R.id.iv_chess_top);
+        ivChessTopRight = rlCharacter.findViewById(R.id.iv_chess_top_right);
+        ivChessCenterLeft = rlCharacter.findViewById(R.id.iv_chess_center_left);
+        ivChessCenter = rlCharacter.findViewById(R.id.iv_chess_center);
+        ivChessCenterRight  = rlCharacter.findViewById(R.id.iv_chess_center_right);
+        ivChessBottomLeft = rlCharacter.findViewById(R.id.iv_chess_bottom_left);
+        ivChessBottom = rlCharacter.findViewById(R.id.iv_chess_bottom);
+        ivChessBottomRight = rlCharacter.findViewById(R.id.iv_chess_bottom_right);
+
+        ivGameResult = rlCharacter.findViewById(R.id.iv_game_result);
+
         //将角色传递到CharacterHelper
         CharacterHelper.initCharacter(ivCharacter);
         llCharacterTalk.setVisibility(View.GONE);
@@ -142,6 +205,7 @@ public class CharacterService extends Service {
         llLastMusic.setVisibility(View.GONE);
         llPlayMusic.setVisibility(View.GONE);
         llNextMusic.setVisibility(View.GONE);
+        llGame.setVisibility(View.GONE);
         llSayHello.setOnClickListener(new ButtonClickListener());
         llSayGood.setOnClickListener(new ButtonClickListener());
         llGame.setOnClickListener(new ButtonClickListener());
@@ -150,6 +214,18 @@ public class CharacterService extends Service {
         llNextMusic.setOnClickListener(new ButtonClickListener());
         ivCharacter.setOnClickListener(new ButtonClickListener());
         ivCharacter.setOnTouchListener(new ViewTouchListener());
+
+        llIsLast.setOnClickListener(new ButtonClickListener());
+        rlChessTopLeft.setOnClickListener(new ButtonClickListener());
+        rlChessTop.setOnClickListener(new ButtonClickListener());
+        rlChessTopRight.setOnClickListener(new ButtonClickListener());
+        rlChessCenterLeft.setOnClickListener(new ButtonClickListener());
+        rlChessCenter.setOnClickListener(new ButtonClickListener());
+        rlChessCenterRight.setOnClickListener(new ButtonClickListener());
+        rlChessBottomLeft.setOnClickListener(new ButtonClickListener());
+        rlChessBottom.setOnClickListener(new ButtonClickListener());
+        rlChessBottomRight.setOnClickListener(new ButtonClickListener());
+
     }
 
     public class ButtonClickListener implements View.OnClickListener {
@@ -163,12 +239,14 @@ public class CharacterService extends Service {
                     llLastMusic.setVisibility(View.VISIBLE);
                     llPlayMusic.setVisibility(View.VISIBLE);
                     llNextMusic.setVisibility(View.VISIBLE);
+                    llGame.setVisibility(View.VISIBLE);
                 } else {
                     llSayHello.setVisibility(View.GONE);
                     llSayGood.setVisibility(View.GONE);
                     llLastMusic.setVisibility(View.GONE);
                     llPlayMusic.setVisibility(View.GONE);
                     llNextMusic.setVisibility(View.GONE);
+                    llGame.setVisibility(View.GONE);
                 }
             } else if(v.getId() == R.id.ll_say_hello) {
                 if(llCharacterTalk.getVisibility() == View.GONE) {
@@ -183,16 +261,360 @@ public class CharacterService extends Service {
                     showContent();
                 }
             } else if(v.getId() == R.id.ll_game) {
-
+                rlGameXO.setVisibility(rlGameXO.getVisibility() == View.GONE? View.VISIBLE:View.GONE);
+                llGameTitle.setVisibility(llGameTitle.getVisibility() == View.GONE? View.VISIBLE:View.GONE);
+                resetGameXO(true);
+                cleanGameScore();
             } else if(v.getId() == R.id.ll_last_music) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
             } else if(v.getId() == R.id.ll_play_music) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_MUSIC));
             } else if(v.getId() == R.id.ll_next_music) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_NEXT));
+            } else if(v.getId() == R.id.ll_is_last) {
+                if(!isClickIsLast) { //后手进行井字游戏
+                    llIsLast.setBackgroundResource(R.drawable.shape_button_white_5_red);
+                    isClickIsLast = true;
+                    GameXOHelper.startGame(false, "", new GameXOHelper.GameXOCallback() {
+
+                        @Override
+                        public void onResult(boolean isOver, String winUser, String aiLoc) {
+                            handleGameXOResult(isOver, winUser, aiLoc);
+                        }
+
+                        @Override
+                        public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                            handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                        }
+                    });
+                }
+            } else if(v.getId() == R.id.rl_chess_top_left) {
+                GameXOHelper.startGame(true, GameXOHelper.locTopLeft, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessTopLeft.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_top) {
+                GameXOHelper.startGame(true, GameXOHelper.locTop, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessTop.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_top_right) {
+                GameXOHelper.startGame(true, GameXOHelper.locTopRight, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessTopRight.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_center_left) {
+                GameXOHelper.startGame(true, GameXOHelper.locCenterLeft, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessCenterLeft.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_center) {
+                GameXOHelper.startGame(true, GameXOHelper.locCenter, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessCenter.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_center_right) {
+                GameXOHelper.startGame(true, GameXOHelper.locCenterRight, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessCenterRight.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_bottom_left) {
+                GameXOHelper.startGame(true, GameXOHelper.locBottomLeft, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessBottomLeft.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+            } else if(v.getId() == R.id.rl_chess_bottom) {
+                GameXOHelper.startGame(true, GameXOHelper.locBottom, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessBottom.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
+
+            } else if(v.getId() == R.id.rl_chess_bottom_right) {
+                GameXOHelper.startGame(true, GameXOHelper.locBottomRight, new GameXOHelper.GameXOCallback() {
+                    @Override
+                    public void onResult(boolean isOver, String winUser, String aiLoc) {
+                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                            rlChessBottomRight.setBackgroundResource(R.mipmap.ic_game_x);
+                        }
+                        handleGameXOResult(isOver, winUser, aiLoc);
+                    }
+
+                    @Override
+                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+                    }
+                });
             }
 
         }
+    }
+
+    /**
+     * 处理井字游戏结果
+     * */
+    @SuppressLint("SetTextI18n")
+    public void handleGameXOResult(boolean isOver, String winUser, String aiLoc) {
+        if(!isOver) {
+            setAILocUI(aiLoc);
+        } else {
+            if(TextUtils.isEmpty(winUser)) {
+                ivGameResult.setBackgroundResource(R.mipmap.ic_play_even);
+                //Toast.makeText(CharacterService.this, "打和", Toast.LENGTH_SHORT).show();
+            } else {
+                if(winUser.equals(GameXOHelper.chessTypeO)) {
+                    setAILocUI(aiLoc);
+                }
+                if(winUser.equals(GameXOHelper.chessTypeX)) {
+                    ivGameResult.setBackgroundResource(R.mipmap.ic_you_win);
+                    tvPlayerWin.setText(""+(++playerWin));
+
+                } else {
+                    ivGameResult.setBackgroundResource(R.mipmap.ic_you_lose);
+                    tvAiWin.setText(""+(++aiWin));
+                }
+
+                boolean b = new Handler().postDelayed((Runnable) () -> {
+                    resetGameXO(false);
+                }, 2000);
+                //Toast.makeText(CharacterService.this, winUser+"胜利", Toast.LENGTH_SHORT).show();
+            }
+
+            llIsLast.setBackgroundResource(R.drawable.shape_button_white_5);
+            isClickIsLast = false;
+        }
+    }
+
+    /**
+     * 处理井字游戏将要消失或消失的棋UI
+     * */
+    private void handleGameXOLocDismiss(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+        Log.i(TAG, "aiLocWD: " + aiLocWD + " aiLocD: " + aiLocD);
+        Log.i(TAG, "playerLocWD: " + playerLocWD + " playerLocD: " + playerLocD);
+
+        if(!TextUtils.isEmpty(aiLocWD)) {
+            setLocWillDismissUI(aiLocWD);
+        }
+
+        if(!TextUtils.isEmpty(aiLocD)) {
+            setLocDefaultUI(aiLocD);
+        }
+
+        if(!TextUtils.isEmpty(playerLocWD)) {
+            setLocWillDismissUI(playerLocWD);
+        }
+
+        if(!TextUtils.isEmpty(playerLocD)) {
+            setLocDefaultUI(playerLocD);
+        }
+    }
+
+    /**
+     * 根据loc位置设置AI下棋的UI
+     * */
+    private void setAILocUI(String loc){
+        if(loc.equals(GameXOHelper.locTopLeft)) {
+            rlChessTopLeft.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locTop)) {
+            rlChessTop.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locTopRight)) {
+            rlChessTopRight.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locCenterLeft)) {
+            rlChessCenterLeft.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locCenter)) {
+            rlChessCenter.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locCenterRight)) {
+            rlChessCenterRight.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locBottomLeft)) {
+            rlChessBottomLeft.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locBottom)) {
+            rlChessBottom.setBackgroundResource(R.mipmap.ic_game_o);
+        } else if(loc.equals(GameXOHelper.locBottomRight)) {
+            rlChessBottomRight.setBackgroundResource(R.mipmap.ic_game_o);
+        }
+    }
+
+    /**
+     * 根据loc位置设置默认下棋的UI
+     * */
+    private void setLocDefaultUI(String loc){
+        if(loc.equals(GameXOHelper.locTopLeft)) {
+            rlChessTopLeft.setBackgroundResource(R.color.white);
+            ivChessTopLeft.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locTop)) {
+            rlChessTop.setBackgroundResource(R.color.white);
+            ivChessTop.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locTopRight)) {
+            rlChessTopRight.setBackgroundResource(R.color.white);
+            ivChessTopRight.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locCenterLeft)) {
+            rlChessCenterLeft.setBackgroundResource(R.color.white);
+            ivChessCenterLeft.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locCenter)) {
+            rlChessCenter.setBackgroundResource(R.color.white);
+            ivChessCenter.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locCenterRight)) {
+            rlChessCenterRight.setBackgroundResource(R.color.white);
+            ivChessCenterRight.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locBottomLeft)) {
+            rlChessBottomLeft.setBackgroundResource(R.color.white);
+            ivChessBottomLeft.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locBottom)) {
+            rlChessBottom.setBackgroundResource(R.color.white);
+            ivChessBottom.setBackgroundResource(R.color.alpha);
+        } else if(loc.equals(GameXOHelper.locBottomRight)) {
+            rlChessBottomRight.setBackgroundResource(R.color.white);
+            ivChessBottomRight.setBackgroundResource(R.color.alpha);
+        }
+    }
+
+    /**
+     * 根据loc位置设置将要消失棋的UI
+     * */
+    private void setLocWillDismissUI(String loc){
+        if(loc.equals(GameXOHelper.locTopLeft)) {
+            ivChessTopLeft.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locTop)) {
+            ivChessTop.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locTopRight)) {
+            ivChessTopRight.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locCenterLeft)) {
+            ivChessCenterLeft.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locCenter)) {
+            ivChessCenter.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locCenterRight)) {
+            ivChessCenterRight.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locBottomLeft)) {
+            ivChessBottomLeft.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locBottom)) {
+            ivChessBottom.setBackgroundResource(R.color.white_alpha_70);
+        } else if(loc.equals(GameXOHelper.locBottomRight)) {
+            ivChessBottomRight.setBackgroundResource(R.color.white_alpha_70);
+        }
+    }
+
+
+    /**
+     * 重置井字游戏UI
+     * */
+    public void resetGameXO(boolean isCleanGameScore) {
+        GameXOHelper.resetGame();
+        rlChessTopLeft.setBackgroundResource(R.color.white);
+        rlChessTopLeft.setBackgroundResource(R.color.white);
+        rlChessTop.setBackgroundResource(R.color.white);
+        rlChessTopRight.setBackgroundResource(R.color.white);
+        rlChessCenterLeft.setBackgroundResource(R.color.white);
+        rlChessCenter.setBackgroundResource(R.color.white);
+        rlChessCenterRight.setBackgroundResource(R.color.white);
+        rlChessBottomLeft.setBackgroundResource(R.color.white);
+        rlChessBottom.setBackgroundResource(R.color.white);
+        rlChessBottomRight.setBackgroundResource(R.color.white);
+
+        ivChessTopLeft.setBackgroundResource(R.color.alpha);
+        ivChessTop.setBackgroundResource(R.color.alpha);
+        ivChessTopRight.setBackgroundResource(R.color.alpha);
+        ivChessCenterLeft.setBackgroundResource(R.color.alpha);
+        ivChessCenter.setBackgroundResource(R.color.alpha);
+        ivChessCenterRight.setBackgroundResource(R.color.alpha);
+        ivChessBottomLeft.setBackgroundResource(R.color.alpha);
+        ivChessBottom.setBackgroundResource(R.color.alpha);
+        ivChessBottomRight.setBackgroundResource(R.color.alpha);
+
+        ivGameResult.setBackgroundResource(R.color.alpha);
+
+        if(isCleanGameScore) { //是否清理比分
+            cleanGameScore();
+        }
+
+        llIsLast.setBackgroundResource(R.drawable.shape_button_white_5);
+        isClickIsLast = false;
+
+    }
+
+    public void cleanGameScore() {
+        playerWin=0;
+        aiWin=0;
+        tvPlayerWin.setText(""+playerWin);
+        tvAiWin.setText(""+aiWin);
     }
 
     //发送显示文本

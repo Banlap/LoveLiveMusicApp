@@ -56,6 +56,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.AppBarLayout;
 
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -66,6 +67,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import es.dmoral.toasty.Toasty;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
@@ -357,7 +359,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     mFavoriteList.addAll(spList2);
                     favoriteListAdapter.notifyDataSetChanged();
                     SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
-                    Toast.makeText(getContext(), "添加收藏成功", Toast.LENGTH_SHORT).show();
+                    Toasty.success(LLActivityManager.getInstance().getTopActivity(), "添加收藏成功", Toast.LENGTH_SHORT, true).show();
+
                     getViewDataBinding().tvFavoriteMusicCount.setText(""+(mFavoriteList.size()-2));
                     getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
                     //刷新ui
@@ -602,7 +605,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     }
                     
                 } else {
-                    Toast.makeText(getContext(), "请输入歌单名称", Toast.LENGTH_SHORT).show();
+                    Toasty.warning(LLActivityManager.getInstance().getTopActivity(), "请输入歌单名称!", Toast.LENGTH_SHORT, true).show();
                 }
             }
         });
@@ -611,7 +614,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 .setView(inputContentBinding.getRoot())
                 .create();
 
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
     }
 
@@ -750,7 +753,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                        @Override
                        public void onClick(View v) {
                            if(mLocalPlayList.size() >=20) {
-                               Toast.makeText(v.getContext(), "仅支持添加20个歌单", Toast.LENGTH_SHORT).show();
+                               Toasty.warning(LLActivityManager.getInstance().getTopActivity(), "仅支持添加20个歌单!", Toast.LENGTH_SHORT, true).show();
                                return;
                            }
                            addNewPlayList();

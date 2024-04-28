@@ -133,6 +133,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import es.dmoral.toasty.Toasty;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.BackpressureStrategy;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.FlowableEmitter;
+import io.reactivex.rxjava3.core.FlowableOnSubscribe;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import okhttp3.OkHttpClient;
 
@@ -224,16 +232,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public static final int REQUEST_CODE_SELECT_IMG_FILE = 104;       //检查选择图片所需要的权限
     public static final int REQUEST_CODE_CONTROLLER_MODE = 105;       //检查进入氛围模式时所需要的权限
 
-    //专辑类型
-    public static final String MUSIC_TYPE_LIELLA = "Liella";
-    public static final String MUSIC_TYPE_LIYUU = "Fo(u)rYuU";
-    public static final String MUSIC_TYPE_SUNNYPASSION = "SunnyPassion";
-    public static final String MUSIC_TYPE_NIJIGASAKI = "Nijigasaki";
-    public static final String MUSIC_TYPE_AQOURS = "Aqours";
-    public static final String MUSIC_TYPE_US = "us";
-    public static final String MUSIC_TYPE_HASUNOSORA = "Hasunosora";
-    public static final String MUSIC_TYPE_SAINT_SNOW = "Saint Snow";
-    public static final String MUSIC_TYPE_A_RISE = "A-RISE";
 
     private BaseApplication baseApplication;
     private HttpProxyCacheServer proxyCacheServer;
@@ -344,7 +342,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         //初始化碎片
         initFragment();
         //
-
     }
 
     @Override
@@ -560,7 +557,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     }
 
 
+    private Disposable textChangeDisposable;
+    FlowableEmitter<String> mEmitter;
+
     /** 初始化所有功能监听 */
+    @SuppressLint("NotifyDataSetChanged")
     private void initListener() {
         getViewDataBinding().sbMusicBar.setOnSeekBarChangeListener(new MusicBarChangerListener());
         getViewDataBinding().sbNewMusicBar.setOnSeekBarChangeListener(new MusicBarChangerListener());
@@ -611,7 +612,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         });
 
-
+        //initSearch();
         getViewDataBinding().etSearchMusic.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -619,6 +620,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //mEmitter.onNext(getViewDataBinding().etSearchMusic.getText().toString());
                 String name = getViewDataBinding().etSearchMusic.getText().toString();
                 if (!name.equals("")) {
                     List<Music> nullData = new ArrayList<>();
@@ -703,14 +705,90 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                     .load(uri)
                                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                                     .into(getViewDataBinding().ivBg);
-                            Toast.makeText(context, "设置成功", Toast.LENGTH_SHORT).show();
+                            Toasty.success(context, "设置成功", Toast.LENGTH_SHORT, true).show();
                         } catch (Exception e) {
                             Log.i(TAG, "e: " + e.getMessage());
                         }
                     }
                 });
 
+
+
     }
+
+
+
+
+    // 初始化搜索逻辑
+    private void initSearch() {
+
+        // 订阅文本变化的 Observable
+        // 处理错误
+        textChangeDisposable = Flowable.create(new FlowableOnSubscribe<String>() {
+            @Override
+            public void subscribe(@NonNull FlowableEmitter<String> emitter) throws Throwable {
+                //
+                mEmitter = emitter;
+            }
+        },  BackpressureStrategy.ERROR)
+                .subscribeOn(Schedulers.io()) // 在计算线程执行搜索逻辑
+                .map(name -> searchMusic(name))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    result-> {
+                        updateMusicList(result);
+                    }, throwable -> {
+
+                    }
+        );
+    }
+
+
+
+
+
+    // 执行搜索逻辑
+    private List<Music> searchMusic(String name) {
+        List<Music> searchList = new ArrayList<>();
+        List<Music> nullData = new ArrayList<>();
+
+        if (!name.isEmpty()) {
+            for (Music music : tempMusicList) {
+                if (music.getMusicType().equals(" ")) {
+                    nullData.add(music);
+                }
+            }
+            int size = tempMusicList.size();
+            for (int i = 0; i < size; i++) {
+                if (tempMusicList.get(i).getMusicName().contains(name)) {
+                    searchList.add(tempMusicList.get(i));
+                }
+            }
+        }
+
+        if (!searchList.isEmpty()) {
+            searchList.addAll(nullData);
+            return searchList;
+        } else {
+            return tempMusicList;
+        }
+    }
+
+    // 更新音乐列表
+    private void updateMusicList(List<Music> result) {
+        if (result != null && !result.isEmpty()) {
+            musicList.clear();
+            musicList.addAll(result);
+            musicListAdapter.notifyDataSetChanged();
+            getViewDataBinding().tvNoSearchMusic.setVisibility(View.GONE);
+        } else {
+            musicList.clear();
+            musicListAdapter.notifyDataSetChanged();
+            getViewDataBinding().tvNoSearchMusic.setVisibility(View.VISIBLE);
+        }
+    }
+
+
 
     /** 开启所有相关服务 */
     private void startAllService() {
@@ -831,7 +909,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.CONNECT_MYSQL_ERROR:
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
-                Toast.makeText(this, "connect error", Toast.LENGTH_SHORT).show();
+                Toasty.error(this, "网络连接失败", Toast.LENGTH_SHORT, true).show();
                 break;
             case ThreadEvent.GET_SUCCESS:
                 musicList.clear();
@@ -893,6 +971,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 versionList.clear();
                 versionList.addAll(event.tList);
                 if(versionList.size()>0) {
+                    //isExistNewVersion = true;
                     int versionCode = Integer.parseInt(versionList.get(0).getVersionCode());
                     if(SystemUtil.getInstance().getAppVersionCode(this) < versionCode) { //判断当前是否有新版本
                         isExistNewVersion = true;
@@ -990,7 +1069,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.PLAY_ERROR:
-                Toast.makeText(this, "播放失败", Toast.LENGTH_SHORT).show();
+                Toasty.error(this, "播放失败", Toast.LENGTH_SHORT, true).show();
+
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
                 break;
@@ -1252,7 +1332,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(null != mAlertDialog) {
                     mAlertDialog.dismiss();
                 }
-                Toast.makeText(this, "app下载失败，请重新下载", Toast.LENGTH_SHORT).show();
+                Toasty.error(this, "app下载失败，请重新下载", Toast.LENGTH_SHORT, true).show();
                 break;
             case ThreadEvent.VIEW_COUNT_DOWN_REFRESH:  //倒计时刷新
                 if(dialogTimeTasksBinding != null) {
@@ -1352,7 +1432,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().rlDisableClick2.setVisibility(event.b? View.VISIBLE : GONE);
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS:
-                Toast.makeText(getApplication(), "添加成功", Toast.LENGTH_SHORT).show();
+                Toasty.success(context, "添加成功", Toast.LENGTH_SHORT, true).show();
                 break;
             case ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS:
                 if(musicListSize>0) {
@@ -1451,48 +1531,48 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LIELLA:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_LIELLA));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_LIELLA)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_LIELLA)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_LIELLA)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_LIELLA)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_FOUR_YUU:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_FOUR_YUU));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_LIYUU)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_LIYUU)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_LIYUU)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_LIYUU)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_SUNNY_PASSION:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_SUNNY_PASSION));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_SUNNYPASSION)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_SUNNYPASSION)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_SUNNYPASSION)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_SUNNYPASSION)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_NIJIGASAKI:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_NIJIGASAKI));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_NIJIGASAKI)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_NIJIGASAKI)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_NIJIGASAKI)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_NIJIGASAKI)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_AQOURS:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_AQOURS));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_AQOURS)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_AQOURS)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_AQOURS)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_AQOURS)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_US:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_US));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_US)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_US)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_US)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_US)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_HASUNOSORA:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_HASUNOSORA));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MUSIC_TYPE_HASUNOSORA)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MUSIC_TYPE_HASUNOSORA)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_HASUNOSORA)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_HASUNOSORA)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_SAINT_SNOW:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_SAINT_SNOW));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MUSIC_TYPE_AQOURS, MUSIC_TYPE_SAINT_SNOW)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MUSIC_TYPE_AQOURS, MUSIC_TYPE_SAINT_SNOW)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MysqlHelper.MUSIC_TYPE_AQOURS, MysqlHelper.MUSIC_TYPE_SAINT_SNOW)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MysqlHelper.MUSIC_TYPE_AQOURS, MysqlHelper.MUSIC_TYPE_SAINT_SNOW)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_A_RISE:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_A_RISE));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MUSIC_TYPE_US, MUSIC_TYPE_A_RISE)));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MUSIC_TYPE_US, MUSIC_TYPE_A_RISE)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MysqlHelper.MUSIC_TYPE_US, MysqlHelper.MUSIC_TYPE_A_RISE)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MysqlHelper.MUSIC_TYPE_US, MysqlHelper.MUSIC_TYPE_A_RISE)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LOCAL_PLAY:
                 if(event.t != null) {
@@ -1698,7 +1778,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         messageBinding.btSelectIconCancel.setText("以后再说");
         messageBinding.btSelectIconCommit.setText("立即体验");
         messageBinding.btSelectIconCommit.setTextColor(getResources().getColor(R.color.white));
-        messageBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected3);
+        messageBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected_default);
 
         messageBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1871,7 +1951,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 mAlertDialog = new AlertDialog.Builder(context)
                         .setView(dialogLocalFileBinding.getRoot())
                         .create();
-                Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+                Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
                 mAlertDialog.show();
 
             }
@@ -1954,7 +2034,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 mAlertDialog = new AlertDialog.Builder(context)
                         .setView(dialogTimeTasksBinding.getRoot())
                         .create();
-                Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+                Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
                 mAlertDialog.show();
             }
         });
@@ -1993,7 +2073,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     @Override
                     public void onClick(View view) {
                         if(hour == 0 && minute == 0) {
-                            Toast.makeText(context, "请设置一个正确的时间值", Toast.LENGTH_SHORT).show();
+                            Toasty.warning(context, "请设置一个正确的时间值", Toast.LENGTH_SHORT, true).show();
                             return;
                         }
                         mPopupWindow.dismiss();
@@ -3323,20 +3403,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 //展示各团Logo
                 binding.ivShowLogo.setVisibility(list.get(position).isLocal? View.GONE : View.VISIBLE);
                 binding.ivShowLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                if(MUSIC_TYPE_LIELLA.equals(list.get(position).musicType)) {
+                if(MysqlHelper.MUSIC_TYPE_LIELLA.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_liella_3);
-                } else if (MUSIC_TYPE_LIYUU.equals(list.get(position).musicType)) {
+                } else if (MysqlHelper.MUSIC_TYPE_LIYUU.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_liyuu);
-                } else if (MUSIC_TYPE_SUNNYPASSION.equals(list.get(position).musicType)) {
+                } else if (MysqlHelper.MUSIC_TYPE_SUNNYPASSION.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_sunny_passion);
                     binding.ivShowLogo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                } else if (MUSIC_TYPE_NIJIGASAKI.equals(list.get(position).musicType)) {
+                } else if (MysqlHelper.MUSIC_TYPE_NIJIGASAKI.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_nijigasaki_3);
-                } else if (MUSIC_TYPE_AQOURS.equals(list.get(position).musicType)) {
+                } else if (MysqlHelper.MUSIC_TYPE_AQOURS.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_aqours_3);
-                } else if (MUSIC_TYPE_US.equals(list.get(position).musicType)) {
+                } else if (MysqlHelper.MUSIC_TYPE_US.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_us_3);
-                } else if (MUSIC_TYPE_HASUNOSORA.equals(list.get(position).musicType)) {
+                } else if (MysqlHelper.MUSIC_TYPE_HASUNOSORA.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_hasu_2);
                 }
 

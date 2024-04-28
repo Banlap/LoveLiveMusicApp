@@ -132,6 +132,21 @@ public class SystemUtil {
     }
 
     /**
+     * 获取版本名称
+     * */
+    public String getAppVersionName(Context context) {
+        String versionName=null;
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
+            versionName = pi.versionName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return versionName;
+    }
+
+    /**
      * 判断服务是否开启
      *
      * @param mContext 上下文

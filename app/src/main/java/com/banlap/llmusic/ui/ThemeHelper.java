@@ -9,8 +9,10 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.databinding.ActivityMainBinding;
@@ -31,7 +33,6 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.MyAnimationUtil;
-import com.banlap.llmusic.widget.HorizontalProgressBar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -2572,23 +2573,46 @@ public class ThemeHelper {
     /**
      *  SettingActivity主题改变 - 下载进度 ui
      * */
-    public void settingActivityProgressTheme(Context context, int rThemeId, HorizontalProgressBar hpvProgress) {
+    public void settingActivityProgressTheme(Context context, int rThemeId, ProgressBar pbProgress) {
         if(rThemeId == R.id.ll_theme_normal) {
-            hpvProgress.setLinearGradient(R.color.light_f9);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_light_f8));
         } else if(rThemeId == R.id.ll_theme_blue) {
-            hpvProgress.setLinearGradient(R.color.blue_0E);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_blue));
         } else if(rThemeId == R.id.ll_theme_dark) {
-            hpvProgress.setLinearGradient(R.color.white);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_black));
         } else if(rThemeId == R.id.ll_theme_white) {
-            hpvProgress.setLinearGradient(R.color.purple);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_purple));
         } else if(rThemeId == R.id.ll_theme_orange) {
-            hpvProgress.setLinearGradient(R.color.orange_0b);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_orange));
         } else if(rThemeId == R.id.ll_theme_light) {
-            hpvProgress.setLinearGradient(R.color.light_b5);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_light));
         } else if(rThemeId == R.id.ll_theme_red) {
-            hpvProgress.setLinearGradient(R.color.red_3a);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_red));
         } else {
-            hpvProgress.setLinearGradient(R.color.light_f9);
+            pbProgress.setProgressDrawable(context.getResources().getDrawable(R.drawable.shape_bg_progress_bar_download_light_f8));
+        }
+    }
+
+    /**
+     * SettingActivity主题改变 - 更新App弹窗按钮
+     * */
+    public void settingActivityUpgradeAppButton(Context context, int rThemeId, Button bt) {
+        if(rThemeId == R.id.ll_theme_normal) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_default);
+        } else if(rThemeId == R.id.ll_theme_blue) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_blue);
+        } else if(rThemeId == R.id.ll_theme_dark) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_black);
+        } else if(rThemeId == R.id.ll_theme_white) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_purple);
+        } else if(rThemeId == R.id.ll_theme_orange) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_orange);
+        } else if(rThemeId == R.id.ll_theme_light) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_light_b5);
+        } else if(rThemeId == R.id.ll_theme_red) {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_red);
+        } else {
+            bt.setBackgroundResource(R.drawable.selector_button_selected_default);
         }
     }
 

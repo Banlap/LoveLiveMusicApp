@@ -352,7 +352,7 @@
                                 android:ellipsize="marquee"
                                 android:textColor="@color/light_ff"
                                 android:textStyle="bold"
-                                android:textSize="19dp"/>
+                                android:textSize="19sp"/>
 
                             <TextView
                                 android:id="@+id/tv_list_msg_name2"
@@ -362,7 +362,7 @@
                                 android:singleLine="true"
                                 android:ellipsize="marquee"
                                 android:textColor="@color/light_ff"
-                                android:textSize="17dp" />
+                                android:textSize="17sp" />
 
 
                             <LinearLayout
@@ -386,7 +386,7 @@
                                     android:layout_marginStart="5dp"
                                     android:text="N"
                                     android:textColor="@color/light_ff"
-                                    android:textSize="17dp" />
+                                    android:textSize="17sp" />
 
                             </LinearLayout>
 
@@ -449,7 +449,7 @@
                                     android:layout_marginStart="5dp"
                                     android:text="0"
                                     android:textColor="@color/light_ff"
-                                    android:textSize="12dp" />
+                                    android:textSize="12sp" />
 
                             </LinearLayout>
 

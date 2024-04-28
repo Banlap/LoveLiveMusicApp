@@ -3,11 +3,8 @@ package com.banlap.llmusic.ui.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
@@ -52,6 +49,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.util.Objects;
 
+import es.dmoral.toasty.Toasty;
+
 /**
  * 设置页面
  * */
@@ -70,6 +69,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     private String mNormalLaunchVideoUrl; //默认启动动画UI
     private String mNormalLaunchVideoUrl2; //启动动画UI 5nd
 
+    private int rThemeId =0;
     private static final int REQUEST_CODE_DOWNLOAD_APP_2 = 201;
     private static final int REQUEST_CODE_SELECT_VIDEO_FILE_2 = 202;
 
@@ -87,11 +87,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mNormalLaunchVideoUrl = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella;
         mNormalLaunchVideoUrl2 = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella5nd;
         String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
-        if(strThemeId!=null) {
-            if(!strThemeId.equals("")) {
-                int rId = Integer.parseInt(strThemeId);
-                changeTheme(rId);
-            }
+        if(!TextUtils.isEmpty(strThemeId)) {
+            changeTheme(Integer.parseInt(strThemeId));
         }
     }
 
@@ -122,7 +119,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             }
         });
 
-        getViewDataBinding().tvVersionValue.setText("V" + getAppVersionName(this));
+        getViewDataBinding().tvVersionValue.setText("V" + SystemUtil.getInstance().getAppVersionName(this));
         getViewDataBinding().tvNewVersion.setVisibility(isExistNewVersion ? View.VISIBLE : View.GONE);
         getViewDataBinding().llVersionMain.setEnabled(isExistNewVersion);
         getViewDataBinding().llVersionMain.setOnClickListener(new View.OnClickListener() { //版本
@@ -223,7 +220,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             case ThreadEvent.DOWNLOAD_APP_LOADING2:
                 if(null != downloadBinding) {
                     downloadBinding.tvValue.setText(""+event.i);
-                    downloadBinding.hpvProgress.setCurrentCount(event.i);
+                    downloadBinding.pbProgress.setProgress(event.i);
                 }
                 break;
             case ThreadEvent.DOWNLOAD_APP_SUCCESS2:
@@ -261,7 +258,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 if(null != mAlertDialog) {
                     mAlertDialog.dismiss();
                 }
-                Toast.makeText(this, "app下载失败，请重新下载", Toast.LENGTH_SHORT).show();
+                Toasty.error(this, "app下载失败，请重新下载", Toast.LENGTH_SHORT,true).show();
                 break;
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS:
                 if(!TextUtils.isEmpty(event.str)) {
@@ -273,19 +270,6 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 Log.i(TAG, "设置启动动画失败");
                 break;
         }
-    }
-
-    /** 获取版本名称 */
-    public static String getAppVersionName(Context context) {
-        String versionName=null;
-        try {
-            PackageManager pm = context.getPackageManager();
-            PackageInfo pi = pm.getPackageInfo(context.getPackageName(), 0);
-            versionName = pi.versionName;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return versionName;
     }
 
     /** 设置启动动画 */
@@ -393,10 +377,10 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         messageBinding.tvTitle.setText(newVersionTitle);
         messageBinding.tvContent.setText(newVersionContent);
         messageBinding.btSelectIconCancel.setText("以后再说");
+        messageBinding.btSelectIconCancel.setBackgroundResource(R.drawable.selector_button_selected4);
         messageBinding.btSelectIconCommit.setText("立即体验");
         messageBinding.btSelectIconCommit.setTextColor(getResources().getColor(R.color.white));
-        messageBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected3);
-
+        ThemeHelper.getInstance().settingActivityUpgradeAppButton(LLActivityManager.getInstance().getTopActivity(), rThemeId, messageBinding.btSelectIconCommit);
         messageBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -497,7 +481,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         messageBinding.btSelectIconCancel.setVisibility(View.GONE);
         messageBinding.btSelectIconCommit.setText("确认");
         messageBinding.btSelectIconCommit.setTextColor(getResources().getColor(R.color.white));
-        messageBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected3);
+        messageBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected_default);
         messageBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -508,7 +492,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mAlertDialog = new AlertDialog.Builder(this)
                 .setView(messageBinding.getRoot())
                 .create();
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
 
     }
@@ -522,14 +506,9 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         downloadBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_download, null, false);
 
-        downloadBinding.hpvProgress.setMaxCount(100);
-        String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
-        if(strThemeId!=null) {
-            if(!strThemeId.equals("")) {
-                int rId = Integer.parseInt(strThemeId);
-                ThemeHelper.getInstance().settingActivityProgressTheme(LLActivityManager.getInstance().getTopActivity(), rId, downloadBinding.hpvProgress);
-            }
-        }
+        downloadBinding.pbProgress.setMax(100);
+
+        ThemeHelper.getInstance().settingActivityProgressTheme(LLActivityManager.getInstance().getTopActivity(), rThemeId, downloadBinding.pbProgress);
 
         downloadBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -582,6 +561,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     /** 改变主题 */
     private void changeTheme(int rId) {
+        rThemeId = rId;
         SPUtil.setStrValue(getApplicationContext(), SPUtil.SaveThemeId, String.valueOf(rId));
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
         //主题变更

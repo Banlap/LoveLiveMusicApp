@@ -207,7 +207,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="12dp"
-                android:background="@drawable/selector_button_selected2"
+                android:background="@drawable/selector_button_selected4"
                 android:stateListAnimator="@null"
                 android:text="关闭" />
 

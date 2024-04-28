@@ -29,7 +29,7 @@ public class OkhttpUtil {
     }
 
     /**
-     * GET请求
+     * GET请求 - enqueue异步
      * @param url 请求地址
      * */
     public void request(String url, OkHttpCallBack okHttpCallBack){
@@ -61,7 +61,7 @@ public class OkhttpUtil {
     }
 
     /**
-     * POST请求
+     * POST请求 - enqueue异步
      * @param url 请求地址
      * */
     public void requestByPost(String url, OkHttpCallBack okHttpCallBack){

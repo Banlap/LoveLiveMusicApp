@@ -27,6 +27,7 @@
     <color name="light_fd_alpha">#CCBBF9FB</color>
     <color name="light_ea">#a9edea</color>
     <color name="light_f9">#ACE0F9</color>
+    <color name="light_f9_alpha">#E6ACE0F9</color>
     <color name="light_f8">#E5F2F8</color>
 
     <color name="light_e7">#c7e4e7</color>

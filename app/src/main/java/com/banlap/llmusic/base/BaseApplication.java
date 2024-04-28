@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
+import es.dmoral.toasty.Toasty;
 
 
 public class BaseApplication extends Application {

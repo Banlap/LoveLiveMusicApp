@@ -52,13 +52,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <com.banlap.llmusic.widget.HorizontalProgressBar
-                    android:id="@+id/hpv_progress"
-                    android:layout_width="match_parent"
-                    android:layout_height="15dp"
+<!--                <com.banlap.llmusic.widget.HorizontalProgressBar-->
+<!--                    android:id="@+id/hpv_progress"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="15dp"-->
+<!--                    android:layout_centerVertical="true"-->
+<!--                    android:layout_marginStart="5dp"-->
+<!--                    android:layout_marginEnd="5dp" />-->
+
+                <ProgressBar
+                    android:id="@+id/pb_progress"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    tools:progress="0"
+                    android:progressDrawable="@drawable/shape_bg_progress_bar_download_light_f8"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp" />
+                    android:layout_width="match_parent"
+                    android:layout_height="15dp"/>
 
                 <TextView
                     android:id="@+id/tv_value"
@@ -76,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="5dp"
                     android:layout_centerVertical="true"
-                    android:layout_alignEnd="@+id/hpv_progress"
+                    android:layout_alignEnd="@+id/pb_progress"
                     android:text="%"
                     android:textSize="17dp" />
 

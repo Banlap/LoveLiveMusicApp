@@ -1,11 +1,13 @@
 package com.banlap.llmusic.ui.activity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.splashscreen.SplashScreen;
 
@@ -21,6 +23,7 @@ import com.banlap.llmusic.utils.SPUtil;
 public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBinding>
     implements WelcomeVM.WelcomeCallBack {
 
+    private static final String TAG = WelcomeActivity.class.getSimpleName();
     @Override
     protected int getLayoutId() { return R.layout.activity_welcome; }
 
@@ -48,21 +51,31 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
         //是否显示启动动画
         String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
         if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
-            Intent intent = new Intent(getApplication(), MainActivity.class);
-            startActivity(intent);
-            finish();
+            runActivity();
             return;
         }
         //启动动画
         initVideo();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(getApplication(), MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }, 5000);
+        new Handler().postDelayed(this::runActivity, 5000);
+    }
+
+    /**
+     * 进入页面
+     * */
+    private void runActivity() {
+//        if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_CAR) {
+//            Log.i(TAG, "car mode: ");
+//            Toast.makeText(this, "car mode: ", Toast.LENGTH_SHORT).show();
+//
+//            Intent intent = new Intent(getApplication(), CarModeActivity.class);
+//            startActivity(intent);
+//            finish();
+//            return;
+//        }
+
+        Intent intent = new Intent(getApplication(), MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     /** 视频保持宽高比 */

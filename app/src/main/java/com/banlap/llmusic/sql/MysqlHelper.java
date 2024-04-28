@@ -26,6 +26,17 @@ public class MysqlHelper {
     private static final String USERNAME= BuildConfig.MYSQL_ACCOUNT;
     private static final String PASSWORD= BuildConfig.MYSQL_PASSWORD;
 
+    //专辑类型
+    public static final String MUSIC_TYPE_LIELLA = "Liella";
+    public static final String MUSIC_TYPE_LIYUU = "Fo(u)rYuU";
+    public static final String MUSIC_TYPE_SUNNYPASSION = "SunnyPassion";
+    public static final String MUSIC_TYPE_NIJIGASAKI = "Nijigasaki";
+    public static final String MUSIC_TYPE_AQOURS = "Aqours";
+    public static final String MUSIC_TYPE_US = "us";
+    public static final String MUSIC_TYPE_HASUNOSORA = "Hasunosora";
+    public static final String MUSIC_TYPE_SAINT_SNOW = "Saint Snow";
+    public static final String MUSIC_TYPE_A_RISE = "A-RISE";
+
     public static MysqlHelper getInstance() { return new MysqlHelper(); }
 
     public static Connection connectDB() {
