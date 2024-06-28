@@ -8,13 +8,28 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
+import android.view.DisplayCutout;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.banlap.llmusic.receiver.ScreenReceiver;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -83,6 +98,76 @@ public class SystemUtil {
         if(getScreenWidthDp == -1) return false;
         return (getScreenWidthDp(LLActivityManager.getInstance().getTopActivity()) <= 360);
     }
+
+    /**
+     * 设备是否是平板
+     *
+     * @param context 上下文
+     * @return 是平板则返回true，反之返回false
+     */
+    public static boolean isPad(Context context) {
+        //新加条件
+        boolean isPad = (context.getResources().getConfiguration().screenLayout
+                & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        DisplayMetrics dm = new DisplayMetrics();
+        display.getMetrics(dm);
+        double x = Math.pow(dm.widthPixels / dm.xdpi, 2);
+        double y = Math.pow(dm.heightPixels / dm.ydpi, 2);
+        double screenInches = Math.sqrt(x + y); // 屏幕尺寸
+
+        return isPad || screenInches >= 7.0;
+    }
+
+    public static boolean isOrientationPortrait() {
+
+        return true;
+    }
+
+
+    /**
+     * 判断底部状态栏是否显示
+     *
+     */
+      public void hasNavigationBar(Activity activity, NavigationBarCallback callback) {
+
+          if(Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+              boolean hasNavigationBarOld = false;
+              int height=0;
+              Resources resources = activity.getResources();
+              int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+              if (resourceId > 0) {
+                  height = resources.getDimensionPixelSize(resourceId);
+                  hasNavigationBarOld = height > 0;
+              }
+              Log.d(TAG, "是否存在底部栏: " + hasNavigationBarOld +", 高度: " + height);
+              callback.onResult(hasNavigationBarOld, height);
+          } else {
+              View decorView = activity.getWindow().getDecorView();
+              decorView.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+
+                  @Override
+                  public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                      // 检查导航栏是否可见
+                      boolean hasNavigationBar = insets.isVisible(WindowInsets.Type.navigationBars());
+                      // 获取导航栏高度
+                      int navigationBarHeight = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+                      // 你可以根据需要处理导航栏高度，例如存储到成员变量中
+                      Log.d(TAG, "是否存在底部栏: " + hasNavigationBar +", 高度: " + navigationBarHeight);
+                      callback.onResult(hasNavigationBar, navigationBarHeight);
+                      return insets;
+                  }
+              });
+          }
+
+      }
+
+      public  interface NavigationBarCallback {
+          void onResult(boolean isShow, int height);
+     }
+
 
     /**
      * 注册屏幕监测广播

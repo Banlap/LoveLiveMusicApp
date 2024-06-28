@@ -2,4 +2,8 @@
     <string name="app_name">LLMusic</string>
     <attr name="play_controller_bg" format="reference"/>
     <item name="img_load" type="id"/>
+
+    <string name="shortcuts_title">添加小组件</string>
+    <string name="shortcuts_title_long">添加LLMusic小组件</string>
+
 </resources>

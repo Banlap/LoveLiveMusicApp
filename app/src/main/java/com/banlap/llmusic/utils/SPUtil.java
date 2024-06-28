@@ -23,6 +23,7 @@ public class SPUtil {
     public static final String SaveThemeId = "SaveThemeId";  //保存主题ID
     public static final String SavePlayMode = "SavePlayMode";  //保存播放模式
     public static final String SaveControllerScene = "SaveControllerScene"; //保存控制器场景
+    public static final String isBGScene = "isBGScene"; //是否背景模式标记
     public static final String BackgroundUri = "BackgroundUri";  //壁纸URI
     public static final String CloseLaunchVideo = "CloseLaunchVideo"; //关闭启动视频标记
     public static final String LaunchVideoPath = "LaunchVideoPath"; //启动视频自定义路径

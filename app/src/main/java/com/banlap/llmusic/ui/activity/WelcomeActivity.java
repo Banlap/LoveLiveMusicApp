@@ -1,21 +1,21 @@
 package com.banlap.llmusic.ui.activity;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.splashscreen.SplashScreen;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivityWelcomeBinding;
+import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.uivm.vm.WelcomeVM;
 import com.banlap.llmusic.utils.SPUtil;
+import com.banlap.llmusic.utils.SystemUtil;
 
 /**
  * 欢迎页
@@ -48,6 +48,14 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
 
     /** 判断是否显示启动动画 */
     private void launchVideo() {
+        //pad版本跳过启动视频，看后续是否需要添加
+        if(SystemUtil.isPad(getApplication())) {
+            Intent intent = new Intent(getApplication(), PadMainActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         //是否显示启动动画
         String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
         if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
@@ -63,16 +71,12 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
      * 进入页面
      * */
     private void runActivity() {
-//        if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_CAR) {
-//            Log.i(TAG, "car mode: ");
-//            Toast.makeText(this, "car mode: ", Toast.LENGTH_SHORT).show();
-//
-//            Intent intent = new Intent(getApplication(), CarModeActivity.class);
-//            startActivity(intent);
-//            finish();
-//            return;
-//        }
 
+        Log.i(TAG, "isPad: " + SystemUtil.isPad(getApplication()));
+//        Log.i(TAG, "isNavBarVisible: " + SystemUtil.isNavBarVisible(getWindow()));
+
+        //判断设备是否pad，ps需要考虑通知栏点击和小组件点击 也需要判断
+        //Intent intent = new Intent(getApplication(), SystemUtil.isPad(getApplication())? PadMainActivity.class : MainActivity.class);
         Intent intent = new Intent(getApplication(), MainActivity.class);
         startActivity(intent);
         finish();
@@ -113,7 +117,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
         getViewDataBinding().vvWelcomeVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Log.i("ABMusicPlayer", "onSuccess");
+                Log.i(TAG, "onSuccess");
                 mp.setVolume(0f,0f);
             }
         });
@@ -132,7 +136,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
                 *   MEDIA_ERROR_TIMED_OUT 一些操作使用了过长的时间，也就是超时了，通常是超过了3-5秒 值: -110 (0xffffff92)
                 *   MEDIA_ERROR_SYSTEM (-2147483648) - low-level system error.
                 * */
-                Log.i("ABMusicPlayer", "what: " + what + " extra: " + extra);
+                Log.i(TAG, "what: " + what + " extra: " + extra);
                 return false;
             }
         });

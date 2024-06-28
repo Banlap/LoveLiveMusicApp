@@ -3,33 +3,29 @@ package com.banlap.llmusic.utils;
 import static android.content.Context.NOTIFICATION_SERVICE;
 
 import android.annotation.SuppressLint;
-import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.util.Log;
 import android.widget.RemoteViews;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+
 import com.banlap.llmusic.R;
-import com.banlap.llmusic.service.MusicIsPauseService;
-import com.banlap.llmusic.service.MusicLastService;
-import com.banlap.llmusic.service.MusicNextService;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
 import com.banlap.llmusic.ui.activity.MainActivity;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * 通知栏帮助类 展示LLMusic通知
@@ -40,8 +36,8 @@ public class NotificationHelper {
     public static final int LL_MUSIC_CHARACTER= 0x02;  //角色通知
     public static final int LL_MUSIC_FULL_SCREEN= 0x03;  //锁屏通知
     public Notification notification;
-    public NotificationCompat.Builder builder;
-    public NotificationManager manager;
+    public static NotificationCompat.Builder builder;
+    public static NotificationManager manager;
 
     public Bitmap roundedBitmap;
     public static NotificationHelper getInstance() { return new NotificationHelper(); }
@@ -86,13 +82,140 @@ public class NotificationHelper {
     }
 
     /**
-     * 创建音乐通知
+     * 创建音乐通知，使用MediaStyle方式
      * */
     @SuppressLint("RemoteViewLayout")
-    public Notification createRemoteViews(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isDefault) {
+    public Notification createRemoteViews(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isPause) {
+
+        //播放与暂停
+        Intent intentServiceIsPause = new Intent(context, MusicPlayService.class);
+        intentServiceIsPause.setAction(MusicPlayService.INTENT_ACTION_PLAY);
+        intentServiceIsPause.putExtra("IsPauseMusic", true);
+        intentServiceIsPause.putExtra("MusicName", musicName);
+        intentServiceIsPause.putExtra("MusicSinger", musicSinger);
+        if(bitmap !=null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
+            byte[] bitmapByte = baos.toByteArray();
+            intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
+        } else {
+            intentServiceIsPause.putExtra("MusicBitmap", (byte[]) null);
+        }
+        @SuppressLint("UnspecifiedImmutableFlag")
+        //使用PendingIntent时 版本大于31时需要添加 FLAG_IMMUTABLE 或者 FLAG_MUTABLE
+        PendingIntent pIntentIsPause = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceIsPause,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //下一首
+        Intent intentServiceNext = new Intent(context, MusicPlayService.class);
+        intentServiceNext.setAction(MusicPlayService.INTENT_ACTION_PLAY_NEXT);
+        intentServiceNext.putExtra("NextMusic", true);
+        @SuppressLint("UnspecifiedImmutableFlag")
+        PendingIntent pIntentNext = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceNext,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //上一首
+        Intent intentServiceLast = new Intent(context, MusicPlayService.class);
+        intentServiceLast.setAction(MusicPlayService.INTENT_ACTION_PLAY_LAST);
+        intentServiceLast.putExtra("LastMusic", true);
+        @SuppressLint("UnspecifiedImmutableFlag")
+        PendingIntent pIntentLast = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceLast,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //进入主程序
+        Intent intentMain = new Intent(context, MainActivity.class);
+        intentMain.addCategory(Intent.CATEGORY_LAUNCHER);
+        //FLAG_ACTIVITY_RESET_TASK_IF_NEEDED 按需启动的关键,如果任务队列中已经存在,则重建程序
+        intentMain.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED | Intent.FLAG_ACTIVITY_NEW_TASK);
+        @SuppressLint("UnspecifiedImmutableFlag")
+        PendingIntent pIntentMain = PendingIntent.getActivity(context, LL_MUSIC_PLAYER, intentMain,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(context.getPackageName(), "LLMusic_channel", NotificationManager.IMPORTANCE_HIGH);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            channel.setShowBadge(false);
+            manager.createNotificationChannel(channel);
+            builder = new NotificationCompat.Builder(context, context.getPackageName());
+        } else {
+            builder = new NotificationCompat.Builder(context);
+        }
+
+        builder.setChannelId(context.getPackageName());
+        builder.setPriority(NotificationCompat.PRIORITY_MAX);
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        builder.setCategory(Notification.CATEGORY_TRANSPORT);
+        builder.setShowWhen(false);
+        builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
+        builder.setContentTitle(musicName);
+        builder.setContentText(musicSinger);
+        builder.setOngoing(false); //传统通知时，控制播放时是否能划走通知
+
+        if(bitmap !=null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
+            builder.setLargeIcon(bitmap);
+        } else {
+            builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp_2));
+        }
+
+        MediaSessionCompat mediaSession = MusicPlayService.mMediaSession;
+        if(mediaSession == null) {
+            Log.e(TAG, "mediaSession is null, so create new one");
+            mediaSession = new MediaSessionCompat(context, context.getPackageName());
+        }
+        builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
+                .setMediaSession(mediaSession.getSessionToken())
+                .setShowActionsInCompactView(0, 1, 2) //对应显示通知栏的按钮
+        );
+
+        builder.addAction(new NotificationCompat.Action(
+                R.mipmap.ic_last_black, "Previous", pIntentLast));
+        builder.addAction(new NotificationCompat.Action(
+                isPause? R.mipmap.ic_play_black : R.mipmap.ic_pause_black, "IsPause", pIntentIsPause));
+        builder.addAction(new NotificationCompat.Action(
+                R.mipmap.ic_next_black, "Next", pIntentNext));
+
+        builder.setContentIntent(pIntentMain);
+
+        notification = builder.build();
+
+        notification.flags |= Notification.FLAG_ONGOING_EVENT;
+        manager.notify(LL_MUSIC_PLAYER, notification);
+        NotificationManagerCompat.from(context).notify(LL_MUSIC_PLAYER, notification);
+
+        return notification;
+    }
+
+
+    public static void setProgressByValue(int max, int pos) {
+        if(builder != null && manager != null) {
+            Log.e(TAG, "max: " + max + " pos: " + pos);
+            builder.setProgress(max, pos, false);
+            refreshManager();
+        }
+    }
+
+    public static void refreshManager() {
+        if(builder != null && manager != null) {
+            manager.notify(LL_MUSIC_PLAYER, builder.build());
+        }
+    }
+
+    /**
+     * 旧版本通知栏
+     * */
+    @Deprecated
+    @SuppressLint("RemoteViewLayout")
+    public Notification createRemoteViewsOld(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isDefault) {
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(),
                 //Build.VERSION.SDK_INT >= Build.VERSION_CODES.S? R.layout.view_remote_notification_small_bar:
-                        R.layout.view_remote_notification_bar);
+                R.layout.view_remote_notification_bar);
         RemoteViews remoteBigViews = new RemoteViews(context.getPackageName(), R.layout.view_remote_notification_big_bar);
 
         remoteViews.setTextViewText(R.id.tv_music_name, musicName);
@@ -108,7 +231,8 @@ public class NotificationHelper {
             remoteBigViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier("selector_pause_purple_notify_selected", "drawable", context.getPackageName()));
         }
 
-        Intent intentServiceIsPause = new Intent(context, MusicIsPauseService.class);
+        Intent intentServiceIsPause = new Intent(context, MusicPlayService.class);
+        intentServiceIsPause.setAction(MusicPlayService.INTENT_ACTION_PLAY);
         intentServiceIsPause.putExtra("IsPauseMusic", true);
         intentServiceIsPause.putExtra("MusicName", musicName);
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
@@ -135,7 +259,8 @@ public class NotificationHelper {
         remoteViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
         remoteBigViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
 
-        Intent intentServiceNext = new Intent(context, MusicNextService.class);
+        Intent intentServiceNext = new Intent(context, MusicPlayService.class);
+        intentServiceNext.setAction(MusicPlayService.INTENT_ACTION_PLAY_NEXT);
         intentServiceNext.putExtra("NextMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentNext = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceNext,
@@ -144,7 +269,8 @@ public class NotificationHelper {
         remoteViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
         remoteBigViews.setOnClickPendingIntent(R.id.bt_next, pIntentNext);
 
-        Intent intentServiceLast = new Intent(context, MusicLastService.class);
+        Intent intentServiceLast = new Intent(context, MusicPlayService.class);
+        intentServiceLast.setAction(MusicPlayService.INTENT_ACTION_PLAY_LAST);
         intentServiceLast.putExtra("LastMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentLast = PendingIntent.getService(context, LL_MUSIC_PLAYER, intentServiceLast,
@@ -166,23 +292,23 @@ public class NotificationHelper {
 
         manager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("channel_1", "LLMusic_channel", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel channel = new NotificationChannel(context.getPackageName(), "LLMusic_channel", NotificationManager.IMPORTANCE_DEFAULT);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             manager.createNotificationChannel(channel);
-            builder = new NotificationCompat.Builder(context, "channel_1");
+            builder = new NotificationCompat.Builder(context, context.getPackageName());
         } else {
             builder = new NotificationCompat.Builder(context);
         }
 
         builder.setPriority(NotificationCompat.PRIORITY_MAX);
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-
+        builder.setCategory(Notification.CATEGORY_CALL);
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
         builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
         builder.setCustomBigContentView(remoteBigViews);
         builder.setCustomContentView(remoteViews);
-
+        builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle());
         notification = builder.build();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         manager.notify(LL_MUSIC_PLAYER, notification);
@@ -210,7 +336,6 @@ public class NotificationHelper {
         builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
         builder.setSound(null);
         builder.setPriority(NotificationCompat.PRIORITY_MAX);
-        builder.setCategory(NotificationCompat.CATEGORY_CALL);
         builder.setOngoing(true);
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         builder.setAutoCancel(true);

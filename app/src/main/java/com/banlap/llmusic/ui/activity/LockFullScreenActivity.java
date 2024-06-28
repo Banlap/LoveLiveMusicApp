@@ -16,6 +16,7 @@ import androidx.core.view.GestureDetectorCompat;
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivityLockFullScreenBinding;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.uivm.vm.LockFullScreenVM;
 import com.banlap.llmusic.utils.CountDownHelper;
 import com.banlap.llmusic.utils.MyAnimationUtil;
@@ -72,11 +73,11 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
         getViewDataBinding().tvDate.setText(TimeUtil.getCurrentDateByMD());
         setTime();
 
-        if(!TextUtils.isEmpty(MainActivity.currentMusicName)) {
-            getViewDataBinding().tvMusicName.setText(MainActivity.currentMusicName);
+        if(!TextUtils.isEmpty(MusicPlayService.currentMusicName)) {
+            getViewDataBinding().tvMusicName.setText(MusicPlayService.currentMusicName);
         }
-        if(!TextUtils.isEmpty(MainActivity.currentMusicSinger)) {
-            getViewDataBinding().tvMusicSinger.setText(MainActivity.currentMusicSinger);
+        if(!TextUtils.isEmpty(MusicPlayService.currentMusicSinger)) {
+            getViewDataBinding().tvMusicSinger.setText(MusicPlayService.currentMusicSinger);
         }
 
         RequestOptions requestOptions = new RequestOptions();
@@ -84,10 +85,10 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
         //requestOptions.override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL); //关键代码，加载原始大小
         requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
 
-        if(MainActivity.currentBitmap != null) {
+        if(MusicPlayService.currentMusicBitmap != null) {
             Glide.with(this)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(MainActivity.currentBitmap)
+                    .load(MusicPlayService.currentMusicBitmap)
                     .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(getViewDataBinding().ivMusicImg);

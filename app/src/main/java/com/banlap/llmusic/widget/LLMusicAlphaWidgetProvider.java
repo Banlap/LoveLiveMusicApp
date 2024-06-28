@@ -18,9 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
-import com.banlap.llmusic.service.MusicIsPauseService;
-import com.banlap.llmusic.service.MusicLastService;
-import com.banlap.llmusic.service.MusicNextService;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.bumptech.glide.Glide;
@@ -38,6 +36,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  * 音乐播放器小组件 4x1
  * */
 public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
+    private static final String TAG = LLMusicAlphaWidgetProvider.class.getSimpleName();
 
     public static final String WIDGET_PROVIDER_REFRESH_MUSIC_MSG = "WIDGET_PROVIDER_REFRESH_MUSIC_MSG";
 
@@ -45,9 +44,9 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         String musicName, musicSinger;
-        musicName = MainActivity.currentMusicName;
-        musicSinger = MainActivity.currentMusicSinger;
-        Log.i("ABMusicPlayer", "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
+        musicName = MusicPlayService.currentMusicName;
+        musicSinger = MusicPlayService.currentMusicSinger;
+        Log.i(TAG, "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
         setRemoteViews(context, appWidgetManager, null);
     }
 
@@ -56,7 +55,7 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         String action = intent.getAction();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
-        //Log.i("ABMusicPlayer", "send success: " + intent.getIntExtra("MusicProgress", 0));
+        //Log.i(TAG, "send success: " + intent.getIntExtra("MusicProgress", 0));
 
         if (action.equals(WIDGET_PROVIDER_REFRESH_MUSIC_MSG)) {
             setRemoteViews(context, appWidgetManager, intent);
@@ -86,15 +85,15 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         }
 
         //当小组件重新加入时 获取上次音乐信息
-        String musicNameTemp = MainActivity.currentMusicName;
-        String musicSingerTemp = MainActivity.currentMusicSinger;
+        String musicNameTemp = MusicPlayService.currentMusicName;
+        String musicSingerTemp = MusicPlayService.currentMusicSinger;
         Bitmap bitmapTemp;
         if(musicNameTemp != null && !musicNameTemp.equals("")) {
             if(musicSingerTemp != null && !musicSingerTemp.equals("")) {
                 musicName = musicNameTemp;
                 musicSinger = musicSingerTemp;
 
-                bitmapTemp = MainActivity.currentBitmap;
+                bitmapTemp = MusicPlayService.currentMusicBitmap;
                 if(bitmapTemp != null) {
                     bitmap = bitmapTemp;
                 }
@@ -114,7 +113,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier(isDefault ? "ic_play" : "ic_pause", "mipmap", context.getPackageName()));
         remoteViews.setViewVisibility(R.id.pb_loading_music, isLoading? View.VISIBLE : View.INVISIBLE);
 
-        Intent intentServiceIsPause = new Intent(context, MusicIsPauseService.class);
+        Intent intentServiceIsPause = new Intent(context, MusicPlayService.class);
+        intentServiceIsPause.setAction(MusicPlayService.INTENT_ACTION_PLAY);
         intentServiceIsPause.putExtra("IsPauseMusic", true);
         intentServiceIsPause.putExtra("MusicName", musicName);
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
@@ -151,7 +151,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.bt_play, pIntentIsPause);
 
 
-        Intent intentServiceLast = new Intent(context, MusicLastService.class);
+        Intent intentServiceLast = new Intent(context, MusicPlayService.class);
+        intentServiceLast.setAction(MusicPlayService.INTENT_ACTION_PLAY_LAST);
         intentServiceLast.putExtra("LastMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentLast = PendingIntent.getService(context, NotificationHelper.LL_MUSIC_PLAYER, intentServiceLast,
@@ -159,7 +160,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
                         PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.bt_last, pIntentLast);
 
-        Intent intentServiceNext = new Intent(context, MusicNextService.class);
+        Intent intentServiceNext = new Intent(context, MusicPlayService.class);
+        intentServiceNext.setAction(MusicPlayService.INTENT_ACTION_PLAY_NEXT);
         intentServiceNext.putExtra("NextMusic", true);
         @SuppressLint("UnspecifiedImmutableFlag")
         PendingIntent pIntentNext = PendingIntent.getService(context, NotificationHelper.LL_MUSIC_PLAYER, intentServiceNext,

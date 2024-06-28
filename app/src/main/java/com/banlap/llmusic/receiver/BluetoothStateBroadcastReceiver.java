@@ -5,13 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.view.KeyEvent;
 
 import com.banlap.llmusic.request.ThreadEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
 public class BluetoothStateBroadcastReceiver extends BroadcastReceiver {
+    private static final String TAG = BluetoothStateBroadcastReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -19,10 +19,10 @@ public class BluetoothStateBroadcastReceiver extends BroadcastReceiver {
         if(action!=null) {
             switch (action) {
                 case BluetoothDevice.ACTION_ACL_CONNECTED:
-                    Log.i("ABMusicPlayer", "bluetooth connect");
+                    Log.i(TAG, "bluetooth connect");
                     break;
                 case BluetoothDevice.ACTION_ACL_DISCONNECTED:
-                    Log.i("ABMusicPlayer", "bluetooth disconnect");
+                    Log.i(TAG, "bluetooth disconnect");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.BLUETOOTH_DISCONNECT));
                     break;
             }

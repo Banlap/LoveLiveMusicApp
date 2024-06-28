@@ -362,6 +362,28 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_setting_view_mode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/selector_normal_selected">
+
+                    <TextView
+                        android:id="@+id/tv_setting_view_mode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="设置界面模式"
+                        android:textColor="@color/light_ff"
+                        android:textSize="17dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/ll_version_main"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -520,6 +542,10 @@
 
 
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"/>
 
             </LinearLayout>
 

@@ -42,10 +42,10 @@ public class ThreadEvent<T> {
     public static final int GET_DATA_LIST_BY_LIELLA = 0x201;    //获取Liella所有歌曲
     public static final int GET_DATA_LIST_BY_SUNNY_PASSION = 0x202; //获取SUNNY PASSION所有歌曲
     public static final int GET_DATA_LIST_BY_FOUR_YUU = 0x203;    //获取Liyuu所有歌曲
-    public static final int GET_DATA_LIST_BY_NIJIGASAKI = 0x204;
-    public static final int GET_DATA_LIST_BY_AQOURS = 0x205;
-    public static final int GET_DATA_LIST_BY_US = 0x206;
-    public static final int GET_DATA_LIST_BY_HASUNOSORA = 0x207;
+    public static final int GET_DATA_LIST_BY_NIJIGASAKI = 0x204;  //获取虹团所有歌曲
+    public static final int GET_DATA_LIST_BY_AQOURS = 0x205;  //获取Aqours所有歌曲
+    public static final int GET_DATA_LIST_BY_US = 0x206;  //
+    public static final int GET_DATA_LIST_BY_HASUNOSORA = 0x207; //
     public static final int GET_DATA_LIST_BY_SAINT_SNOW = 0x208;
     public static final int GET_DATA_LIST_BY_A_RISE = 0x209;
     public static final int GET_DATA_LIST_BY_LOCAL_PLAY = 0x255;
@@ -82,7 +82,7 @@ public class ThreadEvent<T> {
     public static final int PLAY_ERROR = 0x311;
     public static final int MUSIC_LIST_REFRESH = 0x312;
     public static final int PLAY_LIST_FIRST = 0x32;
-    public static final int PLAY_MUSIC = 0x33;
+    public static final int PLAY_MUSIC_BY_CHARACTER = 0x33;  //角色控制播放
     public static final int PLAY_LOCAL_MUSIC = 0x331;
     public static final int ADD_LOCAL_MUSIC = 0x332;
     public static final int PLAY_FAVORITE_MUSIC = 0x333;
@@ -106,6 +106,8 @@ public class ThreadEvent<T> {
     public static final int VIEW_LISTEN_STATUS_CHARACTER_RIGHT = 0x433;
 
     public static final int VIEW_SEEK_BAR_POS = 0x50;
+    public static final int UPDATE_NOTIFICATION_SEEK_BAR_POS = 0x501;
+
     public static final int VIEW_SEEK_BAR_RESUME = 0x51;
     public static final int VIEW_PAUSE = 0x52;   //处理播放或暂停
     public static final int VIEW_SHOW_VISUALIZER =0x521;
@@ -129,7 +131,10 @@ public class ThreadEvent<T> {
     public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 0x60;
     public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 0x601;
     public static final int VIEW_CONTROLLER_MODE = 0x61;
-    public static final int VIEW_CROPPING_IMG_2 = 0x611;
+    public static final int VIEW_NEW_CONTROLLER_MODE = 0x611;
+    public static final int VIEW_BG_MODE = 0x612;
+    public static final int VIEW_INTO_SET_BG = 0x613;
+
     public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 0x62;
     public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 0x621;
     public static final int VIEW_COUNT_DOWN_REFRESH = 0x631;
@@ -142,6 +147,31 @@ public class ThreadEvent<T> {
     /** 蓝牙部分控制 */
     public static final int BLUETOOTH_DISCONNECT = 0x70;
     public static final int ACTION_MEDIA_BUTTON = 0x71; //已使用onKeyDown方法实现
+
+
+    /**
+     * Pad版本
+     * */
+    public static final int PAD_CONNECT_MYSQL= 0x9101;
+    public static final int PAD_GET_DATA_LIST = 0x9102;
+    public static final int VIEW_PAD_GET_SUCCESS = 0x9103;
+    public static final int VIEW_PAD_CHANGE_FRAGMENT= 0x9110;
+    public static final int VIEW_PAD_CHANGE_LAST_FRAGMENT= 0x9111;
+
+    public static final int PAD_GET_DATA_LIST_BY_LIELLA = 0x9201;    //获取Liella所有歌曲
+    public static final int PAD_GET_DATA_LIST_BY_SUNNY_PASSION = 0x9202; //获取SUNNY PASSION所有歌曲
+    public static final int PAD_GET_DATA_LIST_BY_FOUR_YUU = 0x9203;    //获取Liyuu所有歌曲
+    public static final int PAD_GET_DATA_LIST_BY_NIJIGASAKI = 0x9204;  //获取虹团所有歌曲
+    public static final int PAD_GET_DATA_LIST_BY_AQOURS = 0x9205;  //获取Aqours所有歌曲
+    public static final int PAD_GET_DATA_LIST_BY_US = 0x9206;  //
+    public static final int PAD_GET_DATA_LIST_BY_HASUNOSORA = 0x9207; //
+    public static final int PAD_GET_DATA_LIST_BY_SAINT_SNOW = 0x9208;
+    public static final int PAD_GET_DATA_LIST_BY_A_RISE = 0x9209;
+    public static final int PAD_GET_DATA_LIST_BY_LOCAL_PLAY = 0x9255;
+    public static final int PAD_VIEW_PLAY_MUSIC = 0x9301;
+    public static final int PAD_VIEW_ADD_MUSIC = 0x9302;
+    public static final int PAD_PLAY_ALL_MUSIC = 0x9303;
+
 
     public int msgCode;
     public List<Music> musicList;

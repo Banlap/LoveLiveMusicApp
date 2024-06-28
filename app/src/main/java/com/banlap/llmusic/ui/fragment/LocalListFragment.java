@@ -47,6 +47,7 @@ import com.banlap.llmusic.uivm.fvm.LocalListFVM;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
+import com.banlap.llmusic.utils.RecyclerViewUtils;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SelectImgHelper;
 import com.banlap.llmusic.utils.SystemUtil;
@@ -63,9 +64,11 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 
 import es.dmoral.toasty.Toasty;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -165,16 +168,31 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         playListAdapter = new PlayListAdapter(getContext(), mLocalPlayList);
         getViewDataBinding().rvLocalPlayList.setLayoutManager(new LinearLayoutManager(getContext()));
         getViewDataBinding().rvLocalPlayList.setAdapter(playListAdapter);
+
+        //当滑动列表时停止加载图片资源，不滑动时继续加载图片资源
+        RecyclerViewUtils.scrollSuspend(getContext(), getViewDataBinding().rvLocalPlayList);
+        //加大RecyclerView 的缓存，用空间换时间，来提高滚动的流畅性
+        RecyclerViewUtils.setViewCache(getViewDataBinding().rvLocalPlayList);
         playListAdapter.notifyDataSetChanged();
 
         localListAdapter = new LocalListAdapter(getContext(), mLocalMusicList);
         getViewDataBinding().rvLocalMusicList.setLayoutManager(new LinearLayoutManager(getContext()));
         getViewDataBinding().rvLocalMusicList.setAdapter(localListAdapter);
+
+        //当滑动列表时停止加载图片资源，不滑动时继续加载图片资源
+        RecyclerViewUtils.scrollSuspend(getContext(), getViewDataBinding().rvLocalMusicList);
+        //加大RecyclerView 的缓存，用空间换时间，来提高滚动的流畅性
+        RecyclerViewUtils.setViewCache(getViewDataBinding().rvLocalMusicList);
         localListAdapter.notifyDataSetChanged();
 
         favoriteListAdapter = new FavoriteListAdapter(getContext(), mFavoriteList);
         getViewDataBinding().rvFavoriteMusicList.setLayoutManager(new LinearLayoutManager(getContext()));
         getViewDataBinding().rvFavoriteMusicList.setAdapter(favoriteListAdapter);
+
+        //当滑动列表时停止加载图片资源，不滑动时继续加载图片资源
+        RecyclerViewUtils.scrollSuspend(getContext(), getViewDataBinding().rvFavoriteMusicList);
+        //加大RecyclerView 的缓存，用空间换时间，来提高滚动的流畅性
+        RecyclerViewUtils.setViewCache(getViewDataBinding().rvFavoriteMusicList);
         favoriteListAdapter.notifyDataSetChanged();
 
         if(null != mLocalMusicList) {
@@ -354,9 +372,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     mFavoriteList.clear();
                     List<Music> currentMusicList = new ArrayList<>();
                     currentMusicList.add(event.music);
-                    mFavoriteList.addAll(currentMusicList);
+
                     List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                    mFavoriteList.addAll(spList2);
+                    currentMusicList.addAll(spList2);
+
+                    Set<Music> uniqueMusicSet = new LinkedHashSet<>(currentMusicList); // 使用LinkedHashSet去重并保留顺序
+                    mFavoriteList.addAll(uniqueMusicSet);
                     favoriteListAdapter.notifyDataSetChanged();
                     SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
                     Toasty.success(LLActivityManager.getInstance().getTopActivity(), "添加收藏成功", Toast.LENGTH_SHORT, true).show();

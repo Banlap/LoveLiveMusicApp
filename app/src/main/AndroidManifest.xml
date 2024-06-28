@@ -10,11 +10,19 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <!-- 添加快捷方式 -->
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <!-- 移除快捷方式 -->
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+    <!-- 查询快捷方式 -->
+    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
+
     <!-- 大于等于android 12版本 -->
     <!--<uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -38,27 +46,25 @@
         android:usesCleartextTraffic="true"
         >
 
+        <!--音乐服务-->
         <service
             android:name="com.banlap.llmusic.service.MusicPlayService"
             android:enabled="true"
             android:exported="true"
             />
 
-        <service
-            android:name="com.banlap.llmusic.service.MusicNextService"
+        <!-- 新 -->
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
             android:enabled="true"
-            android:exported="true"/>
+            android:exported="true">
+            
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
-        <service
-            android:name="com.banlap.llmusic.service.MusicLastService"
-            android:enabled="true"
-            android:exported="true"/>
-
-        <service
-            android:name="com.banlap.llmusic.service.MusicIsPauseService"
-            android:enabled="true"
-            android:exported="true"/>
-
+        <!--角色服务-->
         <service
             android:name="com.banlap.llmusic.service.CharacterService"
             android:enabled="true"
@@ -76,6 +82,7 @@
 
         <receiver
             android:name=".widget.LLMusicWidgetProvider"
+            android:permission="android.permission.BIND_APPWIDGET"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -89,6 +96,7 @@
 
         <receiver
             android:name=".widget.LLMusicAlphaWidgetProvider"
+            android:permission="android.permission.BIND_APPWIDGET"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -111,37 +119,49 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
         <activity
             android:name=".ui.activity.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
+
+        <activity
+            android:name=".pad.ui.activity.PadMainActivity"
+            android:configChanges="screenSize|smallestScreenSize|orientation|screenLayout|keyboardHidden|keyboard"
+            />
 
         <activity
             android:name=".ui.activity.LockFullScreenActivity"
             android:showOnLockScreen="true"
             android:theme="@style/LockScreenBase"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
 
         <activity
             android:name=".ui.activity.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
 
         <activity
             android:name=".ui.activity.CustomErrorActivity"
             android:screenOrientation="portrait"
-            android:process=":error_activity" />
+            android:process=":error_activity"
+            />
 
         <activity
             android:name=".ui.activity.WebViewActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
 
         <activity
             android:name=".ui.activity.SelectImgActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -157,7 +177,8 @@
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            />
 
     </application>
 

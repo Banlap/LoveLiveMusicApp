@@ -32,6 +32,7 @@ import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
+import com.banlap.llmusic.databinding.DialogSettingViewModeBinding;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.ui.ThemeHelper;
 import com.banlap.llmusic.uivm.vm.SettingsVM;
@@ -116,6 +117,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             @Override
             public void onClick(View v) {
                 showSettingVideo();
+            }
+        });
+
+        getViewDataBinding().llSettingViewMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showViewMode();
             }
         });
 
@@ -230,7 +238,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 //是否完成下载app
                 if(event.b) {
                     try {
-                        Log.i("ABMusicPlayer","file: " + event.file.toString());
+                        Log.i(TAG,"file: " + event.file.toString());
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -367,6 +375,82 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 settingVideoBinding.tvLaunchVideoCustom.setText("已设定视频");
             }
         }
+    }
+
+
+    /**设置界面模式 */
+    private void showViewMode() {
+        DialogSettingViewModeBinding viewModeBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_setting_view_mode, null, false);
+        viewModeBinding.tvTitle.setText("设置界面模式");
+
+        String controllerScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.SaveControllerScene);
+
+        viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
+        viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+
+        if(!TextUtils.isEmpty(controllerScene)) {
+            if(controllerScene.equals("NewScene")) {
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.VISIBLE);
+            }
+        }
+
+        viewModeBinding.switchSetBg.setChecked(false);
+
+        String isBGScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.isBGScene);
+        if(isBGScene.equals("1")) {
+            viewModeBinding.switchSetBg.setChecked(true);
+        }
+
+        viewModeBinding.btCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.dismiss();
+            }
+        });
+
+        viewModeBinding.llViewModeSimple.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
+            }
+        });
+
+        viewModeBinding.llViewModeDefault.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.VISIBLE);
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_NEW_CONTROLLER_MODE));
+
+            }
+        });
+
+        viewModeBinding.tvSetBg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_INTO_SET_BG));
+            }
+        });
+        viewModeBinding.switchSetBg.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_BG_MODE));
+                SPUtil.setStrValue(getApplicationContext(), SPUtil.isBGScene, viewModeBinding.switchSetBg.isChecked()? "1" : "0");
+            }
+        });
+
+
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setView(viewModeBinding.getRoot())
+                .create();
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        mAlertDialog.show();
+
+
     }
 
     /** 显示弹窗更新App */

@@ -1,35 +1,23 @@
 package com.banlap.llmusic.uivm.vm;
 
-import android.Manifest;
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Interpolator;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.OkhttpUtil;
 import com.banlap.llmusic.utils.SPUtil;
@@ -38,7 +26,6 @@ import com.banlap.llmusic.utils.TimeUtil;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,23 +33,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-
-import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 /**
  * @author Banlap on 2021/11/30
  */
 public class MainVM extends AndroidViewModel {
+
+    private static final String TAG = MainVM.class.getSimpleName();
 
     public MainCallBack callBack;
     public static final int CHARACTER_NAME_KEKE_INT = 100;     //角色：唐可可
@@ -99,7 +81,7 @@ public class MainVM extends AndroidViewModel {
             //正常操作
             if(msg.what == 0) {
                 if(msg.arg1 == NORMAL_STATUS_CHARACTER) {
-                    //Log.i("ABMusicPlayer", "NORMAL");
+                    //Log.i(TAG, "NORMAL");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MOVE_STATUS_CHARACTER, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -107,7 +89,7 @@ public class MainVM extends AndroidViewModel {
                     message.arg2 = msg.arg2;
                     animatedHandler.sendMessage(message);
                 } else if(msg.arg1 == MOVE_STATUS_CHARACTER) {
-                    //Log.i("ABMusicPlayer", "MOVE");
+                    //Log.i(TAG, "MOVE");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_NORMAL_STATUS_CHARACTER, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -115,7 +97,7 @@ public class MainVM extends AndroidViewModel {
                     message.arg2 = msg.arg2;
                     animatedHandler.sendMessage(message);
                 } else if(msg.arg1 == LISTEN_STATUS_CHARACTER_LEFT) {
-                    //Log.i("ABMusicPlayer", "MOVE");
+                    //Log.i(TAG, "MOVE");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LISTEN_STATUS_CHARACTER_LEFT, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -123,7 +105,7 @@ public class MainVM extends AndroidViewModel {
                     message.arg2 = msg.arg2;
                     animatedHandler.sendMessage(message);
                 } else if (msg.arg1 == LISTEN_STATUS_CHARACTER_RIGHT) {
-                    //Log.i("ABMusicPlayer", "MOVE");
+                    //Log.i(TAG, "MOVE");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LISTEN_STATUS_CHARACTER_RIGHT, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
@@ -249,10 +231,10 @@ public class MainVM extends AndroidViewModel {
                     //Bitmap bitmapNew = BitmapFactory.decodeStream(inputStream, null, optionsNew);
 
                     //计算当前bitmap大小
-                    Log.i("ABMusicPlayer", "bitmap: " + getBitmapSize(bitmap));
-                    Log.i("ABMusicPlayer", "bitmapNew: " + getBitmapSize(bitmapNew));
-                    if (getBitmapSize(bitmap) >= IMG_BITMAP_LIMIT_SIZE) {
-                        Log.i("ABMusicPlayer", "bitmap: resize");
+                    Log.i(TAG, "bitmap: " + getBitmapSize(bitmap));
+                    Log.i(TAG, "bitmapNew: " + getBitmapSize(bitmapNew));
+                    if (getBitmapSize(bitmap) >= IMG_BITMAP_LIMIT_SIZE) { //图片过大导致通知栏显示异常
+                        Log.i(TAG, "bitmap: resize");
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmapNew));
                     } else {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
@@ -322,7 +304,7 @@ public class MainVM extends AndroidViewModel {
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_LOADING, progress));
-                //Log.i("ABMusicPlayer","Download progress: " + (100 * (total / (double) contentLength)));
+                //Log.i(TAG,"Download progress: " + (100 * (total / (double) contentLength)));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS, false));
@@ -393,6 +375,10 @@ public class MainVM extends AndroidViewModel {
             List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
             if(spList.size() >0){
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, spList));
+            } else {
+                //获取最新的每日推荐数据
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
+                SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
             }
             return;
         }
@@ -403,19 +389,20 @@ public class MainVM extends AndroidViewModel {
 
     /** 默认存储Music值 */
     public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {
-        Music music = new Music();
-        music.setMusicId(musicMsg.getMusicId());
-        music.setMusicName(musicMsg.getMusicName());
-        music.setMusicSinger(musicMsg.getMusicSinger());
-        music.setMusicType(musicMsg.getMusicType());
-        music.setMusicImg(musicMsg.getMusicImg());
-        music.setMusicURL(musicMsg.getMusicURL());
-        music.setMusicFavorite(musicMsg.getMusicFavorite());
-        music.setMusicLyric(musicMsg.getMusicLyric());
-        music.setMusicImgByte(musicMsg.getMusicImgByte());
-        music.setLocal(musicMsg.isLocal);
-        music.isPlaying = isPlaying;
-        return music;
+        musicMsg.isPlaying = isPlaying;
+//        Music music = new Music();
+//        music.setMusicId(musicMsg.getMusicId());
+//        music.setMusicName(musicMsg.getMusicName());
+//        music.setMusicSinger(musicMsg.getMusicSinger());
+//        music.setMusicType(musicMsg.getMusicType());
+//        music.setMusicImg(musicMsg.getMusicImg());
+//        music.setMusicURL(musicMsg.getMusicURL());
+//        music.setMusicFavorite(musicMsg.getMusicFavorite());
+//        music.setMusicLyric(musicMsg.getMusicLyric());
+//        music.setMusicImgByte(musicMsg.getMusicImgByte());
+//        music.setLocal(musicMsg.isLocal);
+//        music.isPlaying = isPlaying;
+        return musicMsg;
     }
 
     /** 转换成时间格式*/

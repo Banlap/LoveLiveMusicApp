@@ -1,13 +1,32 @@
 package com.banlap.llmusic.base;
 
+import android.annotation.TargetApi;
+import android.app.PendingIntent;
+import android.appwidget.AppWidgetHost;
+import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.Color;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,11 +37,17 @@ import androidx.databinding.adapters.ViewBindingAdapter;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.banlap.llmusic.R;
+import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
+import com.banlap.llmusic.widget.LLMusicAlphaWidgetProvider;
+import com.banlap.llmusic.widget.LLMusicWidgetProvider;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -30,6 +55,7 @@ import java.util.Objects;
  */
 public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBinding> extends AppCompatActivity {
 
+    private static final String TAG = BaseActivity.class.getSimpleName();
     protected VM mViewModel;
     protected VDB mViewDataBinding;
 
@@ -45,6 +71,10 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
 
     public static final long TIME_500MS = 500;
 
+
+    private ActivityResultLauncher<Intent> intentActivityResultLauncher;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         beforeOnCreate();
@@ -55,10 +85,55 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
         mViewDataBinding.setLifecycleOwner(this);
         //将Activity实例添加到LLActivityManager的堆栈
         LLActivityManager.getInstance().addActivity(this);
-        if(savedInstanceState!=null) {
-            String data = savedInstanceState.getString("SIS");
-            Toast.makeText(this, "SIS: " + data, Toast.LENGTH_SHORT).show();
+
+
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            AppWidgetManager appWidgetManager = getSystemService(AppWidgetManager.class);
+            if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+                // 系统支持添加小部件的操作
+                // 进行添加小部件操作的处理
+//                new Handler().post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+//
+//                        //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.baidu.com/"));
+//
+//                        AppWidgetHost host = new AppWidgetHost(BaseActivity.this, 1);
+//                        host.startListening();
+//                        int nextId = host.allocateAppWidgetId();
+//
+//
+//                        Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
+//                        pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, nextId);
+//
+//                                // 获取ShortcutManager服务
+//                        ShortcutInfo shortcut = new ShortcutInfo.Builder(BaseActivity.this, "unique_shortcut_id")
+//                                .setShortLabel(getString(R.string.shortcuts_title)) // 快捷方式的简短标签
+//                                .setLongLabel(getString(R.string.shortcuts_title_long)) // 快捷方式的完整标签
+//                                .setIcon(Icon.createWithResource(BaseActivity.this, R.mipmap.ic_llmp_small_1)) // 快捷方式的图标
+//                                .setIntent(pickIntent) // 点击快捷方式时启动的Activity
+//                                .build();
+//                        shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
+//                    }
+//                });
+
+            }
+
         }
+
+        try {
+            if(savedInstanceState!=null) {
+                String data = savedInstanceState.getString("SIS");
+                Toast.makeText(this, "SIS: " + data, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "e: " + e.getMessage());
+            Toast.makeText(this, "SIS: " + null, Toast.LENGTH_SHORT).show();
+        }
+
         init();
         initData();
         initView();
@@ -121,4 +196,5 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
         lastTime = currentTime;
         return false;
     }
+
 }

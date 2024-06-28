@@ -95,7 +95,7 @@
                         android:gravity="center">
 
                         <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="80dp"
+                            android:layout_width="75dp"
                             android:layout_height="120dp"
                             android:scaleType="centerCrop"
                             android:src="@mipmap/ic_video_normal_1" />
@@ -119,7 +119,7 @@
                         android:gravity="center">
 
                         <com.banlap.llmusic.widget.CircleImageView
-                            android:layout_width="80dp"
+                            android:layout_width="75dp"
                             android:layout_height="120dp"
                             android:scaleType="centerCrop"
                             android:src="@mipmap/ic_video_normal_2" />
@@ -147,8 +147,8 @@
                         <com.banlap.llmusic.widget.CircleImageView
                             android:visibility="visible"
                             android:id="@+id/civ_launch_video_add"
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
                             android:layout_marginTop="30dp"
                             android:scaleType="centerCrop"
                             android:src="@drawable/ic_add_light_3" />
@@ -156,8 +156,8 @@
                         <com.banlap.llmusic.widget.CircleImageView
                             android:visibility="gone"
                             android:id="@+id/civ_launch_video_custom"
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
                             android:layout_marginTop="30dp"
                             android:scaleType="centerCrop"
                             android:src="@drawable/ic_video_light" />
@@ -177,6 +177,7 @@
                             android:layout_width="25dp"
                             android:layout_height="25dp"
                             android:layout_marginTop="10dp"
+                            android:layout_marginBottom="5dp"
                             android:background="@drawable/ic_click_ok"
                             />
 

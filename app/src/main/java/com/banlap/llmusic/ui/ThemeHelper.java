@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +33,7 @@ import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.MainActivity;
+import com.banlap.llmusic.ui.activity.WelcomeActivity;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -39,11 +41,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 
 import jp.wasabeef.glide.transformations.CropCircleWithBorderTransformation;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * 主题管理类
  * */
 public class ThemeHelper {
+
+    private static final String TAG = ThemeHelper.class.getSimpleName();
 
     public static ThemeHelper getInstance() { return new ThemeHelper(); }
     private RequestOptions requestOptions;
@@ -166,16 +171,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_33_selected);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -302,16 +307,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_blue_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -438,16 +443,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -575,16 +580,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -711,16 +716,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -846,16 +851,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -982,16 +987,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_red_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MainActivity.currentMusicImg != null || MainActivity.currentBitmap != null) {
+            if(MusicPlayService.currentMusicImg != null || MusicPlayService.currentMusicBitmap != null) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((MainActivity.currentMusicImg != null && !MainActivity.currentMusicImg.equals(""))? MainActivity.currentMusicImg : MainActivity.currentBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentMusicImg))? MusicPlayService.currentMusicImg : MusicPlayService.currentMusicBitmap)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -1045,7 +1050,7 @@ public class ThemeHelper {
      * */
     public void playButtonStatusTheme(int rThemeId, ActivityMainBinding vdb, boolean b) {
         if(rThemeId!=0) {
-            Log.i("ABMusicPlayer","rThemeId: " + rThemeId);
+            Log.i(TAG,"rThemeId: " + rThemeId);
             if(rThemeId == R.id.ll_theme_normal) {
                 vdb.btPlay.setBackgroundResource(b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
                 vdb.btNewPlay.setBackgroundResource(b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
@@ -1534,6 +1539,8 @@ public class ThemeHelper {
         if(rThemeId!=0) {
             if(rThemeId == R.id.ll_theme_normal) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_normal);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1562,6 +1569,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
             } else if(rThemeId == R.id.ll_theme_blue) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_blue);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1590,6 +1599,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
             } else if(rThemeId == R.id.ll_theme_dark) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1618,6 +1629,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
             } else if(rThemeId == R.id.ll_theme_white) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_gray);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings_purple);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.purple));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings_purple);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.purple));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.purple));
@@ -1646,6 +1659,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.purple));
             } else if(rThemeId == R.id.ll_theme_orange) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_orange);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1674,6 +1689,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
             } else if(rThemeId == R.id.ll_theme_light) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_light_7e);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1702,6 +1719,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
             } else if(rThemeId == R.id.ll_theme_red) {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_red);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1730,6 +1749,8 @@ public class ThemeHelper {
                 panelMoreMenuBinding.tvDetailValue45.setTextColor(context.getResources().getColor(R.color.white));
             } else {
                 panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_normal);
+                panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+                panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
                 panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
                 panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -1759,6 +1780,8 @@ public class ThemeHelper {
             }
         } else {
             panelMoreMenuBinding.llMoreSetDialog.setBackgroundResource(R.drawable.shape_button_menu_normal);
+            panelMoreMenuBinding.ivSystemSetTitle.setBackgroundResource(R.drawable.ic_settings);
+            panelMoreMenuBinding.tvSystemSetTitle.setTextColor(context.getResources().getColor(R.color.white));
             panelMoreMenuBinding.ivLyricSetTitle.setBackgroundResource(R.drawable.ic_lyric_settings);
             panelMoreMenuBinding.tvLyricSetTitle.setTextColor(context.getResources().getColor(R.color.white));
             panelMoreMenuBinding.tvLyricSizeTitle.setTextColor(context.getResources().getColor(R.color.white));
@@ -2382,11 +2405,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -2411,11 +2436,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -2440,11 +2467,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -2469,11 +2498,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.shape_button_black_alpha);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llCleanCache.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llErrorLog.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llAbout.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.purple));
@@ -2498,11 +2529,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.orange_0b));
@@ -2527,11 +2560,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -2556,11 +2591,13 @@ public class ThemeHelper {
             vdb.llThemeNormal.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -3093,4 +3130,197 @@ public class ThemeHelper {
 
         }
     }
+
+
+    /**
+     * pad相关
+     **/
+
+    /**
+     * PadMainActivity主题改变 - 播放控制器圆型图片ui
+     * */
+    public void padMusicBarMusicImgTheme(Context context, int rThemeId, ActivityMainBinding vdb, Music music) {
+        if(requestOptions == null) {
+            requestOptions = new RequestOptions();
+            requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+            //requestOptions.override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL); //关键代码，加载原始大小
+            requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
+        }
+
+        if(rThemeId!=0) {
+            if(rThemeId == R.id.ll_theme_normal) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else if(rThemeId == R.id.ll_theme_blue) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else if(rThemeId == R.id.ll_theme_dark) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else if(rThemeId == R.id.ll_theme_white) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple_light)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple_light)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else if(rThemeId == R.id.ll_theme_orange) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else if(rThemeId == R.id.ll_theme_light) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal ?
+                                (null != music.musicImgByte ?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal ?
+                                (null != music.musicImgByte ?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else if(rThemeId == R.id.ll_theme_red) {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal ?
+                                (null != music.musicImgByte ?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal ?
+                                (null != music.musicImgByte ?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            } else {
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivMusicImg);
+                Glide.with(context)
+                        .setDefaultRequestOptions(requestOptions)
+                        .load(music.isLocal?
+                                (null != music.musicImgByte?
+                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                        )
+                        .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                        .into(vdb.ivNewMusicImg);
+            }
+        } else {
+            Glide.with(context)
+                    .load(music.isLocal?
+                            (null != music.musicImgByte?
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                    )
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .load(music.isLocal?
+                            (null != music.musicImgByte?
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.drawable.ic_music_default) : music.getMusicImg()
+                    )
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+        }
+    }
+
+
+
 }

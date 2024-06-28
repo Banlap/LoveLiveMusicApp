@@ -20,9 +20,14 @@ import android.media.AudioManager;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -131,7 +136,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import es.dmoral.toasty.Toasty;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -141,6 +148,7 @@ import io.reactivex.rxjava3.core.FlowableEmitter;
 import io.reactivex.rxjava3.core.FlowableOnSubscribe;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import okhttp3.OkHttpClient;
 
@@ -179,10 +187,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private boolean isClickNewSingleLyricView = false;  //判断是否点击新版音乐歌词展示
     public static boolean isPlay = false;               //判断是否播放音乐
     public Music currentMusicDetail;                    //当前播放的歌曲总数据
-    public static String currentMusicName ="";          //当前歌曲的歌名
-    public static String currentMusicSinger ="";        //当前歌曲的歌手
-    public static String currentMusicImg ="";           //当前歌曲的图片
-    public static Bitmap currentBitmap = null;          //当前歌曲Bitmap图
+
     public static boolean isFavorite = false;           //当前歌曲是否已收藏
     private AlertDialog mAlertDialog;                   //弹窗
     private PopupWindow mPopupWindow;                   //弹窗
@@ -222,7 +227,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private LyricScrollView lyricScrollView;              //
     private LyricScrollView lyricNewScrollDetailView;              //
     private SingleLyricScrollView lyricNewScrollView;              //
-    private MediaSession mSession;                        //用于获取按键事件
+    public static MediaSessionCompat mSession;                        //用于获取按键事件
     public boolean isFirstBluetoothControl = true;        //首次蓝牙控制标记
     private MainFragmentStateAdapter  mainFragmentStateAdapter;     //主页与本地页面切换Adapter
     public static final int REQUEST_CODE_NEED_RUNNING_PERMISSION = 100; //检查进入APP需要的权限
@@ -237,24 +242,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private HttpProxyCacheServer proxyCacheServer;
     private AudioManager audioManager;
 
-    /** MediaSession框架回调 用于返回耳机实体按钮操作 */
-    private final MediaSession.Callback mSessionCallback = new MediaSession.Callback() {
-        @Override
-        public boolean onMediaButtonEvent(@NonNull Intent intent) {
-            if (mSession == null) {
-                return false;
-            }
-            if (Intent.ACTION_MEDIA_BUTTON.equals(intent.getAction())) {
-                KeyEvent event = (KeyEvent) intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-                if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
-                    onKeyDown(event.getKeyCode(),event);
-                    onKeyUp(event.getKeyCode(),event);
-                    return true;
-                }
-            }
-            return false;
-        }
-    };
+    private PublishSubject<String> textChangeSubject = PublishSubject.create();
+
 
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
@@ -304,6 +293,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         String controllerScene = SPUtil.getStrValue(MainActivity.this, SPUtil.SaveControllerScene);
         if(TextUtils.isEmpty(controllerScene)) {
             SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
+        }
+
+        String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
+        if(TextUtils.isEmpty(isBGScene)) {
+            SPUtil.setStrValue(MainActivity.this, SPUtil.isBGScene, "0");
         }
 
         requestOptions = new RequestOptions();
@@ -410,6 +404,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         newPlayController.start();
         newCurrentMusicList.start();
+
+        String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
+        if(isBGScene.equals("1")) {
+            getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
+            getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
+        }
 
         initDeviceMate();
         //获取设备高度
@@ -612,7 +612,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         });
 
-        //initSearch();
+       // initSearch();
         getViewDataBinding().etSearchMusic.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -620,22 +620,19 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                textChangeSubject.onNext(s.toString());
                 //mEmitter.onNext(getViewDataBinding().etSearchMusic.getText().toString());
                 String name = getViewDataBinding().etSearchMusic.getText().toString();
                 if (!name.equals("")) {
-                    List<Music> nullData = new ArrayList<>();
-                    for (Music music : tempMusicList) {
-                        if (music.getMusicType().equals(" ")) {
-                            nullData.add(music);
-                        }
-                    }
-                    List<Music> searchList = new ArrayList<>();
-                    int size = tempMusicList.size();
-                    for (int i = 0; i < size; i++) {
-                        if (tempMusicList.get(i).musicName.contains(name)) {
-                            searchList.add(tempMusicList.get(i));
-                        }
-                    }
+
+                    List<Music> nullData = tempMusicList.stream()
+                            .filter(tempMusic -> tempMusic.getMusicType().equals(" "))
+                            .collect(Collectors.toList());
+
+                    List<Music> searchList = tempMusicList.stream()
+                            .filter(tempMusic -> tempMusic.musicName.toLowerCase().contains(name.toLowerCase()))
+                            .collect(Collectors.toList());
+
                     if (searchList.size() > 0) {
                         musicList.clear();
                         musicList.addAll(searchList);
@@ -722,25 +719,64 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     // 初始化搜索逻辑
     private void initSearch() {
 
+        // 将文本变化的PublishSubject转换为Flowable
+        Flowable<String> textFlowable = textChangeSubject.toFlowable(BackpressureStrategy.BUFFER);
+
+        // 订阅Flowable并处理文本变化事件
+        textFlowable.subscribe(name -> {
+            // 处理文本变化事件
+            // 在这里可以进行一些逻辑处理，比如搜索建议等
+            if (!name.equals("")) {
+
+                List<Music> nullData = tempMusicList.stream()
+                        .filter(tempMusic -> tempMusic.getMusicType().equals(" "))
+                        .collect(Collectors.toList());
+
+                List<Music> searchList = tempMusicList.stream()
+                        .filter(tempMusic -> tempMusic.musicName.toLowerCase().contains(name.toLowerCase()))
+                        .collect(Collectors.toList());
+
+                if (searchList.size() > 0) {
+                    musicList.clear();
+                    musicList.addAll(searchList);
+                    musicList.addAll(nullData);
+                    musicListAdapter.notifyDataSetChanged();
+                    getViewDataBinding().tvNoSearchMusic.setVisibility(View.GONE);
+                } else {
+                    musicList.clear();
+                    musicListAdapter.notifyDataSetChanged();
+                    getViewDataBinding().tvNoSearchMusic.setVisibility(View.VISIBLE);
+                }
+            } else {
+                musicList.clear();
+                if(tempMusicList!=null) {
+                    musicList.addAll(tempMusicList);
+                }
+                musicListAdapter.notifyDataSetChanged();
+                getViewDataBinding().tvNoSearchMusic.setVisibility(View.GONE);
+            }
+
+        });
+
         // 订阅文本变化的 Observable
         // 处理错误
-        textChangeDisposable = Flowable.create(new FlowableOnSubscribe<String>() {
-            @Override
-            public void subscribe(@NonNull FlowableEmitter<String> emitter) throws Throwable {
-                //
-                mEmitter = emitter;
-            }
-        },  BackpressureStrategy.ERROR)
-                .subscribeOn(Schedulers.io()) // 在计算线程执行搜索逻辑
-                .map(name -> searchMusic(name))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    result-> {
-                        updateMusicList(result);
-                    }, throwable -> {
-
-                    }
-        );
+//        textChangeDisposable = Flowable.create(new FlowableOnSubscribe<String>() {
+//            @Override
+//            public void subscribe(@NonNull FlowableEmitter<String> emitter) throws Throwable {
+//                //
+//                mEmitter = emitter;
+//            }
+//        },  BackpressureStrategy.ERROR)
+//                .subscribeOn(Schedulers.io()) // 在计算线程执行搜索逻辑
+//                .map(name -> searchMusic(name))
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(
+//                    result-> {
+//                        updateMusicList(result);
+//                    }, throwable -> {
+//
+//                    }
+//        );
     }
 
 
@@ -749,22 +785,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     // 执行搜索逻辑
     private List<Music> searchMusic(String name) {
-        List<Music> searchList = new ArrayList<>();
-        List<Music> nullData = new ArrayList<>();
 
-        if (!name.isEmpty()) {
-            for (Music music : tempMusicList) {
-                if (music.getMusicType().equals(" ")) {
-                    nullData.add(music);
-                }
-            }
-            int size = tempMusicList.size();
-            for (int i = 0; i < size; i++) {
-                if (tempMusicList.get(i).getMusicName().contains(name)) {
-                    searchList.add(tempMusicList.get(i));
-                }
-            }
-        }
+        List<Music> nullData = tempMusicList.stream()
+                .filter(tempMusic -> tempMusic.getMusicType().equals(" "))
+                .collect(Collectors.toList());
+
+        List<Music> searchList = tempMusicList.stream()
+                .filter(tempMusic -> tempMusic.musicName.toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+
 
         if (!searchList.isEmpty()) {
             searchList.addAll(nullData);
@@ -800,7 +829,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         } else {
             startService(intentService);
         }
-        initNotificationHelper("LLMusic", "Singer", "");
+        //initNotificationHelper("LLMusic", "Singer", "");
         bindService(intentService, conn, BIND_AUTO_CREATE);
     }
 
@@ -836,7 +865,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, musicName, musicSinger, imgUrl));
         } else {
             NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, null, true);
-            updateWidgetUI(false);
+            MusicPlayService.updateWidgetUI(MainActivity.this, false);
         }
     }
 
@@ -845,6 +874,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             binder = (MusicPlayService.MusicBinder) service;
+            MediaControllerCompat mediaControllerCompat = new MediaControllerCompat(MainActivity.this, binder.getService().getSessionToken());
+            MediaControllerCompat.setMediaController(MainActivity.this, mediaControllerCompat);
+            binder.setMediaController(mediaControllerCompat);
             changePlayMode(playMode);
         }
 
@@ -877,18 +909,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         }
         //创建媒体MediaSession框架 用于蓝牙耳机按钮控制
-        createMediaSession();
+        //createMediaSession();
     }
 
     /** 创建媒体MediaSession框架 */
     private void createMediaSession() {
-        if (mSession == null) {
-            mSession = new MediaSession(context, MainActivity.class.getSimpleName());
-            mSession.setCallback(mSessionCallback);
-            mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS | MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
-
-            mSession.setActive(true);
-        }
+//        if (mSession == null) {
+//            mSession = new MediaSessionCompat(context, getPackageName());
+//            mSession.setCallback(mSessionCallback);
+//            mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+//
+//            mSession.setActive(true);
+//        }
     }
 
     @SuppressLint({"SetTextI18n", "RemoteViewLayout"})
@@ -966,7 +998,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().tvMusicCount.setText(""+event.i);
                 musicListSize = event.i;
                 break;
-            case ThreadEvent.GET_APP_VERSION_SUCCESS:
+            case ThreadEvent.GET_APP_VERSION_SUCCESS:  //获取app版本更新
                 isExistNewVersion = false;
                 versionList.clear();
                 versionList.addAll(event.tList);
@@ -1074,9 +1106,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
                 break;
-            case ThreadEvent.PLAY_MUSIC:
+            case ThreadEvent.PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {
-                    binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+                    binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
                 }
                 break;
             case ThreadEvent.PLAY_RECOMMEND_MUSIC:   //点击播放每日推荐的歌曲 并添加到播放列表
@@ -1133,6 +1165,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().sbNewMusicBar.setProgress(event.i);
                 getViewDataBinding().hpvProgress.setCurrentCount(event.i);
                 getViewDataBinding().pbNewProgress.setProgress(event.i);
+
+                //binder.getMediaController().getTransportControls().seekTo(event.i);
+                //EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.UPDATE_NOTIFICATION_SEEK_BAR_POS));
                 break;
             case ThreadEvent.VIEW_SEEK_BAR_RESUME:
                 lyricScrollView.posLock(true);
@@ -1142,7 +1177,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().sbNewMusicBar.setProgress(0);
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.VISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.VISIBLE);
-                updateWidgetUI(true);
+                MusicPlayService.updateWidgetUI(MainActivity.this, true);
                 break;
 
             case ThreadEvent.VIEW_PAUSE:
@@ -1166,7 +1201,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 //变更主题
                 ThemeHelper.getInstance().playButtonStatusTheme(rThemeId, getViewDataBinding(), event.b);
-
+                //音乐图片转圈
                 if (objectAnimator != null) {
                     if (!event.b) {
                         objectAnimator.resume();
@@ -1221,8 +1256,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().tvListSize.setText("(" + playList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("(" + playList.size() + ")");
                 currentMusicDetail = event.music;
-                currentMusicImg = event.music.getMusicImg();
-                currentMusicName = event.music.musicName;
+                MusicPlayService.currentMusicImg = event.music.getMusicImg();
+                MusicPlayService.currentMusicName = event.music.musicName;
+                MusicPlayService.currentMusicSinger = event.music.musicSinger;
 
                 //刷新播放列表的收藏歌曲显示ui
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
@@ -1256,35 +1292,31 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
-                            currentMusicName = event.music.musicName;
-                            currentMusicSinger = event.music.musicSinger;
-                            currentBitmap = null;
+                            MusicPlayService.currentMusicBitmap = null;
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
-                            updateWidgetUI(false);
+                            MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
                     } else {
-                        if(!event.music.musicImg.equals("")) {
+                        if(!event.music.musicImg.isEmpty()) {
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
-                            currentMusicName = event.music.musicName;
-                            currentMusicSinger = event.music.musicSinger;
-                            currentMusicImg = "";
+                            MusicPlayService.currentMusicImg = "";
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
-                            updateWidgetUI(false);
+                            MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
                     }
-                } else {
-                    initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg);
                 }
+                initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg);
+
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
-                currentMusicName = event.str;
-                currentMusicSinger = event.str2;
-                currentBitmap = event.bitmap;
+                MusicPlayService.currentMusicName = event.str;
+                MusicPlayService.currentMusicSinger = event.str2;
+                MusicPlayService.currentMusicBitmap = event.bitmap;
 
                 NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
 
-                updateWidgetUI(false);
+                MusicPlayService.updateWidgetUI(MainActivity.this, false);
                 break;
             case ThreadEvent.VIEW_LYRIC:
                 if(null != event.tList) {
@@ -1315,7 +1347,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(event.b) {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    Log.i("ABMusicPlayer","file: " + event.file.toString());
+                    Log.i(TAG,"file: " + event.file.toString());
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         Uri contentUri = FileProvider.getUriForFile(getApplicationContext(),"com.banlap.llmusic.fileProvider", event.file);
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -1359,12 +1391,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     return;
                 }
                 if(binder!=null) {
-                    binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
                 }
                 break;
             case ThreadEvent.BLUETOOTH_DISCONNECT:
                 if(binder!=null) {
-                    binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
                 }
                 break;
             case ThreadEvent.ACTION_MEDIA_BUTTON:
@@ -1375,9 +1407,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
                             lastOrNextMusic(false);
                         } else if(KeyEvent.KEYCODE_MEDIA_PLAY == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.playImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+                            binder.playImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
                         } else if(KeyEvent.KEYCODE_MEDIA_PAUSE == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+                            binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
                         }
                     }
                 }
@@ -1451,22 +1483,77 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 //getViewDataBinding().ccvShowVisualizer.posLock(event.b);
                 break;
             case ThreadEvent.VIEW_CONTROLLER_MODE:
-                Log.i(TAG, "rlPlayController h: " + getViewDataBinding().rlPlayController.getHeight());
-                int moveAxis =  getViewDataBinding().clControllerMode.getHeight() == 0? heightPixels :  getViewDataBinding().clControllerMode.getHeight();
 
-                //隐藏默认音乐控制界面
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
+                isShowControllerModePanel = false;
+                isShowNewPlayController = false;
 
-                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, isShowControllerModePanel, moveAxis, getViewDataBinding().clControllerMode);
+                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
                 controllerModeAnimator.start();
 
-                getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
-                getViewDataBinding().clBgMode.setVisibility(View.GONE);
-                isShowControllerModePanel = !isShowControllerModePanel;
-                SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
+                ObjectAnimator newPlayController1 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
+                newPlayController1.start();
+
+                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+                musicControllerAnimator.start();
+//                Log.i(TAG, "rlPlayController h: " + getViewDataBinding().rlPlayController.getHeight());
+//                int moveAxis =  getViewDataBinding().clControllerMode.getHeight() == 0? heightPixels :  getViewDataBinding().clControllerMode.getHeight();
+//
+//                //隐藏默认音乐控制界面
+//                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+//                musicControllerAnimator.start();
+//
+//                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, isShowControllerModePanel, moveAxis, getViewDataBinding().clControllerMode);
+//                controllerModeAnimator.start();
+//
+//                getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
+//                getViewDataBinding().clBgMode.setVisibility(View.GONE);
+//                isShowControllerModePanel = !isShowControllerModePanel;
+                SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
+                break;
+            case ThreadEvent.VIEW_NEW_CONTROLLER_MODE:
+
+                isShowControllerModePanel = false;
+                isShowNewPlayController = true;
+
+                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+                controllerModeAnimator.start();
+
+                ObjectAnimator newPlayController2 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
+                newPlayController2.start();
+
+                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+                musicControllerAnimator.start();
+
+//                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+//                controllerModeAnimator.start();
+//
+//                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+//                musicControllerAnimator.start();
+//
+                if(isClick) { //是否点击了旧版的播放器 按钮其中一个
+                    getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
+                }
+//                isShowControllerModePanel = false;
+                SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
+                break;
+            case ThreadEvent.VIEW_BG_MODE:
+                if(View.VISIBLE == getViewDataBinding().clBgMode.getVisibility()) {
+                    getViewDataBinding().clBgMode.setVisibility(View.GONE);
+                } else {
+                    getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
+                    getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
+                }
+                getViewDataBinding().rlPlayController.setVisibility(View.VISIBLE);
                 break;
 
+            case ThreadEvent.VIEW_INTO_SET_BG:
+                Intent intentPhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intentPhoto.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                intentPhoto.addCategory(Intent.CATEGORY_OPENABLE);
+                intentPhoto.setType("image/*");
+
+                intentTakePhotoLauncher.launch(intentPhoto);
+                break;
             case ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC:
                 List<Music> spTempList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
                 if(spTempList.size() >0){
@@ -1475,7 +1562,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 playMusicListAdapter.notifyDataSetChanged();
                 //刷新新播放界面是否收藏歌曲
-                setCurrentMusicFavorite(spTempList, currentMusicName);
+                setCurrentMusicFavorite(spTempList, MusicPlayService.currentMusicName);
                 break;
         }
     }
@@ -1599,20 +1686,35 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(event.music != null) {
                     List<LocalPlayList> localPlayLists = SPUtil.getListValue(this, SPUtil.LocalPlayListData, LocalPlayList.class);
                     if(localPlayLists.size() >0) {
-                        for(int i=0; i<localPlayLists.size(); i++) {
-                            if(localPlayLists.get(i).playListId == event.i) {
-                                if(localPlayLists.get(i).getMusicList() != null) {
-                                    List<Music> musicList1 = localPlayLists.get(i).getMusicList();
-                                    musicList1.add(event.music);
-                                    localPlayLists.get(i).setMusicList(musicList1);
-                                    localPlayLists.get(i).setPlayListCount(localPlayLists.get(i).getMusicList().size());
-                                    SPUtil.setListValue(this, SPUtil.LocalPlayListData, localPlayLists);
-                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST));
-                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
-                                }
-                                return;
-                            }
-                        }
+                        localPlayLists.stream()
+                                .filter(playList -> playList.playListId == event.i)
+                                .findFirst()
+                                .ifPresent(playList -> {
+                                    List<Music> musicList = playList.getMusicList();
+                                    if (musicList != null) {
+                                        musicList.add(event.music);
+                                        playList.setMusicList(musicList);
+                                        playList.setPlayListCount(musicList.size());
+                                        SPUtil.setListValue(this, SPUtil.LocalPlayListData, localPlayLists);
+                                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST));
+                                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
+                                    }
+                                });
+
+//                        for(int i=0; i<localPlayLists.size(); i++) {
+//                            if(localPlayLists.get(i).playListId == event.i) {
+//                                if(localPlayLists.get(i).getMusicList() != null) {
+//                                    List<Music> musicList1 = localPlayLists.get(i).getMusicList();
+//                                    musicList1.add(event.music);
+//                                    localPlayLists.get(i).setMusicList(musicList1);
+//                                    localPlayLists.get(i).setPlayListCount(localPlayLists.get(i).getMusicList().size());
+//                                    SPUtil.setListValue(this, SPUtil.LocalPlayListData, localPlayLists);
+//                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST));
+//                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
+//                                }
+//                                return;
+//                            }
+//                        }
                     }
                 }
                 break;
@@ -1642,11 +1744,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 SPUtil.setListValue(context, SPUtil.PlayListData, list);
                 break;
             case ThreadEvent.VIEW_SCREEN_LOCK:
-                if(binder != null && binder.isPlay()) {
-                    NotificationHelper.getInstance().createFullScreen(getApplicationContext());
-                } else {
-                    NotificationHelper.getInstance().cancelNotification(getApplicationContext(), NotificationHelper.LL_MUSIC_FULL_SCREEN);
-                }
+//                if(binder != null && binder.isPlay()) {
+//                    NotificationHelper.getInstance().createFullScreen(getApplicationContext());
+//                } else {
+//                    NotificationHelper.getInstance().cancelNotification(getApplicationContext(), NotificationHelper.LL_MUSIC_FULL_SCREEN);
+//                }
+                break;
+            case ThreadEvent.UPDATE_NOTIFICATION_SEEK_BAR_POS:
                 break;
         }
     }
@@ -1692,17 +1796,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 detailPanelChangeObjectAnimator.start();
                 isNotMain = false;
             } else if(v.getId() == R.id.fl_new_change_mode) {
-                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-                controllerModeAnimator.start();
-
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
-
-                if(isClick) { //是否点击了旧版的播放器 按钮其中一个
-                    getViewDataBinding().rlDisableClick.setVisibility(View.VISIBLE);
-                }
-                isShowControllerModePanel = false;
-                SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
+                //intoSettings();
+                //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_NEW_CONTROLLER_MODE));
             } else if(v.getId() == R.id.fl_close_controller_mode) {  //关闭新版音乐播放页面
                 showOrHideNewController(true);
             } else if(v.getId() == R.id.rl_new_play_controller) { //打开新版音乐播放页面
@@ -1724,48 +1819,48 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     }
 
     /** 更新小组件UI */
-    private void updateWidgetUI(boolean isLoading) {
-        if(binder != null && binder.isPlay()) {
-            MusicPlayService.stopAppWidgetRunnable();
-            MusicPlayService.appWidgetRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    sendWidgetBroadcastReceiver(isLoading);
-                    MusicPlayService.appWidgetHandler.postDelayed(MusicPlayService.appWidgetRunnable, MusicPlayService.DELAY_MILLIS);
-                }
-            };
-
-            MusicPlayService.appWidgetHandler.post(MusicPlayService.appWidgetRunnable);
-        } else {
-            if(MusicPlayService.stopAppWidgetRunnable()) {
-                sendWidgetBroadcastReceiver(isLoading);
-            }
-        }
-
-    }
+//    private void updateWidgetUI(boolean isLoading) {
+//        if(binder != null && binder.isPlay()) {
+//            MusicPlayService.stopAppWidgetRunnable();
+//            MusicPlayService.appWidgetRunnable = new Runnable() {
+//                @Override
+//                public void run() {
+//                    sendWidgetBroadcastReceiver(isLoading);
+//                    MusicPlayService.appWidgetHandler.postDelayed(MusicPlayService.appWidgetRunnable, MusicPlayService.DELAY_MILLIS);
+//                }
+//            };
+//
+//            MusicPlayService.appWidgetHandler.post(MusicPlayService.appWidgetRunnable);
+//        } else {
+//            if(MusicPlayService.stopAppWidgetRunnable()) {
+//                sendWidgetBroadcastReceiver(isLoading);
+//            }
+//        }
+//
+//    }
 
     /** 发送广播给小组件 更新视图 */
-    private void sendWidgetBroadcastReceiver(boolean isLoading) {
-        Intent intent = new Intent("WIDGET_PROVIDER_REFRESH_MUSIC_MSG");
-        intent.setPackage(getPackageName());
-        intent.putExtra("IsLoading", isLoading);
-
-        String startTime = TimeUtil.rebuildTime(MusicPlayService.mStartPosition);
-        if(!TextUtils.isEmpty(startTime)) {
-            intent.putExtra("StartTime", startTime);
-        }
-        String allTime = TimeUtil.rebuildTime(MusicPlayService.mAllPosition);
-        if(!TextUtils.isEmpty(allTime)) {
-            intent.putExtra("AllTime", allTime);
-        }
-        BigDecimal bd1 = new BigDecimal(TimeUtil.showSec(MusicPlayService.mStartPosition));
-        BigDecimal bd2 = new BigDecimal(TimeUtil.showSec(MusicPlayService.mAllPosition));
-
-        int progress = bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).intValue();
-        intent.putExtra("MusicProgress", progress);
-
-        sendBroadcast(intent);
-    }
+//    private void sendWidgetBroadcastReceiver(boolean isLoading) {
+//        Intent intent = new Intent("WIDGET_PROVIDER_REFRESH_MUSIC_MSG");
+//        intent.setPackage(getPackageName());
+//        intent.putExtra("IsLoading", isLoading);
+//
+//        String startTime = TimeUtil.rebuildTime(MusicPlayService.mStartPosition);
+//        if(!TextUtils.isEmpty(startTime)) {
+//            intent.putExtra("StartTime", startTime);
+//        }
+//        String allTime = TimeUtil.rebuildTime(MusicPlayService.mAllPosition);
+//        if(!TextUtils.isEmpty(allTime)) {
+//            intent.putExtra("AllTime", allTime);
+//        }
+//        BigDecimal bd1 = new BigDecimal(TimeUtil.showSec(MusicPlayService.mStartPosition));
+//        BigDecimal bd2 = new BigDecimal(TimeUtil.showSec(MusicPlayService.mAllPosition));
+//
+//        int progress = bd1.divide(bd2, 2, BigDecimal.ROUND_HALF_UP).multiply(BigDecimal.valueOf(100)).intValue();
+//        intent.putExtra("MusicProgress", progress);
+//
+//        sendBroadcast(intent);
+//    }
 
     /** 显示弹窗更新App */
     private void showUpgradeApp(){
@@ -1906,12 +2001,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             @Override
             public void onClick(View v) {
                 menuPopupWindow.dismiss();
-                Intent intentPhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intentPhoto.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                intentPhoto.addCategory(Intent.CATEGORY_OPENABLE);
-                intentPhoto.setType("image/*");
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_INTO_SET_BG));
 
-                intentTakePhotoLauncher.launch(intentPhoto);
             }
         });
         //导入歌曲
@@ -2264,13 +2355,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             @Override
             public void onClick(View v) {
                 changeModePopupWindow.dismiss();
-                if(View.VISIBLE == getViewDataBinding().clBgMode.getVisibility()) {
-                    getViewDataBinding().clBgMode.setVisibility(View.GONE);
-                } else {
-                    getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
-                }
-                getViewDataBinding().rlPlayController.setVisibility(View.VISIBLE);
-
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_BG_MODE));
             }
         });
 
@@ -2283,9 +2368,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 面板里面的更多菜单 */
     public void panelMoreMenu(View view) {
         if(isDoubleClick()) { return; }
+
         DialogPanelMoreMenuBinding panelMoreMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_panel_more_menu, null, false);
 
+        PopupWindow panelMorePopupWindow  = new PopupWindow(panelMoreMenuBinding.getRoot(),
+                WindowManager.LayoutParams.MATCH_PARENT,  WindowManager.LayoutParams.WRAP_CONTENT, true);
+
+        panelMoreMenuBinding.llSystemSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                intoSettings();
+                panelMorePopupWindow.dismiss();
+            }
+        });
         panelMoreMenuBinding.sbLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -2401,9 +2497,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
 
 
-        PopupWindow panelMorePopupWindow  = new PopupWindow(panelMoreMenuBinding.getRoot(),
-                WindowManager.LayoutParams.MATCH_PARENT,  WindowManager.LayoutParams.WRAP_CONTENT, true);
-
         panelMorePopupWindow.setTouchable(true);
         //变更主题
         ThemeHelper.getInstance().panelMenuPopupWindowTheme(this, rThemeId, panelMorePopupWindow, panelMoreMenuBinding);
@@ -2417,7 +2510,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 点击播放按钮 */
     public void playButtonClick(View view)  {
-        binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+        binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
     }
 
     /** 点击切换播放模式按钮 */
@@ -2446,53 +2539,88 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     }
 
     /** 播放上一首或下一首歌曲 */
-    public void lastOrNextMusic(boolean isNext) {
+    public void lastOrNextMusic(final boolean isNext) {
         if(playList.size()>0) {
             if(playList.size() == 1) {
                 binder.showLyric(playList.get(0), (playMode == 2));
             } else {
-                for(int i=0; i<playList.size(); i++) {
-                    if(playList.get(i).isPlaying) {
-                        //如果当前模式为随机模式，点击播放下一首为随机歌曲
-                        if(playMode ==1) {
-                            playList.get(i).isPlaying = false;
-                            int rand = new Random().nextInt(playList.size());
-                            while (i == rand) {
-                                rand = new Random().nextInt(playList.size());
-                            }
-                            binder.showLyric(playList.get(rand), false);
-                            playList.get(rand).isPlaying = true;
-                            playMusicListAdapter.notifyDataSetChanged();
-                        } else if(playMode == 2) {
-                            binder.showLyric(playList.get(i), true);
-                        } else {
-                            if (isNext) {
-                                if (i + 1 < playList.size()) {
-                                    playList.get(i).isPlaying = false;
-                                    binder.showLyric(playList.get(i + 1), false);
-                                    playList.get(i + 1).isPlaying = true;
-                                    playMusicListAdapter.notifyDataSetChanged();
-                                } else {
-                                    playList.get(i).isPlaying = false;
-                                    binder.showLyric(playList.get(0), false);
-                                    playList.get(0).isPlaying = true;
-                                }
-                            } else {
-                                if (i == 0) {
-                                    playList.get(0).isPlaying = false;
-                                    binder.showLyric(playList.get(playList.size() - 1), false);
-                                    playList.get(playList.size() - 1).isPlaying = true;
-                                } else {
-                                    playList.get(i).isPlaying = false;
-                                    binder.showLyric(playList.get(i - 1), false);
-                                    playList.get(i - 1).isPlaying = true;
-                                }
-                            }
+
+                Optional<Music> currentMusicPlayList = playList.stream()
+                        .filter(playMusic -> playMusic.isPlaying)
+                        .findFirst();
+
+                if(currentMusicPlayList.isPresent()) {
+                    Music currentMusic = currentMusicPlayList.get();
+                    int index = playList.indexOf(currentMusic);
+                    currentMusic.isPlaying = false;
+
+                    if(playMode ==1) {
+                        int rand = new Random().nextInt(playList.size());
+                        while (index == rand) {
+                            rand = new Random().nextInt(playList.size());
                         }
-                        playMusicListAdapter.notifyDataSetChanged();
-                        break;
+                        binder.showLyric(playList.get(rand), false);
+                        playList.get(rand).isPlaying = true;
+
+                    } else if(playMode == 2) {
+                        binder.showLyric(currentMusic, true);
+                    } else {
+                        if (isNext) {
+                            int nextIndex = (index + 1) % playList.size();
+                            binder.showLyric(playList.get(nextIndex), false);
+                            playList.get(nextIndex).isPlaying = true;
+                        } else {
+                            int prevIndex = (index == 0) ? playList.size() - 1 : index - 1;
+                            binder.showLyric(playList.get(prevIndex), false);
+                            playList.get(prevIndex).isPlaying = true;
+                        }
                     }
+
+                    playMusicListAdapter.notifyDataSetChanged();
                 }
+
+//                for(int i=0; i<playList.size(); i++) {
+//                    if(playList.get(i).isPlaying) {
+//                        //如果当前模式为随机模式，点击播放下一首为随机歌曲
+//                        if(playMode ==1) {
+//                            playList.get(i).isPlaying = false;
+//                            int rand = new Random().nextInt(playList.size());
+//                            while (i == rand) {
+//                                rand = new Random().nextInt(playList.size());
+//                            }
+//                            binder.showLyric(playList.get(rand), false);
+//                            playList.get(rand).isPlaying = true;
+//                            playMusicListAdapter.notifyDataSetChanged();
+//                        } else if(playMode == 2) {
+//                            binder.showLyric(playList.get(i), true);
+//                        } else {
+//                            if (isNext) {
+//                                if (i + 1 < playList.size()) {
+//                                    playList.get(i).isPlaying = false;
+//                                    binder.showLyric(playList.get(i + 1), false);
+//                                    playList.get(i + 1).isPlaying = true;
+//                                    playMusicListAdapter.notifyDataSetChanged();
+//                                } else {
+//                                    playList.get(i).isPlaying = false;
+//                                    binder.showLyric(playList.get(0), false);
+//                                    playList.get(0).isPlaying = true;
+//                                }
+//                            } else {
+//                                if (i == 0) {
+//                                    playList.get(0).isPlaying = false;
+//                                    binder.showLyric(playList.get(playList.size() - 1), false);
+//                                    playList.get(playList.size() - 1).isPlaying = true;
+//                                } else {
+//                                    playList.get(i).isPlaying = false;
+//                                    binder.showLyric(playList.get(i - 1), false);
+//                                    playList.get(i - 1).isPlaying = true;
+//                                }
+//                            }
+//                        }
+//                        playMusicListAdapter.notifyDataSetChanged();
+//                        break;
+//                    }
+//                }
             }
         }
     }
@@ -2620,12 +2748,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public void allPlayMusic() {
         if(musicListSize!=0) {
             playList.clear();
-            List<Music> list = new ArrayList<>();
-            for(Music music: musicList) {
-                if(!music.getMusicType().equals(" ")) {
-                    list.add(music);
-                }
-            }
+            List<Music> list = musicList.stream()
+                    .filter(music -> !music.getMusicType().equals(" "))
+                    .collect(Collectors.toList());
+//            List<Music> list = new ArrayList<>();
+//            for(Music music: musicList) {
+//                if(!music.getMusicType().equals(" ")) {
+//                    list.add(music);
+//                }
+//            }
             playList.addAll(list);
             playMusicListAdapter.notifyDataSetChanged();
             //保存当前列表数据
@@ -2923,7 +3054,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             //拖动时改变显示时间
             getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
             getViewDataBinding().tvNewStartTime.setText(getViewModel().rebuildTime(progress));
-            //Log.i("ABMusicPlayer", "progress: " + progress);
+            //Log.i(TAG, "progress: " + progress);
             lyricScrollView.setMusicPlayerPos(progress);
             lyricNewScrollDetailView.setMusicPlayerPos(progress);
             lyricNewScrollView.setMusicPlayerPos(progress);
@@ -2958,11 +3089,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Log.i("ABMediaPlay", "Click: down ");
+                    Log.i(TAG, "Click: down ");
                     binder.posLock(true);
                     break;
                 case MotionEvent.ACTION_UP:
-                    Log.i("ABMediaPlay", "Click: up ");
+                    Log.i(TAG, "Click: up ");
                     binder.posLock(false);
                     break;
             }
@@ -2974,14 +3105,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i("ABMusicPlayer", "Stop - UnbindService");
+        Log.i(TAG, "Stop - UnbindService");
         EventBus.getDefault().unregister(this);
         if(binder != null) {
-            binder.pauseImm(this, currentMusicName, currentMusicSinger, currentBitmap);
+            binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
             binder.clearMedia();
         }
         getViewDataBinding().ccvShowVisualizer.release();
-        clearMediaSession();
+        MusicPlayService.stopAppWidgetRunnable();
+        MusicPlayService.stopMusicNotificationRunnable();
+        MusicPlayService.clearMediaSession();
         MainVM.stopHandler();
         MainVM.stopTalkHandler();
         unbindService(conn);
@@ -3047,7 +3180,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+                binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
             }
            // binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
         } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
@@ -3056,7 +3189,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+                binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
             }
             //binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
         } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
@@ -3181,17 +3314,33 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 播放当前点击的歌曲 */
     private void playMusic(List<Music> list, int position) {
         if(playList.size()>0){
-            for(int i=0; i<playList.size(); i++) {
-                if(playList.get(i).isPlaying) {
-                    playList.get(i).isPlaying = false;
-                    binder.showLyric(list.get(position), (playMode == 2));
-                    playList.add(i+1, MainVM.setMusicMsg(list.get(position), true));
-                    playMusicListAdapter.notifyDataSetChanged();
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SAVE_LOCAL_MUSIC_LIST, playList));
-                    //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
-                    return;
-                }
+
+            Optional<Music> currentlyPlaying = playList.stream()
+                    .filter(music -> music.isPlaying)
+                    .findFirst();
+
+            if(currentlyPlaying.isPresent()) {
+                Music music = currentlyPlaying.get();
+                music.isPlaying = false;
+                binder.showLyric(list.get(position), (playMode == 2));
+                int index = playList.indexOf(music);
+                playList.add(index + 1, MainVM.setMusicMsg(list.get(position), true));
+                playMusicListAdapter.notifyDataSetChanged();
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SAVE_LOCAL_MUSIC_LIST, playList));
+                return;
             }
+
+
+//            for(int i=0; i<playList.size(); i++) {
+//                if(playList.get(i).isPlaying) {
+//                    playList.get(i).isPlaying = false;
+//                    binder.showLyric(list.get(position), (playMode == 2));
+//                    playList.add(i+1, MainVM.setMusicMsg(list.get(position), true));
+//                    playMusicListAdapter.notifyDataSetChanged();
+//                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SAVE_LOCAL_MUSIC_LIST, playList));
+//                    return;
+//                }
+//            }
             binder.showLyric(list.get(position), (playMode == 2));
             playList.add(playList.size(), MainVM.setMusicMsg(list.get(position), true));
         } else {
@@ -3321,36 +3470,44 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 设置播放列表使用图标显示收藏的歌 */
     private void setMusicFavorite(List<Music> favoriteList) {
-        for(int i = 0; i< playList.size(); i++) {
-            boolean isShowMusicFavorite = false;
-            for(int j = 0; j< favoriteList.size(); j++) {
-                if(!TextUtils.isEmpty(playList.get(i).musicName) && !TextUtils.isEmpty(favoriteList.get(j).musicName)) {
-                    if(playList.get(i).musicName.equals(favoriteList.get(j).musicName)) {
-                        playList.get(i).setMusicFavorite(1);
-                        isShowMusicFavorite =true;
-                        break;
-                    }
-                }
-            }
-            if(!isShowMusicFavorite) {
-                playList.get(i).setMusicFavorite(0);
-            }
-        }
+        playList.forEach(playMusic ->{
+           boolean isFavorite = favoriteList.stream().anyMatch(favoriteMusic ->
+                   !TextUtils.isEmpty(playMusic.musicName) && !TextUtils.isEmpty(favoriteMusic.musicName)
+                           && playMusic.getMusicName().equals(favoriteMusic.getMusicName()));
+           playMusic.setMusicFavorite(isFavorite? 1 : 0);
+        });
+//        for(int i = 0; i< playList.size(); i++) {
+//            boolean isShowMusicFavorite = false;
+//            for(int j = 0; j< favoriteList.size(); j++) {
+//                if(!TextUtils.isEmpty(playList.get(i).musicName) && !TextUtils.isEmpty(favoriteList.get(j).musicName)) {
+//                    if(playList.get(i).musicName.equals(favoriteList.get(j).musicName)) {
+//                        playList.get(i).setMusicFavorite(1);
+//                        isShowMusicFavorite =true;
+//                        break;
+//                    }
+//                }
+//            }
+//            if(!isShowMusicFavorite) {
+//                playList.get(i).setMusicFavorite(0);
+//            }
+//        }
     }
 
     private void setCurrentMusicFavorite(List<Music> favoriteMusicList, String currentMusic) {
         isFavorite = false;
 
         if(favoriteMusicList.size() >0) {
-            for(int i=0; i < favoriteMusicList.size(); i++) {
-                String favoriteMusicName = favoriteMusicList.get(i).musicName;
-                if(!TextUtils.isEmpty(favoriteMusicName)) {
-                    if(favoriteMusicName.equals(currentMusic)){
-                        isFavorite = true;
-                        break;
-                    }
-                }
-            }
+            isFavorite = favoriteMusicList.stream().anyMatch(favoriteMusic -> !TextUtils.isEmpty(favoriteMusic.getMusicName()) && favoriteMusic.getMusicName().equals(currentMusic));
+
+//            for(int i=0; i < favoriteMusicList.size(); i++) {
+//                String favoriteMusicName = favoriteMusicList.get(i).musicName;
+//                if(!TextUtils.isEmpty(favoriteMusicName)) {
+//                    if(favoriteMusicName.equals(currentMusic)){
+//                        isFavorite = true;
+//                        break;
+//                    }
+//                }
+//            }
         }
         //变更主题
         ThemeHelper.getInstance().musicBarMusicFavoriteTheme(this, rThemeId, getViewDataBinding(), isFavorite);
@@ -3358,11 +3515,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 存储列表时默认所有歌单为未播放状态 */
     private void setPlayListDefault(List<Music> playList) {
-        List<Music> list = playList;
-        int size = list.size();
-        for(int i=0; i<size; i++) {
-            list.get(i).isPlaying = false;
-        }
+        playList.forEach(music -> music.isPlaying = false );
     }
 
     public static class PlayMusicListViewHolder extends RecyclerView.ViewHolder {

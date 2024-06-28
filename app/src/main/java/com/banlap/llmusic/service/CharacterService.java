@@ -27,18 +27,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.banlap.llmusic.R;
+import com.banlap.llmusic.pad.uivm.vm.PadMainVM;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.ui.activity.SettingsActivity;
 import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.GameXOHelper;
+import com.banlap.llmusic.utils.SystemUtil;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -157,7 +157,6 @@ public class CharacterService extends Service {
     }
 
     private void initView() {
-        //MainVM.initAnimatedCharacter();
         clCharacter = rlCharacter.findViewById(R.id.cl_character);
         ivCharacter = rlCharacter.findViewById(R.id.iv_character);
         llCharacterTalk = rlCharacter.findViewById(R.id.ll_character_talk);
@@ -268,165 +267,77 @@ public class CharacterService extends Service {
             } else if(v.getId() == R.id.ll_last_music) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
             } else if(v.getId() == R.id.ll_play_music) {
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_MUSIC));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_MUSIC_BY_CHARACTER));
             } else if(v.getId() == R.id.ll_next_music) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_NEXT));
             } else if(v.getId() == R.id.ll_is_last) {
                 if(!isClickIsLast) { //后手进行井字游戏
                     llIsLast.setBackgroundResource(R.drawable.shape_button_white_5_red);
                     isClickIsLast = true;
-                    GameXOHelper.startGame(false, "", new GameXOHelper.GameXOCallback() {
-
-                        @Override
-                        public void onResult(boolean isOver, String winUser, String aiLoc) {
-                            handleGameXOResult(isOver, winUser, aiLoc);
-                        }
-
-                        @Override
-                        public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                            handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                        }
-                    });
+                    startGameXO(false, "");
                 }
             } else if(v.getId() == R.id.rl_chess_top_left) {
-                GameXOHelper.startGame(true, GameXOHelper.locTopLeft, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessTopLeft.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locTopLeft);
             } else if(v.getId() == R.id.rl_chess_top) {
-                GameXOHelper.startGame(true, GameXOHelper.locTop, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessTop.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locTop);
             } else if(v.getId() == R.id.rl_chess_top_right) {
-                GameXOHelper.startGame(true, GameXOHelper.locTopRight, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessTopRight.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locTopRight);
             } else if(v.getId() == R.id.rl_chess_center_left) {
-                GameXOHelper.startGame(true, GameXOHelper.locCenterLeft, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessCenterLeft.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locCenterLeft);
             } else if(v.getId() == R.id.rl_chess_center) {
-                GameXOHelper.startGame(true, GameXOHelper.locCenter, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessCenter.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locCenter);
             } else if(v.getId() == R.id.rl_chess_center_right) {
-                GameXOHelper.startGame(true, GameXOHelper.locCenterRight, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessCenterRight.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locCenterRight);
             } else if(v.getId() == R.id.rl_chess_bottom_left) {
-                GameXOHelper.startGame(true, GameXOHelper.locBottomLeft, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessBottomLeft.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locBottomLeft);
             } else if(v.getId() == R.id.rl_chess_bottom) {
-                GameXOHelper.startGame(true, GameXOHelper.locBottom, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessBottom.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
-
+                startGameXO(true, GameXOHelper.locBottom);
             } else if(v.getId() == R.id.rl_chess_bottom_right) {
-                GameXOHelper.startGame(true, GameXOHelper.locBottomRight, new GameXOHelper.GameXOCallback() {
-                    @Override
-                    public void onResult(boolean isOver, String winUser, String aiLoc) {
-                        if(isOver || !TextUtils.isEmpty(aiLoc)) {
-                            rlChessBottomRight.setBackgroundResource(R.mipmap.ic_game_x);
-                        }
-                        handleGameXOResult(isOver, winUser, aiLoc);
-                    }
-
-                    @Override
-                    public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
-                        handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
-                    }
-                });
+                startGameXO(true, GameXOHelper.locBottomRight);
             }
 
         }
+    }
+
+    /**
+     * 开始井字棋游戏
+     * @param isPlayerSet 是否玩家先出棋
+     * @param loc 下棋位置
+     * */
+    public void startGameXO(boolean isPlayerSet, final String loc) {
+        GameXOHelper.startGame(isPlayerSet, loc, new GameXOHelper.GameXOCallback() {
+            @Override
+            public void onResult(boolean isOver, String winUser, String aiLoc) {
+                if(isOver || !TextUtils.isEmpty(aiLoc)) {
+                    if(loc.equals(GameXOHelper.locTopLeft)) {
+                        rlChessTopLeft.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locTop)) {
+                        rlChessTop.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locTopRight)) {
+                        rlChessTopRight.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locCenterLeft)) {
+                        rlChessCenterLeft.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locCenter)) {
+                        rlChessCenter.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locCenterRight)) {
+                        rlChessCenterRight.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locBottomLeft)) {
+                        rlChessBottomLeft.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locBottom)) {
+                        rlChessBottom.setBackgroundResource(R.mipmap.ic_game_x);
+                    } else if(loc.equals(GameXOHelper.locBottomRight)) {
+                        rlChessBottomRight.setBackgroundResource(R.mipmap.ic_game_x);
+                    }
+                }
+                handleGameXOResult(isOver, winUser, aiLoc);
+            }
+
+            @Override
+            public void onDismissLoc(String aiLocWD, String aiLocD, String playerLocWD, String playerLocD) {
+                handleGameXOLocDismiss(aiLocWD, aiLocD, playerLocWD, playerLocD);
+            }
+        });
+
     }
 
     /**
@@ -689,7 +600,7 @@ public class CharacterService extends Service {
                         } else {
                             isMove = true;
                         }
-                        Log.i("ABMusicPlayer", "isMove: " + isMove);
+                        Log.i(TAG, "isMove: " + isMove);
                         break;
                 }
                 return isMove;
@@ -716,12 +627,22 @@ public class CharacterService extends Service {
         }
 
         //根据播放或暂停 对角色状态变更
-        MainVM.stopHandler();
-        if(isPlayMusic) {
-            MainVM.animatedListenCharacter(mCharacterName);
+        if(SystemUtil.isPad(getApplication())) {
+            PadMainVM.stopHandler();
+            if(isPlayMusic) {
+                PadMainVM.animatedListenCharacter(mCharacterName);
+            } else {
+                PadMainVM.initAnimatedCharacter(mCharacterName);
+            }
         } else {
-            MainVM.initAnimatedCharacter(mCharacterName);
+            MainVM.stopHandler();
+            if(isPlayMusic) {
+                MainVM.animatedListenCharacter(mCharacterName);
+            } else {
+                MainVM.initAnimatedCharacter(mCharacterName);
+            }
         }
+
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel("channel_2", "LLMusicCharacter_channel", NotificationManager.IMPORTANCE_LOW);

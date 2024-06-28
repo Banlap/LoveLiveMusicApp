@@ -15,6 +15,7 @@ import org.greenrobot.eventbus.EventBus;
  * 定时器广播
  * */
 public class AlarmReceiver extends BroadcastReceiver {
+    private static final String TAG = AlarmReceiver.class.getSimpleName();
     public static final String ACTION_ALARM = "com.banlap.llmusic.receiver.AlarmReceiver";
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -22,7 +23,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         if(action!=null) {
             switch (action) {
                 case ACTION_ALARM:
-                    Log.i("ABMusicPlayer", "receive alarm");
+                    Log.i(TAG, "receive alarm");
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_COUNT_DOWN_FINISH));
                     break;
             }

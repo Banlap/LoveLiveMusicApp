@@ -56,6 +56,18 @@ public class MyAnimationUtil {
         return animator;
     }
 
+    public static ObjectAnimator objectAnimatorLeftOrRightNew(Activity activity, boolean isLeft, boolean isRun, int moveAxis, ViewGroup viewGroup) {
+        WindowManager windowManager = activity.getWindowManager();
+        Display display = windowManager.getDefaultDisplay();
+        int displayAxis = isLeft ? -moveAxis * 2 - 100 : moveAxis * 2 - 100;
+
+        ObjectAnimator animator = isRun ?
+                ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
+                : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
+        animator.setDuration(300);
+        return animator;
+    }
+
     /**
      * banlap: 添加动画效果 上下显示
      *

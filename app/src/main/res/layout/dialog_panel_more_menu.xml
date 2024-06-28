@@ -25,6 +25,34 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/ll_system_set"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <ImageView
+                    android:id="@+id/iv_system_set_title"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/ic_settings_light"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/tv_system_set_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="系统设置  〉"
+                    android:textColor="@color/light_ff"
+                    android:textSize="16sp" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"

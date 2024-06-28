@@ -16,6 +16,7 @@ import com.banlap.llmusic.R;
  * 水平进度条
  * */
 public class HorizontalProgressBar extends View {
+    private static final String TAG = HorizontalProgressBar.class.getSimpleName();
 
     private float maxCount = 100; //进度条最大值
     private float currentCount; //进度条当前值
@@ -60,7 +61,7 @@ public class HorizontalProgressBar extends View {
         super.onDraw(canvas);
         mPaint.setAntiAlias(true);
         int round = mHeight/2; //半径
-        //Log.i("ABMusicPlayer", "mWidth: " + mWidth +  " mHeight: " + mHeight  + " round: " + round);
+        //Log.i(TAG, "mWidth: " + mWidth +  " mHeight: " + mHeight  + " round: " + round);
         mPaint.setColor(getResources().getColor(bgColor)); //设置边框背景颜色
         mPaint.setShader(getLinearGradient());
         rectBg.right = mWidth;
@@ -70,13 +71,13 @@ public class HorizontalProgressBar extends View {
         float section = currentCount/maxCount; //进度条的比例
         rectProgressBg.right = section * mWidth;
         rectProgressBg.bottom = mHeight;
-        //Log.i("ABMusicPlayer", "section: " + section);
+        //Log.i(TAG, "section: " + section);
 
         //Paint设置setColor(白色无透明)和setShader，只让setShader生效；不然前面setColor设置了透明度，透明度会生效，和setShader效果叠加
         mPaint.setColor(getResources().getColor(bgColor2));
         mPaint.setShader(getLinearGradient());
         canvas.drawRoundRect(rectProgressBg, round, round, mPaint); //最左边的圆角矩形
-        //Log.i("ABMusicPlayer", "maxCount: " + maxCount + " currentCount: " + currentCount);
+        //Log.i(TAG, "maxCount: " + maxCount + " currentCount: " + currentCount);
 
         if (maxCount != currentCount){ //如果不是100%，绘制第三段矩形
             rectProgressBg2.left = mWidth * section - round;
@@ -90,7 +91,7 @@ public class HorizontalProgressBar extends View {
     private LinearGradient linearGradient;
     private LinearGradient getLinearGradient(){
         if(linearGradient == null) {
-            Log.i("ABMusicPlayer", "getWidth: " + mWidth);
+            Log.i(TAG, "getWidth: " + mWidth);
             linearGradient = new LinearGradient(0, 0, mWidth, mHeight, new int[]{
                     mContext.getResources().getColor(linearGradientColor),
                     mContext.getResources().getColor(linearGradientColor)
@@ -102,7 +103,7 @@ public class HorizontalProgressBar extends View {
 
     private int linearGradientColor = R.color.light_f9;
     public void setLinearGradient(int color){
-        //Log.i("ABMusicPlayer", "setLinearGradient getWidth: " + mWidth);
+        //Log.i(TAG, "setLinearGradient getWidth: " + mWidth);
         linearGradientColor = color;
         if(0 != color) {
             linearGradient = new LinearGradient(0, 0, mWidth, mHeight, new int[]{

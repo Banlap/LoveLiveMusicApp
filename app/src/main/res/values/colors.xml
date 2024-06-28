@@ -23,12 +23,15 @@
     <color name="blue_f8">#CEF8F8</color>
 
     <color name="light_ff">#697E8A</color>
+    <color name="light_ff_alpha_90">#E6697E8A</color>
     <color name="light_ff_alpha">#E67897AA</color>
     <color name="light_fd_alpha">#CCBBF9FB</color>
     <color name="light_ea">#a9edea</color>
     <color name="light_f9">#ACE0F9</color>
     <color name="light_f9_alpha">#E6ACE0F9</color>
-    <color name="light_f8">#E5F2F8</color>
+    <color name="light_fd_alpha_90">#E6ECF9FF</color>
+
+    <color name="light_f8">#EAF4F8</color>
 
     <color name="light_e7">#c7e4e7</color>
     <color name="light_afd">#DBFAFD</color>
@@ -62,7 +65,8 @@
     <color name="red_4d">#BC3D4D</color>
 
     <color name="white">#FFFFFF</color>
-    <color name="background_color_F2">#F2F2F2</color>
+    <color name="white_alpha_40">#66FFFFFF</color>
+、    <color name="background_color_F2">#F2F2F2</color>
 
     <color name="gray_f1">#f1f3f4</color>
     <color name="gray_ea">#EAEAEA</color>
@@ -80,6 +84,7 @@
 
     <color name="alpha">#00FFFFFF</color>
     <color name="alpha_10">#1AFFFFFF</color>
+    <color name="alpha_20">#33FFFFFF</color>
     <color name="alpha_30">#4DFFFFFF</color>
     <color name="alpha_40">#66B6B6B6</color>
     <color name="alpha_50">#807B7B7B</color>

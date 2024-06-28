@@ -10,9 +10,9 @@ android {
 
     defaultConfig {
         applicationId "com.banlap.llmusic"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 33
-        versionCode 170
+        versionCode 171
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -157,6 +157,10 @@ android {
         versionName "1.7.0"
         //1.优化部分ui
         //2.角色功能添加小游戏内容
+        versionName "1.7.1"
+        //1.优化音乐框架部分内容、优化通知栏显示问题
+        //2.调整界面模式开启位置
+        //3.全新适配平板模式
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息
@@ -191,8 +195,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'com.google.ar:core:1.25.0'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    //androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    //androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     /** mysql数据库 */
     implementation files('libs\\mysql-connector-java-5.1.49.jar')
     /** 闪屏页面 */
@@ -225,10 +229,18 @@ dependencies {
     /** 崩溃异常处理 框架*/
     implementation 'cat.ereza:customactivityoncrash:2.3.0'
 
-
     /** tabLayout */
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'com.lzp:FlycoTabLayoutZ:1.3.3'
+
+    /** 新音频框架 */
+    implementation 'androidx.media3:media3-exoplayer:1.0.0'
+    implementation 'androidx.media3:media3-ui:1.0.0'
+    implementation 'androidx.media:media:1.4.3'
+    implementation 'androidx.media3:media3-session:1.0.0'
+    /** 磨砂背景处理 */
+    implementation 'com.eightbitlab:blurview:1.6.3'
+
 
     /** 内存泄露查询工具 使用后安装app之后会出现检测软件 */
     /*debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'

@@ -185,7 +185,7 @@ public class LyricScrollView extends View {
                 float v = (playerCurrentPosition - start) >= 500 ?
                         currentPosition * mPaddingY :
                         lastPosition * mPaddingY + (currentPosition - lastPosition) * mPaddingY * ((playerCurrentPosition - start) / 500f);
-               /* Log.i("ABMusicPlayer", "v: " + v + " p:" + playerCurrentPosition
+               /* Log.i(TAG, "v: " + v + " p:" + playerCurrentPosition
                         + " s:" + start + " p-s:" + (playerCurrentPosition - start) + " c: " + currentPosition);
                 */
                 setScrollY((int) v);
@@ -193,7 +193,7 @@ public class LyricScrollView extends View {
                     lastPosition = currentPosition;
                 }
             } else {
-                //Log.i("ABMusicPlayer", "currentPosition: " + currentPosition + " mPaddingY: " + mPaddingY);
+                //Log.i(TAG, "currentPosition: " + currentPosition + " mPaddingY: " + mPaddingY);
                 setScrollY((int) currentPosition * mPaddingY);
             }
             postInvalidateDelayed(100);
@@ -409,7 +409,7 @@ public class LyricScrollView extends View {
         }
         //获取滚动歌词的行数
         int moveRow = Math.abs((int) moveY / lyricSize);
-        //Log.i("ABMusicPlayer", "moveY: " + moveY);
+        //Log.i(TAG, "moveY: " + moveY);
 
         if(moveY <0) {  //向上滚动
             currentPosition += moveRow;
