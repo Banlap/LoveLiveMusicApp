@@ -44,7 +44,7 @@
 <p align="start">15. 每日推荐功能</p>
 <p align="start">16. 定时关闭歌曲任务</p>
 <p align="start">17. 角色功能中添加小游戏</p>
-<p align="start">18. 平板适配</p>
+<p align="start">18. 适配平板</p>
 
 **（本项目为开源项目，仅用于学习交流，请勿用于商业及非法用途）**
 
