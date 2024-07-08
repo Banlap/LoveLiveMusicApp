@@ -154,8 +154,12 @@ public class SystemUtil {
                       boolean hasNavigationBar = insets.isVisible(WindowInsets.Type.navigationBars());
                       // 获取导航栏高度
                       int navigationBarHeight = insets.getInsets(WindowInsets.Type.navigationBars()).bottom;
+                      int navigationBarLeft = insets.getInsets(WindowInsets.Type.navigationBars()).left;
+                      int navigationBarRight = insets.getInsets(WindowInsets.Type.navigationBars()).right;
+
                       // 你可以根据需要处理导航栏高度，例如存储到成员变量中
                       Log.d(TAG, "是否存在底部栏: " + hasNavigationBar +", 高度: " + navigationBarHeight);
+                      Log.d(TAG, "左边: " + navigationBarLeft + " 右边: " + navigationBarRight);
                       callback.onResult(hasNavigationBar, navigationBarHeight);
                       return insets;
                   }

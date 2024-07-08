@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -158,6 +159,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
     private boolean isIntoMusicController = false;      //判断是否点击进入控制器
     private boolean isShowDetailMusicList = false;       //判断是否在音乐控制器里面显示当前播放列表
     public static boolean isPlay = false;               //判断是否播放音乐
+    public static boolean isOnTouchSeekBar = false;      //是否按着控制条
     private boolean isExistNewVersion = false;            //是否存在新版本app
     private String mCharacterName;                      //当前角色
     private SingleLyricScrollView lyricNewScrollView;              //
@@ -1049,14 +1051,15 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.VIEW_SEEK_BAR_POS:
-                //lyricScrollView.setMusicPlayerPos(event.i);
-                lyricNewScrollDetailView.setMusicPlayerPos(event.i);
-                lyricNewScrollView.setMusicPlayerPos(event.i);
-                //getViewDataBinding().sbMusicBar.setProgress(event.i);
-                getViewDataBinding().sbNewMusicBar.setProgress(event.i);
-                //getViewDataBinding().hpvProgress.setCurrentCount(event.i);
-                //getViewDataBinding().pbNewProgress.setProgress(event.i);
-
+                if(!isOnTouchSeekBar) {
+                    //lyricScrollView.setMusicPlayerPos(event.i);
+                    lyricNewScrollDetailView.setMusicPlayerPos(event.i);
+                    lyricNewScrollView.setMusicPlayerPos(event.i);
+                    //getViewDataBinding().sbMusicBar.setProgress(event.i);
+                    getViewDataBinding().sbNewMusicBar.setProgress(event.i);
+                    //getViewDataBinding().hpvProgress.setCurrentCount(event.i);
+                    //getViewDataBinding().pbNewProgress.setProgress(event.i);
+                }
                 break;
             case ThreadEvent.VIEW_SEEK_BAR_RESUME:
 //                lyricScrollView.posLock(true);
@@ -1848,6 +1851,15 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     }
 
+    /** 将当前界面设置为Task中第一个Activity启动 */
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(Intent.ACTION_MAIN);
+        i.addCategory(Intent.CATEGORY_HOME);
+        startActivity(i);
+    }
+
+
     private static class PadMainFragmentStateAdapter extends FragmentStateAdapter {
 
         private List<Fragment> fragmentList;
@@ -2046,16 +2058,18 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
     private class MusicBarChangerListener implements SeekBar.OnSeekBarChangeListener {
 
         @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            //拖动时改变显示时间
-            //getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
-            getViewDataBinding().tvNewStartTime.setText(TimeUtil.rebuildTime(progress));
-            //Log.i(TAG, "progress: " + progress);
-            //lyricScrollView.setMusicPlayerPos(progress);
-            lyricNewScrollDetailView.setMusicPlayerPos(progress);
-            lyricNewScrollView.setMusicPlayerPos(progress);
-            //getViewDataBinding().hpvProgress.setCurrentCount(progress);
-            //getViewDataBinding().pbNewProgress.setProgress(progress);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(!isOnTouchSeekBar) {
+                //拖动时改变显示时间
+                //getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
+                getViewDataBinding().tvNewStartTime.setText(TimeUtil.rebuildTime(progress));
+                //Log.i(TAG, "progress: " + progress);
+                //lyricScrollView.setMusicPlayerPos(progress);
+                lyricNewScrollDetailView.setMusicPlayerPos(progress);
+                lyricNewScrollView.setMusicPlayerPos(progress);
+                //getViewDataBinding().hpvProgress.setCurrentCount(progress);
+                //getViewDataBinding().pbNewProgress.setProgress(progress);
+            }
 
         }
 
@@ -2086,10 +2100,12 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Log.i(TAG, "Click: down ");
+                    isOnTouchSeekBar = true;
                     binder.posLock(true);
                     break;
                 case MotionEvent.ACTION_UP:
                     Log.i(TAG, "Click: up ");
+                    isOnTouchSeekBar = false;
                     binder.posLock(false);
                     break;
             }

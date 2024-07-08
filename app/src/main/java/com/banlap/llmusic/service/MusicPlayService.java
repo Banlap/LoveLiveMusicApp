@@ -16,6 +16,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -93,6 +94,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static String currentMusicImg ="";  //当前音乐的图片 目前仅用于UI方面 看是否能去掉
     public static Bitmap currentMusicBitmap; //当前音乐的图片Bitmap
 
+    private Thread musicPosThread;
 
     Runnable musicPosRunnable = new Runnable() {
         @Override
@@ -109,7 +111,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         }
                     }
                     int currentPosition = mediaPlayer.getCurrentPosition();
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_CURRENT_TIME, TimeUtil.rebuildTime(currentPosition)));
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_POS, currentPosition));
 
                     mStartPosition = currentPosition;
@@ -332,7 +333,15 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         public void player(final Music dataSource, final boolean isLoop, final HttpProxyCacheServer proxyCacheServer, final List<MusicLyric> musicLyrics) {
             try {
                 stop();
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
+
+                //延迟0.2秒处理进度条等ui内容，同时线程休眠0.2秒
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
+                    }
+                }, 200);
+                Thread.sleep(200);
 
                 mediaPlayer = new MediaPlayer();
 
@@ -365,7 +374,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         mediaPlayer.start();
                         mAllPosition = mediaPlayer.getDuration();
                         mAudioSessionId = mediaPlayer.getAudioSessionId();
-                        Log.i(TAG, "mAudioSessionId: " + mAudioSessionId);
+                        Log.i(TAG, "mAudioSessionId: " + mAudioSessionId + " isStop: " + isStop);
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, isStop));
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, mediaPlayer.getDuration()));
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_VISUALIZER));
@@ -380,9 +389,9 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         );
                         updateMusicNotification(mediaPlayer.isPlaying());
 
-                        new Thread(musicPosRunnable).start();
-                        //AppExecutors.getInstance().networkIO().execute(runnable);
-                        //ThreadTask.getInstance().executorNetThread(runnable, 1);
+                        musicPosThread = new Thread(musicPosRunnable);
+                        musicPosThread.start();
+
                     }
                 });
                 mediaPlayer.setLooping(isLoop);
@@ -404,7 +413,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     }
                 });
 
-            } catch(IOException e) {
+            } catch(Exception e) {
                 e.printStackTrace();
             }
         }
@@ -635,7 +644,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     }
 
     public void updatePlaybackState(int state, MediaSessionCompat mediaSession) {
-        Log.e(TAG, "mediaPlayer.getCurrentPosition(): " + mediaPlayer.getCurrentPosition());
+        //Log.e(TAG, "mediaPlayer.getCurrentPosition(): " + mediaPlayer.getCurrentPosition());
         stateBuilder = new PlaybackStateCompat.Builder();
         stateBuilder.setActions(
                 PlaybackStateCompat.ACTION_PLAY | PlaybackStateCompat.ACTION_PAUSE |

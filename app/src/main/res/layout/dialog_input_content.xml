@@ -43,7 +43,7 @@
                 android:id="@+id/civ_image"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:background="@drawable/ic_music_cover"
+                android:background="@drawable/ic_music_cover_4"
                 />
 
             <TextView

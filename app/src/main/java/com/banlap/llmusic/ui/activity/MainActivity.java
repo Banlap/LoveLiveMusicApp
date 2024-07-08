@@ -186,6 +186,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private boolean isShowNewMusicList = false;         //判断是否显新版音乐清单
     private boolean isClickNewSingleLyricView = false;  //判断是否点击新版音乐歌词展示
     public static boolean isPlay = false;               //判断是否播放音乐
+    public static boolean isOnTouchSeekBar = false;      //是否按着控制条
+
     public Music currentMusicDetail;                    //当前播放的歌曲总数据
 
     public static boolean isFavorite = false;           //当前歌曲是否已收藏
@@ -982,7 +984,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isClickLocalPlayList = false;
                 break;
             case ThreadEvent.GET_LOCAL_PLAY_LIST_SUCCESS:
-                updateMusicDetailMessage(event.str, event.str, "", getViewDataBinding().ivLogo, R.drawable.ic_music_cover, 80, 80);
+                updateMusicDetailMessage(event.str, event.str, "", getViewDataBinding().ivLogo, R.drawable.ic_music_cover_4, 80, 80);
                 if(event.byteArray != null && event.byteArray.length >0) {
                     Bitmap bitmap = BitmapFactory.decodeByteArray(event.byteArray, 0, event.byteArray.length);
                     getViewDataBinding().ivLogo.setImageBitmap(bitmap);
@@ -1158,14 +1160,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
 
             case ThreadEvent.VIEW_SEEK_BAR_POS:
-                lyricScrollView.setMusicPlayerPos(event.i);
-                lyricNewScrollDetailView.setMusicPlayerPos(event.i);
-                lyricNewScrollView.setMusicPlayerPos(event.i);
-                getViewDataBinding().sbMusicBar.setProgress(event.i);
-                getViewDataBinding().sbNewMusicBar.setProgress(event.i);
-                getViewDataBinding().hpvProgress.setCurrentCount(event.i);
-                getViewDataBinding().pbNewProgress.setProgress(event.i);
-
+                if(!isOnTouchSeekBar) {
+                    lyricScrollView.setMusicPlayerPos(event.i);
+                    lyricNewScrollDetailView.setMusicPlayerPos(event.i);
+                    lyricNewScrollView.setMusicPlayerPos(event.i);
+                    getViewDataBinding().sbMusicBar.setProgress(event.i);
+                    getViewDataBinding().sbNewMusicBar.setProgress(event.i);
+                    getViewDataBinding().hpvProgress.setCurrentCount(event.i);
+                    getViewDataBinding().pbNewProgress.setProgress(event.i);
+                }
                 //binder.getMediaController().getTransportControls().seekTo(event.i);
                 //EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.UPDATE_NOTIFICATION_SEEK_BAR_POS));
                 break;
@@ -3051,16 +3054,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            //拖动时改变显示时间
-            getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
-            getViewDataBinding().tvNewStartTime.setText(getViewModel().rebuildTime(progress));
-            //Log.i(TAG, "progress: " + progress);
-            lyricScrollView.setMusicPlayerPos(progress);
-            lyricNewScrollDetailView.setMusicPlayerPos(progress);
-            lyricNewScrollView.setMusicPlayerPos(progress);
-            getViewDataBinding().hpvProgress.setCurrentCount(progress);
-            getViewDataBinding().pbNewProgress.setProgress(progress);
-
+            if(!isOnTouchSeekBar) {
+                //拖动时改变显示时间
+                getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
+                getViewDataBinding().tvNewStartTime.setText(getViewModel().rebuildTime(progress));
+                //Log.i(TAG, "progress: " + progress);
+                lyricScrollView.setMusicPlayerPos(progress);
+                lyricNewScrollDetailView.setMusicPlayerPos(progress);
+                lyricNewScrollView.setMusicPlayerPos(progress);
+                getViewDataBinding().hpvProgress.setCurrentCount(progress);
+                getViewDataBinding().pbNewProgress.setProgress(progress);
+            }
         }
 
         @Override
@@ -3090,10 +3094,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     Log.i(TAG, "Click: down ");
+                    isOnTouchSeekBar = true;
                     binder.posLock(true);
                     break;
                 case MotionEvent.ACTION_UP:
                     Log.i(TAG, "Click: up ");
+                    isOnTouchSeekBar = false;
                     binder.posLock(false);
                     break;
             }
@@ -3720,7 +3726,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         Bitmap bitmap = BitmapFactory.decodeByteArray(list.get(position).playListImgByte, 0, list.get(position).playListImgByte.length);
                         binding.civImage.setImageBitmap(bitmap);
                     } else {
-                        binding.civImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover));
+                        binding.civImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover_4));
                     }
                     //点击添加到该自建歌单
                     binding.llMusicAll.setOnClickListener(new View.OnClickListener() {

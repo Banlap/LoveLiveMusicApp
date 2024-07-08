@@ -29,7 +29,7 @@
                 android:layout_width="55dp"
                 android:layout_height="55dp"
                 android:layout_margin="5dp"
-                android:background="@drawable/ic_music_cover"
+                android:background="@drawable/ic_music_cover_4"
                 />
 
             <LinearLayout

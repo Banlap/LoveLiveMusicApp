@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 171
+        versionCode 172
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -161,6 +161,10 @@ android {
         //1.优化音乐框架部分内容、优化通知栏显示问题
         //2.调整界面模式开启位置
         //3.全新适配平板模式
+        versionName "1.7.2"
+        //1.修复平板模式后退到系统桌面再次进入数据丢失
+        //2.修复点击或拖动播放进度条闪跳问题
+
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息

@@ -147,9 +147,11 @@ public class NotificationHelper {
         }
 
         builder.setChannelId(context.getPackageName());
-        builder.setPriority(NotificationCompat.PRIORITY_MAX);
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
         builder.setCategory(Notification.CATEGORY_TRANSPORT);
+        builder.setDefaults(0); // 禁用所有默认的提示行为
+        builder.setSilent(true); // 设置静默通知
         builder.setShowWhen(false);
         builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
         builder.setContentTitle(musicName);

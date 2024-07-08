@@ -108,6 +108,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_SEEK_BAR_POS = 0x50;
     public static final int UPDATE_NOTIFICATION_SEEK_BAR_POS = 0x501;
 
+    public static final int RUNNABLE_DELAY = 0x511;
     public static final int VIEW_SEEK_BAR_RESUME = 0x51;
     public static final int VIEW_PAUSE = 0x52;   //处理播放或暂停
     public static final int VIEW_SHOW_VISUALIZER =0x521;

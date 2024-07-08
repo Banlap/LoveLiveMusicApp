@@ -795,7 +795,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             Bitmap bitmap = BitmapFactory.decodeByteArray(localPlayList.get(position).playListImgByte, 0, localPlayList.get(position).playListImgByte.length);
                             binding.ivMusicImg.setImageBitmap(bitmap);
                         } else {
-                            binding.ivMusicImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover));
+                            binding.ivMusicImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover_4));
                         }
                         binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                             @Override
