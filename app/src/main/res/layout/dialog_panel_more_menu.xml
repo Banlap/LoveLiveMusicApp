@@ -14,364 +14,579 @@
         android:paddingBottom="5dp"
         >
 
-        <LinearLayout
-            android:id="@+id/ll_more_set_dialog"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
             <LinearLayout
-                android:id="@+id/ll_system_set"
+                android:id="@+id/ll_more_set_dialog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="5dp">
-
-                <ImageView
-                    android:id="@+id/iv_system_set_title"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="@drawable/ic_settings_light"
-                    android:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/tv_system_set_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:text="系统设置  〉"
-                    android:textColor="@color/light_ff"
-                    android:textSize="16sp" />
-
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="5dp">
-
-                <ImageView
-                    android:id="@+id/iv_lyric_set_title"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="@drawable/ic_lyric_settings_light_ff"
-                    android:visibility="visible" />
-
-                <TextView
-                    android:id="@+id/tv_lyric_set_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="start"
-                    android:text="歌词设置"
-                    android:textColor="@color/light_ff"
-                    android:textSize="16sp" />
-
-
-            </LinearLayout>
-
-            <!-- 默认页面下歌词调整 -->
-            <LinearLayout
-                android:id="@+id/ll_default_lyric_size_panel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="5dp">
-
-
-                <TextView
-                    android:id="@+id/tv_lyric_size_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="5dp"
-                    android:text="歌词大小"
-                    android:textColor="@color/light_ff"
-                    android:textSize="14sp" />
-
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/ll_system_set"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <ImageView
+                        android:id="@+id/iv_system_set_title"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/ic_settings_light"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_system_set_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="系统设置  〉"
+                        android:textColor="@color/light_ff"
+                        android:textSize="16sp" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+                    <ImageView
+                        android:id="@+id/iv_lyric_set_title"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:background="@drawable/ic_lyric_settings_light_ff"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tv_lyric_set_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:text="歌词设置"
+                        android:textColor="@color/light_ff"
+                        android:textSize="16sp" />
+
+
+                </LinearLayout>
+
+                <!-- 默认页面下歌词调整 -->
+                <LinearLayout
+                    android:id="@+id/ll_default_lyric_size_panel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="5dp">
+
+
+                    <TextView
+                        android:id="@+id/tv_lyric_size_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
+                        android:text="歌词大小"
+                        android:textColor="@color/light_ff"
+                        android:textSize="14sp" />
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <SeekBar
+                            android:id="@+id/sb_lyric_size"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:max="4"
+                            android:progress="0"
+                            android:splitTrack="false"
+                            android:thumbOffset="0dp"
+                            android:progressDrawable="@drawable/layer_progress_bar_default"
+                            android:thumb="@drawable/shape_round_white"
+                            />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="10dp"
+                            android:gravity="center_horizontal"
+                            >
+
+
+                            <TextView
+                                android:id="@+id/tv_value_25"
+                                android:layout_weight="1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:text="25"/>
+
+                            <TextView
+                                android:id="@+id/tv_value_30"
+                                android:layout_weight="1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:text="30"/>
+
+                            <TextView
+                                android:id="@+id/tv_value_35"
+                                android:layout_weight="1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:text="35"/>
+
+                            <TextView
+                                android:id="@+id/tv_value_40"
+                                android:layout_weight="1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:text="40"/>
+
+                            <TextView
+                                android:id="@+id/tv_value_45"
+                                android:layout_weight="1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textAlignment="center"
+                                android:text="45"/>
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+                <!-- 音乐页面下歌词调整 -->
+
+                <LinearLayout
+                    android:id="@+id/ll_new_lyric_size_panel"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <SeekBar
-                        android:id="@+id/sb_lyric_size"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:max="4"
-                        android:progress="0"
-                        android:splitTrack="false"
-                        android:thumbOffset="0dp"
-                        android:progressDrawable="@drawable/layer_progress_bar_default"
-                        android:thumb="@drawable/shape_round_white"
-                        />
-
                     <LinearLayout
+                        android:id="@+id/ll_single_lyric_size"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:layout_marginStart="10dp"
-                        android:layout_marginEnd="10dp"
-                        android:gravity="center_horizontal"
-                        >
+                        android:padding="5dp">
 
 
                         <TextView
-                            android:id="@+id/tv_value_25"
-                            android:layout_weight="1"
+                            android:id="@+id/tv_single_lyric_size_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:text="25"/>
+                            android:layout_marginEnd="5dp"
+                            android:text="滚动行歌词大小"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
 
-                        <TextView
-                            android:id="@+id/tv_value_30"
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:text="30"/>
 
-                        <TextView
-                            android:id="@+id/tv_value_35"
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:text="35"/>
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/tv_value_40"
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:text="40"/>
+                            <SeekBar
+                                android:id="@+id/sb_single_lyric_size"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:max="4"
+                                android:progress="0"
+                                android:splitTrack="false"
+                                android:thumbOffset="0dp"
+                                android:progressDrawable="@drawable/layer_progress_bar_default"
+                                android:thumb="@drawable/shape_round_white"
+                                />
 
-                        <TextView
-                            android:id="@+id/tv_value_45"
-                            android:layout_weight="1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textAlignment="center"
-                            android:text="45"/>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:gravity="center_horizontal"
+                                >
+
+
+                                <TextView
+                                    android:id="@+id/tv_single_value_25"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="25"/>
+
+                                <TextView
+                                    android:id="@+id/tv_single_value_30"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="30"/>
+
+                                <TextView
+                                    android:id="@+id/tv_single_value_35"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="35"/>
+
+                                <TextView
+                                    android:id="@+id/tv_single_value_40"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="40"/>
+
+                                <TextView
+                                    android:id="@+id/tv_single_value_45"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="45"/>
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+
+
                     </LinearLayout>
 
+                    <LinearLayout
+                        android:id="@+id/ll_detail_lyric_size"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_detail_lyric_size_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="5dp"
+                            android:text="详细歌词大小"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <SeekBar
+                                android:id="@+id/sb_detail_lyric_size"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:max="4"
+                                android:progress="0"
+                                android:splitTrack="false"
+                                android:thumbOffset="0dp"
+                                android:progressDrawable="@drawable/layer_progress_bar_default"
+                                android:thumb="@drawable/shape_round_white"
+                                />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:layout_marginStart="10dp"
+                                android:layout_marginEnd="10dp"
+                                android:gravity="center_horizontal"
+                                >
+
+
+                                <TextView
+                                    android:id="@+id/tv_detail_value_25"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="25"/>
+
+                                <TextView
+                                    android:id="@+id/tv_detail_value_30"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="30"/>
+
+                                <TextView
+                                    android:id="@+id/tv_detail_value_35"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="35"/>
+
+                                <TextView
+                                    android:id="@+id/tv_detail_value_40"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="40"/>
+
+                                <TextView
+                                    android:id="@+id/tv_detail_value_45"
+                                    android:layout_weight="1"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textAlignment="center"
+                                    android:text="45"/>
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <View
+                    android:visibility="gone"
+                    android:id="@+id/v_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:background="@color/gray_c9" />
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+
+                    <LinearLayout
+                        android:id="@+id/ll_name1_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_name1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="艺术家"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_value1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="xxxx"
+                            android:textColor="@color/light_ff"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_name2_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_name2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="时长"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_value2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="00:00"
+                            android:textColor="@color/light_ff"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_name3_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_name3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="比特率"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_value3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="0 kps"
+                            android:textColor="@color/light_ff"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_name4_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_name4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="大小"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_value4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="0 MB"
+                            android:textColor="@color/light_ff"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_name5_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_name5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="格式"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <View
+                            android:layout_weight="1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            />
+
+                        <TextView
+                            android:id="@+id/tv_value5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="MP3"
+                            android:textColor="@color/light_ff"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
 
             </LinearLayout>
 
-            <!-- 音乐页面下歌词调整 -->
+        </ScrollView>
 
-            <LinearLayout
-                android:id="@+id/ll_new_lyric_size_panel"
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:id="@+id/ll_single_lyric_size"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="5dp">
-
-
-                    <TextView
-                        android:id="@+id/tv_single_lyric_size_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:text="滚动行歌词大小"
-                        android:textColor="@color/light_ff"
-                        android:textSize="14sp" />
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <SeekBar
-                            android:id="@+id/sb_single_lyric_size"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:max="4"
-                            android:progress="0"
-                            android:splitTrack="false"
-                            android:thumbOffset="0dp"
-                            android:progressDrawable="@drawable/layer_progress_bar_default"
-                            android:thumb="@drawable/shape_round_white"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:gravity="center_horizontal"
-                            >
-
-
-                            <TextView
-                                android:id="@+id/tv_single_value_25"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="25"/>
-
-                            <TextView
-                                android:id="@+id/tv_single_value_30"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="30"/>
-
-                            <TextView
-                                android:id="@+id/tv_single_value_35"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="35"/>
-
-                            <TextView
-                                android:id="@+id/tv_single_value_40"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="40"/>
-
-                            <TextView
-                                android:id="@+id/tv_single_value_45"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="45"/>
-                        </LinearLayout>
-
-
-                    </LinearLayout>
-
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/ll_detail_lyric_size"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="5dp">
-
-
-                    <TextView
-                        android:id="@+id/tv_detail_lyric_size_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="5dp"
-                        android:text="详细歌词大小"
-                        android:textColor="@color/light_ff"
-                        android:textSize="14sp" />
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <SeekBar
-                            android:id="@+id/sb_detail_lyric_size"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:max="4"
-                            android:progress="0"
-                            android:splitTrack="false"
-                            android:thumbOffset="0dp"
-                            android:progressDrawable="@drawable/layer_progress_bar_default"
-                            android:thumb="@drawable/shape_round_white"
-                            />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:gravity="center_horizontal"
-                            >
-
-
-                            <TextView
-                                android:id="@+id/tv_detail_value_25"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="25"/>
-
-                            <TextView
-                                android:id="@+id/tv_detail_value_30"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="30"/>
-
-                            <TextView
-                                android:id="@+id/tv_detail_value_35"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="35"/>
-
-                            <TextView
-                                android:id="@+id/tv_detail_value_40"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="40"/>
-
-                            <TextView
-                                android:id="@+id/tv_detail_value_45"
-                                android:layout_weight="1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textAlignment="center"
-                                android:text="45"/>
-                        </LinearLayout>
-
-
-                    </LinearLayout>
-
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-
-        </LinearLayout>
 
     </RelativeLayout>
 

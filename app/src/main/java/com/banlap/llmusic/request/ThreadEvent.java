@@ -80,7 +80,9 @@ public class ThreadEvent<T> {
     public static final int SHOW_FRAGMENT = 0x301;
     public static final int PLAY_FINISH_SUCCESS = 0x31;
     public static final int PLAY_ERROR = 0x311;
-    public static final int MUSIC_LIST_REFRESH = 0x312;
+    public static final int GET_MUSIC_METADATA = 0x312;
+    public static final int VIEW_GET_MUSIC_METADATA = 0x313;
+
     public static final int PLAY_LIST_FIRST = 0x32;
     public static final int PLAY_MUSIC_BY_CHARACTER = 0x33;  //角色控制播放
     public static final int PLAY_LOCAL_MUSIC = 0x331;

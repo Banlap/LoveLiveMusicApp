@@ -10,6 +10,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.ui.ThemeHelper;
 import com.banlap.llmusic.uivm.fvm.MainListFVM;
+import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SPUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -108,9 +109,9 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                     recommendList.clear();
                     recommendList.addAll(event.musicList);
 
-                    SPUtil.setListValue(getContext(), SPUtil.RecommendListData, recommendList);
+                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.RecommendListData, recommendList);
 
-                    Glide.with(getContext())
+                    Glide.with(LLActivityManager.getInstance().getTopActivity())
                             .setDefaultRequestOptions(requestOptions)
                             .load(recommendList.get(0).getMusicImg())
                             .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
@@ -119,7 +120,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
 
                     getViewDataBinding().tvRecommend1.setText(recommendList.get(0).musicName);
 
-                    Glide.with(getContext())
+                    Glide.with(LLActivityManager.getInstance().getTopActivity())
                             .setDefaultRequestOptions(requestOptions)
                             .load(recommendList.get(1).getMusicImg())
                             .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
@@ -128,7 +129,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
 
                     getViewDataBinding().tvRecommend2.setText(recommendList.get(1).musicName);
 
-                    Glide.with(getContext())
+                    Glide.with(LLActivityManager.getInstance().getTopActivity())
                             .setDefaultRequestOptions(requestOptions)
                             .load(recommendList.get(2).getMusicImg())
                             .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))

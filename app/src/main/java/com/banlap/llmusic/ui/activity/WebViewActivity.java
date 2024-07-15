@@ -24,8 +24,7 @@ public class WebViewActivity extends BaseActivity<WebViewVM, ActivityWebviewBind
 
     @Override
     protected void initView() {
-        getViewDataBinding().wvUrl.loadUrl("https://banlap-db.oss-cn-guangzhou.aliyuncs.com/music/lovelive/app/LLMusicPlayer_official_v1.3.1_2022-05-22_16-53.apk");
-        //getViewDataBinding().wvUrl.loadUrl("https://www.baidu.com");
+        getViewDataBinding().wvUrl.loadUrl("https://www.baidu.com");
         getViewDataBinding().wvUrl.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);//设置js可以直接打开窗口，如window.open()，默认为false
         getViewDataBinding().wvUrl.getSettings().setJavaScriptEnabled(true);//是否允许执行js，默认为false。设置true时，会提醒可能造成XSS漏洞
         getViewDataBinding().wvUrl.getSettings().setSupportZoom(true);//是否可以缩放，默认true

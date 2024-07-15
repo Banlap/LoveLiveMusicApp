@@ -1211,10 +1211,11 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             case ThreadEvent.VIEW_IMAGE_URL:
                 MusicPlayService.currentMusicName = event.str;
                 MusicPlayService.currentMusicSinger = event.str2;
-                MusicPlayService.currentMusicBitmap = event.bitmap;
+                if(event.bitmap != null) {
+                    MusicPlayService.currentMusicBitmap = event.bitmap;
+                }
 
-                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
-
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusicBitmap, false);
                 MusicPlayService.updateWidgetUI(context, false);
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC:
@@ -2059,18 +2060,15 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
         @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            if(!isOnTouchSeekBar) {
-                //拖动时改变显示时间
-                //getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
-                getViewDataBinding().tvNewStartTime.setText(TimeUtil.rebuildTime(progress));
-                //Log.i(TAG, "progress: " + progress);
-                //lyricScrollView.setMusicPlayerPos(progress);
-                lyricNewScrollDetailView.setMusicPlayerPos(progress);
-                lyricNewScrollView.setMusicPlayerPos(progress);
-                //getViewDataBinding().hpvProgress.setCurrentCount(progress);
-                //getViewDataBinding().pbNewProgress.setProgress(progress);
-            }
-
+            //拖动时改变显示时间
+            //getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
+            getViewDataBinding().tvNewStartTime.setText(TimeUtil.rebuildTime(progress));
+            //Log.i(TAG, "progress: " + progress);
+            //lyricScrollView.setMusicPlayerPos(progress);
+            lyricNewScrollDetailView.setMusicPlayerPos(progress);
+            lyricNewScrollView.setMusicPlayerPos(progress);
+            //getViewDataBinding().hpvProgress.setCurrentCount(progress);
+            //getViewDataBinding().pbNewProgress.setProgress(progress);
         }
 
         @Override

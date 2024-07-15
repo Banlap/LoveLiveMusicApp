@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -49,6 +50,7 @@ public class BaseApplication extends Application {
     private long lastChangeTime = 0; //上次截图时间
     private AlertDialog mAlertDialog;                   //弹窗
 
+    private static String mCacheMusicName="";
 
     ContentObserver contentObserver = new ContentObserver(new Handler()) {
         @Override
@@ -234,14 +236,22 @@ public class BaseApplication extends Application {
        /* return new HttpProxyCacheServer(this);*/
         return new HttpProxyCacheServer.Builder(this)
                 .cacheDirectory(getAudioCacheDir(this))
-                //.fileNameGenerator(new BaseNameGenerator())
+                .fileNameGenerator(new BaseNameGenerator())
                 .build();
+    }
+
+    public static void setCacheMusicName(String musicName) {
+        mCacheMusicName = musicName;
     }
 
     public class BaseNameGenerator implements FileNameGenerator { //缓存的命名规则
         public String generate(String url) {
             Uri uri = Uri.parse(url);
-            String audioId = uri.getQueryParameter("guid");
+            //String audioId = uri.getQueryParameter("guid");
+            String audioId = "ll-" + url.hashCode();
+            if(!TextUtils.isEmpty(mCacheMusicName)) {
+                audioId = "ll-" +  mCacheMusicName;
+            }
             return audioId + ".mp3";
         }
     }

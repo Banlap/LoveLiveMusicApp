@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.Build;
@@ -25,6 +26,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -46,6 +48,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -61,6 +64,7 @@ import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.media3.common.Metadata;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -135,6 +139,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -184,6 +189,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private boolean isShowControllerModePanel = false;  //判断是否显示新版音乐控制模式
     private boolean isShowNewPlayController = false;    //判断是否显示新版音乐控制栏
     private boolean isShowNewMusicList = false;         //判断是否显新版音乐清单
+
+    private boolean isShowMoreMenu = false;         //判断是否显更多菜单
+
     private boolean isClickNewSingleLyricView = false;  //判断是否点击新版音乐歌词展示
     public static boolean isPlay = false;               //判断是否播放音乐
     public static boolean isOnTouchSeekBar = false;      //是否按着控制条
@@ -225,7 +233,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private int defaultLyricSize = 25;                        //默认歌词字体大小
     private int singleLyricSize = 25;                        //滚动行歌词字体大小
     private int detailLyricSize = 25;                        //明细歌词字体大小
-
+    private int navigationBarHeight = 0;
     private LyricScrollView lyricScrollView;              //
     private LyricScrollView lyricNewScrollDetailView;              //
     private SingleLyricScrollView lyricNewScrollView;              //
@@ -316,8 +324,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     }
 
-
-
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
     @Override
     protected void initView() {
@@ -325,6 +331,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
         initCheckPermission();
+        //检查是否存在底部栏
+        initCheckNavigationBar();
         //初始化主页内容
         initMainView();
         //连接数据库
@@ -337,7 +345,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         BluetoothUtil.getInstance().registerBluetoothReceiver(this);
         //初始化碎片
         initFragment();
-        //
     }
 
     @Override
@@ -378,6 +385,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().clAlbumDetail.setVisibility(View.VISIBLE);
         getViewDataBinding().clControllerMode.setVisibility(View.VISIBLE);
         getViewDataBinding().clNewCurrentMusicList.setVisibility(View.VISIBLE);
+        getViewDataBinding().rlMoreSetDialog.setVisibility(View.VISIBLE);
 
         getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
         getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
@@ -390,9 +398,25 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         String controllerScene = SPUtil.getStrValue(MainActivity.this, SPUtil.SaveControllerScene);
 
         //动画：初始化将新版音乐控制器移走
-        ObjectAnimator newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
+        ObjectAnimator newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, this), getViewDataBinding().rlNewPlayController);
         //动画：初始化将新版播放列表移走
         ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(325, this), getViewDataBinding().clNewCurrentMusicList);
+        //动画：初始化将更多菜单移走
+        ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
+
+        //配置简约模式下控制器高度
+        ViewGroup.MarginLayoutParams marginLayoutParams1 = (ViewGroup.MarginLayoutParams) getViewDataBinding().clCurrentMusicPanel.getLayoutParams();
+        marginLayoutParams1.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().clCurrentMusicPanel.setLayoutParams(marginLayoutParams1);
+
+        ViewGroup.MarginLayoutParams marginLayoutParams2 = (ViewGroup.MarginLayoutParams) getViewDataBinding().clCurrentMusicList.getLayoutParams();
+        marginLayoutParams2.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().clCurrentMusicList.setLayoutParams(marginLayoutParams2);
+
+        //配置默认模式下控制器位置
+        ViewGroup.MarginLayoutParams marginLayoutParams3 = (ViewGroup.MarginLayoutParams) getViewDataBinding().rlNewPlayController.getLayoutParams();
+        marginLayoutParams3.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().rlNewPlayController.setLayoutParams(marginLayoutParams3);
 
         if(!TextUtils.isEmpty(controllerScene)) {
             if(controllerScene.equals("NewScene")) {
@@ -406,6 +430,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         newPlayController.start();
         newCurrentMusicList.start();
+        newMoreMenu.start();
 
         String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
         if(isBGScene.equals("1")) {
@@ -558,6 +583,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     }
 
+    /**
+     * 判断是否存在底部栏，存在则调整高度
+     * */
+    private void initCheckNavigationBar() {
+        SystemUtil.getInstance().hasNavigationBar(this, new SystemUtil.NavigationBarCallback() {
+            @Override
+            public void onResult(boolean isShow, int height) {
+                if(isShow) { //存在底部导航栏则调整部分ui高度
+                    navigationBarHeight = height;
+                    Log.i(TAG, "navigationBarHeight: " + navigationBarHeight);
+                }
+            }
+        });
+    }
 
     private Disposable textChangeDisposable;
     FlowableEmitter<String> mEmitter;
@@ -573,6 +612,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().rlShowLoading.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().rlDisableClick.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().rlDisableClick3.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().rlDisableClick4.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llMoreSetMusicInfo.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llAllPlay.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llSearch.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llSort.setOnClickListener(new ButtonClickListener());
@@ -585,6 +626,79 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().lvNewShowLyric.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().lvNewShowLyricDetail.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().lvNewShowLyricDetail.setIsUseLyricDetailColor(true);
+
+        //更多菜单
+        getViewDataBinding().llSystemSet.setOnClickListener(new ButtonClickListener());
+
+        //歌词大小设置监听
+        getViewDataBinding().sbLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                int size = 25 + (i * 5);
+                if(SystemUtil.getInstance().isSmallScaleDevice()) {
+                    size = 15 + (i * 5);
+                }
+                getViewDataBinding().lvShowLyric.setLyricSize(size);
+                defaultLyricSize = size;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                getViewDataBinding().lvShowLyric.setIsResetLyricSize(true);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                getViewDataBinding().lvShowLyric.setIsResetLyricSize(false);
+                SPUtil.setStrValue(MainActivity.this, SPUtil.DefaultLyricSizeData, "" + defaultLyricSize);
+            }
+        });
+        getViewDataBinding().sbSingleLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                int size = 25 + (i * 5);
+                if(SystemUtil.getInstance().isSmallScaleDevice()) {
+                    size = 15 + (i * 5);
+                }
+                getViewDataBinding().lvNewShowLyric.setLyricSize(size);
+                singleLyricSize = size;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                getViewDataBinding().lvNewShowLyric.setIsResetLyricSize(true);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                getViewDataBinding().lvNewShowLyric.setIsResetLyricSize(false);
+                SPUtil.setStrValue(MainActivity.this, SPUtil.SingleLyricSizeData, "" + singleLyricSize);
+            }
+        });
+        getViewDataBinding().sbDetailLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                int size = 25 + (i * 5);
+                if(SystemUtil.getInstance().isSmallScaleDevice()) {
+                    size = 15 + (i * 5);
+                }
+                getViewDataBinding().lvNewShowLyricDetail.setLyricSize(size);
+                detailLyricSize = size;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                getViewDataBinding().lvNewShowLyricDetail.setIsResetLyricSize(true);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                getViewDataBinding().lvNewShowLyricDetail.setIsResetLyricSize(false);
+                SPUtil.setStrValue(MainActivity.this, SPUtil.DetailLyricSizeData, "" + detailLyricSize);
+            }
+        });
+        //
+
         getViewDataBinding().lvNewShowLyricDetail.setOnLyricClickListener(new LyricScrollView.LyricClickListener() {
             @Override
             public void onSingleTap() {
@@ -648,7 +762,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     }
                 } else {
                     musicList.clear();
-                    if(tempMusicList!=null) {
+                    if(tempMusicList != null) {
                         musicList.addAll(tempMusicList);
                     }
                     musicListAdapter.notifyDataSetChanged();
@@ -862,11 +976,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 初始化通知栏消息 */
     @SuppressLint("RemoteViewLayout")
-    private void initNotificationHelper(String musicName, String musicSinger, String imgUrl) {
-        if(!imgUrl.equals("")) {
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, musicName, musicSinger, imgUrl));
+    private void initNotificationHelper(String musicName, String musicSinger, String imgUrl, Bitmap musicImageBitmap) {
+        if(!TextUtils.isEmpty(imgUrl)) {
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, musicName, musicSinger, imgUrl, musicImageBitmap, false));
         } else {
-            NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, null, true);
+            NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, musicImageBitmap, true);
             MusicPlayService.updateWidgetUI(MainActivity.this, false);
         }
     }
@@ -1248,8 +1362,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
-                getViewDataBinding().tvAllTime.setText(getViewModel().rebuildTime(event.i));
-                getViewDataBinding().tvNewAllTime.setText(getViewModel().rebuildTime(event.i));
+                getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
+                getViewDataBinding().tvNewAllTime.setText(TimeUtil.rebuildTime(event.i));
                 String musicName = event.music.musicName;
                 getViewDataBinding().tvMusicName.setText(musicName);
                 getViewDataBinding().tvNewMusicName.setText(musicName);
@@ -1291,7 +1405,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if(event.music.isLocal) {
-                        if(null != event.music.musicImgByte) {
+                        if(event.music.musicImgByte != null) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
@@ -1301,24 +1415,26 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         }
                     } else {
                         if(!event.music.musicImg.isEmpty()) {
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
+                            //重复调用，在initNotificationHelper中有调用
+                            //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
                             MusicPlayService.currentMusicImg = "";
-                            startMusicService(true, event.music.musicName, event.music.musicSinger, null);
+                            startMusicService(true, event.music.musicName, event.music.musicSinger, event.music.musicImgByte != null? BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : null);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
                     }
                 }
-                initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg);
+                initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg, event.music.musicImgByte != null? BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : null);
 
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
                 MusicPlayService.currentMusicName = event.str;
                 MusicPlayService.currentMusicSinger = event.str2;
-                MusicPlayService.currentMusicBitmap = event.bitmap;
+                if(event.bitmap != null) {
+                    MusicPlayService.currentMusicBitmap = event.bitmap;
+                }
 
-                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, event.bitmap, false);
-
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusicBitmap, false);
                 MusicPlayService.updateWidgetUI(MainActivity.this, false);
                 break;
             case ThreadEvent.VIEW_LYRIC:
@@ -1493,7 +1609,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
                 controllerModeAnimator.start();
 
-                ObjectAnimator newPlayController1 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
+                ObjectAnimator newPlayController1 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
                 newPlayController1.start();
 
                 musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
@@ -1566,6 +1682,29 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 playMusicListAdapter.notifyDataSetChanged();
                 //刷新新播放界面是否收藏歌曲
                 setCurrentMusicFavorite(spTempList, MusicPlayService.currentMusicName);
+                break;
+            case ThreadEvent.VIEW_GET_MUSIC_METADATA:
+                if(!TextUtils.isEmpty(event.str)){
+                    MusicPlayService.currentMusicBitrate = event.str;
+                    getViewDataBinding().tvBitrateValue.setText(event.str + " kps");
+                }
+                if(!TextUtils.isEmpty(event.str2)) {
+                    MusicPlayService.currentMusicMime = event.str2;
+                    getViewDataBinding().tvMimeValue.setText(event.str2);
+                }
+
+                if(MusicPlayService.mMediaSession != null) {
+                    MediaMetadataCompat metadata =  MusicPlayService.mMediaSession.getController().getMetadata();
+                    if(metadata != null) {
+                        MusicPlayService.currentMusicFileSize = getViewModel().showFileSize(
+                                metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE),
+                                metadata.getString("IsLocal"),
+                                metadata.getString("Path")
+                        );
+                        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
+                    }
+                }
+
                 break;
         }
     }
@@ -1755,6 +1894,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.UPDATE_NOTIFICATION_SEEK_BAR_POS:
                 break;
+            case ThreadEvent.GET_MUSIC_METADATA:
+                if(event.music != null) {
+                    Map<String, String> map = MusicPlayService.getMediaMeta(event.music);
+                    String bitrate = map.get("Bitrate");
+                    String mime = map.get("Mime");
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_GET_MUSIC_METADATA, bitrate, mime));
+                }
+                break;
         }
     }
 
@@ -1763,6 +1910,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         @SuppressLint("SetTextI18n")
         @Override
         public void onClick(View v) {
+            if(isDoubleClick()) { return; }
             if(v.getId() == R.id.rl_play_controller) {
                 Log.i("ABMediaPlay", "clickController");
             } else if(v.getId() == R.id.rl_show_loading) {
@@ -1772,18 +1920,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 hideAllMusicView();
             } else if (v.getId() == R.id.rl_disable_click_3) {
                 showOrHideNewMusicPlayerList();
+            } else if (v.getId() == R.id.rl_disable_click_4) {
+                showNewMoreMenu();
             } else if (v.getId() == R.id.ll_all_play) {
-                if(isDoubleClick()) { return; }
+                //if(isDoubleClick()) { return; }
                 allPlayMusic();
             } else if (v.getId() == R.id.ll_search) {
-                if(isDoubleClick()) { return; }
+                //if(isDoubleClick()) { return; }
                 isSearchMusic = true;
                 searchMusic();
             } else if (v.getId() == R.id.ll_sort) {
-                if(isDoubleClick()) { return; }
+                //if(isDoubleClick()) { return; }
                 showSortMenuDialog(v);
             } else if (v.getId() == R.id.ll_cancel) {
-                if(isDoubleClick()) { return; }
+                //if(isDoubleClick()) { return; }
                 isSearchMusic = false;
                 searchCancel();
             } else if (v.getId() == R.id.ll_settings) {
@@ -1817,6 +1967,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 showOrHideNewLyricDetailView(true);
             } else if(v.getId() == R.id.lv_new_show_lyric_detail) {
                 showOrHideNewLyricDetailView(false);
+            } else if(v.getId() == R.id.ll_system_set) {
+                if(isShowMoreMenu) {
+                    showNewMoreMenu();
+                }
+                //跳转设置页面
+                new Handler().postDelayed(() -> runOnUiThread(MainActivity.this::intoSettings), 200);
             }
         }
     }
@@ -2369,120 +2525,50 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     }
 
     /** 面板里面的更多菜单 */
+    @SuppressLint("SetTextI18n")
     public void panelMoreMenu(View view) {
         if(isDoubleClick()) { return; }
 
-        DialogPanelMoreMenuBinding panelMoreMenuBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
-                R.layout.dialog_panel_more_menu, null, false);
-
-        PopupWindow panelMorePopupWindow  = new PopupWindow(panelMoreMenuBinding.getRoot(),
-                WindowManager.LayoutParams.MATCH_PARENT,  WindowManager.LayoutParams.WRAP_CONTENT, true);
-
-        panelMoreMenuBinding.llSystemSet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                intoSettings();
-                panelMorePopupWindow.dismiss();
+        if(MusicPlayService.mMediaSession != null) {
+            MediaMetadataCompat metadata =  MusicPlayService.mMediaSession.getController().getMetadata();
+            if(metadata != null) {
+                getViewDataBinding().tvArtistValue.setText(MusicPlayService.currentMusicSinger);
+                getViewDataBinding().tvSongTimeValue.setText(TimeUtil.rebuildTime(MusicPlayService.mAllPosition)+"");
+                getViewDataBinding().tvBitrateValue.setText(MusicPlayService.currentMusicBitrate + " kps");
+                getViewDataBinding().tvMimeValue.setText(MusicPlayService.currentMusicMime);
+                getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
             }
-        });
-        panelMoreMenuBinding.sbLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                int size = 25 + (i * 5);
-                if(SystemUtil.getInstance().isSmallScaleDevice()) {
-                    size = 15 + (i * 5);
-                }
-                getViewDataBinding().lvShowLyric.setLyricSize(size);
-                defaultLyricSize = size;
-            }
+        }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                getViewDataBinding().lvShowLyric.setIsResetLyricSize(true);
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                getViewDataBinding().lvShowLyric.setIsResetLyricSize(false);
-                SPUtil.setStrValue(MainActivity.this, SPUtil.DefaultLyricSizeData, "" + defaultLyricSize);
-            }
-        });
-
-        panelMoreMenuBinding.sbSingleLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                int size = 25 + (i * 5);
-                if(SystemUtil.getInstance().isSmallScaleDevice()) {
-                    size = 15 + (i * 5);
-                }
-                getViewDataBinding().lvNewShowLyric.setLyricSize(size);
-                singleLyricSize = size;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                getViewDataBinding().lvNewShowLyric.setIsResetLyricSize(true);
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                getViewDataBinding().lvNewShowLyric.setIsResetLyricSize(false);
-                SPUtil.setStrValue(MainActivity.this, SPUtil.SingleLyricSizeData, "" + singleLyricSize);
-            }
-        });
-
-        panelMoreMenuBinding.sbDetailLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                int size = 25 + (i * 5);
-                if(SystemUtil.getInstance().isSmallScaleDevice()) {
-                    size = 15 + (i * 5);
-                }
-                getViewDataBinding().lvNewShowLyricDetail.setLyricSize(size);
-                detailLyricSize = size;
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                getViewDataBinding().lvNewShowLyricDetail.setIsResetLyricSize(true);
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                getViewDataBinding().lvNewShowLyricDetail.setIsResetLyricSize(false);
-                SPUtil.setStrValue(MainActivity.this, SPUtil.DetailLyricSizeData, "" + detailLyricSize);
-            }
-        });
-
-        panelMoreMenuBinding.llDefaultLyricSizePanel.setVisibility(View.VISIBLE);
-        panelMoreMenuBinding.llNewLyricSizePanel.setVisibility(View.GONE);
-        int popWindowY = -150;
 
         String defaultSize = SPUtil.getStrValue(MainActivity.this, SPUtil.DefaultLyricSizeData);
         if(!TextUtils.isEmpty(defaultSize)) {
             int defaultSizeInt = Integer.parseInt(defaultSize);
             if(SystemUtil.getInstance().isSmallScaleDevice()) {
-                panelMoreMenuBinding.sbLyricSize.setProgress((defaultSizeInt - 15)/5);
+                getViewDataBinding().sbLyricSize.setProgress((defaultSizeInt - 15)/5);
             } else {
-                panelMoreMenuBinding.sbLyricSize.setProgress((defaultSizeInt - 25)/5);
+                getViewDataBinding().sbLyricSize.setProgress((defaultSizeInt - 25)/5);
             }
         }
+
+        getViewDataBinding().llDefaultLyricSizePanel.setVisibility(View.VISIBLE);
+        getViewDataBinding().llNewLyricSizePanel.setVisibility(View.GONE);
 
         //根据当前显示的歌词页面展示对应设置
         String controllerScene = SPUtil.getStrValue(MainActivity.this, SPUtil.SaveControllerScene);
         if(!TextUtils.isEmpty(controllerScene)) {
+
             if(controllerScene.equals("NewScene")) {
-                panelMoreMenuBinding.llDefaultLyricSizePanel.setVisibility(View.GONE);
-                panelMoreMenuBinding.llNewLyricSizePanel.setVisibility(View.VISIBLE);
-                popWindowY = -185;
+                getViewDataBinding().llDefaultLyricSizePanel.setVisibility(View.GONE);
+                getViewDataBinding().llNewLyricSizePanel.setVisibility(View.VISIBLE);
 
                 String singleSize = SPUtil.getStrValue(MainActivity.this, SPUtil.SingleLyricSizeData);
                 if(!TextUtils.isEmpty(singleSize)) {
                     int singleSizeInt = Integer.parseInt(singleSize);
                     if(SystemUtil.getInstance().isSmallScaleDevice()) {
-                        panelMoreMenuBinding.sbSingleLyricSize.setProgress((singleSizeInt - 15)/5);
+                        getViewDataBinding().sbSingleLyricSize.setProgress((singleSizeInt - 15)/5);
                     } else {
-                        panelMoreMenuBinding.sbSingleLyricSize.setProgress((singleSizeInt - 25)/5);
+                        getViewDataBinding().sbSingleLyricSize.setProgress((singleSizeInt - 25)/5);
                     }
                 }
 
@@ -2490,24 +2576,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(!TextUtils.isEmpty(detailSize)) {
                     int detailSizeInt = Integer.parseInt(detailSize);
                     if(SystemUtil.getInstance().isSmallScaleDevice()) {
-                        panelMoreMenuBinding.sbDetailLyricSize.setProgress((detailSizeInt - 15)/5);
+                        getViewDataBinding().sbDetailLyricSize.setProgress((detailSizeInt - 15)/5);
                     } else {
-                        panelMoreMenuBinding.sbDetailLyricSize.setProgress((detailSizeInt - 25)/5);
+                        getViewDataBinding().sbDetailLyricSize.setProgress((detailSizeInt - 25)/5);
                     }
                 }
             }
         }
 
-
-
-        panelMorePopupWindow.setTouchable(true);
-        //变更主题
-        ThemeHelper.getInstance().panelMenuPopupWindowTheme(this, rThemeId, panelMorePopupWindow, panelMoreMenuBinding);
-        panelMorePopupWindow.setAnimationStyle(R.style.showPopupMoreMenuAnimation);
-        if(!TextUtils.isEmpty(controllerScene) && controllerScene.equals("NewScene")) {
-            panelMorePopupWindow.setAnimationStyle(R.style.showPopupNewMoreMenuAnimation);
-        }
-        panelMorePopupWindow.showAsDropDown(view,  PxUtil.getInstance().dp2px(0, this),  PxUtil.getInstance().dp2px(popWindowY, this));
+        showNewMoreMenu();
 
     }
 
@@ -2677,17 +2754,40 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 新版显示当前播放列表 */
     public void showOrHideNewMusicPlayerList() {
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) getViewDataBinding().clNewCurrentMusicList.getLayoutParams();
+        marginLayoutParams.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().clNewCurrentMusicList.setLayoutParams(marginLayoutParams);
+
         if(!isShowNewMusicList) {
             getViewDataBinding().rlDisableClick3.setVisibility(View.VISIBLE);
-            ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(325, this), getViewDataBinding().clNewCurrentMusicList);
+            ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().clNewCurrentMusicList);
             newCurrentMusicList.start();
         } else {
             getViewDataBinding().rlDisableClick3.setVisibility(View.GONE);
-            ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(325, this), getViewDataBinding().clNewCurrentMusicList);
+            ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().clNewCurrentMusicList);
             newCurrentMusicList.start();
         }
         isShowNewMusicList = !isShowNewMusicList;
     }
+
+    /** 新版显示更多菜单 */
+    public void showNewMoreMenu() {
+        ViewGroup.MarginLayoutParams marginLayoutParams = (ViewGroup.MarginLayoutParams) getViewDataBinding().rlMoreSetDialog.getLayoutParams();
+        marginLayoutParams.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().rlMoreSetDialog.setLayoutParams(marginLayoutParams);
+
+        if(!isShowMoreMenu) {
+            getViewDataBinding().rlDisableClick4.setVisibility(View.VISIBLE);
+            ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
+            newMoreMenu.start();
+        } else {
+            getViewDataBinding().rlDisableClick4.setVisibility(View.GONE);
+            ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
+            newMoreMenu.start();
+        }
+        isShowMoreMenu = !isShowMoreMenu;
+    }
+
     /** 显示当前播放面板 */
     public void showOrHideMusicPlayerPanel() {
         //Log.i("CLICK:", "isClick: " +isClick + " isShowMusicPanel: " + isShowMusicPanel + " isShowMusicList: " + isShowMusicList);
@@ -2917,7 +3017,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, isShow, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
         controllerModeAnimator.start();
 
-        ObjectAnimator newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, !isShow, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
+        ObjectAnimator newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, !isShow, PxUtil.getInstance().dp2px(!isShow? 185: 85, MainActivity.this), getViewDataBinding().rlNewPlayController);
         newPlayController.start();
         isShowControllerModePanel = !isShow;
         isShowNewPlayController = isShow;
@@ -3054,17 +3154,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            if(!isOnTouchSeekBar) {
-                //拖动时改变显示时间
-                getViewDataBinding().tvStartTime.setText(getViewModel().rebuildTime(progress));
-                getViewDataBinding().tvNewStartTime.setText(getViewModel().rebuildTime(progress));
-                //Log.i(TAG, "progress: " + progress);
-                lyricScrollView.setMusicPlayerPos(progress);
-                lyricNewScrollDetailView.setMusicPlayerPos(progress);
-                lyricNewScrollView.setMusicPlayerPos(progress);
-                getViewDataBinding().hpvProgress.setCurrentCount(progress);
-                getViewDataBinding().pbNewProgress.setProgress(progress);
-            }
+            //拖动时改变显示时间
+            getViewDataBinding().tvStartTime.setText(TimeUtil.rebuildTime(progress));
+            getViewDataBinding().tvNewStartTime.setText(TimeUtil.rebuildTime(progress));
+            //Log.i(TAG, "progress: " + progress);
+            lyricScrollView.setMusicPlayerPos(progress);
+            lyricNewScrollDetailView.setMusicPlayerPos(progress);
+            lyricNewScrollView.setMusicPlayerPos(progress);
+            getViewDataBinding().hpvProgress.setCurrentCount(progress);
+            getViewDataBinding().pbNewProgress.setProgress(progress);
+
         }
 
         @Override
@@ -3145,6 +3244,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
         if(keyCode == KeyEvent.KEYCODE_BACK) { //物理返回键
+
+            if(isShowMoreMenu) {
+                showNewMoreMenu();
+                return true;
+            }
 
             if(isShowNewMusicList) { //在新版音乐控制界面时当打开播放列表
                 showOrHideNewMusicPlayerList();
@@ -3503,7 +3607,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         isFavorite = false;
 
         if(favoriteMusicList.size() >0) {
-            isFavorite = favoriteMusicList.stream().anyMatch(favoriteMusic -> !TextUtils.isEmpty(favoriteMusic.getMusicName()) && favoriteMusic.getMusicName().equals(currentMusic));
+            isFavorite = favoriteMusicList.stream().anyMatch(favoriteMusic ->
+                    !TextUtils.isEmpty(favoriteMusic.getMusicName()) && favoriteMusic.getMusicName().equals(currentMusic));
 
 //            for(int i=0; i < favoriteMusicList.size(); i++) {
 //                String favoriteMusicName = favoriteMusicList.get(i).musicName;

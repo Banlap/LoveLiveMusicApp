@@ -68,6 +68,8 @@
     <color name="white_alpha_40">#66FFFFFF</color>
 、    <color name="background_color_F2">#F2F2F2</color>
 
+    <color name="gray_fa">#FAFAFA</color>
+    <color name="gray_f8">#F8F8F8</color>
     <color name="gray_f1">#f1f3f4</color>
     <color name="gray_ea">#EAEAEA</color>
     <color name="gray_e6">#E6E6E6</color>

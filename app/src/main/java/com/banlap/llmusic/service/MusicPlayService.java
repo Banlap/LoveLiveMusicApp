@@ -11,12 +11,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaMetadata;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -36,6 +38,7 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.exoplayer.ExoPlayer;
 
 import com.banlap.llmusic.base.BaseActivity;
+import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
@@ -51,8 +54,13 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 音乐播放服务
@@ -89,10 +97,13 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static PlaybackStateCompat.Builder stateBuilder;
 
     //当前歌曲信息
-    public static String currentMusicName =""; //当前音乐名称
-    public static String currentMusicSinger ="";  //当前音乐歌手名
-    public static String currentMusicImg ="";  //当前音乐的图片 目前仅用于UI方面 看是否能去掉
+    public static String currentMusicName = ""; //当前音乐名称
+    public static String currentMusicSinger = "";  //当前音乐歌手名
+    public static String currentMusicImg = "";  //当前音乐的图片 目前仅用于UI方面 看是否能去掉
     public static Bitmap currentMusicBitmap; //当前音乐的图片Bitmap
+    public static String currentMusicBitrate = "--";
+    public static String currentMusicMime = "--";
+    public static String currentMusicFileSize = "-- MB";
 
     private Thread musicPosThread;
 
@@ -345,13 +356,15 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
                 mediaPlayer = new MediaPlayer();
 
+
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
                 } else {
                     mMusicLyricList = new ArrayList<>();
                 }
                 mMusicLyricList.addAll(musicLyrics);
-
+                //设置缓存时的歌曲名称
+                BaseApplication.setCacheMusicName(dataSource.musicName);
                 //设置当前歌曲加载后存入缓存（目前先下载再缓存）
                 String url = proxyCacheServer.getProxyUrl(dataSource.musicURL);
                 if(dataSource.isLocal) { //判断当前歌曲是否本地，则不使用缓存方法
@@ -367,6 +380,14 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 mediaPlayer.setDataSource(url);
                 mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.prepareAsync();
+
+                //处理歌曲信息
+                currentMusicBitrate = "--";
+                currentMusicMime = "--";
+                currentMusicFileSize = "-- MB";
+                //获取MediaMeta内容 后台线程处理，网络缓慢的情况下会卡住
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_METADATA, dataSource));
+
                 mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                     @Override
                     public void onPrepared(MediaPlayer mp) {
@@ -379,18 +400,28 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, mediaPlayer.getDuration()));
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_VISUALIZER));
 
+
                         //需要设置数据源，保证高版本显示进度条时更新歌曲进度
                         mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
                                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentMusicName)
                                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentMusicSinger)
                                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, dataSource.musicType)
                                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration()) // 音乐总时长
+                                .putString("IsLocal", dataSource.isLocal()? "1" : "0")
+                                .putString("Path", dataSource.musicURL)
                                 .build()
                         );
                         updateMusicNotification(mediaPlayer.isPlaying());
 
                         musicPosThread = new Thread(musicPosRunnable);
                         musicPosThread.start();
+
+                    }
+                });
+                mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+                    @Override
+                    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+                        Log.i(TAG, "mp: " + mp.isPlaying() + "music buffer: " + percent);
 
                     }
                 });
@@ -417,6 +448,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 e.printStackTrace();
             }
         }
+
 
         /** 播放或暂停 */
         public void pause(Context context, String musicName, String musicSinger, Bitmap bitmap) {
@@ -514,6 +546,41 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     /** 获取AudioSessionId */
     public static int getAudioSessionId() {
         return mAudioSessionId;
+    }
+
+
+    /**
+     * 获取歌曲MediaMeta的信息
+     * */
+    public static Map<String, String> getMediaMeta(Music dataSource) {
+        Map<String, String> map = new HashMap<>();
+        String bitrate = "0";
+        String mime ="";
+        try {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            if(dataSource.isLocal) {
+                retriever.setDataSource(dataSource.musicURL);
+            } else {
+                retriever.setDataSource(dataSource.musicURL, new HashMap<>());
+            }
+            // 获取音频采样率
+            bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
+            bitrate = ""+Integer.parseInt(bitrate)/1000;
+            mime = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
+            if(mime.equals("audio/flac")) {
+                mime = "FLAC";
+            } else {
+                mime = "MP3";
+            }
+            map.put("Bitrate", bitrate);
+            map.put("Mime", mime);
+
+            Log.d(TAG, "Audio bitrate: " + bitrate + " mime: " + mime);
+        } catch (Exception e) {
+            Log.d(TAG, "Audio bitrate error: " + e.getMessage());
+        }
+
+        return map;
     }
 
     /** 恢复线程 */

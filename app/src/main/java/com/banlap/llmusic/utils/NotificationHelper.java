@@ -195,20 +195,6 @@ public class NotificationHelper {
     }
 
 
-    public static void setProgressByValue(int max, int pos) {
-        if(builder != null && manager != null) {
-            Log.e(TAG, "max: " + max + " pos: " + pos);
-            builder.setProgress(max, pos, false);
-            refreshManager();
-        }
-    }
-
-    public static void refreshManager() {
-        if(builder != null && manager != null) {
-            manager.notify(LL_MUSIC_PLAYER, builder.build());
-        }
-    }
-
     /**
      * 旧版本通知栏
      * */

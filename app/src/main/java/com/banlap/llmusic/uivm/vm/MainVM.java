@@ -19,6 +19,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.CharacterHelper;
+import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.OkhttpUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.TimeUtil;
@@ -406,12 +407,41 @@ public class MainVM extends AndroidViewModel {
     }
 
     /** 转换成时间格式*/
-    public String rebuildTime(long position) {
-        long minLong = position /1000/60;
-        long secLong = position /1000%60;
-        String minStr = minLong <10 ? "0"+minLong : ""+minLong;
-        String secStr = secLong <10 ? "0"+secLong : ""+secLong;
-        return minStr + ":" + secStr;
+    public String showFileSize(String name, String isLocal, String url) {
+        String size = "0 MB";
+        if(isLocal.equals("0")) {
+            File file = new File(getApplication().getExternalFilesDir("music"), "audio-cache");
+            if (file.exists()) {
+                String musicFilePath = file.getAbsolutePath() + "/" + "ll-" + name + ".mp3";
+                File musicFile = new File(musicFilePath);
+                if(musicFile.exists()) {
+                    long fileSizeInBytes = musicFile.length();
+                    // 将字节大小转换为MB
+                    double fileSizeInMB = fileSizeInBytes / (1024.0 * 1024.0);
+                    String fileSizeFormatted = String.format("%.2f MB", fileSizeInMB);
+                    size = fileSizeFormatted;
+                    Log.d(TAG, "File size: " + fileSizeFormatted);
+                } else {
+                    Log.d(TAG, "MusicFile does not exist.");
+                }
+            } else {
+                Log.d(TAG, "File does not exist.");
+            }
+        } else {
+            File file = new File(url);
+            if (file.exists()) {
+                long fileSizeInBytes = file.length();
+                // 将字节大小转换为MB
+                double fileSizeInMB = fileSizeInBytes / (1024.0 * 1024.0);
+                String fileSizeFormatted = String.format("%.2f MB", fileSizeInMB);
+                size = fileSizeFormatted;
+                Log.d(TAG, "File size: " + fileSizeFormatted);
+            } else {
+                Log.d(TAG, "File does not exist.");
+            }
+        }
+
+        return size;
     }
 
     public interface MainCallBack {

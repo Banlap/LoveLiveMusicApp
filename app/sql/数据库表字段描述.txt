@@ -1,0 +1,21 @@
+1.music表 - 用于显示歌曲列表
+
+music_id:     	唯一值
+music_type:   	音乐类型：例如 Liella、Aqours 用于判断进入不同团的音乐列表
+music_name:   	音乐名称：用于显示，例如 始まりは君の空
+music_singer: 	歌手： 用于显示，例如 Liyuu
+music_favorite: 目前没有使用
+music_img:  	音乐在线图片文件：如http://xxxx/xxx.jpg (也可以本地文件)
+music_url:      音乐在线歌曲文件：如http://xxxx/xxx.mp3 (也可以本地文件)
+music_lyric:    音乐歌词文件： 如http://xxxx/xxx.txt (目前没有使用.lyc格式的处理，使用文本形式)
+music_flac:     目前没有使用
+
+2.version表 - 用于显示是否更新app
+
+version_id:	    唯一值
+version_name:   版本名
+version_code:   版本code：用于判断当前app版本号，大于app版本号则可以作为新版本提示
+version_type:   版本类型： 用于判断是否需要更新，值为0则没有更新；值为1需要更新并不强制；值为2则进去app强制提示更新
+version_title:  版本标题
+version_content:版本更新内容
+version_url:    版本app链接：如http://xxxx/xxx.apk

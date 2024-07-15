@@ -68,7 +68,6 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
     protected abstract int getLayoutId();
 
     public static long lastTime;
-
     public static final long TIME_500MS = 500;
 
 
@@ -137,9 +136,7 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
         init();
         initData();
         initView();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            setStatusBar();
-        }
+        setStatusBar();
     }
 
     @SuppressWarnings("unchecked")
