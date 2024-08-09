@@ -21,7 +21,7 @@
             android:id="@+id/cl_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
+            android:visibility="gone"
             >
 
             <View
@@ -869,7 +869,7 @@
             android:id="@+id/cl_controller"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
+            android:visibility="visible"
             >
 
             <eightbitlab.com.blurview.BlurView
@@ -1059,16 +1059,43 @@
                             android:textStyle="bold" />
 
 
-                        <TextView
-                            android:id="@+id/tv_new_singer_name"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:singleLine="true"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginBottom="5dp"
-                            android:textColor="@color/black_33"
-                            android:text="SingerName"
-                            />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            >
+
+                            <RelativeLayout
+                                android:id="@+id/rl_quality"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/shape_button_white_6">
+
+                                <TextView
+                                    android:id="@+id/tv_quality"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:padding="3dp"
+                                    android:text=" - - "
+                                    android:textSize="10sp"
+                                    android:textColor="@color/light_ff"
+                                    />
+
+                            </RelativeLayout>
+
+                            <TextView
+                                android:id="@+id/tv_new_singer_name"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:singleLine="true"
+                                android:layout_marginStart="5dp"
+                                android:textColor="@color/black_33"
+                                android:text="SingerName"
+                                />
+
+                        </LinearLayout>
+
 
                         <LinearLayout
                             android:id="@+id/ll_new_more_bar"
@@ -1093,7 +1120,7 @@
                                 />
 
                             <ImageView
-                                android:visibility="gone"
+                                android:visibility="visible"
                                 android:id="@+id/iv_new_more"
                                 android:layout_width="25dp"
                                 android:layout_height="match_parent"
@@ -1353,6 +1380,232 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/ll_new_music_list_title"
                     />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- 灰色背景  -->
+            <RelativeLayout
+                android:id="@+id/rl_detail_disable_click_2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@color/alpha_40"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- 更多信息 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:visibility="gone"
+                android:id="@+id/cl_new_detail_more"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:elevation="3dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="15dp"
+                android:background="@drawable/shape_button_white_3"
+                app:layout_constraintBottom_toTopOf="@+id/view_bottom_bar_2"
+                app:layout_constraintEnd_toStartOf="@+id/view_right_bar_2"
+                app:layout_constraintStart_toEndOf="@+id/view_left_bar_2">
+
+
+                <LinearLayout
+                    android:id="@+id/ll_more_set_music_info"
+                    android:visibility="visible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:orientation="vertical">
+
+
+                    <View
+                        android:visibility="visible"
+                        android:id="@+id/v_line_new"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:background="@color/gray_c9" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_artist_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_artist"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="艺术家"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/tv_artist_value"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:gravity="end"
+                            android:text="xxx"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_song_time_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_song_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="时长"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/tv_song_time_value"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:gravity="end"
+                            android:text="00:00"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_bitrate_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_bitrate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="比特率"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/tv_bitrate_value"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:gravity="end"
+                            android:text="0 kps"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_file_size_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_file_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="大小"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/tv_file_size_value"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:gravity="end"
+                            android:text="0 MB"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_mime_main"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:padding="5dp">
+
+
+                        <TextView
+                            android:id="@+id/tv_mime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:text="格式"
+                            android:textColor="@color/light_ff"
+                            android:textStyle="bold"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/tv_mime_value"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:gravity="end"
+                            android:text="--"
+                            android:textColor="@color/light_ff"
+                            android:textSize="14sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

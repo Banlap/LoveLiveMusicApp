@@ -33,6 +33,7 @@ import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
 import com.banlap.llmusic.databinding.DialogSettingViewModeBinding;
+import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.ui.ThemeHelper;
 import com.banlap.llmusic.uivm.vm.SettingsVM;
@@ -112,6 +113,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         getViewDataBinding().llThemeWhite.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeOrange.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeRed.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llThemeStars.setOnClickListener(new ButtonClickListener());
 
         getViewDataBinding().llSettingWelcomeVideo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -637,6 +639,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 changeTheme(R.id.ll_theme_light);
             } else if(v.getId() == R.id.ll_theme_red) {
                 changeTheme(R.id.ll_theme_red);
+            } else if(v.getId() == R.id.ll_theme_stars) {
+                changeTheme(R.id.ll_theme_stars);
             }
         }
     }
@@ -656,6 +660,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        DownloadReceiver.stopHandler();
     }
 
     @Override

@@ -114,6 +114,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -469,6 +470,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         getViewDataBinding().sbNewMusicBar.setOnSeekBarChangeListener(new MusicBarChangerListener());
         getViewDataBinding().sbNewMusicBar.setOnTouchListener(new ProgressBarTouchListener());
         getViewDataBinding().flClose.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().ivNewMore.setOnClickListener(new ButtonClickListener());
 
         intentActivityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -566,7 +568,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     newCurrentMusicList.start();
                 }
                 isShowMusicList = !isShowMusicList;
-
             } else if(v.getId() == R.id.rl_disable_click) {
                 if(isShowMusicList) {
                     getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
@@ -599,7 +600,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     newDetailCurrentMusicList.start();
                 }
                 isShowDetailMusicList = !isShowDetailMusicList;
-
             } else if(v.getId() == R.id.rl_detail_disable_click) {
                 if(isShowDetailMusicList) {
                     getViewDataBinding().rlDetailDisableClick.setVisibility(View.GONE);
@@ -607,6 +607,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     newCurrentMusicList.start();
                     isShowDetailMusicList = false;
                 }
+            } else if(v.getId() == R.id.iv_new_more) {
+
             }
         }
     }
@@ -1394,6 +1396,21 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             case ThreadEvent.PAD_VIEW_ADD_MUSIC:  // 添加歌曲
                 addMusic(event.tList, event.i);
                 break;
+
+            case ThreadEvent.PAD_VIEW_GET_MUSIC_METADATA:
+                if(!TextUtils.isEmpty(event.str3)) {
+                    MusicPlayService.currentMusicQuality = event.str3;
+                    getViewDataBinding().tvQuality.setText(" " + event.str3 + " ");
+                    getViewDataBinding().tvQuality.setTextColor(getColor(R.color.white));
+                    if(event.str3.equals("SQ")) {
+                        getViewDataBinding().rlQuality.setBackgroundResource(R.drawable.shape_button_orange_d3_6);
+                        getViewDataBinding().tvQuality.setTextColor(getColor(R.color.orange_0b));
+                    } else if(event.str3.equals("HQ")) {
+                        getViewDataBinding().rlQuality.setBackgroundResource(R.drawable.shape_button_blue_f3_6);
+                        getViewDataBinding().tvQuality.setTextColor(getColor(R.color.blue_3c));
+                    }
+                }
+                break;
         }
     }
 
@@ -1461,6 +1478,15 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             case ThreadEvent.SAVE_LOCAL_MUSIC_LIST:  //在子线程中保存列表数据
                 List<Music> list = event.musicList;
                 SPUtil.setListValue(context, SPUtil.PlayListData, list);
+                break;
+            case ThreadEvent.GET_MUSIC_METADATA:
+                if(event.music != null) {
+                    Map<String, String> map = MusicPlayService.getMediaMeta(event.music);
+                    String bitrate = map.get("Bitrate");
+                    String mime = map.get("Mime");
+                    String quality = map.get("Quality");
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PAD_VIEW_GET_MUSIC_METADATA, bitrate, mime, quality));
+                }
                 break;
         }
     }

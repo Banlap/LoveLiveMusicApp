@@ -83,6 +83,13 @@
                 android:layout_height="20dp"
                 app:rail_color="@color/light_8a"/>
 
+            <com.banlap.llmusic.widget.MusicLoadingView
+                android:visibility="gone"
+                android:id="@+id/iv_music_rail_stars"
+                android:layout_width="28dp"
+                android:layout_height="20dp"
+                app:rail_color="@color/blue_be"/>
+
         </LinearLayout>
 
         <FrameLayout

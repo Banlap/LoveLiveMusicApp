@@ -297,32 +297,30 @@ public class LyricScrollView extends View {
      *  绘制歌词颜色
      * */
     private void setLyricColor(boolean isLyricDetail) {
-        if(0 != rThemeId) {
-            if(rThemeId == R.id.ll_theme_normal) {
-                highLightLyricColor = getResources().getColor(R.color.blue_ed);
-                defaultLyricColor = getResources().getColor(R.color.black);
-            } else if(rThemeId == R.id.ll_theme_blue) {
-                highLightLyricColor = getResources().getColor(isLyricDetail? R.color.light_f9 : R.color.blue_0E);
-                defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.blue_ed);
-            } else if(rThemeId == R.id.ll_theme_dark) {
-                highLightLyricColor = getResources().getColor(R.color.black);
-                defaultLyricColor = getResources().getColor(R.color.white);
-            } else if(rThemeId == R.id.ll_theme_white) {
-                highLightLyricColor = getResources().getColor(R.color.purple);
-                defaultLyricColor = getResources().getColor(R.color.gray_purple_ac);
-            } else if(rThemeId == R.id.ll_theme_orange) {
-                highLightLyricColor = getResources().getColor(R.color.orange_f4);
-                defaultLyricColor = getResources().getColor(R.color.orange_0b);
-            } else if(rThemeId == R.id.ll_theme_light) {
-                highLightLyricColor = getResources().getColor(R.color.light_8a);
-                defaultLyricColor = getResources().getColor(R.color.light_b5);
-            } else if(rThemeId == R.id.ll_theme_red) {
-                highLightLyricColor = getResources().getColor(isLyricDetail? R.color.red_1a : R.color.red_3a);
-                defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.red_4d);
-            } else {
-                highLightLyricColor = getResources().getColor(R.color.blue_ed);
-                defaultLyricColor = getResources().getColor(R.color.black);
-            }
+        if(rThemeId == R.id.ll_theme_normal) {
+            highLightLyricColor = getResources().getColor(R.color.blue_ed);
+            defaultLyricColor = getResources().getColor(R.color.black);
+        } else if(rThemeId == R.id.ll_theme_blue) {
+            highLightLyricColor = getResources().getColor(isLyricDetail? R.color.light_f9 : R.color.blue_0E);
+            defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.blue_ed);
+        } else if(rThemeId == R.id.ll_theme_dark) {
+            highLightLyricColor = getResources().getColor(R.color.black);
+            defaultLyricColor = getResources().getColor(R.color.white);
+        } else if(rThemeId == R.id.ll_theme_white) {
+            highLightLyricColor = getResources().getColor(R.color.purple);
+            defaultLyricColor = getResources().getColor(R.color.gray_purple_ac);
+        } else if(rThemeId == R.id.ll_theme_orange) {
+            highLightLyricColor = getResources().getColor(R.color.orange_f4);
+            defaultLyricColor = getResources().getColor(R.color.orange_0b);
+        } else if(rThemeId == R.id.ll_theme_light) {
+            highLightLyricColor = getResources().getColor(R.color.light_8a);
+            defaultLyricColor = getResources().getColor(R.color.light_b5);
+        } else if(rThemeId == R.id.ll_theme_red) {
+            highLightLyricColor = getResources().getColor(isLyricDetail? R.color.red_1a : R.color.red_3a);
+            defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.red_4d);
+        } else if(rThemeId == R.id.ll_theme_stars) {
+            highLightLyricColor = getResources().getColor(isLyricDetail? R.color.blue_ff : R.color.blue_be);
+            defaultLyricColor = getResources().getColor(isLyricDetail? R.color.white : R.color.blue_be);
         } else {
             highLightLyricColor = getResources().getColor(R.color.blue_ed);
             defaultLyricColor = getResources().getColor(R.color.black);

@@ -15,11 +15,14 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
+import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.CharacterHelper;
+import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.FileUtil;
+import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.OkhttpUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.TimeUtil;
@@ -442,6 +445,19 @@ public class MainVM extends AndroidViewModel {
         }
 
         return size;
+    }
+
+    /** 下载音乐文件 */
+    public void downloadMusic(String fileName, String url) {
+
+        DownloadMusic downloadMusic = new DownloadMusic();
+        downloadMusic.setDownloadId("");
+        downloadMusic.setFileName(fileName);
+        downloadMusic.setUrl(url);
+        downloadMusic.setStatus(DownloadMusic.DownloadWaiting);
+
+        DownloadHelper.addDownloadFile(downloadMusic);
+        DownloadHelper.startDownload();
     }
 
     public interface MainCallBack {

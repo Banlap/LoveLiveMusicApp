@@ -149,6 +149,14 @@
                             android:layout_margin="5dp"
                             android:background="@drawable/ic_add_red"/>
 
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/iv_add_animator_stars"
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_margin="5dp"
+                            android:background="@drawable/ic_add_stars"/>
+
                     </RelativeLayout>
 
                     <RelativeLayout

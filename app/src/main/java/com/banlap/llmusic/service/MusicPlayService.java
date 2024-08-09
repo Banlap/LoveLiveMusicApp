@@ -103,6 +103,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static Bitmap currentMusicBitmap; //当前音乐的图片Bitmap
     public static String currentMusicBitrate = "--";
     public static String currentMusicMime = "--";
+    public static String currentMusicQuality = "--";
     public static String currentMusicFileSize = "-- MB";
 
     private Thread musicPosThread;
@@ -556,6 +557,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         Map<String, String> map = new HashMap<>();
         String bitrate = "0";
         String mime ="";
+        String quality="--";
+        int bitrateInt = 0;
         try {
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             if(dataSource.isLocal) {
@@ -565,13 +568,20 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
             }
             // 获取音频采样率
             bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE);
-            bitrate = ""+Integer.parseInt(bitrate)/1000;
+            bitrateInt = Integer.parseInt(bitrate)/1000;
+            if(bitrateInt>192) {
+                quality = "SQ";
+            } else {
+                quality = "HQ";
+            }
+            bitrate = ""+bitrateInt;
             mime = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
             if(mime.equals("audio/flac")) {
                 mime = "FLAC";
             } else {
                 mime = "MP3";
             }
+            map.put("Quality", quality);
             map.put("Bitrate", bitrate);
             map.put("Mime", mime);
 

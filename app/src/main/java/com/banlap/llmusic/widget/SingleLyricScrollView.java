@@ -296,24 +296,22 @@ public class SingleLyricScrollView extends View {
      * 设置高亮歌词颜色
      * */
     public void setHighLightLyric(boolean isHighLight) {
-        if(0 != rThemeId) {
-            if(rThemeId == R.id.ll_theme_normal) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.blue_ed : R.color.black));
-            } else if(rThemeId == R.id.ll_theme_blue) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.light_f9 : R.color.white));
-            } else if(rThemeId == R.id.ll_theme_dark) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.black : R.color.white));
-            } else if(rThemeId == R.id.ll_theme_white) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.purple : R.color.gray_purple_ac));
-            } else if(rThemeId == R.id.ll_theme_orange) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.orange_f4 : R.color.orange_0b));
-            } else if(rThemeId == R.id.ll_theme_light) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.light_8a : R.color.light_b5));
-            } else if(rThemeId == R.id.ll_theme_red) {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.red_1a : R.color.white));
-            } else {
-                mPaint.setColor(getResources().getColor(isHighLight? R.color.blue_ed : R.color.black));
-            }
+        if(rThemeId == R.id.ll_theme_normal) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.blue_ed : R.color.black));
+        } else if(rThemeId == R.id.ll_theme_blue) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.light_f9 : R.color.white));
+        } else if(rThemeId == R.id.ll_theme_dark) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.black : R.color.white));
+        } else if(rThemeId == R.id.ll_theme_white) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.purple : R.color.gray_purple_ac));
+        } else if(rThemeId == R.id.ll_theme_orange) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.orange_f4 : R.color.orange_0b));
+        } else if(rThemeId == R.id.ll_theme_light) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.light_8a : R.color.light_b5));
+        } else if(rThemeId == R.id.ll_theme_red) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.red_1a : R.color.white));
+        } else if(rThemeId == R.id.ll_theme_stars) {
+            mPaint.setColor(getResources().getColor(isHighLight? R.color.blue_ff : R.color.white));
         } else {
             mPaint.setColor(getResources().getColor(isHighLight? R.color.blue_ed : R.color.black));
         }

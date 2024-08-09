@@ -84,7 +84,6 @@ import com.banlap.llmusic.databinding.DialogLocalFileBinding;
 import com.banlap.llmusic.databinding.DialogMainMenuBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogMoreMenuBinding;
-import com.banlap.llmusic.databinding.DialogPanelMoreMenuBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
 import com.banlap.llmusic.databinding.DialogTimePickerBinding;
 import com.banlap.llmusic.databinding.DialogTimeTasksBinding;
@@ -97,6 +96,7 @@ import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.model.Version;
+import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.CharacterService;
 import com.banlap.llmusic.service.MusicPlayService;
@@ -108,6 +108,7 @@ import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
+import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
@@ -947,6 +948,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
         //initNotificationHelper("LLMusic", "Singer", "");
         bindService(intentService, conn, BIND_AUTO_CREATE);
+        DownloadHelper.init(this);
     }
 
     /** 初始化音乐服务 */
@@ -1612,21 +1614,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 ObjectAnimator newPlayController1 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
                 newPlayController1.start();
 
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
-//                Log.i(TAG, "rlPlayController h: " + getViewDataBinding().rlPlayController.getHeight());
-//                int moveAxis =  getViewDataBinding().clControllerMode.getHeight() == 0? heightPixels :  getViewDataBinding().clControllerMode.getHeight();
-//
-//                //隐藏默认音乐控制界面
-//                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-//                musicControllerAnimator.start();
-//
-//                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, isShowControllerModePanel, moveAxis, getViewDataBinding().clControllerMode);
-//                controllerModeAnimator.start();
-//
-//                getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
-//                getViewDataBinding().clBgMode.setVisibility(View.GONE);
-//                isShowControllerModePanel = !isShowControllerModePanel;
+                //先升起再下降
+                ObjectAnimator musicControllerAnimatorUp = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+                musicControllerAnimatorUp.start();
+                ObjectAnimator musicControllerAnimatorDown = MyAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().clCurrentAllPanel.getHeight(), getViewDataBinding().rlPlayController);
+                musicControllerAnimatorDown.start();
+                //重置状态
+                isClick = false;
+                isShowMusicPanel = false;
+                isShowMusicList = false;
+
                 SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
                 break;
             case ThreadEvent.VIEW_NEW_CONTROLLER_MODE:
@@ -1642,12 +1639,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
                 musicControllerAnimator.start();
-
-//                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-//                controllerModeAnimator.start();
-//
-//                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-//                musicControllerAnimator.start();
 //
                 if(isClick) { //是否点击了旧版的播放器 按钮其中一个
                     getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
@@ -1662,7 +1653,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
                     getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
                 }
-                getViewDataBinding().rlPlayController.setVisibility(View.VISIBLE);
+                //getViewDataBinding().rlPlayController.setVisibility(View.VISIBLE);
                 break;
 
             case ThreadEvent.VIEW_INTO_SET_BG:
@@ -1691,6 +1682,19 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(!TextUtils.isEmpty(event.str2)) {
                     MusicPlayService.currentMusicMime = event.str2;
                     getViewDataBinding().tvMimeValue.setText(event.str2);
+                }
+
+                if(!TextUtils.isEmpty(event.str3)) {
+                    MusicPlayService.currentMusicQuality = event.str3;
+                    getViewDataBinding().tvQuality.setText(" " + event.str3 + " ");
+                    getViewDataBinding().tvQuality.setTextColor(getColor(R.color.white));
+                    if(event.str3.equals("SQ")) {
+                        getViewDataBinding().rlQuality.setBackgroundResource(R.drawable.shape_button_orange_d3_6);
+                        getViewDataBinding().tvQuality.setTextColor(getColor(R.color.orange_0b));
+                    } else if(event.str3.equals("HQ")) {
+                        getViewDataBinding().rlQuality.setBackgroundResource(R.drawable.shape_button_blue_f3_6);
+                        getViewDataBinding().tvQuality.setTextColor(getColor(R.color.blue_3c));
+                    }
                 }
 
                 if(MusicPlayService.mMediaSession != null) {
@@ -1899,7 +1903,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     Map<String, String> map = MusicPlayService.getMediaMeta(event.music);
                     String bitrate = map.get("Bitrate");
                     String mime = map.get("Mime");
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_GET_MUSIC_METADATA, bitrate, mime));
+                    String quality = map.get("Quality");
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_GET_MUSIC_METADATA, bitrate, mime, quality));
                 }
                 break;
         }
@@ -2286,6 +2291,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         .create();
                 Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
                 mAlertDialog.show();
+            }
+        });
+        //下载管理
+        mainMenuBinding.llDownload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuPopupWindow.dismiss();
+                Intent intent = new Intent(MainActivity.this, DownloadActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -2776,6 +2790,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         marginLayoutParams.setMargins(15, 0, 15, 15 + navigationBarHeight);
         getViewDataBinding().rlMoreSetDialog.setLayoutParams(marginLayoutParams);
 
+        ThemeHelper.getInstance().rlMoreSetDialogTheme(MainActivity.this, rThemeId, getViewDataBinding());
         if(!isShowMoreMenu) {
             getViewDataBinding().rlDisableClick4.setVisibility(View.VISIBLE);
             ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
@@ -3222,6 +3237,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         MusicPlayService.clearMediaSession();
         MainVM.stopHandler();
         MainVM.stopTalkHandler();
+        DownloadReceiver.stopHandler();
         unbindService(conn);
         stopService(intentService);
         stopService(intentCharacterService);
@@ -3576,6 +3592,21 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
             }
         });
+
+        dialogMoreMenuBinding.llDownloadMusic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mPopupWindow != null) {
+                    mPopupWindow.dismiss();
+                }
+
+                String fileName = list.get(position).musicName + " - " + list.get(position).musicSinger;
+                String url = list.get(position).musicURL;
+                getViewModel().downloadMusic(fileName, url);
+                Toasty.success(context, "已添加到下载列表", Toast.LENGTH_SHORT, true).show();
+            }
+        });
+
     }
 
     /** 设置播放列表使用图标显示收藏的歌 */

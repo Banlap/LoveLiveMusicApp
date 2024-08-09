@@ -34,6 +34,7 @@ public class SPUtil {
     public static final String FavoriteListData = "FavoriteListData"; //最爱歌曲缓存列表
     public static final String PlayListData = "PlayListData";  //播放的歌曲缓存列表
     public static final String RecommendListData = "RecommendListData"; //每日歌曲缓存列表
+    public static final String DownloadMusicListData = "DownloadMusicListData"; //音乐下载列表
 
     public static final String DefaultLyricSizeData = "DefaultLyricSizeData"; //默认歌词字体大小
     public static final String SingleLyricSizeData = "SingleLyricSizeData"; //滚动行歌词字体大小
@@ -88,12 +89,16 @@ public class SPUtil {
      * 将List<T> 保存到本地
      * */
     public static <T> void setListValue(Context context, String key, List<T> list) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-        Gson gson = new Gson();
-        String listJson = gson.toJson(list);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(key, listJson);
-        editor.apply();
+        try {
+            SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+            Gson gson = new Gson();
+            String listJson = gson.toJson(list);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(key, listJson);
+            editor.apply();
+        } catch (Exception e) {
+            Log.e(TAG, "设置本地数据异常：" + e.getMessage());
+        }
     }
 
 }

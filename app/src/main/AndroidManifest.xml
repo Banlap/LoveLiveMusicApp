@@ -148,6 +148,12 @@
             />
 
         <activity
+            android:name=".ui.activity.DownloadActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:screenOrientation="portrait"
+            />
+
+        <activity
             android:name=".ui.activity.CustomErrorActivity"
             android:screenOrientation="portrait"
             android:process=":error_activity"

@@ -668,7 +668,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@mipmap/ic_gradient_color5"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <LinearLayout
                 android:id="@+id/ll_new_tittle_bar"
@@ -834,16 +834,44 @@
                     android:textStyle="bold" />
 
 
-                <TextView
-                    android:id="@+id/tv_new_singer_name"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="15dp"
-                    android:textColor="@color/black_33"
-                    android:text="SingerName"
-                    />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    >
+
+                    <RelativeLayout
+                        android:id="@+id/rl_quality"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/shape_button_white_6">
+
+                        <TextView
+                            android:id="@+id/tv_quality"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="3dp"
+                            android:text=" - - "
+                            android:textSize="10sp"
+                            android:textColor="@color/light_ff"
+                            />
+
+                    </RelativeLayout>
+
+
+                    <TextView
+                        android:id="@+id/tv_new_singer_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:layout_marginStart="5dp"
+                        android:textColor="@color/black_33"
+                        android:text="SingerName"
+                        />
+
+                </LinearLayout>
+
 
                 <LinearLayout
                     android:id="@+id/ll_new_more_bar"

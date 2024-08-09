@@ -75,6 +75,11 @@ public class ThreadEvent<T> {
     public static final int DOWNLOAD_APP_LOADING2 = 0x247;
     public static final int DOWNLOAD_APP_SUCCESS2 = 0x248;
     public static final int DOWNLOAD_APP_ERROR2 = 0x249;
+    public static final int VIEW_DOWNLOAD_MUSIC = 0x25;
+    public static final int VIEW_DOWNLOAD_MUSIC_SHOW = 0x251;
+    public static final int VIEW_DOWNLOAD_MUSIC_UPDATE= 0x252;
+    public static final int VIEW_DOWNLOAD_MUSIC_FINISH = 0x253;
+    public static final int VIEW_DOWNLOAD_MUSIC_CANCEL = 0x254;
 
     public static final int GET_CURRENT_TIME = 0x30;
     public static final int SHOW_FRAGMENT = 0x301;
@@ -94,6 +99,7 @@ public class ThreadEvent<T> {
     public static final int PLAY_RECOMMEND_MUSIC = 0x337;
     public static final int SAVE_LOCAL_MUSIC_LIST = 0x338;
     public static final int GET_MUSIC_LYRIC = 0x34;   //获取音乐歌词
+
     public static final int SHOW_IMAGE_URL = 0x36;    //展示音乐图片
     public static final int MUSIC_IS_NEXT = 0x37;
     public static final int MUSIC_IS_LAST = 0x38;
@@ -174,6 +180,7 @@ public class ThreadEvent<T> {
     public static final int PAD_VIEW_PLAY_MUSIC = 0x9301;
     public static final int PAD_VIEW_ADD_MUSIC = 0x9302;
     public static final int PAD_PLAY_ALL_MUSIC = 0x9303;
+    public static final int PAD_VIEW_GET_MUSIC_METADATA = 0x9313;
 
 
     public int msgCode;

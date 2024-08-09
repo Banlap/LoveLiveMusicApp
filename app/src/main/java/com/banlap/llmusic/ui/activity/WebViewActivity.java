@@ -7,9 +7,7 @@ import android.webkit.WebViewClient;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
-import com.banlap.llmusic.databinding.ActivityMessageBinding;
 import com.banlap.llmusic.databinding.ActivityWebviewBinding;
-import com.banlap.llmusic.databinding.ItemMessageListBinding;
 import com.banlap.llmusic.uivm.vm.WebViewVM;
 
 public class WebViewActivity extends BaseActivity<WebViewVM, ActivityWebviewBinding>

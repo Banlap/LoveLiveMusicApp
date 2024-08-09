@@ -162,6 +162,38 @@
 
         </LinearLayout>
 
+        <View
+            android:id="@+id/v_line5"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/ll_time_tasks"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray_c9" />
+
+        <LinearLayout
+            android:id="@+id/ll_download"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/selector_tab_selected2"
+            android:layout_below="@+id/v_line5"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/tv_download"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="下载管理"
+                android:textColor="@color/gray_c9"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
     </RelativeLayout>
 
 </layout>

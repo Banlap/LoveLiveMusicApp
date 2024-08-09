@@ -70,7 +70,6 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
     public static long lastTime;
     public static final long TIME_500MS = 500;
 
-
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
 
 
@@ -89,8 +88,8 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AppWidgetManager appWidgetManager = getSystemService(AppWidgetManager.class);
-            if (appWidgetManager.isRequestPinAppWidgetSupported()) {
+            //AppWidgetManager appWidgetManager = getSystemService(AppWidgetManager.class);
+           // if (appWidgetManager.isRequestPinAppWidgetSupported()) {
                 // 系统支持添加小部件的操作
                 // 进行添加小部件操作的处理
 //                new Handler().post(new Runnable() {
@@ -119,7 +118,7 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
 //                    }
 //                });
 
-            }
+//            }
 
         }
 
