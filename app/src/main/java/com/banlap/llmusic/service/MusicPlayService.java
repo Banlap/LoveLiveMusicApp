@@ -516,7 +516,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 当前是否播放音乐 */
         public boolean isPlay() {
-            if(mediaPlayer!=null) {
+            if(mediaPlayer != null) {
                 return mediaPlayer.isPlaying();
             } else {
                 return false;

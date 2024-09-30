@@ -99,12 +99,14 @@ import com.banlap.llmusic.model.Version;
 import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.CharacterService;
+import com.banlap.llmusic.service.LyricService;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.ui.ThemeHelper;
 import com.banlap.llmusic.ui.fragment.LocalListFragment;
 import com.banlap.llmusic.ui.fragment.MainListFragment;
 import com.banlap.llmusic.uivm.vm.MainVM;
+import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
@@ -117,6 +119,7 @@ import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
+import com.banlap.llmusic.widget.CircleMenuView;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
 import com.banlap.llmusic.widget.SingleLyricScrollView;
@@ -126,6 +129,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.android.material.appbar.AppBarLayout;
+import com.linroid.filtermenu.library.FilterMenu;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -168,7 +172,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private List<Music> tempMusicList;                  //临时音乐列表
     private List<Music> playList;                       //当前播放的列表
     private List<Music> mFavoriteList;                  //收藏夹歌单数据
-    private List<MusicLyric> musicLyricList;            //当前播放歌曲的歌词列表
+    public static List<MusicLyric> musicLyricList;            //当前播放歌曲的歌词列表
     private List<Message> messageList;                  //消息列表
     private List<Version> versionList;                  //版本列表
     private List<LocalPlayList> localPlayList;          //自建歌单数据列表
@@ -176,10 +180,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private PlayMusicListAdapter playMusicListAdapter;  //播放列表适配器
     private AddMusicLocalListAdapter addMusicLocalListAdapter; //点击添加到自建列表 适配器
     private ObjectAnimator objectAnimator;              //动画效果
-    private MusicPlayService.MusicBinder binder;        //用于绑定服务
+    public static MusicPlayService.MusicBinder binder;        //用于绑定服务
     private ServiceConn conn;                           //用于绑定服务
     private Intent intentService;                       //音乐服务
     private Intent intentCharacterService;              //角色服务
+    public static Intent intentLyricService;            //歌词服务
     private boolean isSelect = false;                   //查询一次数据
     private boolean isClick = false;                    //判断是否点击按钮
     private boolean isNotMain = false;                  //判断是否在主界面
@@ -346,6 +351,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         BluetoothUtil.getInstance().registerBluetoothReceiver(this);
         //初始化碎片
         initFragment();
+
     }
 
     @Override
@@ -390,6 +396,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
         getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
+        getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.GONE);
         getViewDataBinding().tvVersion.setVisibility(View.GONE);
 
         //动画：初始化将详细页面移走
@@ -494,6 +501,22 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     }
 
+    private void updateController() {
+        //配置简约模式下控制器高度
+        ViewGroup.MarginLayoutParams marginLayoutParams1 = (ViewGroup.MarginLayoutParams) getViewDataBinding().clCurrentMusicPanel.getLayoutParams();
+        marginLayoutParams1.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().clCurrentMusicPanel.setLayoutParams(marginLayoutParams1);
+
+        ViewGroup.MarginLayoutParams marginLayoutParams2 = (ViewGroup.MarginLayoutParams) getViewDataBinding().clCurrentMusicList.getLayoutParams();
+        marginLayoutParams2.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().clCurrentMusicList.setLayoutParams(marginLayoutParams2);
+
+        //配置默认模式下控制器位置
+        ViewGroup.MarginLayoutParams marginLayoutParams3 = (ViewGroup.MarginLayoutParams) getViewDataBinding().rlNewPlayController.getLayoutParams();
+        marginLayoutParams3.setMargins(15, 0, 15, 15 + navigationBarHeight);
+        getViewDataBinding().rlNewPlayController.setLayoutParams(marginLayoutParams3);
+    }
+
     /** 设置播放列表长按移动item选项 */
     private void setItemTouchHelper(PlayMusicListAdapter playMusicListAdapter) {
         ItemTouchHelper.Callback callback = new ItemTouchHelperCallback(playMusicListAdapter);
@@ -568,6 +591,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         });
 
+
+        View view = getViewDataBinding().vp2Main.getChildAt(0);
+        if(view instanceof RecyclerView) {
+            view.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
+
         getViewDataBinding().tvDiscover.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -594,6 +623,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(isShow) { //存在底部导航栏则调整部分ui高度
                     navigationBarHeight = height;
                     Log.i(TAG, "navigationBarHeight: " + navigationBarHeight);
+                    //更新UI高度
+                    updateController();
                 }
             }
         });
@@ -941,6 +972,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         conn = new ServiceConn();
         intentService = new Intent(this, MusicPlayService.class);           //创建音乐播放服务
         intentCharacterService = new Intent(this, CharacterService.class);  //创建角色服务
+        intentLyricService = new Intent(this, LyricService.class);  //创歌词服务
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startMusicService(false, "LLMusic", "Singer", null);
         } else {
@@ -1075,6 +1108,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
                 isNotMain = true;
                 isClickLocalOrFavorite = false;
+                getViewDataBinding().tvCount.setText("--");
+                getViewDataBinding().tvMusicCount.setText("--");
                 break;
             case ThreadEvent.GET_ALBUM_SUCCESS:
                 getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
@@ -1096,6 +1131,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     updateMusicDetailMessage("セイントスノー", "セイントスノー", "Saint Snow", getViewDataBinding().ivLogo, R.mipmap.ic_album_saint_snow_2, 120, 80);
                 } else if(ThreadEvent.ALBUM_A_RISE.equals(event.str)) {
                     updateMusicDetailMessage("アライズ", "アライズ", "A-RISE", getViewDataBinding().ivLogo, R.mipmap.ic_album_a_rise_2, 120, 50);
+                } else if(ThreadEvent.ALBUM_OTHER.equals(event.str)) {
+                    updateMusicDetailMessage("Other", "Other", "其他", getViewDataBinding().ivLogo, R.mipmap.ic_album_lovelive_2, 120, 50);
                 }
                 isClickLocalPlayList = false;
                 break;
@@ -1223,6 +1260,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
+                getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.GONE);
                 break;
             case ThreadEvent.PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {
@@ -1280,6 +1318,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     lyricScrollView.setMusicPlayerPos(event.i);
                     lyricNewScrollDetailView.setMusicPlayerPos(event.i);
                     lyricNewScrollView.setMusicPlayerPos(event.i);
+                    LyricService.setMusicPlayerPos(event.i);
                     getViewDataBinding().sbMusicBar.setProgress(event.i);
                     getViewDataBinding().sbNewMusicBar.setProgress(event.i);
                     getViewDataBinding().hpvProgress.setCurrentCount(event.i);
@@ -1296,7 +1335,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().sbNewMusicBar.setProgress(0);
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.VISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.VISIBLE);
+                getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.VISIBLE);
                 MusicPlayService.updateWidgetUI(MainActivity.this, true);
+
+                //是否开启浮动歌词服务
+                if(SystemUtil.getInstance().isServiceWorked(this, LyricService.class.getPackage().getName()
+                        + "." + LyricService.class.getSimpleName())) {
+                    LyricService.updateLyricUI(false);
+                }
                 break;
 
             case ThreadEvent.VIEW_PAUSE:
@@ -1304,6 +1350,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 lyricScrollView.posLock(event.b);
                 lyricNewScrollDetailView.posLock(event.b);
                 lyricNewScrollView.posLock(event.b);
+
+                //是否开启浮动歌词服务
+                if(SystemUtil.getInstance().isServiceWorked(this, LyricService.class.getPackage().getName()
+                        + "." + LyricService.class.getSimpleName())) {
+                    LyricService.updateLyricUI(!event.b);
+                }
+
                 //角色服务存在时 对角色服务做处理
                 if(SystemUtil.getInstance().isServiceWorked(this, CharacterService.class.getPackage().getName()
                         + "." + CharacterService.class.getSimpleName())) {
@@ -1339,6 +1392,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 lyricNewScrollView.initView();
                 lyricNewScrollDetailView.initView();
 
+                //是否开启浮动歌词服务
+                if(SystemUtil.getInstance().isServiceWorked(this, LyricService.class.getPackage().getName()
+                        + "." + LyricService.class.getSimpleName())) {
+                    LyricService.updateLyricUI(true);
+                }
+
                 String defaultSize = SPUtil.getStrValue(MainActivity.this, SPUtil.DefaultLyricSizeData);
                 if(!TextUtils.isEmpty(defaultSize)) {
                     int defaultSizeInt = Integer.parseInt(defaultSize);
@@ -1362,6 +1421,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
+                getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.GONE);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
@@ -1445,9 +1505,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     lyricScrollView.setMusicLyrics(event.tList);
                     lyricNewScrollDetailView.setMusicLyrics(event.tList);
                     lyricNewScrollView.setMusicLyrics(event.tList);
+                    LyricService.setMusicLyrics(event.tList);
                     musicLyricList.clear();
                     musicLyricList.addAll(event.tList);
                 }
+
                 if(binder !=null) {
                     binder.player(event.music, event.b, proxyCacheServer, musicLyricList);
                 }
@@ -1710,6 +1772,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
 
                 break;
+
+            case ThreadEvent.VIEW_CLOSE_FLOATING_LYRIC: //关闭歌词
+                if(SystemUtil.getInstance().isServiceWorked(MainActivity.this, LyricService.class.getPackage().getName()
+                        + "." + LyricService.class.getSimpleName())) {
+                    LyricService.updateLyricUI(false);
+                    stopService(intentLyricService);
+                }
+                break;
         }
     }
 
@@ -1806,6 +1876,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_A_RISE));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MysqlHelper.MUSIC_TYPE_US, MysqlHelper.MUSIC_TYPE_A_RISE)));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MysqlHelper.MUSIC_TYPE_US, MysqlHelper.MUSIC_TYPE_A_RISE)));
+                break;
+            case ThreadEvent.GET_DATA_LIST_BY_OTHER:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_OTHER));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_OTHER)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_OTHER)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LOCAL_PLAY:
                 if(event.t != null) {
@@ -2543,16 +2618,22 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public void panelMoreMenu(View view) {
         if(isDoubleClick()) { return; }
 
-        if(MusicPlayService.mMediaSession != null) {
-            MediaMetadataCompat metadata =  MusicPlayService.mMediaSession.getController().getMetadata();
-            if(metadata != null) {
-                getViewDataBinding().tvArtistValue.setText(MusicPlayService.currentMusicSinger);
-                getViewDataBinding().tvSongTimeValue.setText(TimeUtil.rebuildTime(MusicPlayService.mAllPosition)+"");
-                getViewDataBinding().tvBitrateValue.setText(MusicPlayService.currentMusicBitrate + " kps");
-                getViewDataBinding().tvMimeValue.setText(MusicPlayService.currentMusicMime);
-                getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
-            }
-        }
+//        if(MusicPlayService.mMediaSession != null) {
+//            MediaMetadataCompat metadata =  MusicPlayService.mMediaSession.getController().getMetadata();
+//            if(metadata != null) {
+//                getViewDataBinding().tvArtistValue.setText(MusicPlayService.currentMusicSinger);
+//                getViewDataBinding().tvSongTimeValue.setText(TimeUtil.rebuildTime(MusicPlayService.mAllPosition)+"");
+//                getViewDataBinding().tvBitrateValue.setText(MusicPlayService.currentMusicBitrate + " kps");
+//                getViewDataBinding().tvMimeValue.setText(MusicPlayService.currentMusicMime);
+//                getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
+//            }
+//        }
+
+        getViewDataBinding().tvArtistValue.setText(MusicPlayService.currentMusicSinger);
+        getViewDataBinding().tvSongTimeValue.setText(TimeUtil.rebuildTime(MusicPlayService.mAllPosition)+"");
+        getViewDataBinding().tvBitrateValue.setText(MusicPlayService.currentMusicBitrate + " kps");
+        getViewDataBinding().tvMimeValue.setText(MusicPlayService.currentMusicMime);
+        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
 
 
         String defaultSize = SPUtil.getStrValue(MainActivity.this, SPUtil.DefaultLyricSizeData);
@@ -3176,6 +3257,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             lyricScrollView.setMusicPlayerPos(progress);
             lyricNewScrollDetailView.setMusicPlayerPos(progress);
             lyricNewScrollView.setMusicPlayerPos(progress);
+            LyricService.setMusicPlayerPos(progress);
             getViewDataBinding().hpvProgress.setCurrentCount(progress);
             getViewDataBinding().pbNewProgress.setProgress(progress);
 
@@ -3241,6 +3323,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         unbindService(conn);
         stopService(intentService);
         stopService(intentCharacterService);
+        stopService(intentLyricService);
         //stopService(intentLockScreenService);
         BluetoothUtil.getInstance().unRegisterBluetoothReceiver(this);
 

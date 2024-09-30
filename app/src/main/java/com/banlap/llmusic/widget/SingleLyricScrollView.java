@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.MusicLyric;
+import com.banlap.llmusic.service.LyricService;
+import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.SystemUtil;
 
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ public class SingleLyricScrollView extends View {
     private List<MusicLyric> musicLyrics;
     private List<MusicLyric> musicLyricsTemp;
 
+    private Context context;
+
     private int rThemeId =0;                                   //当前主题
     private Paint mPaint;
     private Paint mPaint2;
@@ -34,6 +38,7 @@ public class SingleLyricScrollView extends View {
     private int lyricSmallSize = 25;                     //歌词副文字大小
     private int zoomSize = 10;
 
+    private float speed = 275f;                             //歌词滚动速度
     private float yOffset = 90;                               //歌词绘制的纵向偏移量
     private int ySmallOffset = 40;                            //主副歌词之间距离
     private int yScrollOffset = 100;                          //滚动纵向偏移量
@@ -49,23 +54,24 @@ public class SingleLyricScrollView extends View {
 
     public SingleLyricScrollView(@NonNull Context context) {
         super(context);
-        init();
+        init(context);
     }
 
     public SingleLyricScrollView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
 
     public SingleLyricScrollView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
     }
 
     /**
      * 初始化参数
      * */
-    private void init() {
+    private void init(Context context) {
+        this.context = context;
         //适配小型设备
         if(SystemUtil.getInstance().isSmallScaleDevice()) {
             lyricSize = 20;
@@ -210,18 +216,17 @@ public class SingleLyricScrollView extends View {
 
                 int start = timeToMill(musicLyrics.get(currentPosition).lyricTime);
                 //Log.i(TAG, "(playerCurrentPosition - start): " + ((playerCurrentPosition - start) <500));
-                if ((playerCurrentPosition - start) < 500) {
+                if ((playerCurrentPosition - start) < speed) {
                     //先执行一次isFirstInto和isSecondInto后再走显示效果
                     if(!isFirstInto) {
                         isFirstInto = true;
                     } else {
                         if(isSecondInto) {
                             if(musicLyricsTemp.size()>=3) {
-                                float duration = (playerCurrentPosition - start) / 500f;
+                                float duration = (playerCurrentPosition - start) / speed;
                                 if(i == 0) {
                                     mPaint.setAlpha((int) (255 - (float) 255 * duration));
                                     mPaint.setTextSize((lyricSize + zoomSize) - (zoomSize) * duration);
-
                                 } else if(i == 1) {
                                     mPaint.setAlpha(255);
                                     mPaint.setTextSize(lyricSize + (zoomSize * duration) );
@@ -230,8 +235,8 @@ public class SingleLyricScrollView extends View {
                                     mPaint.setTextSize(lyricSize);
                                 }
 
-                                y -= yScrollOffset * duration;
-                                if(y >300) {
+                                y -= (yScrollOffset * duration);
+                                if(y > 300) {
                                     y = 300;
                                 }
 
@@ -291,6 +296,7 @@ public class SingleLyricScrollView extends View {
         mPaint.setTextSize(i == 0 ? lyricSmallSize + zoomSize : lyricSmallSize);
         canvas.drawText(musicLyrics.get(index).lyricContext2, getWidth() / 2, y + ySmallOffset, mPaint);
     }
+
 
     /**
      * 设置高亮歌词颜色

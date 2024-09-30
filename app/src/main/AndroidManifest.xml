@@ -70,6 +70,12 @@
             android:enabled="true"
             android:exported="true"/>
 
+        <!--歌词服务-->
+        <service
+            android:name="com.banlap.llmusic.service.LyricService"
+            android:enabled="true"
+            android:exported="true"/>
+
         <receiver
             android:name=".receiver.AlarmReceiver"
             android:enabled="true"

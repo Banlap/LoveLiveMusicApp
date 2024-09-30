@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -35,6 +37,9 @@ import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
 import com.banlap.llmusic.databinding.DialogSettingViewModeBinding;
 import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.service.CharacterService;
+import com.banlap.llmusic.service.LyricService;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.ThemeHelper;
 import com.banlap.llmusic.uivm.vm.SettingsVM;
 import com.banlap.llmusic.utils.CacheUtil;
@@ -68,6 +73,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     private DialogSettingVideoBinding settingVideoBinding;
     private ActivityResultLauncher<Intent> intentActivityResultLauncher;
+    private ActivityResultLauncher<Intent> intentFloatingLyricResultLauncher;
     private String mNormalLaunchVideoUrl; //默认启动动画UI
     private String mNormalLaunchVideoUrl2; //启动动画UI 5nd
 
@@ -83,6 +89,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     protected void initWindow() {
         super.initWindow();
     }
+
+
 
     @Override
     protected void initData() {
@@ -114,6 +122,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         getViewDataBinding().llThemeOrange.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeRed.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llThemeStars.setOnClickListener(new ButtonClickListener());
+
 
         getViewDataBinding().llSettingWelcomeVideo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,6 +188,81 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                             }
                         }
                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_ERROR));
+                    }
+                });
+
+
+        getViewDataBinding().llFloatingLyric.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //判断是否已经授权显示悬浮窗
+                if(SystemUtil.getInstance().isCanDrawOverlays(SettingsActivity.this)) {
+                    if(SystemUtil.getInstance().isServiceWorked(SettingsActivity.this, LyricService.class.getPackage().getName()
+                            + "." + LyricService.class.getSimpleName())) {
+                        LyricService.updateLyricUI(false);
+                        stopService(MainActivity.intentLyricService);
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(MainActivity.intentLyricService);
+                        } else {
+                            startService(MainActivity.intentLyricService);
+                        }
+                        //
+                        refreshFloatingLyric();
+                    }
+                } else {
+                    DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(SettingsActivity.this),
+                            R.layout.dialog_default, null, false);
+
+                    defaultBinding.dialogSelectTitle.setText("开启悬浮窗权限以展示悬浮歌词");
+
+                    //取消
+                    defaultBinding.btSelectIconCancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mAlertDialog.dismiss();
+                        }
+                    });
+
+                    //授权开启
+                    defaultBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent();
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                intent.setAction(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                            }
+                            intentFloatingLyricResultLauncher.launch(intent);
+                        }
+                    });
+
+                    mAlertDialog = new AlertDialog.Builder(SettingsActivity.this)
+                            .setView(defaultBinding.getRoot())
+                            .create();
+                    Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
+                    mAlertDialog.show();
+                    mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(SettingsActivity.this).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
+                }
+            }
+        });
+
+        intentFloatingLyricResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        //此处是跳转的result回调方法
+                        if(SystemUtil.getInstance().isCanDrawOverlays(getApplication())) {
+                            if(null != mAlertDialog) {
+                                mAlertDialog.dismiss();
+                            }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                startForegroundService(MainActivity.intentLyricService);
+                            } else {
+                                startService(MainActivity.intentLyricService);
+                            }
+                            refreshFloatingLyric();
+                        }
                     }
                 });
     }
@@ -620,6 +704,22 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
         mAlertDialog.show();
 
+    }
+
+    /** 刷新悬浮歌词内容 */
+    private void refreshFloatingLyric() {
+        new Handler().postDelayed(() -> runOnUiThread(() -> {
+            //刷新悬浮歌词列表和ui
+            if(MainActivity.binder != null) {
+                if(MainActivity.musicLyricList != null && MainActivity.musicLyricList.size()>0) {
+                    LyricService.setMusicLyrics(MainActivity.musicLyricList);
+                }
+                if(MainActivity.binder.isPlay()) {
+                    LyricService.updateLyricUI(true);
+
+                }
+            }
+        }), 500);
     }
 
     public class ButtonClickListener implements View.OnClickListener {

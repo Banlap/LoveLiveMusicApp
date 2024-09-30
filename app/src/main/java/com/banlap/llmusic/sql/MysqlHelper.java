@@ -36,6 +36,8 @@ public class MysqlHelper {
     public static final String MUSIC_TYPE_HASUNOSORA = "Hasunosora";
     public static final String MUSIC_TYPE_SAINT_SNOW = "Saint Snow";
     public static final String MUSIC_TYPE_A_RISE = "A-RISE";
+    public static final String MUSIC_TYPE_OTHER = "Other";
+
 
     public static MysqlHelper getInstance() { return new MysqlHelper(); }
 

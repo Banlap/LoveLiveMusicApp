@@ -1,5 +1,6 @@
 package com.banlap.llmusic.base;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetHost;
@@ -39,12 +40,19 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
+import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.service.LyricService;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
+import com.banlap.llmusic.ui.activity.SettingsActivity;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
+import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.widget.LLMusicAlphaWidgetProvider;
 import com.banlap.llmusic.widget.LLMusicWidgetProvider;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;

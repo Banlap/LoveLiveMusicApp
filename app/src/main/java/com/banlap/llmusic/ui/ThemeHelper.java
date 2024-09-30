@@ -5,8 +5,10 @@ import static android.view.View.GONE;
 import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +16,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
+
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.databinding.ActivityDownloadBinding;
@@ -114,6 +121,12 @@ public class ThemeHelper {
             vdb.llBack.setBackgroundResource(R.drawable.selector_normal_selected);
 
             vdb.ivAllPlay.setBackgroundResource(R.drawable.ic_play_mini_light);
+//            Drawable icPlayMiniDrawable = AppCompatResources.getDrawable(context, R.drawable.ic_play_mini);
+//            if (icPlayMiniDrawable != null) {
+//                icPlayMiniDrawable.setTint(ContextCompat.getColor(context, R.color.light_ff));
+//                vdb.ivAllPlay.setImageDrawable(icPlayMiniDrawable);
+//            }
+
             vdb.ivSearch.setBackgroundResource(R.drawable.ic_search_light);
             vdb.ivSort.setBackgroundResource(R.drawable.ic_sort_light);
             //vdb.ivSettings.setBackgroundResource(R.drawable.ic_settings_light);
@@ -201,6 +214,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_f9), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.light_f9);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_light_f8));
@@ -338,6 +352,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_ac), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_ac), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_ac), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.blue_0E);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_blue));
@@ -475,6 +490,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.gray_36), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.white);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_black));
@@ -613,6 +629,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.purple), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.purple);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_purple));
@@ -750,6 +767,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_0b), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.orange_f4), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.orange_0b);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_orange));
@@ -886,6 +904,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.light_b5), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.light_b5);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_light));
@@ -1023,6 +1042,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.red_4d), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.red_4d), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.red_4d), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.red_3a);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_red));
@@ -1160,6 +1180,7 @@ public class ThemeHelper {
             //loading加载颜色
             vdb.pbLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_be), PorterDuff.Mode.SRC_IN);
             vdb.pbNewLoadingMusic.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_be), PorterDuff.Mode.SRC_IN);
+            vdb.pbNewLoadingMusic2.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_IN);
             vdb.prLoading.getIndeterminateDrawable().setColorFilter(context.getResources().getColor(R.color.blue_be), PorterDuff.Mode.SRC_IN);
             vdb.hpvProgress.setLinearGradient(R.color.blue_be);
             vdb.pbNewProgress.setProgressDrawable(context.getDrawable(R.drawable.shape_bg_progress_bar_stars));
@@ -2944,12 +2965,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -2976,12 +2999,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -3008,12 +3033,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -3040,12 +3067,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.shape_button_black_alpha);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llVersionMain.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llCleanCache.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llErrorLog.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.llAbout.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.purple));
@@ -3072,12 +3101,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.orange_0b));
@@ -3104,12 +3135,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -3136,12 +3169,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -3168,12 +3203,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.white));
@@ -3199,12 +3236,14 @@ public class ThemeHelper {
             vdb.llThemeWhite.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingWelcomeVideo.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llSettingViewMode.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.llFloatingLyric.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llVersionMain.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llCleanCache.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llErrorLog.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.llAbout.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvSettingWelcomeVideo.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvSettingViewMode.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvFloatingLyric.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersion.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvVersionValue.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvCleanCache.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -3276,10 +3315,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else if(rThemeId == R.id.ll_theme_blue) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.white));
@@ -3300,10 +3341,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else if(rThemeId == R.id.ll_theme_white) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.purple));
@@ -3312,10 +3355,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.purple));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.purple));
             vdb.tvGroup0.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.tvGroup1.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.tvGroup2.setBackgroundResource(R.drawable.shape_button_black_alpha);
             vdb.tvGroup3.setBackgroundResource(R.drawable.shape_button_black_alpha);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.shape_button_black_alpha);
         } else if(rThemeId == R.id.ll_theme_orange) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.orange_0b));
@@ -3324,10 +3369,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.orange_0b));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.orange_0b));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else if(rThemeId == R.id.ll_theme_light) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -3336,10 +3383,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else if(rThemeId == R.id.ll_theme_red) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.white));
@@ -3348,10 +3397,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else if(rThemeId == R.id.ll_theme_stars) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.white));
@@ -3360,10 +3411,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.light_ff));
@@ -3372,10 +3425,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.light_ff));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.light_ff));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         }
     }
 

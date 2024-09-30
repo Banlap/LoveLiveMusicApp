@@ -35,6 +35,7 @@ public class NotificationHelper {
     public static final int LL_MUSIC_PLAYER = 0x01; //播放通知
     public static final int LL_MUSIC_CHARACTER= 0x02;  //角色通知
     public static final int LL_MUSIC_FULL_SCREEN= 0x03;  //锁屏通知
+    public static final int LL_MUSIC_FLOATING_LYRIC= 0x04;  //浮动歌词通知
     public Notification notification;
     public static NotificationCompat.Builder builder;
     public static NotificationManager manager;

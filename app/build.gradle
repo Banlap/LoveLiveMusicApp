@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 174
+        versionCode 175
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -172,6 +172,10 @@ android {
         //1.显示歌曲文件质量
         //2.添加下载歌曲功能
         //3.添加星空主题，并修复部分主题ui
+        versionName "1.7.5"
+        //1.修复界面模式下的控制条位置、调整加载圈显示
+        //2.修复歌曲数刷新问题、调整歌词滚动速度
+        //3.添加桌面悬浮歌词功能、添加其他分组
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息
@@ -252,6 +256,7 @@ dependencies {
     /** 磨砂背景处理 */
     implementation 'com.eightbitlab:blurview:1.6.3'
 
+    implementation 'com.linroid.filtermenu:library:0.2.3@aar'
 
     /** 内存泄露查询工具 使用后安装app之后会出现检测软件 */
     /*debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'

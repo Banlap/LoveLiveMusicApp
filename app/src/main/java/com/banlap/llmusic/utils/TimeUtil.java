@@ -101,6 +101,40 @@ public class TimeUtil {
         return Integer.parseInt(secStr);
     }
 
+    /**
+     * 时间转换为秒
+     * @param time 24小时格式，如14:35转化毫秒
+     * */
+    public static int timeToSec(String time) {
+        if(0 == time.trim().length()) {
+            return 0;
+        }
+        String minute = time.substring(0, time.indexOf(":"));
+        String sec = time.substring(time.indexOf(":")+1);
+        if(Integer.parseInt(minute)>0) {
+            return (Integer.parseInt(minute))*60 + Integer.parseInt(sec);
+        } else {
+            return Integer.parseInt(sec);
+        }
+    }
+
+
+    /**
+     * 时间转换为毫秒
+     * @param time 24小时格式，如14:35转化毫秒
+     *  */
+    public static int timeToMill(String time) {
+        if(0 == time.trim().length()) {
+            return 0;
+        }
+        String minute = time.substring(0, time.indexOf(":"));
+        String sec = time.substring(time.indexOf(":")+1);
+        if(Integer.parseInt(minute)>0) {
+            return ((Integer.parseInt(minute)) * 60 + Integer.parseInt(sec)) * 1000;
+        } else {
+            return Integer.parseInt(sec) * 1000;
+        }
+    }
 
 
 }

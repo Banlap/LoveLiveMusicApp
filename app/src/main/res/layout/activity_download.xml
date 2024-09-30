@@ -61,6 +61,7 @@
 
         </RelativeLayout>
 
+        <!-- 下载框部分 -->
         <LinearLayout
             android:id="@+id/ll_main"
             android:layout_width="match_parent"
@@ -228,6 +229,7 @@
 
         </LinearLayout>
 
+        <!-- 下载记录列表 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_message_list"
             android:layout_width="match_parent"
@@ -236,7 +238,9 @@
             app:layout_constraintTop_toBottomOf="@+id/ll_path"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:overScrollMode="never"
+            />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -57,7 +57,9 @@
             app:layout_constraintTop_toBottomOf="@+id/rl_settings_bar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:overScrollMode="never"
+            >
 
 
             <LinearLayout
@@ -376,7 +378,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="5dp"
                     android:background="@drawable/selector_normal_selected">
 
                     <TextView
@@ -395,10 +397,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="5dp"
                     android:background="@drawable/selector_normal_selected">
 
                     <TextView
@@ -413,6 +415,28 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_floating_lyric"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/selector_normal_selected">
+
+                    <TextView
+                        android:id="@+id/tv_floating_lyric"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="悬浮歌词"
+                        android:textColor="@color/light_ff"
+                        android:textSize="17dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/ll_version_main"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -420,7 +444,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="5dp"
                     android:background="@drawable/selector_normal_selected">
 
                     <TextView
@@ -469,10 +493,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="5dp"
                     android:background="@drawable/selector_normal_selected">
 
                     <TextView
@@ -528,7 +552,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:layout_marginBottom="10dp"

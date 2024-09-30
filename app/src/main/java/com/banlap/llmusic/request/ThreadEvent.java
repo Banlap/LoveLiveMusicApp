@@ -24,6 +24,8 @@ public class ThreadEvent<T> {
     public static String ALBUM_HASUNOSORA = "ALBUM_HASUNOSORA";
     public static String ALBUM_SAINT_SNOW = "ALBUM_SAINT_SNOW";
     public static String ALBUM_A_RISE = "ALBUM_A_RISE";
+    public static String ALBUM_OTHER = "ALBUM_OTHER";
+
     public static final int CONNECT_MYSQL = 0x10;    //连接数据库
     public static final int CONNECT_MYSQL_LOADING = 0x101;  //连接数据库 加载中
     public static final int CONNECT_MYSQL_SUCCESS = 0x11;  //连接数据库 成功
@@ -48,6 +50,7 @@ public class ThreadEvent<T> {
     public static final int GET_DATA_LIST_BY_HASUNOSORA = 0x207; //
     public static final int GET_DATA_LIST_BY_SAINT_SNOW = 0x208;
     public static final int GET_DATA_LIST_BY_A_RISE = 0x209;
+    public static final int GET_DATA_LIST_BY_OTHER = 0x2010;
     public static final int GET_DATA_LIST_BY_LOCAL_PLAY = 0x255;
 
     public static final int GET_DATA_LIST_COUNT = 0x21;
@@ -89,6 +92,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_GET_MUSIC_METADATA = 0x313;
 
     public static final int PLAY_LIST_FIRST = 0x32;
+
     public static final int PLAY_MUSIC_BY_CHARACTER = 0x33;  //角色控制播放
     public static final int PLAY_LOCAL_MUSIC = 0x331;
     public static final int ADD_LOCAL_MUSIC = 0x332;
@@ -149,8 +153,9 @@ public class ThreadEvent<T> {
     public static final int VIEW_COUNT_DOWN_REFRESH = 0x631;
     public static final int VIEW_COUNT_DOWN_FINISH = 0x632;
 
-    public static final int VIEW_SCREEN_LOCK= 0x641;
-    public static final int VIEW_SCREEN_UNLOCK= 0x642;
+    public static final int VIEW_SCREEN_LOCK = 0x641;
+    public static final int VIEW_SCREEN_UNLOCK = 0x642;
+    public static final int VIEW_CLOSE_FLOATING_LYRIC = 0x65;
 
 
     /** 蓝牙部分控制 */

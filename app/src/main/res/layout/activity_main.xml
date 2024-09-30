@@ -21,7 +21,7 @@
             android:id="@+id/cl_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <LinearLayout
                 android:id="@+id/ll_tittle_bar_1"
@@ -222,6 +222,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/ll_tittle_bar_1"
                 app:layout_constraintVertical_bias="1.0"/>
 
+            <com.banlap.llmusic.widget.CircleMenuView
+                android:visibility="gone"
+                android:id="@+id/cmv_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 专辑详细页 -->
@@ -229,7 +239,7 @@
             android:id="@+id/cl_album_detail"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <RelativeLayout
                 android:id="@+id/ll_title_bar"
@@ -635,7 +645,9 @@
                             app:layout_constraintHorizontal_bias="0.0"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintVertical_bias="0.0" />
+                            app:layout_constraintVertical_bias="0.0"
+                            android:overScrollMode="never"
+                            />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -668,7 +680,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@mipmap/ic_gradient_color5"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <LinearLayout
                 android:id="@+id/ll_new_tittle_bar"
@@ -755,8 +767,8 @@
                     <com.banlap.llmusic.widget.CircleImageView
                         android:visibility="visible"
                         android:id="@+id/civ_music_img"
-                        android:layout_width="150dp"
-                        android:layout_height="150dp"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
                         android:layout_marginTop="20dp"
                         android:scaleType="centerCrop"
                         android:background="@mipmap/ic_llmp_2"
@@ -887,10 +899,18 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"/>
 
+                    <ProgressBar
+                        android:id="@+id/pb_new_loading_music_2"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:indeterminateTint="@color/light_f9"
+                        android:visibility="visible" />
+
                     <ImageView
                         android:id="@+id/iv_new_my_favorite"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
+                        android:layout_marginStart="10dp"
                         android:background="@drawable/ic_favorite_empty_red"
                         />
 
