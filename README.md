@@ -47,8 +47,10 @@
 <p align="start">14. 添加收藏夹</p>
 <p align="start">15. 每日推荐功能</p>
 <p align="start">16. 定时关闭歌曲任务</p>
-<p align="start">17. 角色功能中添加小游戏</p>
+<p align="start">17. 角色功能的小游戏</p>
 <p align="start">18. 适配平板</p>
+<p align="start">19. 桌面悬浮歌词</p>
+
 
 **（本项目为开源项目，仅用于学习交流，请勿用于商业及非法用途）**
 
