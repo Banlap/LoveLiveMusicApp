@@ -576,7 +576,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
-                        android:background="@drawable/ic_music_default" />
+                        android:background="@mipmap/ic_music_default_new" />
 
 
                 </RelativeLayout>
@@ -1003,7 +1003,7 @@
                                 android:layout_height="150dp"
                                 android:layout_marginTop="20dp"
                                 android:scaleType="centerCrop"
-                                android:background="@mipmap/ic_llmp_2"
+                                android:background="@mipmap/ic_llmp_new_2"
                                 />
 
                             <com.banlap.llmusic.widget.SingleLyricScrollView

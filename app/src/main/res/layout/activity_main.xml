@@ -764,15 +764,26 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent">
 
-                    <com.banlap.llmusic.widget.CircleImageView
-                        android:visibility="visible"
-                        android:id="@+id/civ_music_img"
-                        android:layout_width="200dp"
-                        android:layout_height="200dp"
-                        android:layout_marginTop="20dp"
-                        android:scaleType="centerCrop"
-                        android:background="@mipmap/ic_llmp_2"
-                       />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        >
+
+                        <com.banlap.llmusic.widget.CircleImageView
+                            android:visibility="visible"
+                            android:id="@+id/civ_music_img"
+                            android:layout_width="200dp"
+                            android:layout_height="200dp"
+                            android:layout_centerHorizontal="true"
+                            android:scaleType="centerCrop"
+                            android:background="@mipmap/ic_llmp_new_2"
+                            />
+
+
+                    </RelativeLayout>
+
 
                     <com.banlap.llmusic.widget.SingleLyricScrollView
                         android:visibility="visible"
@@ -1103,7 +1114,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentBottom="true"
-                            android:background="@drawable/ic_music_default" />
+                            android:background="@mipmap/ic_music_default_new" />
 
 
                     </RelativeLayout>
@@ -1541,7 +1552,7 @@
                     android:id="@+id/iv_new_music_img"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:background="@drawable/ic_music_default" />
+                    android:background="@mipmap/ic_music_default_new" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"

@@ -36,6 +36,12 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
     private RequestOptions requestOptions;
     private int rThemeId =0;                             //当前主题
 
+    private int musicNewTotalLiella = 0, musicNewTotalLiyuu = 0, musicNewTotalSunnyPassion = 0, musicNewTotalNIJIGASAKI = 0, musicNewTotalAqours = 0;
+    private int musicNewTotalUS = 0, musicNewTotalHASUNOSORA = 0, musicNewTotalSAINTSNOW = 0, musicNewTotalARISE = 0,  musicNewTotalOther = 0;
+
+    private int musicTotalLiella = 0, musicTotalLiyuu = 0, musicTotalSunnyPassion = 0, musicTotalNIJIGASAKI = 0, musicTotalAqours = 0;
+    private int musicTotalUS = 0, musicTotalHASUNOSORA = 0, musicTotalSAINTSNOW = 0, musicTotalARISE = 0,  musicTotalOther = 0;
+
     @Override
     protected int getLayoutId() {
         return R.layout.fragment_main_list;
@@ -46,6 +52,20 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         EventBus.getDefault().register(this);
         recommendList = new ArrayList<>();
         initRequestOptions();
+        //updateMusicNew();
+    }
+
+    private void updateMusicNew() {
+        musicNewTotalLiella = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByLiella);
+        musicNewTotalLiyuu = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByLiyuu);
+        musicNewTotalSunnyPassion = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalBySunnyPassion);
+        musicNewTotalNIJIGASAKI = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByNIJIGASAKI);
+        musicNewTotalAqours = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByAqours);
+        musicNewTotalUS = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByUS);
+        musicNewTotalHASUNOSORA = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByHASUNOSORA);
+        musicNewTotalSAINTSNOW = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalBySAINTSNOW);
+        musicNewTotalARISE = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByARISE);
+        musicNewTotalOther = SPUtil.getIntValue(getContext(), SPUtil.MusicNewAllTotalByOther);
     }
 
     private void initRequestOptions() {
@@ -74,6 +94,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         getViewDataBinding().llList8.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList9.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList10.setOnClickListener(new ButtonClickListener());
+
     }
 
     /**
@@ -94,6 +115,20 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
     public void onResume() {
         super.onResume();
         changeTheme();
+        //refreshTotalNew();
+    }
+
+    private void refreshTotalNew() {
+        getViewDataBinding().tvLiellaNew.setVisibility(musicNewTotalLiella == musicTotalLiella? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvFourYuuNew.setVisibility(musicNewTotalLiyuu == musicTotalLiyuu? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvSunnyPassionNew.setVisibility(musicNewTotalSunnyPassion == musicTotalSunnyPassion? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvNijigasakiNew.setVisibility(musicNewTotalNIJIGASAKI == musicTotalNIJIGASAKI? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvAqoursNew.setVisibility(musicNewTotalAqours == musicTotalAqours? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvUsNew.setVisibility(musicNewTotalUS == musicTotalUS? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvHausNew.setVisibility(musicNewTotalHASUNOSORA == musicTotalHASUNOSORA? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvSaintSnowNew.setVisibility(musicNewTotalSAINTSNOW == musicTotalSAINTSNOW? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvARiseNew.setVisibility(musicNewTotalARISE == musicTotalARISE? View.GONE : View.VISIBLE);
+        getViewDataBinding().tvOtherNew.setVisibility(musicNewTotalOther == musicTotalOther? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -139,6 +174,46 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
 
                     getViewDataBinding().tvRecommend3.setText(recommendList.get(2).musicName);
                 }
+                break;
+            case ThreadEvent.GET_TOTAL_LIELLA_SUCCESS:
+                musicTotalLiella = event.i;
+                getViewDataBinding().tvLiellaNew.setVisibility(musicNewTotalLiella == musicTotalLiella? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_LIYUU_SUCCESS:
+                musicTotalLiyuu = event.i;
+                getViewDataBinding().tvFourYuuNew.setVisibility(musicNewTotalLiyuu == musicTotalLiyuu? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_SUNNY_PASSION_SUCCESS:
+                musicTotalSunnyPassion = event.i;
+                getViewDataBinding().tvSunnyPassionNew.setVisibility(musicNewTotalSunnyPassion == musicTotalSunnyPassion? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_NIJIGASAKI_SUCCESS:
+                musicTotalNIJIGASAKI = event.i;
+                getViewDataBinding().tvNijigasakiNew.setVisibility(musicNewTotalNIJIGASAKI == musicTotalNIJIGASAKI? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_AQOURS_SUCCESS:
+                musicTotalAqours = event.i;
+                getViewDataBinding().tvAqoursNew.setVisibility(musicNewTotalAqours == musicTotalAqours? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_US_SUCCESS:
+                musicTotalUS = event.i;
+                getViewDataBinding().tvUsNew.setVisibility(musicNewTotalUS == musicTotalUS? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_HASUNOSORA_SUCCESS:
+                musicTotalHASUNOSORA = event.i;
+                getViewDataBinding().tvHausNew.setVisibility(musicNewTotalHASUNOSORA == musicTotalHASUNOSORA? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_SAINT_SNOW_SUCCESS:
+                musicTotalSAINTSNOW = event.i;
+                getViewDataBinding().tvSaintSnowNew.setVisibility(musicNewTotalSAINTSNOW == musicTotalSAINTSNOW? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_A_RISE_SUCCESS:
+                musicTotalARISE = event.i;
+                getViewDataBinding().tvARiseNew.setVisibility(musicNewTotalARISE == musicTotalARISE? View.GONE : View.VISIBLE);
+                break;
+            case ThreadEvent.GET_TOTAL_OTHER_SUCCESS:
+                musicTotalOther = event.i;
+                getViewDataBinding().tvOtherNew.setVisibility(musicNewTotalOther == musicTotalOther? View.GONE : View.VISIBLE);
                 break;
         }
     }

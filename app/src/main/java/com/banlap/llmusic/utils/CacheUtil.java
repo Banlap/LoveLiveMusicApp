@@ -97,7 +97,18 @@ public class CacheUtil {
      * @param context
      */
     public static String clearAllCacheAfter(Context context) {
+        //清理应用缓存
         clearAllCache(context);
+        //清理歌曲缓存
+        cleanLLMusicCache(context);
         return getTotalCacheSize(context);
+    }
+
+    /**
+     * 删除缓存歌曲
+     * */
+    public static void cleanLLMusicCache(Context context) {
+        File file = new File(context.getExternalFilesDir("music"), "audio-cache");
+        deleteDir(file);
     }
 }

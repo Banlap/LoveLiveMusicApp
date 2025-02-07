@@ -82,7 +82,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="2dp"
                                 android:layout_marginBottom="2dp"
-                                android:src="@drawable/ic_music_default"
+                                android:src="@mipmap/ic_music_default_new"
                                 android:scaleType="fitCenter"
                                 />
 
@@ -126,7 +126,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="2dp"
                                 android:layout_marginBottom="2dp"
-                                android:src="@drawable/ic_music_default"
+                                android:src="@mipmap/ic_music_default_new"
                                 android:scaleType="fitCenter"
                                 />
 
@@ -168,7 +168,7 @@
                                 android:layout_height="match_parent"
                                 android:layout_marginTop="2dp"
                                 android:layout_marginBottom="2dp"
-                                android:src="@drawable/ic_music_default"
+                                android:src="@mipmap/ic_music_default_new"
                                 android:scaleType="fitCenter"
                                 />
 
@@ -225,15 +225,21 @@
                         android:src="@drawable/selector_click_album_haus" />
 
                     <TextView
-                        android:id="@+id/tv_haus"
+                        android:visibility="gone"
+                        android:id="@+id/tv_haus_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="haus"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -254,15 +260,21 @@
                         android:src="@drawable/selector_click_album_liella" />
 
                     <TextView
-                        android:id="@+id/tv_liella_music"
+                        android:visibility="gone"
+                        android:id="@+id/tv_liella_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="Liella!"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -285,15 +297,21 @@
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tv_nijigasaki"
+                        android:visibility="gone"
+                        android:id="@+id/tv_nijigasaki_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="Nijigasaki"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -315,15 +333,21 @@
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tv_aqours"
+                        android:visibility="gone"
+                        android:id="@+id/tv_aqours_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="Aqours"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -344,15 +368,21 @@
                         android:src="@drawable/selector_click_album_us" />
 
                     <TextView
-                        android:id="@+id/tv_us"
+                        android:visibility="gone"
+                        android:id="@+id/tv_us_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="u's"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -392,15 +422,21 @@
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tv_sunny_passion"
+                        android:visibility="gone"
+                        android:id="@+id/tv_sunny_passion_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="SunnyPassion"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -421,15 +457,21 @@
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tv_saint_snow"
+                        android:visibility="gone"
+                        android:id="@+id/tv_saint_snow_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="Saint Snow"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -450,15 +492,21 @@
                         android:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tv_a_rise"
+                        android:visibility="gone"
+                        android:id="@+id/tv_a_rise_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="A-RISE"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -498,15 +546,21 @@
                         android:src="@drawable/selector_click_album_four_yuu" />
 
                     <TextView
-                        android:id="@+id/tv_four_yuu"
+                        android:visibility="gone"
+                        android:id="@+id/tv_four_yuu_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="Fo(u)r YuU"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 
@@ -545,15 +599,21 @@
                         android:src="@drawable/selector_click_album_other" />
 
                     <TextView
-                        android:id="@+id/tv_other"
+                        android:visibility="gone"
+                        android:id="@+id/tv_other_new"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="15dp"
-                        android:text="Other"
-                        android:textColor="@color/white"
-                        android:textSize="36dp"
-                        android:visibility="gone" />
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
 
                 </RelativeLayout>
 

@@ -164,7 +164,7 @@ public class NotificationHelper {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
             builder.setLargeIcon(bitmap);
         } else {
-            builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp_2));
+            builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp_new_2));
         }
 
         MediaSessionCompat mediaSession = MusicPlayService.mMediaSession;
@@ -294,7 +294,7 @@ public class NotificationHelper {
         builder.setCategory(Notification.CATEGORY_CALL);
         builder.setWhen(System.currentTimeMillis());
         builder.setSmallIcon(R.mipmap.ic_llmp_small_1);
-        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp));
+        builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp_new));
         builder.setCustomBigContentView(remoteBigViews);
         builder.setCustomContentView(remoteViews);
         builder.setStyle(new androidx.media.app.NotificationCompat.MediaStyle());

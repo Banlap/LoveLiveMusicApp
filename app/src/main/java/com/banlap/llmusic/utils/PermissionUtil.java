@@ -3,6 +3,7 @@ package com.banlap.llmusic.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.core.content.ContextCompat;
@@ -29,6 +30,15 @@ public class PermissionUtil {
             }
         }
         return false;
+    }
+
+
+    public void intoSystemPermission(Context context) {
+        Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+        intent.setData(uri);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     public void intoMIUIPermission(Context context) {

@@ -35,9 +35,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.pad.uivm.vm.PadMainVM;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.GameXOHelper;
+import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SystemUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -59,7 +61,7 @@ public class CharacterService extends Service {
     private ConstraintLayout clCharacter;
     private ImageView ivCharacter;
     private static LinearLayout llCharacterTalk;
-    private LinearLayout llSayHello, llSayGood, llGame;
+    private LinearLayout llSayHello, llSayGood, llGame, llClose;
     private LinearLayout llLastMusic, llPlayMusic, llNextMusic;
     private static ImageView ivPlayMusic;
     /**
@@ -163,6 +165,7 @@ public class CharacterService extends Service {
         llSayHello = rlCharacter.findViewById(R.id.ll_say_hello);
         llSayGood = rlCharacter.findViewById(R.id.ll_say_good);
         llGame = rlCharacter.findViewById(R.id.ll_game);
+        llClose = rlCharacter.findViewById(R.id.ll_close);
         llLastMusic = rlCharacter.findViewById(R.id.ll_last_music);
         llPlayMusic = rlCharacter.findViewById(R.id.ll_play_music);
         ivPlayMusic = rlCharacter.findViewById(R.id.iv_play_music);
@@ -205,9 +208,11 @@ public class CharacterService extends Service {
         llPlayMusic.setVisibility(View.GONE);
         llNextMusic.setVisibility(View.GONE);
         llGame.setVisibility(View.GONE);
+        llClose.setVisibility(View.GONE);
         llSayHello.setOnClickListener(new ButtonClickListener());
         llSayGood.setOnClickListener(new ButtonClickListener());
         llGame.setOnClickListener(new ButtonClickListener());
+        llClose.setOnClickListener(new ButtonClickListener());
         llLastMusic.setOnClickListener(new ButtonClickListener());
         llPlayMusic.setOnClickListener(new ButtonClickListener());
         llNextMusic.setOnClickListener(new ButtonClickListener());
@@ -239,6 +244,7 @@ public class CharacterService extends Service {
                     llPlayMusic.setVisibility(View.VISIBLE);
                     llNextMusic.setVisibility(View.VISIBLE);
                     llGame.setVisibility(View.VISIBLE);
+                    llClose.setVisibility(View.VISIBLE);
                 } else {
                     llSayHello.setVisibility(View.GONE);
                     llSayGood.setVisibility(View.GONE);
@@ -246,6 +252,7 @@ public class CharacterService extends Service {
                     llPlayMusic.setVisibility(View.GONE);
                     llNextMusic.setVisibility(View.GONE);
                     llGame.setVisibility(View.GONE);
+                    llClose.setVisibility(View.GONE);
                 }
             } else if(v.getId() == R.id.ll_say_hello) {
                 if(llCharacterTalk.getVisibility() == View.GONE) {
@@ -264,6 +271,16 @@ public class CharacterService extends Service {
                 llGameTitle.setVisibility(llGameTitle.getVisibility() == View.GONE? View.VISIBLE:View.GONE);
                 resetGameXO(true);
                 cleanGameScore();
+            } else if(v.getId() == R.id.ll_close) {
+                if(SystemUtil.getInstance().isCanDrawOverlays(LLActivityManager.getInstance().getTopActivity())) {
+                    if(SystemUtil.getInstance().isServiceWorked(LLActivityManager.getInstance().getTopActivity(), CharacterService.class.getPackage().getName()
+                            + "." + CharacterService.class.getSimpleName())) {
+
+                        stopService(MainActivity.intentCharacterService);
+                        MainVM.stopHandler();           //关闭角色并停止handler
+                        MainVM.stopTalkHandler();
+                    }
+                }
             } else if(v.getId() == R.id.ll_last_music) {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
             } else if(v.getId() == R.id.ll_play_music) {

@@ -391,6 +391,19 @@ public class MainVM extends AndroidViewModel {
         SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
     }
 
+    public static void showAllMusicTotal(Context context) {
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_LIELLA));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_LIYUU));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_SUNNY_PASSION));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_NIJIGASAKI));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_AQOURS));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_US));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_HASUNOSORA));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_SAINT_SNOW));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_A_RISE));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_OTHER));
+    }
+
     /** 默认存储Music值 */
     public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {
         musicMsg.isPlaying = isPlaying;
@@ -409,7 +422,7 @@ public class MainVM extends AndroidViewModel {
         return musicMsg;
     }
 
-    /** 转换成时间格式*/
+    /** 获取文件大小 */
     public String showFileSize(String name, String isLocal, String url) {
         String size = "0 MB";
         if(isLocal.equals("0")) {

@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -859,7 +861,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
                     binding.ivMusicImg.setImageBitmap(bitmap);
                 } else {
-                    binding.ivMusicImg.setImageResource(R.mipmap.ic_llmp);
+                    binding.ivMusicImg.setImageResource(R.mipmap.ic_llmp_new);
                 }
 
                 //点击播放歌曲列表
@@ -903,9 +905,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     public void onClick(View v) {
                         localFileList.remove(position);
                         localListAdapter.notifyItemRemoved(position);
-                        localListAdapter.notifyItemRangeChanged(position, mLocalMusicList.size());
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_LOCAL_MUSIC));
-                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, localFileList);
+                        localListAdapter.notifyItemRangeChanged(position, mLocalMusicList.size() - position);
+                        new Thread(() -> {
+                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, localFileList);
+                        }).start();
+
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_LOCAL_MUSIC));
+                        }, 200);
                     }
                 });
             }

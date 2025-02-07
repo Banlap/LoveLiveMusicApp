@@ -1152,7 +1152,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                         .setDefaultRequestOptions(requestOptions)
                         .load(event.music.isLocal?
                                 (null != event.music.musicImgByte?
-                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_2) : event.music.getMusicImg()
+                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : event.music.getMusicImg()
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1162,7 +1162,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                         .setDefaultRequestOptions(requestOptions)
                         .load(event.music.isLocal?
                                 (null != event.music.musicImgByte?
-                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_2) : event.music.getMusicImg()
+                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : event.music.getMusicImg()
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))

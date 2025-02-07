@@ -37,9 +37,9 @@
     <application
         android:name=".base.BaseApplication"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_llmp_2"
+        android:icon="@mipmap/ic_llmp_new_2"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_llmp_2"
+        android:roundIcon="@mipmap/ic_llmp_new_2"
         android:supportsRtl="true"
         android:theme="@style/NormalTheme"
         android:requestLegacyExternalStorage="true"

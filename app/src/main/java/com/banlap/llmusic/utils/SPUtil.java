@@ -42,6 +42,21 @@ public class SPUtil {
     public static final String TaskAfterMusicSwitch = "TaskAfterMusicSwitch"; //定时任务中歌曲播放后是否停止
 
     /**
+     * 各团歌曲总数
+     * */
+    public static final String MusicNewAllTotalByLiella = "MusicNewAllTotalByLiella";
+    public static final String MusicNewAllTotalByLiyuu = "MusicNewAllTotalByLiyuu";
+    public static final String MusicNewAllTotalBySunnyPassion = "MusicNewAllTotalBySunnyPassion";
+    public static final String MusicNewAllTotalByNIJIGASAKI = "MusicNewAllTotalByNIJIGASAKI";
+    public static final String MusicNewAllTotalByAqours = "MusicNewAllTotalByAqours";
+    public static final String MusicNewAllTotalByUS = "MusicNewAllTotalByUS";
+    public static final String MusicNewAllTotalByHASUNOSORA = "MusicNewAllTotalByHASUNOSORA";
+    public static final String MusicNewAllTotalBySAINTSNOW = "MusicNewAllTotalBySAINTSNOW";
+    public static final String MusicNewAllTotalByARISE = "MusicNewAllTotalByARISE";
+    public static final String MusicNewAllTotalByOther = "MusicNewAllTotalByOther";
+
+
+    /**
      * ---------默认变量值----------------
      * */
     public static final String SaveControllerSceneValue_DefaultScene = "DefaultScene";
@@ -58,6 +73,18 @@ public class SPUtil {
         SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(key, value);
+        editor.apply();
+    }
+
+    public static int getIntValue(Context context, String key) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(key, 0);
+    }
+
+    public static void setIntValue(Context context, String key, int value) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(key, value);
         editor.apply();
     }
 

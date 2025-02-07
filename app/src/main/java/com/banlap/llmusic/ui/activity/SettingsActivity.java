@@ -33,6 +33,7 @@ import com.banlap.llmusic.databinding.ActivitySettingsBinding;
 import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
 import com.banlap.llmusic.databinding.DialogMessageBinding;
+import com.banlap.llmusic.databinding.DialogPermissionBinding;
 import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
 import com.banlap.llmusic.databinding.DialogSettingViewModeBinding;
 import com.banlap.llmusic.receiver.DownloadReceiver;
@@ -162,6 +163,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             @Override
             public void onClick(View view) {
                 showErrorLog();
+            }
+        });
+
+        getViewDataBinding().llPermission.setOnClickListener(new View.OnClickListener() { //关于
+            @Override
+            public void onClick(View v) {
+                showPermission();
             }
         });
 
@@ -435,7 +443,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mAlertDialog = new AlertDialog.Builder(this)
                 .setView(settingVideoBinding.getRoot())
                 .create();
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
     }
 
@@ -533,7 +541,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mAlertDialog = new AlertDialog.Builder(this)
                 .setView(viewModeBinding.getRoot())
                 .create();
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
 
 
@@ -570,7 +578,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         mAlertDialog = new AlertDialog.Builder(this)
                 .setView(messageBinding.getRoot())
                 .create();
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
     }
 
@@ -667,6 +675,60 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     }
 
+    private void showPermission() {
+        DialogPermissionBinding permissionBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
+                R.layout.dialog_permission, null, false);
+
+        String[] permissionStorage = {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        };
+        permissionBinding.tvIsReadWrite.setText(PermissionUtil.getInstance().checkPermission(this, permissionStorage)? "未授权": "已授权");
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            String[] permissionAudio = {
+                    Manifest.permission.READ_MEDIA_AUDIO
+            };
+
+            String[] permissionPicture = {
+                    Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO
+            };
+
+            String[] permissionNotifications = {
+                    Manifest.permission.POST_NOTIFICATIONS,
+            };
+
+            permissionBinding.tvIsMusicAudio.setText(PermissionUtil.getInstance().checkPermission(this, permissionAudio)? "未授权": "已授权");
+            permissionBinding.tvIsPictureVideo.setText(PermissionUtil.getInstance().checkPermission(this, permissionPicture)? "未授权": "已授权");
+            permissionBinding.tvIsNotifications.setText(PermissionUtil.getInstance().checkPermission(this, permissionNotifications)? "未授权": "已授权");
+        }
+
+
+        permissionBinding.btSelectIconCommit.setText("确认");
+        permissionBinding.btSelectIconCommit.setTextColor(getResources().getColor(R.color.white));
+        permissionBinding.btSelectIconCommit.setBackgroundResource(R.drawable.selector_button_selected_default);
+
+        permissionBinding.btIntoPermission.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PermissionUtil.getInstance().intoSystemPermission(SettingsActivity.this);
+            }
+        });
+
+        permissionBinding.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAlertDialog.dismiss();
+            }
+        });
+
+        mAlertDialog = new AlertDialog.Builder(this)
+                .setView(permissionBinding.getRoot())
+                .create();
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
+        mAlertDialog.show();
+    }
+
     /** 展示下载进度 */
     private void showLoadingApp() {
         if(null != mAlertDialog) {
@@ -701,7 +763,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             }
         });
         mAlertDialog.setCanceledOnTouchOutside(false);
-        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_2);
+        Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
 
     }

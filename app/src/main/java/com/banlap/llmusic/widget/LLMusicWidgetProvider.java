@@ -140,7 +140,7 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
                     });
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
         } else {
-            remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_2", "mipmap", context.getPackageName()));
+            remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_new_2", "mipmap", context.getPackageName()));
             intentServiceIsPause.putExtra("MusicBitmap", (byte[]) null);
         }
 

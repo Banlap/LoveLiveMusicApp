@@ -12,7 +12,7 @@
     <!-- 启动页闪屏 -->
     <style name="SplashTheme" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_llmp_3</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_llmp_new_3_1</item>
         <item name="postSplashScreenTheme">@style/NormalTheme</item>
     </style>
 

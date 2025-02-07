@@ -444,6 +444,26 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/ll_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_round_gray"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="@+id/iv_character"
+                app:layout_constraintStart_toStartOf="@+id/ll_last_music">
+
+                <ImageView
+                    android:id="@+id/iv_close"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/ic_close_gray" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/ll_next_music"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

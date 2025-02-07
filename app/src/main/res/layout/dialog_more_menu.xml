@@ -7,7 +7,7 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/selector_button_selected"
+        android:background="@drawable/shape_button_white_3"
         android:padding="7dp">
 
         <LinearLayout

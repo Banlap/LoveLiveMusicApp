@@ -20,7 +20,7 @@
             <ImageView
                 android:layout_width="125dp"
                 android:layout_height="125dp"
-                android:background="@mipmap/ic_llmp_2"
+                android:background="@mipmap/ic_llmp_new_2"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

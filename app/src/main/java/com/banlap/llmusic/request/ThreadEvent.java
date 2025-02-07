@@ -40,6 +40,27 @@ public class ThreadEvent<T> {
     public static final int GET_MESSAGE_ERROR = 0x17;
     public static final int GET_APP_VERSION_SUCCESS = 0x18;
 
+    public static final int GET_TOTAL_LIELLA = 0x1910;
+    public static final int GET_TOTAL_LIELLA_SUCCESS = 0x1920;
+    public static final int GET_TOTAL_LIYUU = 0x1911;
+    public static final int GET_TOTAL_LIYUU_SUCCESS = 0x1921;
+    public static final int GET_TOTAL_SUNNY_PASSION = 0x1912;
+    public static final int GET_TOTAL_SUNNY_PASSION_SUCCESS = 0x1922;
+    public static final int GET_TOTAL_NIJIGASAKI = 0x1913;
+    public static final int GET_TOTAL_NIJIGASAKI_SUCCESS = 0x1923;
+    public static final int GET_TOTAL_AQOURS = 0x1914;
+    public static final int GET_TOTAL_AQOURS_SUCCESS = 0x1924;
+    public static final int GET_TOTAL_US = 0x1915;
+    public static final int GET_TOTAL_US_SUCCESS = 0x1925;
+    public static final int GET_TOTAL_HASUNOSORA = 0x1916;
+    public static final int GET_TOTAL_HASUNOSORA_SUCCESS = 0x1926;
+    public static final int GET_TOTAL_SAINT_SNOW = 0x1917;
+    public static final int GET_TOTAL_SAINT_SNOW_SUCCESS = 0x1927;
+    public static final int GET_TOTAL_A_RISE = 0x1918;
+    public static final int GET_TOTAL_A_RISE_SUCCESS = 0x1928;
+    public static final int GET_TOTAL_OTHER = 0x1919;
+    public static final int GET_TOTAL_OTHER_SUCCESS = 0x1929;
+
     public static final int GET_DATA_LIST = 0x20;           //获取所有歌曲
     public static final int GET_DATA_LIST_BY_LIELLA = 0x201;    //获取Liella所有歌曲
     public static final int GET_DATA_LIST_BY_SUNNY_PASSION = 0x202; //获取SUNNY PASSION所有歌曲
