@@ -1,7 +1,7 @@
 
 
 <p align="center">
-  <img width="128" height="128" src="https://user-images.githubusercontent.com/12729772/200043600-d5977a01-36dd-462e-a0a9-85cf561b1009.png">
+  <img width="128" height="128" src="https://github.com/user-attachments/assets/e0bb545e-83ed-411a-9e68-017e34acca6f">
 </p>
 
 <div align="center"><b>LoveLive音乐播放器 </b></div>
@@ -23,11 +23,14 @@
 
 
 ### 最近更新：
-<p align="start">适配平板；注：v1.6.3前的app版本已无法使用，请使用最新版本为准</p>
+<p align="start">App图标新设计</p>
 
 
 ### 额外内容：
 <p align="start">添加了数据库表字段描述文件</p>
+
+### 注意事项:
+<p align="start">v1.6.3前的app版本已无法使用，请使用最新版本为准</p>
 
 #
 ### App的功能：
@@ -50,6 +53,7 @@
 <p align="start">17. 角色功能的小游戏</p>
 <p align="start">18. 适配平板</p>
 <p align="start">19. 桌面悬浮歌词</p>
+<p align="start">20. 权限设置页面</p>
 
 
 **（本项目为开源项目，仅用于学习交流，请勿用于商业及非法用途）**
