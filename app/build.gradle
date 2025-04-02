@@ -225,7 +225,7 @@ dependencies {
     implementation 'androidx.core:core-splashscreen:1.0.0-alpha01'
 
     implementation 'com.google.code.gson:gson:2.8.9'
-    compile 'com.alibaba:fastjson:2.0.19.android'
+    //compile 'com.alibaba:fastjson:2.0.19.android'
 
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     /** 图片加载框架 Glide*/
@@ -253,7 +253,7 @@ dependencies {
 
     /** tabLayout */
     implementation 'com.google.android.material:material:1.1.0'
-    implementation 'com.lzp:FlycoTabLayoutZ:1.3.3'
+    //implementation 'com.lzp:FlycoTabLayoutZ:1.3.3'
 
     /** 新音频框架 */
     implementation 'androidx.media3:media3-exoplayer:1.0.0'
@@ -261,9 +261,9 @@ dependencies {
     implementation 'androidx.media:media:1.4.3'
     implementation 'androidx.media3:media3-session:1.0.0'
     /** 磨砂背景处理 */
-    implementation 'com.eightbitlab:blurview:1.6.3'
-    implementation 'com.github.centerzx:ShapeBlurView:1.0.5'
-
+//    implementation 'com.eightbitlab:blurview:1.6.3'
+//    implementation 'com.github.centerzx:ShapeBlurView:1.0.5'
+    implementation 'com.github.Dimezis:BlurView:version-2.0.6'
 
     implementation 'com.linroid.filtermenu:library:0.2.3@aar'
 

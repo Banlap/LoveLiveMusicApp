@@ -415,7 +415,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         Drawable windowBackground = decorView.getBackground();
         getViewDataBinding().bvMain.setupWith(rootView)
                 .setFrameClearDrawable(windowBackground)
-                .setBlurAlgorithm(new RenderScriptBlur(this))
                 .setBlurRadius(5f)
                 .setOverlayColor(getColor(R.color.light_fd_alpha_90))
                 .setBlurAutoUpdate(true);

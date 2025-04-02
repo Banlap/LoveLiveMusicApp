@@ -135,9 +135,6 @@ import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.android.material.appbar.AppBarLayout;
 import com.linroid.filtermenu.library.FilterMenu;
 
-import net.center.blurview.ShapeBlurView;
-import net.center.blurview.enu.BlurCorner;
-import net.center.blurview.enu.BlurMode;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
