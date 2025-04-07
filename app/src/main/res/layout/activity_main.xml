@@ -221,16 +221,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ll_tittle_bar_1"
                 app:layout_constraintVertical_bias="1.0"/>
-
-            <com.banlap.llmusic.widget.CircleMenuView
-                android:visibility="gone"
-                android:id="@+id/cmv_main"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                />
+            
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -123,7 +123,6 @@ import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
-import com.banlap.llmusic.widget.CircleMenuView;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
 import com.banlap.llmusic.widget.SingleLyricScrollView;
