@@ -182,7 +182,8 @@ android {
         //1.更换新图标、角色功能添加关闭功能
         //2.修正清理缓存功能：同时将歌曲缓存清除
         //3.修正本地歌曲删除时刷新性能问题
-
+        versionName "1.8.1"
+        //
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息
@@ -239,7 +240,7 @@ dependencies {
     /** okhttp 框架*/
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     /** 音频视频缓冲 */
-    implementation 'com.danikula:videocache:2.7.0'
+    implementation 'com.danikula:videocache:2.7.1'
     /** 图片裁剪 */
     implementation 'com.github.yalantis:ucrop:2.2.6'
     /** Toast新样式 */

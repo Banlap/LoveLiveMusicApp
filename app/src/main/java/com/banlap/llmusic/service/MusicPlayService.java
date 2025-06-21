@@ -107,27 +107,29 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static String currentMusicFileSize = "-- MB";
 
     private Thread musicPosThread;
+    private static MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
     Runnable musicPosRunnable = new Runnable() {
         @Override
         public void run() {
-            if (mediaPlayer != null) {
-                while (true) {
+            while (!Thread.currentThread().isInterrupted() && mediaPlayer != null) {
+                synchronized (lock) {
                     while (isStop) {
-                        synchronized (lock) {
-                            try {
-                                lock.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return;
                         }
                     }
-                    int currentPosition = mediaPlayer.getCurrentPosition();
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_POS, currentPosition));
-
-                    mStartPosition = currentPosition;
 
                 }
+
+                int currentPosition = mediaPlayer.getCurrentPosition();
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_POS, currentPosition));
+
+                mStartPosition = currentPosition;
+
             }
         }
     };
@@ -560,7 +562,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         String quality="--";
         int bitrateInt = 0;
         try {
-            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
             if(dataSource.isLocal) {
                 retriever.setDataSource(dataSource.musicURL);
             } else {
@@ -604,6 +605,9 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     /** 关闭 */
     public void stop() {
         isStop = true;
+        if (musicPosThread != null) {
+            musicPosThread.interrupt();
+        }
         if(mediaPlayer!=null) {
             mediaPlayer.stop();
             mediaPlayer.release();

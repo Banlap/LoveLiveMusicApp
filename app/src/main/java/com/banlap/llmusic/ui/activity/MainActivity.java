@@ -3723,9 +3723,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     public void onClick(View v) {
                         if(!list.get(position).isPlaying) {
                             list.remove(position);
-                            playMusicListAdapter.notifyDataSetChanged();
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
-                            SPUtil.setListValue(context, SPUtil.PlayListData, list);
+                            playMusicListAdapter.notifyItemRemoved(position);
+                            playMusicListAdapter.notifyItemRangeChanged(position, list.size() - position);
+                            new Thread(()-> SPUtil.setListValue(context, SPUtil.PlayListData, list));
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
+                            }, 200);
                         }
                     }
                 });
