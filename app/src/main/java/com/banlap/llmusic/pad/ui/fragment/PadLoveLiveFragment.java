@@ -76,6 +76,7 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
         getViewDataBinding().llList7.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList8.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList9.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llList10.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList11.setOnClickListener(new ButtonClickListener());
     }
 

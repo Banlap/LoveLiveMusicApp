@@ -97,7 +97,11 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
                 if(bitmapTemp != null) {
                     bitmap = bitmapTemp;
                 }
-                isDefault = !MainActivity.isPlay;
+                if(MusicPlayService.mediaPlayer!=null) {
+                    if(MusicPlayService.mediaPlayer.isPlaying()) {
+                        isDefault = false;
+                    }
+                }
             }
         }
 
