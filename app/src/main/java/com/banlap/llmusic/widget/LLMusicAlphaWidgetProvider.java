@@ -44,8 +44,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         String musicName, musicSinger;
-        musicName = MusicPlayService.currentMusicName;
-        musicSinger = MusicPlayService.currentMusicSinger;
+        musicName = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicName : "";
+        musicSinger = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicSinger : "";
         Log.i(TAG, "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
         setRemoteViews(context, appWidgetManager, null);
     }
@@ -85,15 +85,15 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         }
 
         //当小组件重新加入时 获取上次音乐信息
-        String musicNameTemp = MusicPlayService.currentMusicName;
-        String musicSingerTemp = MusicPlayService.currentMusicSinger;
+        String musicNameTemp = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicName : "";
+        String musicSingerTemp = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicSinger : "";
         Bitmap bitmapTemp;
         if(musicNameTemp != null && !musicNameTemp.equals("")) {
             if(musicSingerTemp != null && !musicSingerTemp.equals("")) {
                 musicName = musicNameTemp;
                 musicSinger = musicSingerTemp;
 
-                bitmapTemp = MusicPlayService.currentMusicBitmap;
+                bitmapTemp = MusicPlayService.currentMusic.musicImgBitmap;
                 if(bitmapTemp != null) {
                     bitmap = bitmapTemp;
                 }
@@ -131,7 +131,7 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
                     .setDefaultRequestOptions(requestOptions)
                     .asBitmap()
                     .load(bitmap)
-                    .transform(new RoundedCornersTransformation(15, 0, RoundedCornersTransformation.CornerType.ALL))
+                    .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {

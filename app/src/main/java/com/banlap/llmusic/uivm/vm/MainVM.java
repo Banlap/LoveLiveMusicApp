@@ -244,14 +244,14 @@ public class MainVM extends AndroidViewModel {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
                     }
                 } catch (Exception e) {
-                    Log.i("ABMediaPlay", "error " + e.getMessage());
+                    Log.e(TAG, "error " + e.getMessage());
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
                 }
             }
 
             @Override
             public void onError(String e) {
-                Log.i("ABMediaPlay", "error: " + e);
+                Log.e(TAG, "error: " + e);
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
             }
         });

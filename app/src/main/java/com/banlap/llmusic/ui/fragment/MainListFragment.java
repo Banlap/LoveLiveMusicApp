@@ -94,7 +94,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         getViewDataBinding().llList8.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList9.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList10.setOnClickListener(new ButtonClickListener());
-
+        getViewDataBinding().llList11.setOnClickListener(new ButtonClickListener());
     }
 
     /**
@@ -255,6 +255,8 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_A_RISE));
             } else if (v.getId() == R.id.ll_list_10) {
                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_OTHER));
+            } else if (v.getId() == R.id.ll_list_11) {
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_BLUEBIRD));
             }
         }
     }

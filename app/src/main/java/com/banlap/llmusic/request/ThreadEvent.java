@@ -22,6 +22,7 @@ public class ThreadEvent<T> {
     public static String ALBUM_AQOURS = "ALBUM_AQOURS";
     public static String ALBUM_US = "ALBUM_US";
     public static String ALBUM_HASUNOSORA = "ALBUM_HASUNOSORA";
+    public static String ALBUM_BLUEBIRD = "ALBUM_BLUEBIRD";
     public static String ALBUM_SAINT_SNOW = "ALBUM_SAINT_SNOW";
     public static String ALBUM_A_RISE = "ALBUM_A_RISE";
     public static String ALBUM_OTHER = "ALBUM_OTHER";
@@ -72,6 +73,7 @@ public class ThreadEvent<T> {
     public static final int GET_DATA_LIST_BY_SAINT_SNOW = 0x208;
     public static final int GET_DATA_LIST_BY_A_RISE = 0x209;
     public static final int GET_DATA_LIST_BY_OTHER = 0x2010;
+    public static final int GET_DATA_LIST_BY_BLUEBIRD = 0x2011;
     public static final int GET_DATA_LIST_BY_LOCAL_PLAY = 0x255;
 
     public static final int GET_DATA_LIST_COUNT = 0x21;
@@ -202,6 +204,9 @@ public class ThreadEvent<T> {
     public static final int PAD_GET_DATA_LIST_BY_HASUNOSORA = 0x9207; //
     public static final int PAD_GET_DATA_LIST_BY_SAINT_SNOW = 0x9208;
     public static final int PAD_GET_DATA_LIST_BY_A_RISE = 0x9209;
+    public static final int PAD_GET_DATA_LIST_BY_OTHER = 0x9210;
+    public static final int PAD_GET_DATA_LIST_BY_BLUEBIRD = 0x9211;
+
     public static final int PAD_GET_DATA_LIST_BY_LOCAL_PLAY = 0x9255;
     public static final int PAD_VIEW_PLAY_MUSIC = 0x9301;
     public static final int PAD_VIEW_ADD_MUSIC = 0x9302;

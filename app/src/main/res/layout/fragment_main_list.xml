@@ -209,6 +209,41 @@
                 </LinearLayout>
 
                 <RelativeLayout
+                    android:id="@+id/ll_list_11"
+                    android:layout_width="match_parent"
+                    android:layout_height="155dp"
+                    android:layout_marginStart="15dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="10dp">
+
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/selector_click_album_bluebird" />
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_bluebird_new"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="5dp"
+                        android:text="New"
+                        android:textColor="@color/green_3A"
+                        android:textSize="15dp"
+                        android:textStyle="bold"
+                        android:shadowColor="@color/gray_5c"
+                        android:shadowDx="1"
+                        android:shadowDy="1"
+                        android:shadowRadius="1"
+                        />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/ll_list_7"
                     android:layout_width="match_parent"
                     android:layout_height="155dp"

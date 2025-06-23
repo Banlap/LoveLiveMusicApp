@@ -359,6 +359,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     }
 
+    /** 是否自动播放音乐 */
+    private void autoMusic() {
+        String isAutoMusic = getIntent().getStringExtra("IsAutoMusic");
+        if(!TextUtils.isEmpty(isAutoMusic) && isAutoMusic.equals("1")) {
+            binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
+        }
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -920,6 +928,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             MediaControllerCompat.setMediaController(MainActivity.this, mediaControllerCompat);
             binder.setMediaController(mediaControllerCompat);
             changePlayMode(playMode);
+            //是否直接自动播放音乐
+            autoMusic();
         }
 
         @Override
@@ -982,7 +992,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.CONNECT_MYSQL_ERROR:
-                getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
+                getViewDataBinding().rlShowLoading.setVisibility(GONE);
                 Toasty.error(this, "网络连接失败", Toast.LENGTH_SHORT, true).show();
                 break;
             case ThreadEvent.GET_SUCCESS:
@@ -996,7 +1006,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 ObjectAnimator detailPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, true, getViewDataBinding().clAlbumDetail);
                 mainPanelChangeObjectAnimator.start();
                 detailPanelChangeObjectAnimator.start();
-                getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
+                getViewDataBinding().rlShowLoading.setVisibility(GONE);
                 isNotMain = true;
                 isClickLocalOrFavorite = false;
                 getViewDataBinding().tvCount.setText("--");
@@ -1024,6 +1034,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     updateMusicDetailMessage("アライズ", "アライズ", "A-RISE", getViewDataBinding().ivLogo, R.mipmap.ic_album_a_rise_2, 120, 50);
                 } else if(ThreadEvent.ALBUM_OTHER.equals(event.str)) {
                     updateMusicDetailMessage("Other", "Other", "其他", getViewDataBinding().ivLogo, R.mipmap.ic_album_lovelive_2, 120, 50);
+                } else if(ThreadEvent.ALBUM_BLUEBIRD.equals(event.str)) {
+                    updateMusicDetailMessage("イキヅライブ!", "イキヅライブ!", "LoveLive! BLUEBIRD", getViewDataBinding().ivLogo, R.mipmap.ic_album_bluebird_2, 120, 50);
                 }
                 isClickLocalPlayList = false;
                 break;
@@ -1171,12 +1183,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 Toasty.error(this, "播放失败", Toast.LENGTH_SHORT, true).show();
 
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
-                getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
-                getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.GONE);
+                getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
+                getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
                 break;
             case ThreadEvent.PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {
-                    binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                    binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                 }
                 break;
             case ThreadEvent.PLAY_RECOMMEND_MUSIC:   //点击播放每日推荐的歌曲 并添加到播放列表
@@ -1332,8 +1344,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbNewProgress.setMax(event.i);
 
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
-                getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
-                getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.GONE);
+                getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
+                getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
@@ -1347,9 +1359,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().tvListSize.setText("(" + playList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("(" + playList.size() + ")");
                 currentMusicDetail = event.music;
-                MusicPlayService.currentMusicImg = event.music.getMusicImg();
-                MusicPlayService.currentMusicName = event.music.musicName;
-                MusicPlayService.currentMusicSinger = event.music.musicSinger;
+//                MusicPlayService.currentMusicImg = event.music.getMusicImg();
+//                MusicPlayService.currentMusicName = event.music.musicName;
+//                MusicPlayService.currentMusicSinger = event.music.musicSinger;
+                MusicPlayService.currentMusic.setMusicImg(event.music.getMusicImg());
+                MusicPlayService.currentMusic.setMusicName(event.music.musicName);
+                MusicPlayService.currentMusic.setMusicSinger(event.music.musicSinger);
+
 
                 //刷新播放列表的收藏歌曲显示ui
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
@@ -1384,7 +1400,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
-                            MusicPlayService.currentMusicBitmap = null;
+                            MusicPlayService.currentMusic.setMusicImgBitmap(null);
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
@@ -1393,7 +1409,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             //重复调用，在initNotificationHelper中有调用
                             //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
-                            MusicPlayService.currentMusicImg = "";
+                            //MusicPlayService.currentMusicImg = "";
+                            MusicPlayService.currentMusic.setMusicImg("");
                             startMusicService(true, event.music.musicName, event.music.musicSinger, event.music.musicImgByte != null? BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : null);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
@@ -1403,13 +1420,32 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
-                MusicPlayService.currentMusicName = event.str;
-                MusicPlayService.currentMusicSinger = event.str2;
+//                MusicPlayService.currentMusicName = event.str;
+//                MusicPlayService.currentMusicSinger = event.str2;
+                MusicPlayService.currentMusic.setMusicName(event.str);
+                MusicPlayService.currentMusic.setMusicSinger(event.str2);
+
                 if(event.bitmap != null) {
-                    MusicPlayService.currentMusicBitmap = event.bitmap;
+                    Bitmap finalBitmap = event.bitmap;
+                    // 将图片转为车机兼容格式（JPEG，300x300 像素）
+                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(finalBitmap, 300, 300, true);
+
+                    // 转换为 JPEG 字节流（避免 PNG 透明通道问题）
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                    byte[] jpegData = stream.toByteArray();
+
+                    // 最终使用的 Bitmap
+                    finalBitmap = BitmapFactory.decodeByteArray(jpegData, 0, jpegData.length);
+
+                    MusicPlayService.currentMusic.setMusicImgBitmap(finalBitmap);
                 }
 
-                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusicBitmap, false);
+                if(binder !=null) {
+                    binder.updateMetadata(currentMusicDetail);
+                }
+
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusic.musicImgBitmap, false);
                 MusicPlayService.updateWidgetUI(MainActivity.this, false);
                 break;
             case ThreadEvent.VIEW_LYRIC:
@@ -1465,34 +1501,34 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             case ThreadEvent.VIEW_COUNT_DOWN_REFRESH:  //倒计时刷新
                 if(dialogTimeTasksBinding != null) {
                     dialogTimeTasksBinding.tvTitleDetailTime.setText(event.str);
-                    dialogTimeTasksBinding.pbLoadingTask.setVisibility(View.GONE);
+                    dialogTimeTasksBinding.pbLoadingTask.setVisibility(GONE);
                 }
                 break;
             case ThreadEvent.VIEW_COUNT_DOWN_FINISH:
                 if(dialogTimeTasksBinding != null) {
                     isCountDown = false;
                     dialogTimeTasksBinding.tvTitleDetailTime.setText("00:00");
-                    dialogTimeTasksBinding.pbLoadingTask.setVisibility(View.GONE);
+                    dialogTimeTasksBinding.pbLoadingTask.setVisibility(GONE);
                     dialogTimeTasksBinding.tvTitleDetail.setVisibility(View.VISIBLE);
-                    dialogTimeTasksBinding.llTitleDetail.setVisibility(View.GONE);
+                    dialogTimeTasksBinding.llTitleDetail.setVisibility(GONE);
                     dialogTimeTasksBinding.ivTasksClose.setVisibility(View.VISIBLE);
-                    dialogTimeTasksBinding.ivTimeTasks1.setVisibility(View.GONE);
-                    dialogTimeTasksBinding.ivTimeTasks2.setVisibility(View.GONE);
-                    dialogTimeTasksBinding.ivTimeTasks3.setVisibility(View.GONE);
-                    dialogTimeTasksBinding.ivTimeTasks4.setVisibility(View.GONE);
-                    dialogTimeTasksBinding.ivTimeTasksCustom.setVisibility(View.GONE);
+                    dialogTimeTasksBinding.ivTimeTasks1.setVisibility(GONE);
+                    dialogTimeTasksBinding.ivTimeTasks2.setVisibility(GONE);
+                    dialogTimeTasksBinding.ivTimeTasks3.setVisibility(GONE);
+                    dialogTimeTasksBinding.ivTimeTasks4.setVisibility(GONE);
+                    dialogTimeTasksBinding.ivTimeTasksCustom.setVisibility(GONE);
                 }
                 String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
                 if(!TextUtils.isEmpty(taskSwitch) && taskSwitch.equals("1")) {
                     return;
                 }
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                 }
                 break;
             case ThreadEvent.BLUETOOTH_DISCONNECT:
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                 }
                 break;
             case ThreadEvent.ACTION_MEDIA_BUTTON:
@@ -1503,9 +1539,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
                             lastOrNextMusic(false);
                         } else if(KeyEvent.KEYCODE_MEDIA_PLAY == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.playImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                            binder.playImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                         } else if(KeyEvent.KEYCODE_MEDIA_PAUSE == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                            binder.pauseImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                         }
                     }
                 }
@@ -1541,16 +1577,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
 
             case ThreadEvent.SCAN_LOCAL_FILE_SUCCESS:
-                getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
+                getViewDataBinding().rlShowLoading.setVisibility(GONE);
                 if(null != dialogLocalFileBinding) {
-                    dialogLocalFileBinding.prLocalMusicLoading.setVisibility(View.GONE);
+                    dialogLocalFileBinding.prLocalMusicLoading.setVisibility(GONE);
                     dialogLocalFileBinding.llSelectFile.setClickable(true);
                     dialogLocalFileBinding.llScanFile.setClickable(true);
                 }
                 break;
             case ThreadEvent.SELECT_LOCAL_FILE_SUCCESS:
                 if(null != dialogLocalFileBinding) {
-                    dialogLocalFileBinding.prLocalMusicLoading.setVisibility(View.GONE);
+                    dialogLocalFileBinding.prLocalMusicLoading.setVisibility(GONE);
                     dialogLocalFileBinding.llSelectFile.setClickable(true);
                     dialogLocalFileBinding.llScanFile.setClickable(true);
                 }
@@ -1616,14 +1652,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 musicControllerAnimator.start();
 //
                 if(isClick) { //是否点击了旧版的播放器 按钮其中一个
-                    getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
+                    getViewDataBinding().rlDisableClick.setVisibility(GONE);
                 }
 //                isShowControllerModePanel = false;
                 SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
                 break;
             case ThreadEvent.VIEW_BG_MODE:
                 if(View.VISIBLE == getViewDataBinding().clBgMode.getVisibility()) {
-                    getViewDataBinding().clBgMode.setVisibility(View.GONE);
+                    getViewDataBinding().clBgMode.setVisibility(GONE);
                 } else {
                     getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
                     getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
@@ -1647,20 +1683,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 playMusicListAdapter.notifyDataSetChanged();
                 //刷新新播放界面是否收藏歌曲
-                setCurrentMusicFavorite(spTempList, MusicPlayService.currentMusicName);
+                setCurrentMusicFavorite(spTempList, MusicPlayService.currentMusic.musicName);
                 break;
             case ThreadEvent.VIEW_GET_MUSIC_METADATA:
                 if(!TextUtils.isEmpty(event.str)){
-                    MusicPlayService.currentMusicBitrate = event.str;
+                    MusicPlayService.currentMusic.setMusicBitrate(event.str);
                     getViewDataBinding().tvBitrateValue.setText(event.str + " kps");
                 }
                 if(!TextUtils.isEmpty(event.str2)) {
-                    MusicPlayService.currentMusicMime = event.str2;
+                    MusicPlayService.currentMusic.setMusicMime(event.str2);
                     getViewDataBinding().tvMimeValue.setText(event.str2);
                 }
 
                 if(!TextUtils.isEmpty(event.str3)) {
-                    MusicPlayService.currentMusicQuality = event.str3;
+                    MusicPlayService.currentMusic.setMusicQuality(event.str3);
                     getViewDataBinding().tvQuality.setText(" " + event.str3 + " ");
                     getViewDataBinding().tvQuality.setTextColor(getColor(R.color.white));
                     if(event.str3.equals("SQ")) {
@@ -1675,12 +1711,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(MusicPlayService.mMediaSession != null) {
                     MediaMetadataCompat metadata =  MusicPlayService.mMediaSession.getController().getMetadata();
                     if(metadata != null) {
-                        MusicPlayService.currentMusicFileSize = getViewModel().showFileSize(
+                        MusicPlayService.currentMusic.musicFileSize = getViewModel().showFileSize(
                                 metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE),
                                 metadata.getString("IsLocal"),
                                 metadata.getString("Path")
                         );
-                        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
+                        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusic.musicFileSize);
                     }
                 }
 
@@ -1824,6 +1860,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_OTHER));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_OTHER)));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, ThreadEvent.ALBUM_OTHER, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_OTHER)));
+                break;
+            case ThreadEvent.GET_DATA_LIST_BY_BLUEBIRD:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_ALBUM_SUCCESS, ThreadEvent.ALBUM_BLUEBIRD));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_BLUEBIRD)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, ThreadEvent.ALBUM_OTHER, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_BLUEBIRD)));
                 break;
             case ThreadEvent.GET_DATA_LIST_BY_LOCAL_PLAY:
                 if(event.t != null) {
@@ -2529,11 +2570,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 //            }
 //        }
 
-        getViewDataBinding().tvArtistValue.setText(MusicPlayService.currentMusicSinger);
+        getViewDataBinding().tvArtistValue.setText(MusicPlayService.currentMusic.musicSinger);
         getViewDataBinding().tvSongTimeValue.setText(TimeUtil.rebuildTime(MusicPlayService.mAllPosition)+"");
-        getViewDataBinding().tvBitrateValue.setText(MusicPlayService.currentMusicBitrate + " kps");
-        getViewDataBinding().tvMimeValue.setText(MusicPlayService.currentMusicMime);
-        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusicFileSize);
+        getViewDataBinding().tvBitrateValue.setText(MusicPlayService.currentMusic.musicBitrate + " kps");
+        getViewDataBinding().tvMimeValue.setText(MusicPlayService.currentMusic.musicMime);
+        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusic.musicFileSize);
 
 
         String defaultSize = SPUtil.getStrValue(MainActivity.this, SPUtil.DefaultLyricSizeData);
@@ -2585,7 +2626,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 点击播放按钮 */
     public void playButtonClick(View view)  {
-        binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+        binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
     }
 
     /** 点击切换播放模式按钮 */
@@ -3211,7 +3252,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         Log.i(TAG, "Stop - UnbindService");
         EventBus.getDefault().unregister(this);
         if(binder != null) {
-            binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+            binder.pauseImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
             binder.clearMedia();
         }
         getViewDataBinding().ccvShowVisualizer.release();
@@ -3290,7 +3331,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
             }
            // binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
         } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
@@ -3299,7 +3340,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
             }
             //binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
         } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
@@ -3725,7 +3766,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             list.remove(position);
                             playMusicListAdapter.notifyItemRemoved(position);
                             playMusicListAdapter.notifyItemRangeChanged(position, list.size() - position);
-                            new Thread(()-> SPUtil.setListValue(context, SPUtil.PlayListData, list));
+                            new Thread(() -> SPUtil.setListValue(context, SPUtil.PlayListData, list)).start();
                             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
                             }, 200);

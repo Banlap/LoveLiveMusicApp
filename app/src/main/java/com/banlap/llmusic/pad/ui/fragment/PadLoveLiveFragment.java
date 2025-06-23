@@ -76,6 +76,7 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
         getViewDataBinding().llList7.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList8.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList9.setOnClickListener(new ButtonClickListener());
+        getViewDataBinding().llList11.setOnClickListener(new ButtonClickListener());
     }
 
     /**
@@ -187,6 +188,10 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_FRAGMENT, ThreadEvent.ALBUM_SAINT_SNOW, PadMainActivity.VIEW_PAD_FRAGMENT_DETAIL));
             } else if (v.getId() == R.id.ll_list_9) {
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_FRAGMENT, ThreadEvent.ALBUM_A_RISE, PadMainActivity.VIEW_PAD_FRAGMENT_DETAIL));
+            } else if (v.getId() == R.id.ll_list_10) {
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_FRAGMENT, ThreadEvent.ALBUM_OTHER, PadMainActivity.VIEW_PAD_FRAGMENT_DETAIL));
+            } else if (v.getId() == R.id.ll_list_11) {
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_FRAGMENT, ThreadEvent.ALBUM_BLUEBIRD, PadMainActivity.VIEW_PAD_FRAGMENT_DETAIL));
             }
         }
     }

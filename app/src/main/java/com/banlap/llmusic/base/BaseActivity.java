@@ -93,51 +93,14 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
         LLActivityManager.getInstance().addActivity(this);
 
 
-
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //AppWidgetManager appWidgetManager = getSystemService(AppWidgetManager.class);
-           // if (appWidgetManager.isRequestPinAppWidgetSupported()) {
-                // 系统支持添加小部件的操作
-                // 进行添加小部件操作的处理
-//                new Handler().post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-//
-//                        //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.baidu.com/"));
-//
-//                        AppWidgetHost host = new AppWidgetHost(BaseActivity.this, 1);
-//                        host.startListening();
-//                        int nextId = host.allocateAppWidgetId();
-//
-//
-//                        Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
-//                        pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, nextId);
-//
-//                                // 获取ShortcutManager服务
-//                        ShortcutInfo shortcut = new ShortcutInfo.Builder(BaseActivity.this, "unique_shortcut_id")
-//                                .setShortLabel(getString(R.string.shortcuts_title)) // 快捷方式的简短标签
-//                                .setLongLabel(getString(R.string.shortcuts_title_long)) // 快捷方式的完整标签
-//                                .setIcon(Icon.createWithResource(BaseActivity.this, R.mipmap.ic_llmp_small_1)) // 快捷方式的图标
-//                                .setIntent(pickIntent) // 点击快捷方式时启动的Activity
-//                                .build();
-//                        shortcutManager.setDynamicShortcuts(Arrays.asList(shortcut));
-//                    }
-//                });
-
-//            }
-
-        }
-
         try {
             if(savedInstanceState!=null) {
                 String data = savedInstanceState.getString("SIS");
-                Toast.makeText(this, "SIS: " + data, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "SIS: " + data, Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             Log.e(TAG, "e: " + e.getMessage());
-            Toast.makeText(this, "SIS: " + null, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "SIS: " + null, Toast.LENGTH_SHORT).show();
         }
 
         init();

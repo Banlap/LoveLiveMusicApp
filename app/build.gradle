@@ -183,7 +183,9 @@ android {
         //2.修正清理缓存功能：同时将歌曲缓存清除
         //3.修正本地歌曲删除时刷新性能问题
         versionName "1.8.1"
-        //
+        //1.优化当前播放列表删除卡顿问题
+        //2.优化蓝牙播放点击问题
+        //3.添加新企划: BLUEBIRD
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息

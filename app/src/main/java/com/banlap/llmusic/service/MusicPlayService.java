@@ -3,7 +3,9 @@ package com.banlap.llmusic.service;
 import static com.banlap.llmusic.utils.NotificationHelper.LL_MUSIC_PLAYER;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -29,6 +31,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.SeekBar;
+
+import androidx.media.session.MediaButtonReceiver;
 import androidx.media3.session.MediaSession;
 
 import androidx.annotation.NonNull;
@@ -52,6 +56,7 @@ import com.danikula.videocache.HttpProxyCacheServer;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
@@ -61,6 +66,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 音乐播放服务
@@ -78,6 +85,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
     public static MediaPlayer mediaPlayer;
     private boolean isStop = false;  //是否暂停
+    private static boolean isUpdateWidgetUI = false; //是否在刷新小组件
     private final Object lock = new Object();  //线程锁
     private List<MusicLyric> mMusicLyricList = new ArrayList<>();
     public static int mStartPosition;  //当前歌曲播放时间
@@ -97,17 +105,11 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static PlaybackStateCompat.Builder stateBuilder;
 
     //当前歌曲信息
-    public static String currentMusicName = ""; //当前音乐名称
-    public static String currentMusicSinger = "";  //当前音乐歌手名
-    public static String currentMusicImg = "";  //当前音乐的图片 目前仅用于UI方面 看是否能去掉
-    public static Bitmap currentMusicBitmap; //当前音乐的图片Bitmap
-    public static String currentMusicBitrate = "--";
-    public static String currentMusicMime = "--";
-    public static String currentMusicQuality = "--";
-    public static String currentMusicFileSize = "-- MB";
-
+    public static Music currentMusic; //当前播放音乐的总信息
     private Thread musicPosThread;
-    private static MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+    private static final ExecutorService musicExecutor = Executors.newFixedThreadPool(1); // 单线程
+    private static final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 
     Runnable musicPosRunnable = new Runnable() {
         @Override
@@ -118,6 +120,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         try {
                             lock.wait();
                         } catch (InterruptedException e) {
+                            Log.e(TAG, "InterruptedException: " + e.getMessage());
                             Thread.currentThread().interrupt();
                             return;
                         }
@@ -152,6 +155,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         mMediaSession.setCallback(new MediaSessionCompat.Callback() {
             @Override
             public boolean onMediaButtonEvent(@NonNull Intent intent) {  //蓝牙按键控制
+                Log.i(TAG, "onMediaButtonEvent");
                 if (mMediaSession == null) {
                     return false;
                 }
@@ -175,7 +179,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
                     updateMusicNotification(mediaPlayer.isPlaying());
                     updatePlaybackState(PlaybackStateCompat.STATE_PLAYING, mMediaSession);
-                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusicName, currentMusicSinger, currentMusicBitmap, false);
+                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, false);
                 }
             }
 
@@ -188,7 +192,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     updateMusicNotification(mediaPlayer.isPlaying());
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, true));
                     updatePlaybackState(PlaybackStateCompat.STATE_PAUSED, mMediaSession);
-                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusicName, currentMusicSinger, currentMusicBitmap, true);
+                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, true);
                 }
             }
 
@@ -199,7 +203,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     Log.i(TAG, "onSeekTo");
                     mediaPlayer.seekTo((int) pos);
                     updatePlaybackStateByMP(mMediaSession);
-                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusicName, currentMusicSinger, currentMusicBitmap, false);
+                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, false);
                 }
             }
 
@@ -218,7 +222,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
             }
         });
         mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
-                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+        );
 
         stateBuilder = new PlaybackStateCompat.Builder();
         stateBuilder.setActions(
@@ -227,7 +232,22 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 PlaybackStateCompat.ACTION_SEEK_TO );
         mMediaSession.setPlaybackState(stateBuilder.build());
 
+        //应用未初始化时系统检测媒体按钮并进入
+        Intent intent =  new Intent(Intent.ACTION_MEDIA_BUTTON);
+        intent.setComponent(new ComponentName("com.banlap.llmusic", "androidx.media.session.MediaButtonReceiver"));
+        intent.setPackage("com.banlap.llmusic");
+
+        PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(
+                this.getApplicationContext(),
+                0, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+        // 设置 MediaButtonReceiver
+        mMediaSession.setMediaButtonReceiver(mediaButtonPendingIntent);
+
         mMediaSession.setActive(true);
+
+        currentMusic = new Music();
     }
 
     @Override
@@ -276,13 +296,13 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 String musicSinger = intent.getStringExtra("MusicSinger");
                 byte[] res = intent.getByteArrayExtra("MusicBitmap");
 
-                currentMusicName = musicName;
-                currentMusicSinger = musicSinger;
+                currentMusic.setMusicName(musicName);
+                currentMusic.setMusicSinger(musicSinger);
 
                 Bitmap bitmap = null;
                 if(res != null) {
                     bitmap = BitmapFactory.decodeByteArray(res, 0, res.length);
-                    currentMusicBitmap = bitmap;
+                    currentMusic.setMusicImgBitmap(bitmap);
                 }
                 Notification notification = NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, bitmap, false);
                 startForeground(LL_MUSIC_PLAYER, notification);
@@ -347,7 +367,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         public void player(final Music dataSource, final boolean isLoop, final HttpProxyCacheServer proxyCacheServer, final List<MusicLyric> musicLyrics) {
             try {
                 stop();
-
                 //延迟0.2秒处理进度条等ui内容，同时线程休眠0.2秒
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -366,6 +385,10 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     mMusicLyricList = new ArrayList<>();
                 }
                 mMusicLyricList.addAll(musicLyrics);
+
+                //设置当前音乐总信息
+                currentMusic = dataSource;
+
                 //设置缓存时的歌曲名称
                 BaseApplication.setCacheMusicName(dataSource.musicName);
                 //设置当前歌曲加载后存入缓存（目前先下载再缓存）
@@ -374,10 +397,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     url = dataSource.musicURL;
                 }
 
-                currentMusicName = dataSource.musicName;
-                currentMusicSinger = dataSource.musicSinger;
                 if(dataSource.musicImgByte != null) {
-                    currentMusicBitmap = BitmapFactory.decodeByteArray(dataSource.musicImgByte, 0, dataSource.musicImgByte.length);
+                    currentMusic.setMusicImgBitmap(BitmapFactory.decodeByteArray(dataSource.musicImgByte, 0, dataSource.musicImgByte.length));
                 }
 
                 mediaPlayer.setDataSource(url);
@@ -385,9 +406,10 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 mediaPlayer.prepareAsync();
 
                 //处理歌曲信息
-                currentMusicBitrate = "--";
-                currentMusicMime = "--";
-                currentMusicFileSize = "-- MB";
+                currentMusic.setMusicBitrate("--");
+                currentMusic.setMusicMime("--");
+                currentMusic.setMusicFileSize("-- MB");
+
                 //获取MediaMeta内容 后台线程处理，网络缓慢的情况下会卡住
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_METADATA, dataSource));
 
@@ -403,17 +425,9 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, mediaPlayer.getDuration()));
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SHOW_VISUALIZER));
 
+                        updateMetadata(dataSource);
 
-                        //需要设置数据源，保证高版本显示进度条时更新歌曲进度
-                        mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
-                                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, currentMusicName)
-                                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, currentMusicSinger)
-                                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, dataSource.musicType)
-                                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration()) // 音乐总时长
-                                .putString("IsLocal", dataSource.isLocal()? "1" : "0")
-                                .putString("Path", dataSource.musicURL)
-                                .build()
-                        );
+
                         updateMusicNotification(mediaPlayer.isPlaying());
 
                         musicPosThread = new Thread(musicPosRunnable);
@@ -455,16 +469,24 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放或暂停 */
         public void pause(Context context, String musicName, String musicSinger, Bitmap bitmap) {
-            currentMusicName = musicName;
-            currentMusicSinger = musicSinger;
-            currentMusicBitmap = bitmap;
+            currentMusic.setMusicName(musicName);
+            currentMusic.setMusicSinger(musicSinger);
+            if(currentMusic.musicImgByte != null) {
+                currentMusic.setMusicImgBitmap(BitmapFactory.decodeByteArray(currentMusic.musicImgByte, 0, currentMusic.musicImgByte.length));
+            } else if(bitmap != null) {
+                currentMusic.setMusicImgBitmap(bitmap);
+            }
+
             if(mediaPlayer!=null) {
                 if (mediaPlayer.isPlaying()) {
                     mediaController.getTransportControls().pause();
                 } else {
                     mediaController.getTransportControls().play();
                 }
-                //updateWidgetUI(mediaPlayer.isPlaying(), true);
+
+//                if(!isUpdateWidgetUI) {
+//                    updateWidgetUI(context, true);
+//                }
                 //updateMusicNotification(mediaPlayer.isPlaying());
             } else {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
@@ -474,9 +496,13 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         /** 立即播放 */
         public void playImm(Context context, String musicName, String musicSinger, Bitmap bitmap) {
             if (mediaPlayer != null) {
-                currentMusicName = musicName;
-                currentMusicSinger = musicSinger;
-                currentMusicBitmap = bitmap;
+                currentMusic.setMusicName(musicName);
+                currentMusic.setMusicSinger(musicSinger);
+                if(currentMusic.musicImgByte != null) {
+                    currentMusic.setMusicImgBitmap(BitmapFactory.decodeByteArray(currentMusic.musicImgByte, 0, currentMusic.musicImgByte.length));
+                } else if(bitmap != null) {
+                    currentMusic.setMusicImgBitmap(bitmap);
+                }
                 if (!mediaPlayer.isPlaying()) {
                     mediaController.getTransportControls().play();
                 }
@@ -538,6 +564,21 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         public void setMediaController(MediaControllerCompat mcc) {
              mediaController = mcc;
+        }
+
+        /** 更新数据源 */
+        public void updateMetadata(Music music) {
+            //需要设置数据源，保证高版本显示进度条时更新歌曲进度
+            mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, music.musicName)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, music.musicSinger)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, music.musicType)
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_ART,  MusicPlayService.currentMusic.musicImgBitmap)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.getDuration()) // 音乐总时长
+                    .putString("IsLocal", music.isLocal()? "1" : "0")
+                    .putString("Path", music.musicURL)
+                    .build()
+            );
         }
 
     }
@@ -605,7 +646,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     /** 关闭 */
     public void stop() {
         isStop = true;
-        if (musicPosThread != null) {
+        if(musicPosThread != null) {
             musicPosThread.interrupt();
         }
         if(mediaPlayer!=null) {
@@ -636,16 +677,17 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
             appWidgetRunnable = new Runnable() {
                 @Override
                 public void run() {
+                    isUpdateWidgetUI = true;
                     sendWidgetBroadcastReceiver(context, isLoading);
                     appWidgetHandler.postDelayed(appWidgetRunnable, DELAY_MILLIS);
                 }
             };
-
             appWidgetHandler.post(appWidgetRunnable);
         } else {
             if(stopAppWidgetRunnable()) {
                 sendWidgetBroadcastReceiver(context, isLoading);
             }
+            isUpdateWidgetUI = false;
         }
     }
 
@@ -689,7 +731,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         if(isPlaying) {
             stopMusicNotificationRunnable();
-            Log.e(TAG, "updateMusicNotification: ");
+            Log.i(TAG, "updateMusicNotification: ");
             musicNotificationRunnable = new Runnable() {
                 @Override
                 public void run() {

@@ -55,6 +55,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import es.dmoral.toasty.Toasty;
@@ -81,6 +82,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     private int rThemeId =0;
     private static final int REQUEST_CODE_DOWNLOAD_APP_2 = 201;
     private static final int REQUEST_CODE_SELECT_VIDEO_FILE_2 = 202;
+
+    private boolean isRestartAfterClean = false; //清理缓存后重启app的标志
 
     @Override
     protected int getLayoutId() { return R.layout.activity_settings; }
@@ -603,6 +606,33 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 mAlertDialog.dismiss();
                 String cache = CacheUtil.clearAllCacheAfter(v.getContext());
                 getViewDataBinding().tvCacheValue.setText(cache);
+                //清除当前播放列表所有歌曲
+                SPUtil.setListValue(getApplicationContext(), SPUtil.PlayListData, new ArrayList<>());
+                //标记
+                isRestartAfterClean = true;
+
+                DialogDefaultBinding defaultBinding2 = DataBindingUtil.inflate(LayoutInflater.from(v.getContext()),
+                        R.layout.dialog_default, null, false);
+                defaultBinding2.dialogSelectTitle.setText("清理成功，请重新启动App");
+                defaultBinding2.btSelectIconCancel.setVisibility(View.GONE);
+                defaultBinding2.btSelectIconCommit.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                        System.exit(0);
+                    }
+                });
+
+                mAlertDialog = new AlertDialog.Builder(v.getContext())
+                        .setView(defaultBinding2.getRoot())
+                        .setCancelable(false)
+                        .create();
+                mAlertDialog.setCanceledOnTouchOutside(false);
+                Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
+                mAlertDialog.show();
+                mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(SettingsActivity.this).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
+
             }
         });
 
@@ -846,5 +876,16 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    /** 屏蔽返回键 */
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent keyEvent) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) { //物理返回键
+            if(isRestartAfterClean) {
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, keyEvent);
     }
 }

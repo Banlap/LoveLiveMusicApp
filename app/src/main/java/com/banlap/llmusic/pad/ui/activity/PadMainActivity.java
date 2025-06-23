@@ -1016,6 +1016,12 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     } else if(event.str.equals(ThreadEvent.ALBUM_A_RISE)) {
                         getViewDataBinding().tvTittleName.setText("A-RISE");
                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PAD_GET_DATA_LIST_BY_A_RISE));
+                    } else if(event.str.equals(ThreadEvent.ALBUM_OTHER)) {
+                        getViewDataBinding().tvTittleName.setText("Other");
+                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PAD_GET_DATA_LIST_BY_OTHER));
+                    } else if(event.str.equals(ThreadEvent.ALBUM_BLUEBIRD)) {
+                        getViewDataBinding().tvTittleName.setText("BLUEBIRD");
+                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PAD_GET_DATA_LIST_BY_BLUEBIRD));
                     }
 
                 }
@@ -1140,9 +1146,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 getViewDataBinding().tvNewListSize.setText("(" + playList.size() + ")");
                 getViewDataBinding().tvDetailNewListSize.setText("("+ playList.size() + ")");
                 //currentMusicDetail = event.music;
-                MusicPlayService.currentMusicImg = event.music.getMusicImg();
-                MusicPlayService.currentMusicName = event.music.musicName;
-                MusicPlayService.currentMusicSinger = event.music.musicSinger;
+                MusicPlayService.currentMusic.setMusicImg(event.music.getMusicImg());
+                MusicPlayService.currentMusic.setMusicName(event.music.musicName);
+                MusicPlayService.currentMusic.setMusicSinger(event.music.musicSinger);
 
                 //刷新播放列表的收藏歌曲显示ui
                 //EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
@@ -1186,7 +1192,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                             Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
                         } else {
-                            MusicPlayService.currentMusicBitmap = null;
+                            MusicPlayService.currentMusic.musicImgBitmap = null;
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
                             MusicPlayService.updateWidgetUI(context, false);
                         }
@@ -1194,7 +1200,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                         if(!event.music.musicImg.isEmpty()) {
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
-                            MusicPlayService.currentMusicImg = "";
+                            MusicPlayService.currentMusic.setMusicImg("");
                             startMusicService(true, event.music.musicName, event.music.musicSinger, null);
                             MusicPlayService.updateWidgetUI(context, false);
                         }
@@ -1210,13 +1216,13 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
-                MusicPlayService.currentMusicName = event.str;
-                MusicPlayService.currentMusicSinger = event.str2;
+                MusicPlayService.currentMusic.setMusicName(event.str);
+                MusicPlayService.currentMusic.setMusicSinger(event.str2);
                 if(event.bitmap != null) {
-                    MusicPlayService.currentMusicBitmap = event.bitmap;
+                    MusicPlayService.currentMusic.setMusicImgBitmap(event.bitmap);
                 }
 
-                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusicBitmap, false);
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusic.musicImgBitmap, false);
                 MusicPlayService.updateWidgetUI(context, false);
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC:
@@ -1226,7 +1232,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 break;
             case ThreadEvent.PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {
-                    binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                    binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                 }
                 break;
             case ThreadEvent.MUSIC_IS_PAUSE:
@@ -1386,7 +1392,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     return;
                 }
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
                 }
                 break;
             case ThreadEvent.PAD_PLAY_ALL_MUSIC:  //点击播放所有歌曲
@@ -1398,7 +1404,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
             case ThreadEvent.PAD_VIEW_GET_MUSIC_METADATA:
                 if(!TextUtils.isEmpty(event.str3)) {
-                    MusicPlayService.currentMusicQuality = event.str3;
+                    MusicPlayService.currentMusic.setMusicQuality(event.str3);
                     getViewDataBinding().tvQuality.setText(" " + event.str3 + " ");
                     getViewDataBinding().tvQuality.setTextColor(getColor(R.color.white));
                     if(event.str3.equals("SQ")) {
@@ -1473,6 +1479,14 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             case ThreadEvent.PAD_GET_DATA_LIST_BY_A_RISE:
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerSql(MysqlHelper.MUSIC_TYPE_US, MysqlHelper.MUSIC_TYPE_A_RISE)));
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeAndMusicSingerCount(MysqlHelper.MUSIC_TYPE_US, MysqlHelper.MUSIC_TYPE_A_RISE)));
+                break;
+            case ThreadEvent.PAD_GET_DATA_LIST_BY_OTHER:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_OTHER)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_OTHER)));
+                break;
+            case ThreadEvent.PAD_GET_DATA_LIST_BY_BLUEBIRD:
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_GET_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeSql(MysqlHelper.MUSIC_TYPE_BLUEBIRD)));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_COUNT_SUCCESS, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_BLUEBIRD)));
                 break;
             case ThreadEvent.SAVE_LOCAL_MUSIC_LIST:  //在子线程中保存列表数据
                 List<Music> list = event.musicList;
@@ -1669,7 +1683,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 点击播放按钮 */
     public void padPlayButtonClick(View view) {
-        binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+        binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
     }
 
     /** 添加当前点击的歌曲 */
@@ -2183,7 +2197,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
             }
         } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
             if(isFirstBluetoothControl){
@@ -2191,7 +2205,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentMusicName, MusicPlayService.currentMusicSinger, MusicPlayService.currentMusicBitmap);
+                binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
             }
         } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
             lastOrNextMusic(true);

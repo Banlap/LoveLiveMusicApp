@@ -1,5 +1,7 @@
 package com.banlap.llmusic.model;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 
 /**
@@ -18,6 +20,11 @@ public class Music implements Serializable {
     public boolean isLocal;
     public boolean isDelete;
     public byte[] musicImgByte;
+    public Bitmap musicImgBitmap;
+    public String musicBitrate;
+    public String musicMime ;
+    public String musicFileSize;
+    public String musicQuality;
 
     public int getMusicId() { return musicId; }
     public void setMusicId(int musicId) { this.musicId = musicId; }
@@ -48,4 +55,19 @@ public class Music implements Serializable {
 
     public byte[] getMusicImgByte() { return musicImgByte; }
     public void setMusicImgByte(byte[] musicImgByte) { this.musicImgByte = musicImgByte; }
+
+    public Bitmap getMusicImgBitmap() { return musicImgBitmap; }
+    public void setMusicImgBitmap(Bitmap musicImgBitmap) { this.musicImgBitmap = musicImgBitmap; }
+
+    public String getMusicBitrate() { return musicBitrate; }
+    public void setMusicBitrate(String musicBitrate) { this.musicBitrate = musicBitrate; }
+
+    public String getMusicMime() { return musicMime; }
+    public void setMusicMime(String musicMime) { this.musicMime = musicMime; }
+
+    public String getMusicFileSize() { return musicFileSize; }
+    public void setMusicFileSize(String musicFileSize) { this.musicFileSize = musicFileSize; }
+
+    public String getMusicQuality() { return musicQuality; }
+    public void setMusicQuality(String musicQuality) { this.musicQuality = musicQuality; }
 }
