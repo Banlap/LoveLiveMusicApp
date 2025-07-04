@@ -12,7 +12,7 @@ android {
         applicationId "com.banlap.llmusic"
         minSdkVersion 24
         targetSdkVersion 33
-        versionCode 181
+        versionCode 182
         versionName "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -186,6 +186,10 @@ android {
         //1.优化当前播放列表删除卡顿问题
         //2.优化蓝牙播放点击问题、部分机器组件状态显示问题
         //3.添加新企划: BLUEBIRD
+        versionName "1.8.2"
+        //1.替换播放库：使用ExoPlayer
+        //2.变更服务源地址：旧节点下架
+        //3.重新优化部分代码及调整部分问题
 
         //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //gradle.properties配置对应信息

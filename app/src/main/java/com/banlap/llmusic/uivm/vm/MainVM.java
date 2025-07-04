@@ -19,6 +19,7 @@ import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.FileUtil;
@@ -218,30 +219,12 @@ public class MainVM extends AndroidViewModel {
                 try {
                     InputStream inputStream = response.body().byteStream();
                     //inputStream调用一次后会被清空
-                    byte[] inputStream2ByteArr = inputStream2ByteArr(inputStream);
-                    //使用工厂把网络的输入流生产Bitmap
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    //options.inJustDecodeBounds = true;
-                    options.inJustDecodeBounds = false;
-                    options.inSampleSize = 1; // 1 不压缩, 4 为宽和高变为原来的1/4，即图片压缩为原来的1/16
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(inputStream2ByteArr, 0, inputStream2ByteArr.length, options);
-                    //Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-
-                    //重新压缩图片
-                    BitmapFactory.Options optionsNew = new BitmapFactory.Options();
-                    optionsNew.inJustDecodeBounds = false;
-                    optionsNew.inSampleSize = 4;//宽和高变为原来的1/4，即图片压缩为原来的1/16
-                    Bitmap bitmapNew = BitmapFactory.decodeByteArray(inputStream2ByteArr, 0, inputStream2ByteArr.length, optionsNew);
-                    //Bitmap bitmapNew = BitmapFactory.decodeStream(inputStream, null, optionsNew);
-
-                    //计算当前bitmap大小
-                    Log.i(TAG, "bitmap: " + getBitmapSize(bitmap));
-                    Log.i(TAG, "bitmapNew: " + getBitmapSize(bitmapNew));
-                    if (getBitmapSize(bitmap) >= IMG_BITMAP_LIMIT_SIZE) { //图片过大导致通知栏显示异常
-                        Log.i(TAG, "bitmap: resize");
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmapNew));
-                    } else {
+                    byte[] inputStream2ByteArr = BitmapUtil.getInstance().inputStream2ByteArr(inputStream);
+                    Bitmap bitmap = BitmapUtil.getInstance().showBitmap(inputStream2ByteArr);
+                    if(bitmap != null) {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
+                    } else {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "error " + e.getMessage());
@@ -490,19 +473,6 @@ public class MainVM extends AndroidViewModel {
         }
         // 在低版本中用一行的字节x高度
         return bitmap.getRowBytes() * bitmap.getHeight();
-    }
-
-    /** 将输入流转为为字节数组 */
-    private byte[] inputStream2ByteArr(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buff = new byte[1024];
-        int len = 0;
-        while ((len = inputStream.read(buff)) != -1) {
-            outputStream.write(buff, 0, len);
-        }
-        inputStream.close();
-        outputStream.close();
-        return outputStream.toByteArray();
     }
 
     public static int calculateInSampleSize(BitmapFactory.Options options,

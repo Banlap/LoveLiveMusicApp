@@ -125,6 +125,7 @@ import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
 import com.banlap.llmusic.widget.LyricScrollView;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
+import com.banlap.llmusic.widget.QuarterCircleProgressBar;
 import com.banlap.llmusic.widget.SingleLyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -200,8 +201,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private boolean isShowControllerModePanel = false;  //判断是否显示新版音乐控制模式
     private boolean isShowNewPlayController = false;    //判断是否显示新版音乐控制栏
     private boolean isShowNewMusicList = false;         //判断是否显新版音乐清单
-
-    private boolean isShowMoreMenu = false;         //判断是否显更多菜单
+    private boolean isShowMoreMenu = false;             //判断是否显更多菜单
+    private boolean isShowFloatingPlayController = false; //判断是否显示悬浮音乐控制栏
 
     private boolean isClickNewSingleLyricView = false;  //判断是否点击新版音乐歌词展示
     public static boolean isPlay = false;               //判断是否播放音乐
@@ -258,13 +259,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public static final int REQUEST_CODE_SELECT_IMG_FILE = 104;       //检查选择图片所需要的权限
     public static final int REQUEST_CODE_CONTROLLER_MODE = 105;       //检查进入氛围模式时所需要的权限
 
-
     private BaseApplication baseApplication;
     private HttpProxyCacheServer proxyCacheServer;
-    private AudioManager audioManager;
 
-    private PublishSubject<String> textChangeSubject = PublishSubject.create();
-
+    private final PublishSubject<String> textChangeSubject = PublishSubject.create();
+    public static boolean isShowControllerNewProgress = true;
+    public static boolean isMoveControllerNewProgress = false;
 
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
@@ -313,7 +313,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         String controllerScene = SPUtil.getStrValue(MainActivity.this, SPUtil.SaveControllerScene);
         if(TextUtils.isEmpty(controllerScene)) {
-            SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
+            SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
         }
 
         String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
@@ -331,8 +331,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         //
         baseApplication = (BaseApplication) getApplication();
         proxyCacheServer = baseApplication.getProxy(this);
-        audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
-
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
@@ -440,12 +438,20 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().rlNewPlayController.setLayoutParams(marginLayoutParams3);
 
         if(!TextUtils.isEmpty(controllerScene)) {
-            if(controllerScene.equals("NewScene")) {
+            if(controllerScene.equals(SPUtil.SaveControllerSceneValue_NewScene)) {
                 //隐藏默认音乐控制界面
                 musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, PxUtil.getInstance().dp2px(300, this), getViewDataBinding().rlPlayController);
                 musicControllerAnimator.start();
                 //有场景值时显示新版播放列表
                 newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
+                getViewDataBinding().clFloatingController.setVisibility(View.GONE);
+            } else if(controllerScene.equals(SPUtil.SaveControllerSceneValue_FloatingScene)) {
+                //隐藏默认音乐控制界面
+                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, PxUtil.getInstance().dp2px(300, this), getViewDataBinding().rlPlayController);
+                musicControllerAnimator.start();
+
+                newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
+                getViewDataBinding().clFloatingController.setVisibility(View.VISIBLE);
             }
         }
 
@@ -863,6 +869,34 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     }
                 });
 
+
+        getViewDataBinding().qcpProgress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getViewDataBinding().qcpProgress.showProgress(isShowControllerNewProgress);
+                isShowControllerNewProgress = !isShowControllerNewProgress;
+            }
+        });
+
+        getViewDataBinding().qcpProgress.setOnFloatingPlayerButtonClickListener(new QuarterCircleProgressBar.OnFloatingPlayerButtonClickListener() {
+            @Override
+            public void onFloatingPlayerButtonClickListener() {
+                Log.i(TAG, "点击了悬浮播放按钮");
+                if(isDoubleClick()) { return; }
+                if (binder !=null) {
+                    binder.pause(MainActivity.this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
+                }
+            }
+        });
+
+        getViewDataBinding().qcpProgress.setOnFloatingSettingButtonClickListener(new QuarterCircleProgressBar.OnFloatingSettingButtonClickListener() {
+            @Override
+            public void onFloatingSettingButtonClickListener() {
+                Log.i(TAG, "点击了悬浮设置按钮");
+                if(isDoubleClick()) { return; }
+                new Handler().postDelayed(() -> runOnUiThread(MainActivity.this::intoSettings), 200);
+            }
+        });
     }
 
 
@@ -1219,17 +1253,21 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.MUSIC_IS_PAUSE:
+                if(isDoubleClick()) { return; }
                 if(binder!=null) {
                     binder.pause(this, event.str, event.str2, event.bitmap);
                 }
                 break;
             case ThreadEvent.MUSIC_IS_NEXT:
+                if(isDoubleClick()) { return; }
                 lastOrNextMusic(true);
                 break;
             case ThreadEvent.MUSIC_IS_LAST:
+                if(isDoubleClick()) { return; }
                 lastOrNextMusic(false);
                 break;
             case ThreadEvent.PLAY_LIST_FIRST:
+                if(isDoubleClick()) { return; }
                 if(playList.size()>0) {
                     binder.showLyric(playList.get(0), (playMode == 2));
                     playList.get(0).isPlaying = true;
@@ -1247,6 +1285,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     getViewDataBinding().sbNewMusicBar.setProgress(event.i);
                     getViewDataBinding().hpvProgress.setCurrentCount(event.i);
                     getViewDataBinding().pbNewProgress.setProgress(event.i);
+                    getViewDataBinding().qcpProgress.setProgress(event.i);
                 }
                 //binder.getMediaController().getTransportControls().seekTo(event.i);
                 //EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.UPDATE_NOTIFICATION_SEEK_BAR_POS));
@@ -1260,6 +1299,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.VISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(View.VISIBLE);
                 getViewDataBinding().pbNewLoadingMusic2.setVisibility(View.VISIBLE);
+                getViewDataBinding().qcpProgress.setPlayerIcon(0);
                 MusicPlayService.updateWidgetUI(MainActivity.this, true);
 
                 //是否开启浮动歌词服务
@@ -1342,6 +1382,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 getViewDataBinding().hpvProgress.setMaxCount(event.i);
                 getViewDataBinding().pbNewProgress.setMax(event.i);
+                getViewDataBinding().qcpProgress.setMaxProgress(event.i);
 
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
@@ -1420,25 +1461,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
-//                MusicPlayService.currentMusicName = event.str;
-//                MusicPlayService.currentMusicSinger = event.str2;
                 MusicPlayService.currentMusic.setMusicName(event.str);
                 MusicPlayService.currentMusic.setMusicSinger(event.str2);
 
                 if(event.bitmap != null) {
-                    Bitmap finalBitmap = event.bitmap;
-                    // 将图片转为车机兼容格式（JPEG，300x300 像素）
-                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(finalBitmap, 300, 300, true);
-
-                    // 转换为 JPEG 字节流（避免 PNG 透明通道问题）
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-                    byte[] jpegData = stream.toByteArray();
-
-                    // 最终使用的 Bitmap
-                    finalBitmap = BitmapFactory.decodeByteArray(jpegData, 0, jpegData.length);
-
-                    MusicPlayService.currentMusic.setMusicImgBitmap(finalBitmap);
+                    MusicPlayService.currentMusic.setMusicImgBitmap(event.bitmap);
+                    MusicPlayService.currentMusic.setMusicImgByte(BitmapUtil.getInstance().bitmapToByteArray(event.bitmap));
+                    //设置
+                    getViewDataBinding().qcpProgress.setIcon(event.bitmap);
                 }
 
                 if(binder !=null) {
@@ -1447,6 +1477,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentMusic.musicImgBitmap, false);
                 MusicPlayService.updateWidgetUI(MainActivity.this, false);
+
                 break;
             case ThreadEvent.VIEW_LYRIC:
                 if(null != event.tList) {
@@ -1618,6 +1649,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 isShowControllerModePanel = false;
                 isShowNewPlayController = false;
+                isShowFloatingPlayController = false;
 
                 controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
                 controllerModeAnimator.start();
@@ -1635,12 +1667,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowMusicPanel = false;
                 isShowMusicList = false;
 
+                getViewDataBinding().clFloatingController.setVisibility(View.GONE);
+
                 SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
                 break;
             case ThreadEvent.VIEW_NEW_CONTROLLER_MODE:
 
                 isShowControllerModePanel = false;
                 isShowNewPlayController = true;
+                isShowFloatingPlayController = false;
 
                 controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
                 controllerModeAnimator.start();
@@ -1654,8 +1689,29 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(isClick) { //是否点击了旧版的播放器 按钮其中一个
                     getViewDataBinding().rlDisableClick.setVisibility(GONE);
                 }
+
+                getViewDataBinding().clFloatingController.setVisibility(View.GONE);
+
 //                isShowControllerModePanel = false;
                 SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_NewScene);
+                break;
+            case ThreadEvent.VIEW_CONTROLLER_MODE_FLOATING:
+                isShowControllerModePanel = false;
+                isShowNewPlayController = false;
+                isShowFloatingPlayController = true;
+
+                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+                controllerModeAnimator.start();
+
+                ObjectAnimator newPlayController3 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
+                newPlayController3.start();
+
+                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+                musicControllerAnimator.start();
+
+                getViewDataBinding().clFloatingController.setVisibility(View.VISIBLE);
+
+                SPUtil.setStrValue(MainActivity.this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_FloatingScene);
                 break;
             case ThreadEvent.VIEW_BG_MODE:
                 if(View.VISIBLE == getViewDataBinding().clBgMode.getVisibility()) {
@@ -2593,8 +2649,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         //根据当前显示的歌词页面展示对应设置
         String controllerScene = SPUtil.getStrValue(MainActivity.this, SPUtil.SaveControllerScene);
         if(!TextUtils.isEmpty(controllerScene)) {
-
-            if(controllerScene.equals("NewScene")) {
+            if(controllerScene.equals(SPUtil.SaveControllerSceneValue_NewScene)) {
                 getViewDataBinding().llDefaultLyricSizePanel.setVisibility(View.GONE);
                 getViewDataBinding().llNewLyricSizePanel.setVisibility(View.VISIBLE);
 
@@ -3202,7 +3257,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             LyricService.setMusicPlayerPos(progress);
             getViewDataBinding().hpvProgress.setCurrentCount(progress);
             getViewDataBinding().pbNewProgress.setProgress(progress);
-
+            getViewDataBinding().qcpProgress.setProgress(progress);
         }
 
         @Override
@@ -3245,6 +3300,59 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
     }
 
+    /** 新版控制器2 触摸事件 */
+    private class ControllerViewTouchListener implements View.OnTouchListener {
+        private int lastX, lastY;
+        private int startX, startY; // 记录按下时的初始位置
+        private long mLastTime;
+        private boolean isDragging = false; // 明确标记是否在拖动
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    isDragging = false;
+                    mLastTime = System.currentTimeMillis();
+                    // 记录初始位置和当前触摸点
+                    startX = lastX = (int) event.getRawX();
+                    startY = lastY = (int) event.getRawY();
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    // 计算偏移量
+                    float dx = event.getRawX() - lastX;
+                    float dy = event.getRawY() - lastY;
+
+                    // 检查是否达到拖动阈值(如5像素)
+                    if (!isDragging && (Math.abs(event.getRawX() - startX) > 5 ||
+                            Math.abs(event.getRawY() - startY) > 5)) {
+                        isDragging = true;
+                    }
+
+                    if (isDragging) {
+                        // 更新View位置
+                        v.setX(v.getX() + dx);
+                        v.setY(v.getY() + dy);
+                    }
+
+                    // 重新记录坐标
+                    lastX = (int) event.getRawX();
+                    lastY = (int) event.getRawY();
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    long mCurrentTime = System.currentTimeMillis();
+                    if (mCurrentTime - mLastTime < 500 &&
+                            Math.abs(event.getRawX() - startX) < 10 &&
+                            Math.abs(event.getRawY() - startY) < 10) {
+                        // 满足点击条件
+                        return false; // 让点击事件继续传递
+                    }
+                    break;
+            }
+            return isDragging; // 如果是拖动则消费事件
+        }
+    }
 
     @Override
     protected void onDestroy() {

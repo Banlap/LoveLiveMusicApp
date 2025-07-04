@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1323,6 +1324,7 @@ public class ThemeHelper {
      * */
     public void playButtonStatusTheme(int rThemeId, ActivityMainBinding vdb, boolean b) {
         Log.i(TAG,"rThemeId: " + rThemeId);
+        vdb.qcpProgress.setPlayerIcon(b? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
         if(rThemeId == R.id.ll_theme_normal) {
             vdb.btPlay.setBackgroundResource(b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);
             vdb.btNewPlay.setBackgroundResource(b ? R.drawable.selector_play_black_selected : R.drawable.selector_pause_black_selected);

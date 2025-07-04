@@ -2324,6 +2324,22 @@
         </RelativeLayout>
 
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_floating_controller"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <com.banlap.llmusic.widget.QuarterCircleProgressBar
+                android:id="@+id/qcp_progress"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
 

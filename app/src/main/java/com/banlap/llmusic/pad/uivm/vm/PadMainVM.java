@@ -231,7 +231,10 @@ public class PadMainVM extends AndroidViewModel {
             @Override
             public void onSuccess(Response response) {
                 try {
-                    Bitmap bitmap = BitmapUtil.getInstance().showBitmap(response.body().byteStream());
+                    InputStream inputStream = response.body().byteStream();
+                    //inputStream调用一次后会被清空
+                    byte[] inputStream2ByteArr = BitmapUtil.getInstance().inputStream2ByteArr(inputStream);
+                    Bitmap bitmap = BitmapUtil.getInstance().showBitmap(inputStream2ByteArr);
                     if(bitmap != null) {
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
                     } else {

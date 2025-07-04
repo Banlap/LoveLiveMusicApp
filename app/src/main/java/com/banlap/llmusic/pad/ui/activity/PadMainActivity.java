@@ -1236,17 +1236,21 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.MUSIC_IS_PAUSE:
+                if(isDoubleClick()) { return; }
                 if(binder!=null) {
                     binder.pause(this, event.str, event.str2, event.bitmap);
                 }
                 break;
             case ThreadEvent.MUSIC_IS_NEXT:
+                if(isDoubleClick()) { return; }
                 lastOrNextMusic(true);
                 break;
             case ThreadEvent.MUSIC_IS_LAST:
+                if(isDoubleClick()) { return; }
                 lastOrNextMusic(false);
                 break;
             case ThreadEvent.PLAY_LIST_FIRST:
+                if(isDoubleClick()) { return; }
                 if(playList.size()>0) {
                     binder.showLyric(playList.get(0), (playMode == 2));
                     playList.get(0).isPlaying = true;

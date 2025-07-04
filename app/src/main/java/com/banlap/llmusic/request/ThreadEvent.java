@@ -170,6 +170,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_NEW_CONTROLLER_MODE = 0x611;
     public static final int VIEW_BG_MODE = 0x612;
     public static final int VIEW_INTO_SET_BG = 0x613;
+    public static final int VIEW_CONTROLLER_MODE_FLOATING = 0x614;
 
     public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 0x62;
     public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 0x621;

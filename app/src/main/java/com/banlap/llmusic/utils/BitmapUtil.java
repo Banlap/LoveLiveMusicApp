@@ -9,6 +9,7 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Bitmap图片处理工具类
@@ -22,10 +23,8 @@ public class BitmapUtil {
     /**
      * 展示图片，并处理图片过大时压缩
      * */
-    public Bitmap showBitmap(InputStream inputStream) {
+    public Bitmap showBitmap(byte[] inputStream2ByteArr) {
         try {
-            //inputStream调用一次后会被清空
-            byte[] inputStream2ByteArr = inputStream2ByteArr(inputStream);
             //使用工厂把网络的输入流生产Bitmap
             BitmapFactory.Options options = new BitmapFactory.Options();
             //options.inJustDecodeBounds = true;
@@ -45,15 +44,43 @@ public class BitmapUtil {
             Log.i(TAG, "bitmap: " + getBitmapSize(bitmap));
             Log.i(TAG, "bitmapNew: " + getBitmapSize(bitmapNew));
             if (getBitmapSize(bitmap) >= IMG_BITMAP_LIMIT_SIZE) {
-                Log.i(TAG, "bitmap: resize");
+                Log.i(TAG, "bitmap: use bitmapNew");
                 return bitmapNew;
             } else {
+                Log.i(TAG, "bitmap: use bitmap");
                 return bitmap;
             }
         } catch (Exception e) {
             Log.i("ABMediaPlay", "error " + e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * bitmap转换字节数组：默认PNG 压缩100
+     * */
+    public byte[] bitmapToByteArray(Bitmap bitmap) {
+        return bitmapToByteArray(bitmap, Bitmap.CompressFormat.PNG, 100);
+    }
+
+    /**
+     * bitmap转换字节数组（指定格式和压缩质量）
+     * */
+    public byte[] bitmapToByteArray(Bitmap bitmap, Bitmap.CompressFormat type, int quality) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        // 参数说明：格式（JPEG/PNG/WEBP）、压缩质量（0-100）、输出流
+        bitmap.compress(type, quality, outputStream);
+        return outputStream.toByteArray();
+    }
+
+    /**
+     * bitmap转换字节数组（原始像素数据）
+     * */
+    public byte[] bitmapToRawByteArray(Bitmap bitmap) {
+        int size = bitmap.getByteCount();
+        ByteBuffer buffer = ByteBuffer.allocate(size);
+        bitmap.copyPixelsToBuffer(buffer);
+        return buffer.array();
     }
 
     /**
@@ -71,7 +98,7 @@ public class BitmapUtil {
     }
 
     /** 将输入流转为为字节数组 */
-    private byte[] inputStream2ByteArr(InputStream inputStream) throws IOException {
+    public byte[] inputStream2ByteArr(InputStream inputStream) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] buff = new byte[1024];
         int len = 0;
@@ -82,5 +109,6 @@ public class BitmapUtil {
         outputStream.close();
         return outputStream.toByteArray();
     }
+
 
 }

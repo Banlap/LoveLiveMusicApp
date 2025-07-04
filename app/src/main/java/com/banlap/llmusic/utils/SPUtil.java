@@ -61,6 +61,7 @@ public class SPUtil {
      * */
     public static final String SaveControllerSceneValue_DefaultScene = "DefaultScene";
     public static final String SaveControllerSceneValue_NewScene = "NewScene";
+    public static final String SaveControllerSceneValue_FloatingScene = "FloatingScene";
 
     private static final String TAG = SPUtil.class.getSimpleName();
 

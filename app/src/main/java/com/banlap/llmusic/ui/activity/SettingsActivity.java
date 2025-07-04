@@ -483,13 +483,19 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
         String controllerScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.SaveControllerScene);
 
-        viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
-        viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+        viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.VISIBLE);
+        viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.INVISIBLE);
+        viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
 
         if(!TextUtils.isEmpty(controllerScene)) {
-            if(controllerScene.equals("NewScene")) {
+            if(controllerScene.equals(SPUtil.SaveControllerSceneValue_DefaultScene)) {
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
+            } else if(controllerScene.equals(SPUtil.SaveControllerSceneValue_FloatingScene)) {
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.VISIBLE);
                 viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
-                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.VISIBLE);
             }
         }
 
@@ -507,22 +513,34 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             }
         });
 
-        viewModeBinding.llViewModeSimple.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
-                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
-            }
-        });
-
         viewModeBinding.llViewModeDefault.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
                 viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.VISIBLE);
+                viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_NEW_CONTROLLER_MODE));
 
+            }
+        });
+
+        viewModeBinding.llViewModeFloating.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.VISIBLE);
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE_FLOATING));
+            }
+        });
+
+        viewModeBinding.llViewModeSimple.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.INVISIBLE);
+                viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
             }
         });
 

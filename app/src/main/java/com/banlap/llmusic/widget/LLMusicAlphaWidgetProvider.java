@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,10 +17,12 @@ import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.media3.common.Player;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.ui.activity.MainActivity;
+import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -29,6 +32,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
@@ -37,7 +41,6 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  * */
 public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
     private static final String TAG = LLMusicAlphaWidgetProvider.class.getSimpleName();
-
     public static final String WIDGET_PROVIDER_REFRESH_MUSIC_MSG = "WIDGET_PROVIDER_REFRESH_MUSIC_MSG";
 
     @Override
@@ -69,7 +72,7 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         final ComponentName mComponentName = new ComponentName(context, LLMusicAlphaWidgetProvider.class);
 
         String musicName = "LLMusic", musicSinger = "LLSinger", startTime = "00:00", endTime = "00:00";
-        boolean isDefault = true, isLoading = false;
+        boolean isStop = true, isLoading = false;
         Bitmap bitmap = null;
         int musicProgress = 0;
 
@@ -85,25 +88,49 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         }
 
         //当小组件重新加入时 获取上次音乐信息
-        String musicNameTemp = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicName : "";
-        String musicSingerTemp = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicSinger : "";
+        String musicNameTemp = "";
+        String musicSingerTemp = "";
         Bitmap bitmapTemp;
-        if(musicNameTemp != null && !musicNameTemp.equals("")) {
-            if(musicSingerTemp != null && !musicSingerTemp.equals("")) {
-                musicName = musicNameTemp;
-                musicSinger = musicSingerTemp;
 
-                bitmapTemp = MusicPlayService.currentMusic.musicImgBitmap;
-                if(bitmapTemp != null) {
-                    bitmap = bitmapTemp;
-                }
-                if(MusicPlayService.mediaPlayer!=null) {
-                    if(MusicPlayService.mediaPlayer.isPlaying()) {
-                        isDefault = false;
+        if(MusicPlayService.currentMusic != null) {
+            musicNameTemp = MusicPlayService.currentMusic.musicName;
+            musicSingerTemp = MusicPlayService.currentMusic.musicSinger;
+
+            if(musicNameTemp != null && !musicNameTemp.equals("")) {
+                if(musicSingerTemp != null && !musicSingerTemp.equals("")) {
+                    musicName = musicNameTemp;
+                    musicSinger = musicSingerTemp;
+
+                    if(MusicPlayService.currentMusic.musicImgByte != null) {
+                        boolean isExistsLastByteArray = false;
+                        if(MusicPlayService.lastWidgetByteArray != null) {
+                            if (Arrays.equals(MusicPlayService.lastWidgetByteArray, MusicPlayService.currentMusic.musicImgByte)) {
+                                isExistsLastByteArray = true;
+                                //Log.i(TAG, "byte[] 未变化，跳过解码");
+                            } else {
+                                //Log.i(TAG, "byte[] 有变化，需要解码");
+                            }
+                        } else {
+                           //Log.i(TAG, "lastByteArray 为null，需要解码");
+                        }
+
+                        if(!isExistsLastByteArray) {
+                            MusicPlayService.lastWidgetByteArray = MusicPlayService.currentMusic.musicImgByte;
+                            MusicPlayService.lastWidgetBitmap = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
+                        }
+
+                        if(MusicPlayService.lastWidgetBitmap != null) {
+                            bitmap = MusicPlayService.lastWidgetBitmap;
+                        }
+                    }
+
+                    if(!MusicPlayService.isStop) {
+                        isStop = false;
                     }
                 }
             }
         }
+
 
         @SuppressLint("RemoteViewLayout")
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.layout_widget_llmusic_alpha);
@@ -114,7 +141,7 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.tv_end_time, endTime);
         remoteViews.setProgressBar(R.id.pb_music_bar, 100, musicProgress, false);
 
-        remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier(isDefault ? "ic_play" : "ic_pause", "mipmap", context.getPackageName()));
+        remoteViews.setImageViewResource(R.id.bt_play, context.getResources().getIdentifier(isStop ? "ic_play" : "ic_pause", "mipmap", context.getPackageName()));
         remoteViews.setViewVisibility(R.id.pb_loading_music, isLoading? View.VISIBLE : View.INVISIBLE);
 
         Intent intentServiceIsPause = new Intent(context, MusicPlayService.class);

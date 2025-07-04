@@ -83,7 +83,7 @@ public class NotificationHelper {
     }
 
     /**
-     * 创建音乐通知，使用MediaStyle方式
+     * 创建音乐通知，使用MediaStyle方式 （低版本通知）
      * */
     @SuppressLint("RemoteViewLayout")
     public Notification createRemoteViews(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isPause) {
