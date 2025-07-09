@@ -259,4 +259,13 @@ public class SystemUtil {
                         Context.ACTIVITY_SERVICE);
        return (ArrayList<ActivityManager.RunningServiceInfo>) myManager.getRunningServices(30);
     }
+
+    /**
+     * 判断应用是否已经启动
+     * */
+    public boolean isAppRunning(Context context) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+        return !tasks.isEmpty() && tasks.get(0).topActivity.getPackageName().equals(context.getPackageName());
+    }
 }

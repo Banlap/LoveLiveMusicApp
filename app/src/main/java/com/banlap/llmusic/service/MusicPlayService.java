@@ -223,8 +223,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         //应用未初始化时系统检测媒体按钮并进入
         Intent intent =  new Intent(Intent.ACTION_MEDIA_BUTTON);
-        intent.setComponent(new ComponentName("com.banlap.llmusic", "androidx.media.session.MediaButtonReceiver"));
-        intent.setPackage("com.banlap.llmusic");
+        intent.setClass(this, androidx.media.session.MediaButtonReceiver.class);
 
         PendingIntent mediaButtonPendingIntent = PendingIntent.getBroadcast(
                 this.getApplicationContext(),
