@@ -32,6 +32,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -73,7 +74,6 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
 
         String musicName = "LLMusic", musicSinger = "LLSinger", startTime = "00:00", endTime = "00:00";
         boolean isStop = true, isLoading = false;
-        Bitmap bitmap = null;
         int musicProgress = 0;
 
         if(intent != null) {
@@ -90,7 +90,7 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         //当小组件重新加入时 获取上次音乐信息
         String musicNameTemp = "";
         String musicSingerTemp = "";
-        Bitmap bitmapTemp;
+        Bitmap bitmap = null;
 
         if(MusicPlayService.currentMusic != null) {
             musicNameTemp = MusicPlayService.currentMusic.musicName;
@@ -116,11 +116,12 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
 
                         if(!isExistsLastByteArray) {
                             MusicPlayService.lastWidgetByteArray = MusicPlayService.currentMusic.musicImgByte;
-                            MusicPlayService.lastWidgetBitmap = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
+                            MusicPlayService.lastWidgetBitmapRef = new WeakReference<>(BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte));
+                            //MusicPlayService.lastWidgetBitmapRef = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
                         }
 
-                        if(MusicPlayService.lastWidgetBitmap != null) {
-                            bitmap = MusicPlayService.lastWidgetBitmap;
+                        if(MusicPlayService.lastWidgetBitmapRef != null && MusicPlayService.lastWidgetBitmapRef.get() != null && MusicPlayService.lastWidgetBitmapRef.get().isRecycled()) {
+                            bitmap = MusicPlayService.lastWidgetBitmapRef.get();
                         }
                     }
 
@@ -166,7 +167,11 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
                     .into(new SimpleTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            remoteViews.setImageViewBitmap(R.id.iv_music_img, resource);
+                            // 确保使用前位图未被回收
+                            if(!resource.isRecycled()) {
+                                remoteViews.setImageViewBitmap(R.id.iv_music_img, resource);
+                                appWidgetManager.updateAppWidget(mComponentName, remoteViews);
+                            }
                         }
                     });
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);

@@ -104,7 +104,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.danikula.videocache.HttpProxyCacheServer;
+
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -185,7 +185,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     //歌曲缓存
     private BaseApplication baseApplication;
-    private HttpProxyCacheServer proxyCacheServer;
 
     @Override
     protected int getLayoutId() {
@@ -236,7 +235,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
 
         baseApplication = (BaseApplication) getApplication();
-        proxyCacheServer = baseApplication.getProxy(this);
+//        proxyCacheServer = baseApplication.getProxy(this);
 
     }
 
@@ -1054,7 +1053,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     musicLyricList.addAll(event.tList);
                 }
                 if(binder !=null) {
-                    binder.player(event.music, event.b, proxyCacheServer, musicLyricList);
+                    binder.player(event.music, event.b, musicLyricList);
                 }
                 break;
             case ThreadEvent.VIEW_SEEK_BAR_POS:
@@ -1814,7 +1813,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 playList.clear();
                 playMusicListAdapter.notifyDataSetChanged();
                 SPUtil.setListValue(getApplicationContext(), SPUtil.PlayListData, playList);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC, true));
                 mAlertDialog.dismiss();
             }
         });
@@ -2013,7 +2012,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                         if(!list.get(position).isPlaying) {
                             list.remove(position);
                             playMusicListAdapter.notifyDataSetChanged();
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC, false));
                             SPUtil.setListValue(context, SPUtil.PlayListData, list);
                         }
                     }

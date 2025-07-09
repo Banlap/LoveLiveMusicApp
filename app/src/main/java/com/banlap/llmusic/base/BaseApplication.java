@@ -28,8 +28,7 @@ import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.ui.activity.WelcomeActivity;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
-import com.danikula.videocache.HttpProxyCacheServer;
-import com.danikula.videocache.file.FileNameGenerator;
+
 
 import java.io.File;
 import java.io.FileFilter;
@@ -44,7 +43,7 @@ import es.dmoral.toasty.Toasty;
 public class BaseApplication extends Application {
     private final String TAG = BaseApplication.class.getSimpleName();
 
-    private HttpProxyCacheServer proxy;
+    //private HttpProxyCacheServer proxy;
 
     private boolean isInApp = false; //是否在应用前台中
     private long lastChangeTime = 0; //上次截图时间
@@ -226,36 +225,10 @@ public class BaseApplication extends Application {
 
     }
 
-    public static HttpProxyCacheServer getProxy(Context context) {
-        BaseApplication baseApplication = (BaseApplication) context.getApplicationContext();
-        return baseApplication.proxy == null ? (baseApplication.proxy = baseApplication.newProxy()) : baseApplication.proxy;
-    }
-
-
-    private HttpProxyCacheServer newProxy() {
-       /* return new HttpProxyCacheServer(this);*/
-        return new HttpProxyCacheServer.Builder(this)
-                .cacheDirectory(getAudioCacheDir(this))
-                .fileNameGenerator(new BaseNameGenerator())
-                .build();
-    }
 
     public static void setCacheMusicName(String musicName) {
         mCacheMusicName = musicName;
     }
-
-    public class BaseNameGenerator implements FileNameGenerator { //缓存的命名规则
-        public String generate(String url) {
-            Uri uri = Uri.parse(url);
-            //String audioId = uri.getQueryParameter("guid");
-            String audioId = "ll-" + url.hashCode();
-            if(!TextUtils.isEmpty(mCacheMusicName)) {
-                audioId = "ll-" +  mCacheMusicName;
-            }
-            return audioId + ".mp3";
-        }
-    }
-
 
     /**
      * 音乐播放缓存目录的设置

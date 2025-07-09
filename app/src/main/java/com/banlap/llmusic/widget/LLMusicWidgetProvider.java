@@ -31,6 +31,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
@@ -90,7 +91,6 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
         //当小组件重新加入时 获取上次音乐信息
         String musicNameTemp = "";
         String musicSingerTemp = "";
-        Bitmap bitmapTemp;
 
         if(MusicPlayService.currentMusic != null) {
             musicNameTemp = MusicPlayService.currentMusic.musicName;
@@ -116,11 +116,11 @@ public class LLMusicWidgetProvider extends AppWidgetProvider {
 
                         if(!isExistsLastByteArray) {
                             MusicPlayService.lastWidgetByteArray = MusicPlayService.currentMusic.musicImgByte;
-                            MusicPlayService.lastWidgetBitmap = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
+                            MusicPlayService.lastWidgetBitmapRef = new WeakReference<>(BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte));
                         }
 
-                        if(MusicPlayService.lastWidgetBitmap != null) {
-                            bitmap = MusicPlayService.lastWidgetBitmap;
+                        if(MusicPlayService.lastWidgetBitmapRef != null && MusicPlayService.lastWidgetBitmapRef.get() != null && MusicPlayService.lastWidgetBitmapRef.get().isRecycled()) {
+                            bitmap = MusicPlayService.lastWidgetBitmapRef.get();
                         }
                     }
 

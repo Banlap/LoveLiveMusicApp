@@ -131,9 +131,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.danikula.videocache.HttpProxyCacheServer;
 import com.google.android.material.appbar.AppBarLayout;
-import com.linroid.filtermenu.library.FilterMenu;
 
 
 import org.greenrobot.eventbus.EventBus;
@@ -260,7 +258,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public static final int REQUEST_CODE_CONTROLLER_MODE = 105;       //检查进入氛围模式时所需要的权限
 
     private BaseApplication baseApplication;
-    private HttpProxyCacheServer proxyCacheServer;
 
     private final PublishSubject<String> textChangeSubject = PublishSubject.create();
     public static boolean isShowControllerNewProgress = true;
@@ -330,7 +327,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         //
         baseApplication = (BaseApplication) getApplication();
-        proxyCacheServer = baseApplication.getProxy(this);
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
@@ -1267,8 +1263,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 lastOrNextMusic(false);
                 break;
             case ThreadEvent.PLAY_LIST_FIRST:
-                if(isDoubleClick()) { return; }
                 if(playList.size()>0) {
+                    setPlayListDefault(playList);
                     binder.showLyric(playList.get(0), (playMode == 2));
                     playList.get(0).isPlaying = true;
                     playMusicListAdapter.notifyDataSetChanged();
@@ -1347,9 +1343,53 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC:
+                getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
+                getViewDataBinding().tvNewListSize.setText("("+ playList.size() + ")");
+                break;
             case ThreadEvent.VIEW_DELETE_MUSIC:
                 getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("("+ playList.size() + ")");
+
+                ThemeHelper.getInstance().resetDefaultStatusTheme(this, rThemeId, getViewDataBinding(), binder);
+                //如果是删除全部按钮则 清除现在的播放信息及状态
+                if(event.b) {
+                    //重置所有状态
+                    getViewDataBinding().tvMusicName.setText("MusicName");
+                    getViewDataBinding().tvSingerName.setText("SingerName");
+                    getViewDataBinding().tvNewMusicName.setText("MusicName");
+                    getViewDataBinding().tvNewSingerName.setText("SingerName");
+                    getViewDataBinding().tvNewPlayMusicName.setText("MusicName");
+                    getViewDataBinding().tvStartTime.setText("00:00");
+                    getViewDataBinding().tvAllTime.setText("00:00");
+                    getViewDataBinding().tvNewStartTime.setText("00:00");
+                    getViewDataBinding().tvNewAllTime.setText("00:00");
+                    getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+                    getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
+                    getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
+                    setCurrentMusicFavorite(null, MusicPlayService.currentMusic.musicName);
+
+                    //清空歌词
+                    List<MusicLyric> list = new ArrayList<>();
+                    lyricScrollView.setMusicLyrics(list);
+                    lyricNewScrollDetailView.setMusicLyrics(list);
+                    lyricNewScrollView.setMusicLyrics(list);
+                    LyricService.setMusicLyrics(list);
+                    musicLyricList.clear();
+
+                    Glide.with(context)
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(R.mipmap.ic_llmp_new_2)
+                            .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .into(getViewDataBinding().civMusicImg);
+
+                    if(binder!=null) {
+                        binder.pauseImm(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
+                        binder.clearMedia();
+                        binder.resetMusicPlayer();
+                        MusicPlayService.currentMusic = new Music();
+                    }
+                }
                 break;
             case ThreadEvent.VIEW_MUSIC_MSG:
                 lyricScrollView.initView();
@@ -1491,7 +1531,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
 
                 if(binder !=null) {
-                    binder.player(event.music, event.b, proxyCacheServer, musicLyricList);
+                    binder.player(event.music, event.b, musicLyricList);
                 }
                 break;
             case ThreadEvent.DOWNLOAD_APP_START:
@@ -1732,14 +1772,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 intentTakePhotoLauncher.launch(intentPhoto);
                 break;
             case ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC:
-                List<Music> spTempList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                if(spTempList.size() >0){
-                    setMusicFavorite(spTempList);
-                }
-
-                playMusicListAdapter.notifyDataSetChanged();
-                //刷新新播放界面是否收藏歌曲
-                setCurrentMusicFavorite(spTempList, MusicPlayService.currentMusic.musicName);
+                new Thread(()->{
+                    List<Music> spTempList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
+                    if(spTempList.size() >0){
+                        setMusicFavorite(spTempList);
+                    }
+                    runOnUiThread(()->{
+                        playMusicListAdapter.notifyDataSetChanged();
+                        //刷新新播放界面是否收藏歌曲
+                        setCurrentMusicFavorite(spTempList, MusicPlayService.currentMusic.musicName);
+                    });
+                }).start();
                 break;
             case ThreadEvent.VIEW_GET_MUSIC_METADATA:
                 if(!TextUtils.isEmpty(event.str)){
@@ -2043,17 +2086,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             } else if (v.getId() == R.id.rl_disable_click_4) {
                 showNewMoreMenu();
             } else if (v.getId() == R.id.ll_all_play) {
-                //if(isDoubleClick()) { return; }
                 allPlayMusic();
             } else if (v.getId() == R.id.ll_search) {
-                //if(isDoubleClick()) { return; }
                 isSearchMusic = true;
                 searchMusic();
             } else if (v.getId() == R.id.ll_sort) {
-                //if(isDoubleClick()) { return; }
                 showSortMenuDialog(v);
             } else if (v.getId() == R.id.ll_cancel) {
-                //if(isDoubleClick()) { return; }
                 isSearchMusic = false;
                 searchCancel();
             } else if (v.getId() == R.id.ll_settings) {
@@ -2750,48 +2789,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     playMusicListAdapter.notifyDataSetChanged();
                 }
 
-//                for(int i=0; i<playList.size(); i++) {
-//                    if(playList.get(i).isPlaying) {
-//                        //如果当前模式为随机模式，点击播放下一首为随机歌曲
-//                        if(playMode ==1) {
-//                            playList.get(i).isPlaying = false;
-//                            int rand = new Random().nextInt(playList.size());
-//                            while (i == rand) {
-//                                rand = new Random().nextInt(playList.size());
-//                            }
-//                            binder.showLyric(playList.get(rand), false);
-//                            playList.get(rand).isPlaying = true;
-//                            playMusicListAdapter.notifyDataSetChanged();
-//                        } else if(playMode == 2) {
-//                            binder.showLyric(playList.get(i), true);
-//                        } else {
-//                            if (isNext) {
-//                                if (i + 1 < playList.size()) {
-//                                    playList.get(i).isPlaying = false;
-//                                    binder.showLyric(playList.get(i + 1), false);
-//                                    playList.get(i + 1).isPlaying = true;
-//                                    playMusicListAdapter.notifyDataSetChanged();
-//                                } else {
-//                                    playList.get(i).isPlaying = false;
-//                                    binder.showLyric(playList.get(0), false);
-//                                    playList.get(0).isPlaying = true;
-//                                }
-//                            } else {
-//                                if (i == 0) {
-//                                    playList.get(0).isPlaying = false;
-//                                    binder.showLyric(playList.get(playList.size() - 1), false);
-//                                    playList.get(playList.size() - 1).isPlaying = true;
-//                                } else {
-//                                    playList.get(i).isPlaying = false;
-//                                    binder.showLyric(playList.get(i - 1), false);
-//                                    playList.get(i - 1).isPlaying = true;
-//                                }
-//                            }
-//                        }
-//                        playMusicListAdapter.notifyDataSetChanged();
-//                        break;
-//                    }
-//                }
             }
         }
     }
@@ -2946,20 +2943,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             List<Music> list = musicList.stream()
                     .filter(music -> !music.getMusicType().equals(" "))
                     .collect(Collectors.toList());
-//            List<Music> list = new ArrayList<>();
-//            for(Music music: musicList) {
-//                if(!music.getMusicType().equals(" ")) {
-//                    list.add(music);
-//                }
-//            }
             playList.addAll(list);
             playMusicListAdapter.notifyDataSetChanged();
             //保存当前列表数据
             SPUtil.setListValue(this, SPUtil.PlayListData, playList);
-            //播放当前第一首音乐
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
+
             getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
             getViewDataBinding().tvNewListSize.setText("("+ playList.size() + ")");
+            //播放当前第一首音乐
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
         }
     }
 
@@ -3228,7 +3220,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 playList.clear();
                 playMusicListAdapter.notifyDataSetChanged();
                 SPUtil.setListValue(getApplicationContext(), SPUtil.PlayListData, playList);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC, true));
                 mAlertDialog.dismiss();
             }
         });
@@ -3588,18 +3580,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SAVE_LOCAL_MUSIC_LIST, playList));
                 return;
             }
-
-
-//            for(int i=0; i<playList.size(); i++) {
-//                if(playList.get(i).isPlaying) {
-//                    playList.get(i).isPlaying = false;
-//                    binder.showLyric(list.get(position), (playMode == 2));
-//                    playList.add(i+1, MainVM.setMusicMsg(list.get(position), true));
-//                    playMusicListAdapter.notifyDataSetChanged();
-//                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SAVE_LOCAL_MUSIC_LIST, playList));
-//                    return;
-//                }
-//            }
             binder.showLyric(list.get(position), (playMode == 2));
             playList.add(playList.size(), MainVM.setMusicMsg(list.get(position), true));
         } else {
@@ -3750,39 +3730,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                            && playMusic.getMusicName().equals(favoriteMusic.getMusicName()));
            playMusic.setMusicFavorite(isFavorite? 1 : 0);
         });
-//        for(int i = 0; i< playList.size(); i++) {
-//            boolean isShowMusicFavorite = false;
-//            for(int j = 0; j< favoriteList.size(); j++) {
-//                if(!TextUtils.isEmpty(playList.get(i).musicName) && !TextUtils.isEmpty(favoriteList.get(j).musicName)) {
-//                    if(playList.get(i).musicName.equals(favoriteList.get(j).musicName)) {
-//                        playList.get(i).setMusicFavorite(1);
-//                        isShowMusicFavorite =true;
-//                        break;
-//                    }
-//                }
-//            }
-//            if(!isShowMusicFavorite) {
-//                playList.get(i).setMusicFavorite(0);
-//            }
-//        }
     }
 
+    /** 设置收藏按钮ui*/
     private void setCurrentMusicFavorite(List<Music> favoriteMusicList, String currentMusic) {
         isFavorite = false;
 
-        if(favoriteMusicList.size() >0) {
+        if(favoriteMusicList != null && favoriteMusicList.size() >0) {
             isFavorite = favoriteMusicList.stream().anyMatch(favoriteMusic ->
                     !TextUtils.isEmpty(favoriteMusic.getMusicName()) && favoriteMusic.getMusicName().equals(currentMusic));
-
-//            for(int i=0; i < favoriteMusicList.size(); i++) {
-//                String favoriteMusicName = favoriteMusicList.get(i).musicName;
-//                if(!TextUtils.isEmpty(favoriteMusicName)) {
-//                    if(favoriteMusicName.equals(currentMusic)){
-//                        isFavorite = true;
-//                        break;
-//                    }
-//                }
-//            }
         }
         //变更主题
         ThemeHelper.getInstance().musicBarMusicFavoriteTheme(this, rThemeId, getViewDataBinding(), isFavorite);
@@ -3876,7 +3832,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             playMusicListAdapter.notifyItemRangeChanged(position, list.size() - position);
                             new Thread(() -> SPUtil.setListValue(context, SPUtil.PlayListData, list)).start();
                             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC));
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_MUSIC, false));
                             }, 200);
                         }
                     }

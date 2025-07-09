@@ -45,10 +45,10 @@ import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
-import com.danikula.videocache.HttpProxyCacheServer;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -98,7 +98,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static Music currentMusic; //当前播放音乐的总信息
     //作为小组件临时使用的变量
     public static byte[] lastWidgetByteArray; //临时缓存上一次的 byte[]
-    public static Bitmap lastWidgetBitmap; // 临时缓存上一次的 Bitmap
+     // 临时缓存上一次的 Bitmap
+    public static WeakReference<Bitmap> lastWidgetBitmapRef;
 
     private static final ExecutorService musicExecutor = Executors.newFixedThreadPool(1); // 单线程
     private static final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
@@ -353,7 +354,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         }
 
         /** 播放歌曲整体流程2：播放歌曲 */
-        public void player(final Music dataSource, final boolean isLoop, final HttpProxyCacheServer proxyCacheServer, final List<MusicLyric> musicLyrics) {
+        public void player(final Music dataSource, final boolean isLoop, final List<MusicLyric> musicLyrics) {
             try {
                 stop();
                 //延迟0.2秒处理进度条等ui内容，同时线程休眠0.2秒
@@ -362,15 +363,12 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
                 exoPlayer = new ExoPlayer.Builder(getBaseContext()).setLoadControl(
                                 new DefaultLoadControl.Builder().setBufferDurationsMs(
-                                                5000,  // 最小缓冲时间
-                                                10000, // 最大缓冲时间
-                                                1000, // 开始播放前缓冲
-                                                2000 // 重新缓冲后播放前缓冲
-                                        )
-                                        .build()
-                        )
-                        .build();
-
+                                        5000,  // 最小缓冲时间
+                                        10000, // 最大缓冲时间
+                                        1000, // 开始播放前缓冲
+                                        2000 // 重新缓冲后播放前缓冲
+                                ).build()
+                            ).build();
 
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
@@ -562,6 +560,21 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
             stop();
         }
 
+        /** 重置MediaSession */
+        public void resetMusicPlayer() {
+            // 清除队列
+            mMediaSession.setQueue(null);
+            mMediaSession.setQueueTitle(null);
+            // 清除元数据
+            mMediaSession.setMetadata(null);
+            // 重置播放状态
+            mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
+                    .setState(PlaybackStateCompat.STATE_NONE, 0, 1.0f)
+                    .build());
+            // 清除自定义操作
+            //mMediaSession.setCallback(null);
+        }
+
 
         /** 获取MediaController*/
         public MediaControllerCompat getMediaController() {
@@ -668,9 +681,9 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         //清空小组件临时图片资源
         lastWidgetByteArray = null;
-        if (lastWidgetBitmap != null && !lastWidgetBitmap.isRecycled()) {
-            lastWidgetBitmap.recycle();
-            lastWidgetBitmap = null;
+        if (lastWidgetBitmapRef != null && lastWidgetBitmapRef.get() != null &&!lastWidgetBitmapRef.get().isRecycled()) {
+            lastWidgetBitmapRef.get().recycle();
+            lastWidgetBitmapRef = null;
         }
     }
 

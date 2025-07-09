@@ -665,7 +665,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <!-- 音乐氛围模式 -->
+        <!-- 新音乐界面模式 -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cl_controller_mode"
             android:layout_width="match_parent"

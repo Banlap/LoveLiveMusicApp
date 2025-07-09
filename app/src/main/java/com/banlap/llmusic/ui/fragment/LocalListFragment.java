@@ -27,10 +27,13 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.ViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.banlap.llmusic.R;
+import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.base.BaseFragment;
 import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogInputContentBinding;
@@ -66,6 +69,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -371,27 +375,36 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 break;
             case ThreadEvent.VIEW_ADD_FAVORITE_MUSIC:
                 if(event.music != null) {
-                    mFavoriteList.clear();
-                    List<Music> currentMusicList = new ArrayList<>();
-                    currentMusicList.add(event.music);
+                    BaseActivity<? extends ViewModel, ? extends ViewDataBinding> activity = LLActivityManager.getInstance().getTopActivity();
+                    if (activity == null || activity.isFinishing()) return;
 
-                    List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                    currentMusicList.addAll(spList2);
+                    //mFavoriteList = Collections.synchronizedList(new ArrayList<>());
+                    new Thread(()->{
+                        List<Music> currentMusicList = new ArrayList<>();
+                        currentMusicList.add(event.music);
+                        List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
+                        currentMusicList.addAll(spList2);
+                        Set<Music> uniqueMusicSet = new LinkedHashSet<>(currentMusicList); // 使用LinkedHashSet去重并保留顺序
+                        List<Music> newFavoriteList = new ArrayList<>(uniqueMusicSet);
+                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, newFavoriteList);
 
-                    Set<Music> uniqueMusicSet = new LinkedHashSet<>(currentMusicList); // 使用LinkedHashSet去重并保留顺序
-                    mFavoriteList.addAll(uniqueMusicSet);
-                    favoriteListAdapter.notifyDataSetChanged();
-                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
-                    Toasty.success(LLActivityManager.getInstance().getTopActivity(), "添加收藏成功", Toast.LENGTH_SHORT, true).show();
+                        activity.runOnUiThread(()->{
+                            mFavoriteList.clear();
+                            mFavoriteList.addAll(uniqueMusicSet);
+                            favoriteListAdapter.notifyDataSetChanged();
 
-                    getViewDataBinding().tvFavoriteMusicCount.setText(""+(mFavoriteList.size()-2));
-                    getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
-                    //刷新ui
-                    if(null != mFavoriteList) {
-                        int musicCount = mFavoriteList.size()-2;
-                        getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
-                    }
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
+                            Toasty.success(activity, "添加收藏成功", Toast.LENGTH_SHORT, true).show();
+
+                            getViewDataBinding().tvFavoriteMusicCount.setText(""+(mFavoriteList.size()-2));
+                            getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
+                            //刷新ui
+                            if(mFavoriteList != null) {
+                                int musicCount = mFavoriteList.size()-2;
+                                getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
+                            }
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
+                        });
+                    }).start();
                 }
                 break;
             case ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC:
@@ -403,6 +416,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             favoriteListAdapter.notifyItemRangeChanged(i, mFavoriteList.size());
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
                             SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
+                            break;
                         }
                     }
 

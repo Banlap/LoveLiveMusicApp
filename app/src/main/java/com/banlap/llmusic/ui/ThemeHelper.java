@@ -1294,6 +1294,190 @@ public class ThemeHelper {
     }
 
     /**
+     * MainActivity主题改变 - 重置ui
+     * */
+    public void resetDefaultStatusTheme(Context context, int rThemeId, ActivityMainBinding vdb, MusicPlayService.MusicBinder binder) {
+        if(requestOptions == null) {
+            requestOptions = new RequestOptions();
+            requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+            //requestOptions.override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL); //关键代码，加载原始大小
+            requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
+        }
+
+        if(rThemeId == R.id.ll_theme_normal) {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_33_selected);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else if(rThemeId == R.id.ll_theme_blue) {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_blue_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_blue_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_blue_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else if(rThemeId == R.id.ll_theme_dark) {
+            vdb.btPlay.setBackgroundResource(R.drawable.ic_play_2_white);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.ic_play_2_white);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else if(rThemeId == R.id.ll_theme_white) {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_purple_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_purple_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else if(rThemeId == R.id.ll_theme_orange) {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_orange_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_orange_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else if(rThemeId == R.id.ll_theme_light) {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_light_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_light_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+        } else if(rThemeId == R.id.ll_theme_red) {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_red_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_red_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_red_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else if(rThemeId == R.id.ll_theme_stars) {
+            vdb.btPlay.setBackgroundResource(R.drawable.ic_play_2_stars);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.ic_play_2_stars);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_stars);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+
+        } else {
+            vdb.btPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
+            vdb.btNewPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
+            vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
+            vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_33_selected);
+
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivMusicImg);
+            Glide.with(context)
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(context.getResources().getIdentifier("ic_music_default_new", "mipmap", context.getPackageName()))
+                    .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
+                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                    .into(vdb.ivNewMusicImg);
+        }
+
+    }
+
+    /**
      * MainActivity主题改变 - 播放按钮颜色ui
      * */
     public void playButtonTheme(int rThemeId, ActivityMainBinding vdb) {
@@ -1563,28 +1747,6 @@ public class ThemeHelper {
      * */
     public void musicBarMusicFavoriteTheme(Context context, int rThemeId, ActivityMainBinding vdb, boolean isFavorite) {
         vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
-
-//        if(rThemeId!=0) {
-//            if(rThemeId == R.id.ll_theme_normal) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_black_33 : R.drawable.ic_favorite_empty_black_33);
-//            } else if(rThemeId == R.id.ll_theme_blue) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_blue : R.drawable.ic_favorite_empty_blue);
-//            } else if(rThemeId == R.id.ll_theme_dark) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite : R.drawable.ic_favorite_empty);
-//            } else if(rThemeId == R.id.ll_theme_white) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_purple : R.drawable.ic_favorite_empty_purple);
-//            } else if(rThemeId == R.id.ll_theme_orange) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_orange : R.drawable.ic_favorite_empty_orange);
-//            } else if(rThemeId == R.id.ll_theme_light) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_light : R.drawable.ic_favorite_empty_light);
-//            } else if(rThemeId == R.id.ll_theme_red) {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
-//            } else {
-//                vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_black_33 : R.drawable.ic_favorite_empty_black_33);
-//            }
-//        } else {
-//            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_black_33 : R.drawable.ic_favorite_empty_black_33);
-//        }
     }
 
 

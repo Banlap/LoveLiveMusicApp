@@ -158,9 +158,11 @@ public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBin
         long currentTime = System.currentTimeMillis();
         if(Math.abs(currentTime - lastTime) < TIME_500MS) {
             lastTime = currentTime;
+            Log.i(TAG, "当前已双击");
             return true;
         }
         lastTime = currentTime;
+        Log.i(TAG, "当前未双击");
         return false;
     }
 
