@@ -116,7 +116,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 //Log.d(TAG, "当前进度: " + currentPosition);
             }
             // 每秒更新一次（可根据需要调整间隔）
-            progressHandler.postDelayed(this, 200);
+            progressHandler.postDelayed(this, 10);
         }
     };
 

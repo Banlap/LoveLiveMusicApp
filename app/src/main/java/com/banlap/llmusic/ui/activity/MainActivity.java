@@ -261,7 +261,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     private final PublishSubject<String> textChangeSubject = PublishSubject.create();
     public static boolean isShowControllerNewProgress = true;
-    public static boolean isMoveControllerNewProgress = false;
 
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
@@ -1440,9 +1439,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().tvListSize.setText("(" + playList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("(" + playList.size() + ")");
                 currentMusicDetail = event.music;
-//                MusicPlayService.currentMusicImg = event.music.getMusicImg();
-//                MusicPlayService.currentMusicName = event.music.musicName;
-//                MusicPlayService.currentMusicSinger = event.music.musicSinger;
+
                 MusicPlayService.currentMusic.setMusicImg(event.music.getMusicImg());
                 MusicPlayService.currentMusic.setMusicName(event.music.musicName);
                 MusicPlayService.currentMusic.setMusicSinger(event.music.musicSinger);

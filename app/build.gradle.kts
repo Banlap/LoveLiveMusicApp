@@ -19,7 +19,7 @@ android {
         applicationId = "com.banlap.llmusic"
         minSdk = 24
         targetSdk = 33
-        versionCode = 183
+        versionCode = 184
         versionName = "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -200,6 +200,9 @@ android {
         versionName = "1.8.3"
         //1.优化问题：点击播放全部歌曲问题、优化点击收藏按钮问题
         //2.修复问题：清空当前列表后ui更新、删除当前列表一首歌曲时清除状态问题
+        versionName = "1.8.4"
+        //1.修复歌词显示卡顿问题
+        //2.修复小组件不显示歌曲图片
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")

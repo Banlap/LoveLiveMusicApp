@@ -88,50 +88,42 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         }
 
         //当小组件重新加入时 获取上次音乐信息
-        String musicNameTemp = "";
-        String musicSingerTemp = "";
+        String musicNameTemp = MusicPlayService.currentMusic != null? MusicPlayService.currentMusic.musicName : "";
+        String musicSingerTemp = MusicPlayService.currentMusic != null? MusicPlayService.currentMusic.musicSinger : "";
         Bitmap bitmap = null;
 
-        if(MusicPlayService.currentMusic != null) {
-            musicNameTemp = MusicPlayService.currentMusic.musicName;
-            musicSingerTemp = MusicPlayService.currentMusic.musicSinger;
+        if(!TextUtils.isEmpty(musicNameTemp) && !TextUtils.isEmpty(musicSingerTemp)) {
+            musicName = musicNameTemp;
+            musicSinger = musicSingerTemp;
 
-            if(musicNameTemp != null && !musicNameTemp.equals("")) {
-                if(musicSingerTemp != null && !musicSingerTemp.equals("")) {
-                    musicName = musicNameTemp;
-                    musicSinger = musicSingerTemp;
-
-                    if(MusicPlayService.currentMusic.musicImgByte != null) {
-                        boolean isExistsLastByteArray = false;
-                        if(MusicPlayService.lastWidgetByteArray != null) {
-                            if (Arrays.equals(MusicPlayService.lastWidgetByteArray, MusicPlayService.currentMusic.musicImgByte)) {
-                                isExistsLastByteArray = true;
-                                //Log.i(TAG, "byte[] 未变化，跳过解码");
-                            } else {
-                                //Log.i(TAG, "byte[] 有变化，需要解码");
-                            }
-                        } else {
-                           //Log.i(TAG, "lastByteArray 为null，需要解码");
-                        }
-
-                        if(!isExistsLastByteArray) {
-                            MusicPlayService.lastWidgetByteArray = MusicPlayService.currentMusic.musicImgByte;
-                            MusicPlayService.lastWidgetBitmapRef = new WeakReference<>(BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte));
-                            //MusicPlayService.lastWidgetBitmapRef = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
-                        }
-
-                        if(MusicPlayService.lastWidgetBitmapRef != null && MusicPlayService.lastWidgetBitmapRef.get() != null && MusicPlayService.lastWidgetBitmapRef.get().isRecycled()) {
-                            bitmap = MusicPlayService.lastWidgetBitmapRef.get();
-                        }
+            if(MusicPlayService.currentMusic.musicImgByte != null) {
+                boolean isExistsLastByteArray = false;
+                if(MusicPlayService.lastWidgetByteArray != null) {
+                    if (Arrays.equals(MusicPlayService.lastWidgetByteArray, MusicPlayService.currentMusic.musicImgByte)) {
+                        isExistsLastByteArray = true;
+                        //Log.i(TAG, "byte[] 未变化，跳过解码");
+                    } else {
+                        //Log.i(TAG, "byte[] 有变化，需要解码");
                     }
+                } else {
+                    //Log.i(TAG, "lastByteArray 为null，需要解码");
+                }
 
-                    if(!MusicPlayService.isStop) {
-                        isStop = false;
-                    }
+                if(!isExistsLastByteArray) {
+                    MusicPlayService.lastWidgetByteArray = MusicPlayService.currentMusic.musicImgByte;
+                    MusicPlayService.lastWidgetBitmapRef = new WeakReference<>(BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte));
+                    //MusicPlayService.lastWidgetBitmapRef = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
+                }
+
+                if(MusicPlayService.lastWidgetBitmapRef != null && MusicPlayService.lastWidgetBitmapRef.get() != null && !MusicPlayService.lastWidgetBitmapRef.get().isRecycled()) {
+                    bitmap = MusicPlayService.lastWidgetBitmapRef.get();
                 }
             }
-        }
 
+            if(!MusicPlayService.isStop) {
+                isStop = false;
+            }
+        }
 
         @SuppressLint("RemoteViewLayout")
         RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.layout_widget_llmusic_alpha);
@@ -156,9 +148,6 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         requestOptions.format(DecodeFormat.PREFER_RGB_565);
 
         if(bitmap !=null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
-            byte[] bitmapByte = baos.toByteArray();
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
                     .asBitmap()
@@ -174,7 +163,7 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
                             }
                         }
                     });
-            intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
+            intentServiceIsPause.putExtra("MusicBitmap", MusicPlayService.lastWidgetByteArray);
         } else {
             remoteViews.setImageViewResource(R.id.iv_music_img, context.getResources().getIdentifier("ic_llmp_new_2", "mipmap", context.getPackageName()));
             intentServiceIsPause.putExtra("MusicBitmap", (byte[]) null);

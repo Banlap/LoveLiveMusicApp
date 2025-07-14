@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
@@ -10,9 +10,11 @@
     {
       "type": "SINGLE",
       "filters": [],
-      "versionCode": 181,
-      "versionName": "1.8.1",
-      "outputFile": "LLMusicPlayer_official_v1.8.1_2025-06-23_21-15.apk"
+      "attributes": [],
+      "versionCode": 184,
+      "versionName": "1.8.4",
+      "outputFile": "LLMusicPlayer_official_v1.8.4_2025-07-14_09-32.apk"
     }
-  ]
+  ],
+  "elementType": "File"
 }
