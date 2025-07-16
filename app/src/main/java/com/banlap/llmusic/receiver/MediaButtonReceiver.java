@@ -3,12 +3,11 @@ package com.banlap.llmusic.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 
 import com.banlap.llmusic.service.MusicPlayService;
-import com.banlap.llmusic.ui.activity.MainActivity;
+import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.SystemUtil;
 
 public class MediaButtonReceiver extends BroadcastReceiver {

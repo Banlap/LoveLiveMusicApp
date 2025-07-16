@@ -12,8 +12,6 @@ import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.MusicLyric;
-import com.banlap.llmusic.service.LyricService;
-import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.SystemUtil;
 
 import java.util.ArrayList;

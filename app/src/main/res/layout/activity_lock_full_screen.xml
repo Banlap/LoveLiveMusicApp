@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.banlap.llmusic.uivm.vm.LockFullScreenVM" />
+            type="com.banlap.llmusic.phone.uivm.vm.LockFullScreenVM" />
     </data>
 
     <LinearLayout

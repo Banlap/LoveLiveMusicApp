@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
 
-import com.banlap.llmusic.ui.activity.SelectImgActivity;
+import com.banlap.llmusic.phone.ui.activity.SelectImgActivity;
 
 /**
  * 裁剪图片启动类

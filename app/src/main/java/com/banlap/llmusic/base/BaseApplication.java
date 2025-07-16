@@ -7,13 +7,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.ContentObserver;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,10 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.banlap.llmusic.R;
-import com.banlap.llmusic.ui.activity.CustomErrorActivity;
-import com.banlap.llmusic.ui.activity.MainActivity;
-import com.banlap.llmusic.ui.activity.WelcomeActivity;
+import com.banlap.llmusic.phone.ui.activity.CustomErrorActivity;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 
@@ -34,10 +28,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Objects;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
-import es.dmoral.toasty.Toasty;
 
 
 public class BaseApplication extends Application {

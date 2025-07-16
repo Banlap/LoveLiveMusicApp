@@ -22,8 +22,8 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.service.MusicPlayService;
-import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
-import com.banlap.llmusic.ui.activity.MainActivity;
+import com.banlap.llmusic.phone.ui.activity.LockFullScreenActivity;
+import com.banlap.llmusic.phone.ui.activity.MainActivity;
 
 import java.io.ByteArrayOutputStream;
 

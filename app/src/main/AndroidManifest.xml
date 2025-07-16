@@ -114,7 +114,7 @@
                 android:resource="@xml/widget_provider_alpha"/>
         </receiver>
 
-        <activity android:name=".ui.activity.WelcomeActivity"
+        <activity android:name=".phone.ui.activity.WelcomeActivity"
             android:theme="@style/SplashTheme"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
@@ -129,7 +129,7 @@
         </activity>
 
         <activity
-            android:name=".ui.activity.MainActivity"
+            android:name=".phone.ui.activity.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             />
@@ -140,7 +140,7 @@
             />
 
         <activity
-            android:name=".ui.activity.LockFullScreenActivity"
+            android:name=".phone.ui.activity.LockFullScreenActivity"
             android:showOnLockScreen="true"
             android:theme="@style/LockScreenBase"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
@@ -148,30 +148,30 @@
             />
 
         <activity
-            android:name=".ui.activity.SettingsActivity"
+            android:name=".phone.ui.activity.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             />
 
         <activity
-            android:name=".ui.activity.DownloadActivity"
+            android:name=".phone.ui.activity.DownloadActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
             android:screenOrientation="portrait"
             />
 
         <activity
-            android:name=".ui.activity.CustomErrorActivity"
+            android:name=".phone.ui.activity.CustomErrorActivity"
             android:screenOrientation="portrait"
             android:process=":error_activity"
             />
 
         <activity
-            android:name=".ui.activity.WebViewActivity"
+            android:name=".phone.ui.activity.WebViewActivity"
             android:screenOrientation="portrait"
             />
 
         <activity
-            android:name=".ui.activity.SelectImgActivity"
+            android:name=".phone.ui.activity.SelectImgActivity"
             android:screenOrientation="portrait"
             />
 

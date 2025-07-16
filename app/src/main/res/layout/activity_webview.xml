@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.banlap.llmusic.uivm.vm.WebViewVM" />
+            type="com.banlap.llmusic.phone.uivm.vm.WebViewVM" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

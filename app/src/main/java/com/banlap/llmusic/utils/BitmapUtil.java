@@ -110,5 +110,23 @@ public class BitmapUtil {
         return outputStream.toByteArray();
     }
 
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // 原始图片的宽、高
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        /**
+         * 压缩方式一
+         */
+        // 计算压缩的比例：分为宽高比例
+        final int heightRatio = Math.round((float) height
+                / (float) reqHeight);
+        final int widthRatio = Math.round((float) width / (float) reqWidth);
+        inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+
+        return inSampleSize;
+    }
+
 
 }

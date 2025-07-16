@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.service.MusicPlayService;
-import com.banlap.llmusic.ui.activity.MainActivity;
 
 import org.greenrobot.eventbus.EventBus;
 

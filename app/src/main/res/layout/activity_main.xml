@@ -6,7 +6,7 @@
     <data>
         <variable
             name="vm"
-            type="com.banlap.llmusic.uivm.vm.MainVM" />
+            type="com.banlap.llmusic.phone.uivm.vm.MainVM" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@mipmap/ic_gradient_color5"
-        tools:context=".ui.activity.MainActivity">
+        tools:context=".phone.ui.activity.MainActivity">
 
         <!-- 主页 -->
         <androidx.constraintlayout.widget.ConstraintLayout

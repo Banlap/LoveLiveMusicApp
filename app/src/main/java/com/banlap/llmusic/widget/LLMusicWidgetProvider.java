@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,7 +19,7 @@ import androidx.annotation.Nullable;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.service.MusicPlayService;
-import com.banlap.llmusic.ui.activity.MainActivity;
+import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.bumptech.glide.Glide;
@@ -30,7 +29,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 
-import java.io.ByteArrayOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 

@@ -4,7 +4,6 @@ import static com.banlap.llmusic.utils.NotificationHelper.LL_MUSIC_PLAYER;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -40,7 +39,6 @@ import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.ui.activity.MainActivity;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.SystemUtil;

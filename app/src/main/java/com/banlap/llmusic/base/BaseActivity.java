@@ -1,61 +1,27 @@
 package com.banlap.llmusic.base;
 
-import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetHost;
-import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ShortcutInfo;
-import android.content.pm.ShortcutManager;
 import android.graphics.Color;
-import android.graphics.drawable.Icon;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.provider.Settings;
-import android.support.v4.media.session.MediaControllerCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.splashscreen.SplashScreen;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
-import androidx.databinding.adapters.ViewBindingAdapter;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.banlap.llmusic.R;
-import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
-import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.service.LyricService;
-import com.banlap.llmusic.service.MusicPlayService;
-import com.banlap.llmusic.ui.activity.LockFullScreenActivity;
-import com.banlap.llmusic.ui.activity.SettingsActivity;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
-import com.banlap.llmusic.utils.SystemUtil;
-import com.banlap.llmusic.widget.LLMusicAlphaWidgetProvider;
-import com.banlap.llmusic.widget.LLMusicWidgetProvider;
-
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
