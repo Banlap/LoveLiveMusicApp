@@ -14,6 +14,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
 
 import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
@@ -58,6 +59,9 @@ public class MainVM extends AndroidViewModel {
     private static final int IMG_BITMAP_LIMIT_SIZE = 900000;      //显示图片的最大限值 （超过该值则需要压缩）
     private boolean isDownloadStop = false;  //是否取消下载app
 
+    //使用LiveDta处理ui状态
+    private final MutableLiveData<Boolean> mlIsShowControllerNewProgress = new MutableLiveData<>(true); //点击显示悬浮模式的进度条
+    private final MutableLiveData<Boolean> mlIsClickNewSingleLyricView = new MutableLiveData<>(false);  //判断是否点击新版音乐歌词展示
 
     public MainVM(@NonNull Application application) { super(application); }
 
@@ -83,7 +87,7 @@ public class MainVM extends AndroidViewModel {
             if(msg.what == 0) {
                 if(msg.arg1 == NORMAL_STATUS_CHARACTER) {
                     //Log.i(TAG, "NORMAL");
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MOVE_STATUS_CHARACTER, msg.arg2));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_MOVE_STATUS_CHARACTER, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
                     message.arg1 = MOVE_STATUS_CHARACTER;
@@ -91,7 +95,7 @@ public class MainVM extends AndroidViewModel {
                     animatedHandler.sendMessage(message);
                 } else if(msg.arg1 == MOVE_STATUS_CHARACTER) {
                     //Log.i(TAG, "MOVE");
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_NORMAL_STATUS_CHARACTER, msg.arg2));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_NORMAL_STATUS_CHARACTER, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
                     message.arg1 = NORMAL_STATUS_CHARACTER;
@@ -99,7 +103,7 @@ public class MainVM extends AndroidViewModel {
                     animatedHandler.sendMessage(message);
                 } else if(msg.arg1 == LISTEN_STATUS_CHARACTER_LEFT) {
                     //Log.i(TAG, "MOVE");
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LISTEN_STATUS_CHARACTER_LEFT, msg.arg2));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_LISTEN_STATUS_CHARACTER_LEFT, msg.arg2));
                     android.os.Message message = new Message();
                     message.what = 2;
                     message.arg1 = LISTEN_STATUS_CHARACTER_RIGHT;
@@ -134,8 +138,8 @@ public class MainVM extends AndroidViewModel {
                 @Override
                 public void onSuccess(Response response) {
                     try {
-                        String ly="";   //歌词文本
-                        String lyWithoutTime="";   //歌词文本
+                        StringBuilder ly= new StringBuilder();   //歌词文本
+                        StringBuilder lyWithoutTime= new StringBuilder();   //歌词文本
                         InputStream is = response.body().byteStream();
                         if (is != null) {
                             InputStreamReader inputreader = new InputStreamReader(is);
@@ -144,10 +148,10 @@ public class MainVM extends AndroidViewModel {
                             int id=0;
                             //分行读取
                             while (( line = buffreader.readLine()) != null) {
-                                ly += line + "\n";
-                                lyWithoutTime += line.substring(line.indexOf("]")+1) + "\n";
+                                ly.append(line).append("\n");
+                                lyWithoutTime.append(line.substring(line.indexOf("]") + 1)).append("\n");
 
-                                if(!line.equals("")) {
+                                if(!line.isEmpty()) {
                                     String time = "", lyric="";
                                     if("[".equals(line.substring(0,1))) {
                                         time = line.substring(line.indexOf("[")+1, line.indexOf("]"));
@@ -155,11 +159,11 @@ public class MainVM extends AndroidViewModel {
                                     } else {
                                         lyric = line;
                                     }
-                                    if(!lyric.equals("") && 0 != lyric.trim().length()) {
+                                    if(!lyric.isEmpty() && !lyric.trim().isEmpty()) {
                                         MusicLyric musicLyric = new MusicLyric();
                                         boolean isSetLyric = false;
-                                        if(!time.equals("")) {
-                                            if(musicLyricList.size() >0) {
+                                        if(!time.isEmpty()) {
+                                            if(!musicLyricList.isEmpty()) {
                                                 for(int i=0; i< musicLyricList.size(); i++) {
                                                     if(!"00:00".equals(time)) {
                                                         if(time.equals(musicLyricList.get(i).lyricTime)) {
@@ -187,7 +191,7 @@ public class MainVM extends AndroidViewModel {
                                 }
                             }
                             is.close();
-                            EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly, lyWithoutTime, musicLyricList));
+                            EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly.toString(), lyWithoutTime.toString(), musicLyricList));
                         }
                     } catch (Exception e) {
                         Log.i("ABMediaPlay", "http error " + e.getMessage());
@@ -218,33 +222,33 @@ public class MainVM extends AndroidViewModel {
                     byte[] inputStream2ByteArr = BitmapUtil.getInstance().inputStream2ByteArr(inputStream);
                     Bitmap bitmap = BitmapUtil.getInstance().showBitmap(inputStream2ByteArr);
                     if(bitmap != null) {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
+                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
                     } else {
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
+                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "error " + e.getMessage());
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
                 }
             }
 
             @Override
             public void onError(String e) {
                 Log.e(TAG, "error: " + e);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
             }
         });
     }
 
     /** 展示本地文件图片 */
     public void showImageBitmap(String musicName, String musicSinger, Bitmap bitmap) {
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
     }
 
     /** 下载新版本App */
     public void downloadUrl(String dataSource) {
         isDownloadStop = false;
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_START));
 
         OkhttpUtil.getInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
             @Override
@@ -255,7 +259,7 @@ public class MainVM extends AndroidViewModel {
             @Override
             public void onError(String e) {
                 Log.i("ABMediaPlay", "error " + e);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_ERROR));
             }
         });
     }
@@ -286,11 +290,11 @@ public class MainVM extends AndroidViewModel {
             while((len = is.read(bs)) != -1){
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_LOADING, progress));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_LOADING, progress));
                 //Log.i(TAG,"Download progress: " + (100 * (total / (double) contentLength)));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS, false));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_SUCCESS, false));
                     os.close();
                     is.close();
                     return;
@@ -300,10 +304,10 @@ public class MainVM extends AndroidViewModel {
             //完毕关闭所有连接
             os.close();
             is.close();
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS, true, file));
+            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_SUCCESS, true, file));
         } catch (Exception e) {
             Log.i("ABMediaPlay", "error " + e.getMessage());
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR));
+            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_ERROR));
         }
     }
 
@@ -356,48 +360,24 @@ public class MainVM extends AndroidViewModel {
         if(!TextUtils.isEmpty(recommendDate) && !TimeUtil.isCheckTime(recommendDate, 24)) {
             //本地缓存列表
             List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
-            if(spList.size() >0){
+            if(!spList.isEmpty()){
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, spList));
             } else {
                 //获取最新的每日推荐数据
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_RECOMMEND));
                 SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
             }
             return;
         }
         //获取最新的每日推荐数据
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_RECOMMEND));
         SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
     }
 
-    public static void showAllMusicTotal(Context context) {
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_LIELLA));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_LIYUU));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_SUNNY_PASSION));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_NIJIGASAKI));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_AQOURS));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_US));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_HASUNOSORA));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_SAINT_SNOW));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_A_RISE));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_TOTAL_OTHER));
-    }
 
     /** 默认存储Music值 */
     public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {
         musicMsg.isPlaying = isPlaying;
-//        Music music = new Music();
-//        music.setMusicId(musicMsg.getMusicId());
-//        music.setMusicName(musicMsg.getMusicName());
-//        music.setMusicSinger(musicMsg.getMusicSinger());
-//        music.setMusicType(musicMsg.getMusicType());
-//        music.setMusicImg(musicMsg.getMusicImg());
-//        music.setMusicURL(musicMsg.getMusicURL());
-//        music.setMusicFavorite(musicMsg.getMusicFavorite());
-//        music.setMusicLyric(musicMsg.getMusicLyric());
-//        music.setMusicImgByte(musicMsg.getMusicImgByte());
-//        music.setLocal(musicMsg.isLocal);
-//        music.isPlaying = isPlaying;
         return musicMsg;
     }
 
@@ -451,6 +431,28 @@ public class MainVM extends AndroidViewModel {
         DownloadHelper.addDownloadFile(downloadMusic);
         DownloadHelper.startDownload();
     }
+
+    /** 点击显示悬浮模式的进度条：返回值 */
+    public MutableLiveData<Boolean> getMlIsShowControllerNewProgress() {
+        return mlIsShowControllerNewProgress;
+    }
+
+    /** 点击显示悬浮模式的进度条：变更状态 */
+    public void toggleShowControllerNewProgress() {
+        Boolean currentValue = mlIsShowControllerNewProgress.getValue();
+        mlIsShowControllerNewProgress.setValue(currentValue == null || !currentValue);
+    }
+
+    /** 判断是否点击新版音乐歌词展示：返回值 */
+    public MutableLiveData<Boolean> getMlIsClickNewSingleLyricView() {
+        return mlIsClickNewSingleLyricView;
+    }
+
+    /** 判断是否点击新版音乐歌词展示：变更状态 */
+    public void toggleClickNewSingleLyricView(boolean isClick) {
+        mlIsClickNewSingleLyricView.setValue(isClick);
+    }
+
 
     public interface MainCallBack {
 
