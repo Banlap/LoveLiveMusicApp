@@ -940,9 +940,11 @@
 
                     <TextView
                         android:id="@+id/tv_new_start_time"
-                        android:layout_width="wrap_content"
+                        android:layout_width="40dp"
+                        android:layout_marginEnd="5dp"
                         android:layout_height="wrap_content"
                         android:text="00:00"
+                        android:textAlignment="textStart"
                         android:textColor="@color/black_33"
                         android:textSize="12dp" />
 
@@ -956,9 +958,11 @@
 
                     <TextView
                         android:id="@+id/tv_new_all_time"
-                        android:layout_width="wrap_content"
+                        android:layout_width="40dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
                         android:text="00:00"
+                        android:textAlignment="textEnd"
                         android:textColor="@color/black_33"
                         android:textSize="12dp" />
 
@@ -1270,10 +1274,12 @@
 
                         <TextView
                             android:id="@+id/tv_start_time"
-                            android:layout_width="wrap_content"
+                            android:layout_width="40dp"
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_marginStart="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:textAlignment="center"
                             android:text="00:00"
                             android:textColor="@color/black"
                             android:textSize="12dp" />
@@ -1281,18 +1287,20 @@
                         <SeekBar
                             android:layout_weight="1"
                             android:id="@+id/sb_music_bar"
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:progressDrawable="@drawable/layer_seek_bar"
                             android:thumb="@drawable/shape_seek_bar_thumb" />
 
                         <TextView
                             android:id="@+id/tv_all_time"
-                            android:layout_width="wrap_content"
+                            android:layout_width="40dp"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
+                            android:layout_marginStart="5dp"
                             android:layout_marginEnd="5dp"
                             android:text="00:00"
+                            android:textAlignment="center"
                             android:textColor="@color/black"
                             android:textSize="12dp" />
 

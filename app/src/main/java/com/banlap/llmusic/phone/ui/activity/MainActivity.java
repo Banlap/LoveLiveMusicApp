@@ -3779,6 +3779,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_us_3);
                 } else if (MysqlHelper.MUSIC_TYPE_HASUNOSORA.equals(list.get(position).musicType)) {
                     binding.ivShowLogo.setImageResource(R.mipmap.ic_album_hasu_2);
+                } else if (MysqlHelper.MUSIC_TYPE_BLUEBIRD.equals(list.get(position).musicType)) {
+                    binding.ivShowLogo.setImageResource(R.mipmap.ic_album_bluebird_2);
                 }
 
                 binding.llFavorite.setVisibility(list.get(position).musicFavorite == 1? View.VISIBLE : View.GONE);

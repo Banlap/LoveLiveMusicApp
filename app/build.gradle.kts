@@ -19,7 +19,8 @@ android {
         applicationId = "com.banlap.llmusic"
         minSdk = 24
         targetSdk = 33
-        versionCode = 184
+        //修改版本号
+        versionCode = 185
         versionName = "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -203,6 +204,10 @@ android {
         versionName = "1.8.4"
         //1.修复歌词显示卡顿问题
         //2.修复小组件不显示歌曲图片
+        versionName = "1.8.5"
+        //1.修复当前列表bluebird歌曲显示icon问题
+        //2.修复播放进度条ui问题
+        //3.修复车机首次点击播放暂停按钮逻辑
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")

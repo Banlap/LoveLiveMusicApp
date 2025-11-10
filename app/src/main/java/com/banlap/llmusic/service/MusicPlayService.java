@@ -162,8 +162,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     progressHandler.post(progressRunnable);
                     updateWidgetUI(MusicPlayService.this, false);
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
-                    updateMusicNotification(exoPlayer.isPlaying());
-                    updatePlaybackState(PlaybackStateCompat.STATE_PLAYING, mMediaSession);
+                    updateMusicNotification(true);
+                    //updatePlaybackState(PlaybackStateCompat.STATE_PLAYING, mMediaSession);
                     NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, false);
                 }
             }
@@ -175,10 +175,10 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     exoPlayer.pause();
                     isStop = true;
                     progressHandler.removeCallbacks(progressRunnable);
-                    updateMusicNotification(exoPlayer.isPlaying());
                     updateWidgetUI(MusicPlayService.this, false);
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, true));
-                    updatePlaybackState(PlaybackStateCompat.STATE_PAUSED, mMediaSession);
+                    updateMusicNotification(false);
+                    //updatePlaybackState(PlaybackStateCompat.STATE_PAUSED, mMediaSession);
                     NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, true);
                 }
             }
@@ -208,6 +208,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
             }
         });
+
         mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
         );
