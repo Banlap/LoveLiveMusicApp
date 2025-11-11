@@ -28,6 +28,7 @@ import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.MutableLiveData;
 import androidx.media.MediaBrowserServiceCompat;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
@@ -38,6 +39,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
+import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
@@ -101,6 +103,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
     private static final ExecutorService musicExecutor = Executors.newFixedThreadPool(1); // 单线程
     private static final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+
+    public static final MutableLiveData<Music> mlCurrentMusicDetail = new MutableLiveData<>();  //当前歌曲信息
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper());
     private final Runnable progressRunnable = new Runnable() {
@@ -432,7 +436,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                                 MusicPlayService.currentMusic.musicImgBitmap = null;
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, isStop));
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, (int) exoPlayer.getDuration()));
-
+                                //updateMlCurrentMusicDetail(dataSource);
                                 updateMetadata(dataSource);
                                 updateMusicNotification(exoPlayer.isPlaying());
 
@@ -757,7 +761,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         context.sendBroadcast(intent);
     }
 
-
     /**  更新音乐通知栏进度 */
     private void updateMusicNotification(boolean isPlaying) {
 
@@ -818,6 +821,16 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
             mMediaSession.release();
             mMediaSession = null;
         }
+    }
+
+    /** */
+    public static MutableLiveData<Music> getMlCurrentMusicDetail() {
+        return mlCurrentMusicDetail;
+    }
+
+    /** */
+    public static void updateMlCurrentMusicDetail(Music music) {
+        mlCurrentMusicDetail.setValue(music);
     }
 
 }

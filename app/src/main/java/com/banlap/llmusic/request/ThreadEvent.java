@@ -114,7 +114,7 @@ public class ThreadEvent<T> {
     public static final int GET_MUSIC_METADATA = 0x312;
     public static final int VIEW_GET_MUSIC_METADATA = 0x313;
 
-    public static final int PLAY_LIST_FIRST = 0x32;
+    public static final int PLAY_LIST_FIRST = 0x32; //播放当前第一首音乐
 
     public static final int PLAY_MUSIC_BY_CHARACTER = 0x33;  //角色控制播放
     public static final int PLAY_LOCAL_MUSIC = 0x331;
@@ -145,7 +145,7 @@ public class ThreadEvent<T> {
 
     public static final int RUNNABLE_DELAY = 0x511;
     public static final int VIEW_SEEK_BAR_RESUME = 0x51;
-    public static final int VIEW_PAUSE = 0x52;   //处理播放或暂停
+    public static final int VIEW_PAUSE = 0x52;   //处理播放或暂停的ui
     public static final int VIEW_SHOW_VISUALIZER =0x521;
     public static final int VIEW_SHOW_STOP_VISUALIZER = 0x522;
     public static final int VIEW_MUSIC_MSG = 0x53;  //展示音乐信息

@@ -121,6 +121,7 @@ import com.banlap.llmusic.widget.SingleLyricScrollView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.appbar.AppBarLayout;
 
@@ -141,6 +142,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import es.dmoral.toasty.Toasty;
@@ -177,6 +179,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private boolean isClick = false;                    //判断是否点击按钮
     private boolean isNotMain = false;                  //判断是否在主界面
     private boolean isSearchMusic = false;              //判断是否处于搜索音乐状态
+    private boolean isClickNextOrLastLoading = false;   //判断是否点击了上一首或下一首歌
 
     private boolean isShowMusicPanel = false;           //判断是否显示音乐面板
     private boolean isShowMusicList = false;            //判断是否显示音乐清单
@@ -230,7 +233,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private LyricScrollView lyricNewScrollDetailView;              //
     private SingleLyricScrollView lyricNewScrollView;              //
     public static MediaSessionCompat mSession;                        //用于获取按键事件
-    public boolean isFirstBluetoothControl = true;        //首次蓝牙控制标记
+    public boolean isFirstBluetoothControl = true;        //首次蓝牙控制标记 (场景：进入app后直接蓝牙或车机控制播放按钮 或 正在播放的时候蓝牙或车机控制播放按钮)
     private MainFragmentStateAdapter  mainFragmentStateAdapter;     //主页与本地页面切换Adapter
     public static final int REQUEST_CODE_NEED_RUNNING_PERMISSION = 100; //检查进入APP需要的权限
     public static final int REQUEST_CODE_DOWNLOAD_APP = 101;            //检查下载app时需要的权限
@@ -297,7 +300,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
 
         requestOptions = new RequestOptions();
-        requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.NONE);
         //requestOptions.override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL); //关键代码，加载原始大小
         requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
 
@@ -885,6 +888,44 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().llNewShowLyric.setVisibility(isClick? View.GONE : View.VISIBLE);
             }
         });
+
+        MusicPlayService.getMlCurrentMusicDetail().observe(this, new Observer<Music>() {
+            @Override
+            public void onChanged(Music music) {
+//                currentMusicDetail = music;
+//                String musicName = music.musicName;
+//                getViewDataBinding().tvMusicName.setText(musicName);
+//                getViewDataBinding().tvNewMusicName.setText(musicName);
+//                getViewDataBinding().tvNewPlayMusicName.setText(musicName);
+//                getViewDataBinding().tvSingerName.setText(music.musicSinger);
+//                getViewDataBinding().tvNewSingerName.setText(music.musicSinger);
+//
+//                MusicPlayService.currentMusic.setMusicImg(music.getMusicImg());
+//                MusicPlayService.currentMusic.setMusicName(music.musicName);
+//                MusicPlayService.currentMusic.setMusicSinger(music.musicSinger);
+//
+//                Glide.with(context)
+//                        .setDefaultRequestOptions(requestOptions)
+//                        .load(music.isLocal?
+//                                (null != music.musicImgByte?
+//                                        BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : music.getMusicImg()
+//                        )
+//                        .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+//                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE))
+//                        .into(getViewDataBinding().civMusicImg);
+//
+//                if (objectAnimator != null) {
+//                    objectAnimator.cancel();
+//                }
+//
+//                objectAnimator = ObjectAnimator.ofFloat(getViewDataBinding().ivMusicImg, "rotation", 0f, 360.0f);
+//                objectAnimator.setDuration(15000);
+//                objectAnimator.setInterpolator(new LinearInterpolator());//不停顿
+//                objectAnimator.setRepeatCount(-1);//设置动画重复次数
+//                objectAnimator.setRepeatMode(ValueAnimator.RESTART);//动画重复模式
+//                objectAnimator.start();
+            }
+        });
     }
 
 
@@ -1465,6 +1506,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 objectAnimator.setRepeatMode(ValueAnimator.RESTART);//动画重复模式
                 objectAnimator.start();
 
+                isClickNextOrLastLoading = false;
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if(event.music.isLocal) {
                         if(event.music.musicImgByte != null) {
@@ -1488,7 +1530,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     }
                 }
                 initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg, event.music.musicImgByte != null? BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : null);
-
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
                 MusicPlayService.currentMusic.setMusicName(event.str);
@@ -2737,6 +2778,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 播放上一首或下一首歌曲 */
     public void lastOrNextMusic(final boolean isNext) {
+        if(isClickNextOrLastLoading) {
+            return;
+        }
+        isClickNextOrLastLoading = true;
         if(!playList.isEmpty()) {
             if(playList.size() == 1) {
                 binder.showLyric(playList.get(0), (playMode == 2));
@@ -3410,16 +3455,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             } else {
                 binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
             }
-           // binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
         } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-            if(isFirstBluetoothControl){
-                isFirstBluetoothControl = false;
-                binder.clearMedia();
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_LIST_FIRST));
-            } else {
-                binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
-            }
-            //binder.pause(this, currentMusicName, currentMusicSinger, currentBitmap);
+            isFirstBluetoothControl = false;
+            binder.pause(this, MusicPlayService.currentMusic.musicName, MusicPlayService.currentMusic.musicSinger, MusicPlayService.currentMusic.musicImgBitmap);
         } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
             lastOrNextMusic(true);
         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
