@@ -1383,9 +1383,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().tvListSize.setText("("+ playList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("("+ playList.size() + ")");
 
-                ThemeHelper.getInstance().resetDefaultStatusTheme(this, rThemeId, getViewDataBinding(), binder);
+                ThemeHelper.getInstance().playButtonStatusTheme( rThemeId, getViewDataBinding(), !binder.isPlay());
                 //如果是删除全部按钮则 清除现在的播放信息及状态
                 if(event.b) {
+                    ThemeHelper.getInstance().resetDefaultStatusTheme(this, rThemeId, getViewDataBinding(), binder);
+
                     //重置所有状态
                     getViewDataBinding().tvMusicName.setText("MusicName");
                     getViewDataBinding().tvSingerName.setText("SingerName");
