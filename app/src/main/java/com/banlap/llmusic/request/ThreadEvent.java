@@ -113,6 +113,7 @@ public class ThreadEvent<T> {
     public static final int PLAY_ERROR = 0x311;
     public static final int GET_MUSIC_METADATA = 0x312;
     public static final int VIEW_GET_MUSIC_METADATA = 0x313;
+    public static final int VIEW_REFRESH_MUSIC_MEMORY_VALUE = 0x314; //刷新音乐文件大小值
 
     public static final int PLAY_LIST_FIRST = 0x32; //播放当前第一首音乐
 

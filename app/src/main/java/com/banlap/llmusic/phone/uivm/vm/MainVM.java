@@ -20,6 +20,7 @@ import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.DownloadHelper;
@@ -379,44 +380,6 @@ public class MainVM extends AndroidViewModel {
     public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {
         musicMsg.isPlaying = isPlaying;
         return musicMsg;
-    }
-
-    /** 获取文件大小 */
-    public String showFileSize(String name, String isLocal, String url) {
-        String size = "0 MB";
-        if(isLocal.equals("0")) {
-            File file = new File(getApplication().getExternalFilesDir("music"), "audio-cache");
-            if (file.exists()) {
-                String musicFilePath = file.getAbsolutePath() + "/" + "ll-" + name + ".mp3";
-                File musicFile = new File(musicFilePath);
-                if(musicFile.exists()) {
-                    long fileSizeInBytes = musicFile.length();
-                    // 将字节大小转换为MB
-                    double fileSizeInMB = fileSizeInBytes / (1024.0 * 1024.0);
-                    String fileSizeFormatted = String.format("%.2f MB", fileSizeInMB);
-                    size = fileSizeFormatted;
-                    Log.d(TAG, "File size: " + fileSizeFormatted);
-                } else {
-                    Log.d(TAG, "MusicFile does not exist.");
-                }
-            } else {
-                Log.d(TAG, "File does not exist.");
-            }
-        } else {
-            File file = new File(url);
-            if (file.exists()) {
-                long fileSizeInBytes = file.length();
-                // 将字节大小转换为MB
-                double fileSizeInMB = fileSizeInBytes / (1024.0 * 1024.0);
-                String fileSizeFormatted = String.format("%.2f MB", fileSizeInMB);
-                size = fileSizeFormatted;
-                Log.d(TAG, "File size: " + fileSizeFormatted);
-            } else {
-                Log.d(TAG, "File does not exist.");
-            }
-        }
-
-        return size;
     }
 
     /** 下载音乐文件 */

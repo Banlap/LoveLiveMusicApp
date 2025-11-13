@@ -106,6 +106,7 @@ import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
 import com.banlap.llmusic.utils.DownloadHelper;
+import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
@@ -489,6 +490,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     }
 
+    /** 刷新底部控制栏高度 */
     private void updateController() {
         //配置简约模式下控制器高度
         ViewGroup.MarginLayoutParams marginLayoutParams1 = (ViewGroup.MarginLayoutParams) getViewDataBinding().clCurrentMusicPanel.getLayoutParams();
@@ -927,7 +929,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         });
     }
-
 
     /** 开启所有相关服务 */
     private void startAllService() {
@@ -1840,17 +1841,22 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(MusicPlayService.mMediaSession != null) {
                     MediaMetadataCompat metadata =  MusicPlayService.mMediaSession.getController().getMetadata();
                     if(metadata != null) {
-                        MusicPlayService.currentMusic.musicFileSize = getViewModel().showFileSize(
-                                metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE),
-                                metadata.getString("IsLocal"),
-                                metadata.getString("Path")
-                        );
-                        getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusic.musicFileSize);
+                        if(metadata.getString("IsLocal").equals("0")) {
+                            MusicPlayService.getMusicFileSizeByHttp(metadata.getString("Path"));
+                        } else {
+                            MusicPlayService.currentMusic.musicFileSize = FileUtil.getInstance().getFileSizeByLocal(metadata.getString("Path"));
+                            getViewDataBinding().tvFileSizeValue.setText(MusicPlayService.currentMusic.musicFileSize);
+                        }
                     }
                 }
 
                 break;
-
+            case ThreadEvent.VIEW_REFRESH_MUSIC_MEMORY_VALUE:
+                if(!TextUtils.isEmpty(event.str)) {
+                    MusicPlayService.currentMusic.musicFileSize = event.str;
+                    getViewDataBinding().tvFileSizeValue.setText(event.str);
+                }
+                break;
             case ThreadEvent.VIEW_CLOSE_FLOATING_LYRIC: //关闭歌词
                 if(SystemUtil.getInstance().isServiceWorked(MainActivity.this, LyricService.class.getPackage().getName()
                         + "." + LyricService.class.getSimpleName())) {
@@ -2165,7 +2171,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         }
     }
-
 
     /** 显示弹窗更新App */
     private void showUpgradeApp(){

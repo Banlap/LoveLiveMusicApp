@@ -2,6 +2,7 @@ package com.banlap.llmusic.service;
 
 import static com.banlap.llmusic.utils.NotificationHelper.LL_MUSIC_PLAYER;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -30,17 +31,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.media.MediaBrowserServiceCompat;
+import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DataSourceUtil;
+import androidx.media3.datasource.DataSpec;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.DecoderCounters;
+import androidx.media3.exoplayer.DecoderReuseEvaluation;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.analytics.AnalyticsCollector;
+import androidx.media3.exoplayer.analytics.AnalyticsListener;
+import androidx.media3.exoplayer.source.LoadEventInfo;
+import androidx.media3.exoplayer.source.MediaLoadData;
+import androidx.media3.exoplayer.source.MediaSource;
 
 import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.SystemUtil;
@@ -831,6 +845,44 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     /** */
     public static void updateMlCurrentMusicDetail(Music music) {
         mlCurrentMusicDetail.setValue(music);
+    }
+
+    /** 通过HTTP头信息获取获取文件大小 */
+    public static void getMusicFileSizeByHttp(String audioUrl) {
+        DataSource.Factory dataSourceFactory = new DefaultHttpDataSource.Factory();
+
+        // 使用 DataSource 获取文件信息
+        DataSpec dataSpec = new DataSpec.Builder()
+                .setUri(audioUrl)
+                .setFlags(DataSpec.FLAG_ALLOW_GZIP)
+                .build();
+
+        DataSource dataSource = dataSourceFactory.createDataSource();
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            try {
+                dataSource.open(dataSpec);
+                // 尝试从 Content-Length 头获取文件大小
+                Map<String, List<String>> map = dataSource.getResponseHeaders();
+                List<String> contentLengthHeader = map.get("Content-Length");
+                Long contentLength = null;
+                if (contentLengthHeader != null) {
+                    try {
+                        contentLength = Long.parseLong(contentLengthHeader.get(0));
+                        String musicFileSize = FileUtil.getInstance().formatFileSizeToMB(contentLength);
+                        Log.i(TAG, "当前在线音乐文件大小: " + musicFileSize);
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_REFRESH_MUSIC_MEMORY_VALUE, musicFileSize));
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, "getAudioFileInfo NumberFormatException: ", e);
+                    }
+                }
+
+                dataSource.close();
+            } catch (Exception e) {
+               Log.e(TAG, "getAudioFileInfo error: ", e);
+            }
+        });
     }
 
 }

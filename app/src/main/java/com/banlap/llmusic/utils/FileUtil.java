@@ -41,7 +41,7 @@ public class FileUtil {
 
     public static FileUtil getInstance() { return new FileUtil();}
 
-    public static String ReadTxtFile(String strFilePath) {
+    public String ReadTxtFile(String strFilePath) {
         String path = strFilePath;
         String content = ""; //文件内容字符串
         //打开文件
@@ -71,7 +71,6 @@ public class FileUtil {
         return content;
     }
 
-
     /**
      * 获取文件路径
      * */
@@ -82,7 +81,7 @@ public class FileUtil {
         // DocumentProvider
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
+            if ("com.android.externalstorage.documents".equals(uri.getAuthority())) {
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
                 final String type = split[0];
@@ -90,7 +89,7 @@ public class FileUtil {
                 if ("primary".equalsIgnoreCase(type)) {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
-            } else if (isDownloadsDocument(uri)) { // DownloadsProvider
+            } else if ("com.android.providers.downloads.documents".equals(uri.getAuthority())) { // DownloadsProvider
                 final String id = DocumentsContract.getDocumentId(uri);
                 if(id.contains(":")) {
                     final String[] split = id.split(":");
@@ -110,7 +109,7 @@ public class FileUtil {
                     return getDataColumn(context, contentUri, null, null);
                 }
 
-            } else if (isMediaDocument(uri)) { // MediaProvider
+            } else if ("com.android.providers.media.documents".equals(uri.getAuthority())) { // MediaProvider
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
                 final String type = split[0];
@@ -198,6 +197,27 @@ public class FileUtil {
     }
 
 
+    /** 获取本地文件大小 */
+    public String getFileSizeByLocal(String url) {
+        String size = "0 MB";
+        File file = new File(url);
+        if (file.exists()) {
+            long fileSizeInBytes = file.length();
+            // 将字节大小转换为MB
+            String fileSizeFormatted = formatFileSizeToMB(fileSizeInBytes);
+            size = fileSizeFormatted;
+            Log.d(TAG, "File size: " + fileSizeFormatted);
+        } else {
+            Log.d(TAG, "File does not exist.");
+        }
+        return size;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String formatFileSizeToMB(long bytes) {
+        return String.format("%.2f MB", bytes / (1024.0 * 1024.0));
+    }
+
     /**
      * 保存异常错误日志到本地中
      * */
@@ -238,7 +258,6 @@ public class FileUtil {
     }
 
 
-
     public File createImageFile(Context context) {
         try {
             // 创建一个临时文件，用于保存拍照的照片
@@ -261,7 +280,7 @@ public class FileUtil {
     /**
      * 当前字符串是否为数字
      * */
-    public static boolean isNumeric(String str){
+    public boolean isNumeric(String str){
         for(int i=str.length();--i>=0;){
             int chr=str.charAt(i);
             if(chr<48 || chr>57) {
@@ -290,19 +309,6 @@ public class FileUtil {
                 cursor.close();
         }
         return null;
-    }
-
-
-    public boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }
-
-    public boolean isDownloadsDocument(Uri uri) {
-        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
-    }
-
-    public boolean isMediaDocument(Uri uri) {
-        return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
 }
