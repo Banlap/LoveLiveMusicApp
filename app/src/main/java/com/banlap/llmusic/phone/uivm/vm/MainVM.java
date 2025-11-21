@@ -3,7 +3,6 @@ package com.banlap.llmusic.phone.uivm.vm;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -20,7 +19,6 @@ import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.DownloadHelper;
@@ -249,7 +247,7 @@ public class MainVM extends AndroidViewModel {
     /** 下载新版本App */
     public void downloadUrl(String dataSource) {
         isDownloadStop = false;
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_START));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DOWNLOAD_APP_BY_MAIN_START));
 
         OkhttpUtil.getInstance().request(dataSource, new OkhttpUtil.OkHttpCallBack() {
             @Override
@@ -260,7 +258,7 @@ public class MainVM extends AndroidViewModel {
             @Override
             public void onError(String e) {
                 Log.i("ABMediaPlay", "error " + e);
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_ERROR));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DOWNLOAD_APP_BY_MAIN_ERROR));
             }
         });
     }
@@ -291,11 +289,11 @@ public class MainVM extends AndroidViewModel {
             while((len = is.read(bs)) != -1){
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_LOADING, progress));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DOWNLOAD_APP_BY_MAIN_LOADING, progress));
                 //Log.i(TAG,"Download progress: " + (100 * (total / (double) contentLength)));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_SUCCESS, false));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DOWNLOAD_APP_BY_MAIN_SUCCESS, false));
                     os.close();
                     is.close();
                     return;
@@ -305,10 +303,10 @@ public class MainVM extends AndroidViewModel {
             //完毕关闭所有连接
             os.close();
             is.close();
-            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_SUCCESS, true, file));
+            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DOWNLOAD_APP_BY_MAIN_SUCCESS, true, file));
         } catch (Exception e) {
             Log.i("ABMediaPlay", "error " + e.getMessage());
-            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.DOWNLOAD_APP_ERROR));
+            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DOWNLOAD_APP_BY_MAIN_ERROR));
         }
     }
 
@@ -362,16 +360,16 @@ public class MainVM extends AndroidViewModel {
             //本地缓存列表
             List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
             if(!spList.isEmpty()){
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, spList));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, spList));
             } else {
                 //获取最新的每日推荐数据
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_RECOMMEND));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_RECOMMEND));
                 SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
             }
             return;
         }
         //获取最新的每日推荐数据
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_RECOMMEND));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_RECOMMEND));
         SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
     }
 

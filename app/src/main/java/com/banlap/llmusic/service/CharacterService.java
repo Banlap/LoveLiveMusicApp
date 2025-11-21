@@ -282,11 +282,11 @@ public class CharacterService extends Service {
                     }
                 }
             } else if(v.getId() == R.id.ll_last_music) {
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_LAST));
             } else if(v.getId() == R.id.ll_play_music) {
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_MUSIC_BY_CHARACTER));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_MUSIC_BY_CHARACTER));
             } else if(v.getId() == R.id.ll_next_music) {
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_NEXT));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_NEXT));
             } else if(v.getId() == R.id.ll_is_last) {
                 if(!isClickIsLast) { //后手进行井字游戏
                     llIsLast.setBackgroundResource(R.drawable.shape_button_white_5_red);

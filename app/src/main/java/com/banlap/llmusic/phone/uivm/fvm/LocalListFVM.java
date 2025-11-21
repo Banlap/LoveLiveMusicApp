@@ -11,10 +11,10 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.MutableLiveData;
 
 import com.banlap.llmusic.model.LocalFile;
 import com.banlap.llmusic.request.ThreadEvent;
-import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.FileUtil;
 
@@ -28,16 +28,17 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class LocalListFVM extends AndroidViewModel {
-
     private static final String TAG = LocalListFVM.class.getSimpleName();
     private LocalListCallBack callBack;
-    /*扫描线程*/
+    //扫描线程
     private Thread scanThread;
-    /*定时器  用于定时检测扫描线程的状态*/
+    //定时器  用于定时检测扫描线程的状态
     private Timer scanTimer;
-    /*检测扫描线程的任务*/
+    //检测扫描线程的任务
     private TimerTask scanTask;
     private List<LocalFile> localFileList;
+    //主题id
+    private final MutableLiveData<Integer> themeId = new MutableLiveData<>();
 
     public LocalListFVM(@NonNull Application application) {
         super(application);
@@ -78,7 +79,7 @@ public class LocalListFVM extends AndroidViewModel {
                     localFileList.add(nullLocalFile);
                     localFileList.add(nullLocalFile2);
                     /*说明扫描线程结束 扫描完成  更新ui*/
-                    EventBus.getDefault().post(new ThreadEvent<LocalFile>(ThreadEvent.SCAN_LOCAL_FILE_SUCCESS, localFileList, ""));
+                    EventBus.getDefault().post(new ThreadEvent<LocalFile>(ThreadEvent.VIEW_SCAN_LOCAL_FILE_SUCCESS, localFileList, ""));
                     cancelTask();
                 }
             }
@@ -139,7 +140,9 @@ public class LocalListFVM extends AndroidViewModel {
         }
     }
 
-    /** 获取音乐信息 */
+    /**
+     * 获取音乐信息
+     * */
     private void getMusicData(String path, boolean isPost) {
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         try {
@@ -185,7 +188,7 @@ public class LocalListFVM extends AndroidViewModel {
             }
 
             if(isPost) {
-                EventBus.getDefault().post(new ThreadEvent<LocalFile>(ThreadEvent.SELECT_LOCAL_FILE_SUCCESS, localFileList, ""));
+                EventBus.getDefault().post(new ThreadEvent<LocalFile>(ThreadEvent.VIEW_SELECT_LOCAL_FILE_SUCCESS, localFileList, ""));
             }
 
         } catch(Exception e) {
@@ -194,7 +197,9 @@ public class LocalListFVM extends AndroidViewModel {
 
     }
 
-    /** 取消扫描任务 */
+    /**
+     * 取消扫描任务
+     * */
     private void cancelTask() {
 
         Log.i("cancelTask","结束任务");
@@ -206,6 +211,20 @@ public class LocalListFVM extends AndroidViewModel {
             scanTimer.purge();
             scanTimer.cancel();;
         }
+    }
+
+    /**
+     * 获取主题id
+     * */
+    public MutableLiveData<Integer> getThemeId() {
+        return themeId;
+    }
+
+    /**
+     * 设置主题id
+     * */
+    public void setThemeId(int rThemeId) {
+        themeId.setValue(rThemeId);
     }
 
     public interface LocalListCallBack {

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
+import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityDownloadBinding;
 import com.banlap.llmusic.databinding.DialogDownloadMenuBinding;
 import com.banlap.llmusic.databinding.ItemDownloadListBinding;
@@ -25,6 +26,9 @@ import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.vm.DownloadVM;
+import com.banlap.llmusic.sql.room.RoomSettings;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PxUtil;
@@ -36,6 +40,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadBinding>
     implements DownloadVM.DownloadCallBack {
@@ -52,17 +58,13 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
 
     @Override
     protected void initData() {
+        EventBus.getDefault().register(this);
         downloadMusicList = new ArrayList<>();
 
         List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
 
         if(splist.size()>0) {
             downloadMusicList.addAll(splist);
-        }
-
-        String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
-        if(!TextUtils.isEmpty(strThemeId)) {
-            changeTheme(Integer.parseInt(strThemeId));
         }
 
         downloadMusicList.add(new DownloadMusic());
@@ -73,15 +75,18 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
     /** 改变主题 */
     private void changeTheme(int rId) {
         rThemeId = rId;
-        SPUtil.setStrValue(getApplicationContext(), SPUtil.SaveThemeId, String.valueOf(rId));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppData.saveRoomSettings(roomSetting -> roomSetting.saveThemeId = String.valueOf(rThemeId));
+            }
+        });
         //主题变更
         ThemeHelper.getInstance().downloadActivityTheme(this, rId, getViewDataBinding());
     }
 
     @Override
     protected void initView() {
-        EventBus.getDefault().register(this);
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
 
@@ -195,6 +200,18 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
             case ThreadEvent.VIEW_DOWNLOAD_MUSIC_CANCEL:
                 getViewDataBinding().llDownloadMain.setVisibility(View.GONE);
                 getViewDataBinding().llDownloadNull.setVisibility(View.VISIBLE);
+                break;
+
+            case ThreadEvent.VIEW_ROOM_GET_THEME_ID:
+                if(event.str.equals(DownloadActivity.class.getSimpleName())) {
+                    if(!TextUtils.isEmpty(event.str2)) {
+                        try {
+                            changeTheme(Integer.parseInt(event.str2));
+                        } catch (Exception e) {
+                            Log.e(TAG, "themeId转换失败, ");
+                        }
+                    }
+                }
                 break;
         }
     }

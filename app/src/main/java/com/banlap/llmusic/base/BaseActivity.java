@@ -11,6 +11,7 @@ import android.view.WindowManager;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -22,19 +23,31 @@ import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * @author Banlap on 2021/11/30
  */
 public abstract class BaseActivity<VM extends ViewModel, VDB extends ViewDataBinding> extends AppCompatActivity {
-
     private static final String TAG = BaseActivity.class.getSimpleName();
     protected VM mViewModel;
     protected VDB mViewDataBinding;
+    //添加共享 ViewModel
+    protected Map<Class<? extends ViewModel>, ViewModel> mViewModels = new HashMap<>();
 
     public VM getViewModel() { return mViewModel; }
     public VDB getViewDataBinding() { return mViewDataBinding; }
+
+    //获取共享 ViewModel 的方法
+    protected <SVM extends ViewModel> SVM getViewModel(@NonNull Class<SVM> modelClass) {
+        if (!mViewModels.containsKey(modelClass)) {
+            SVM viewModel = new ViewModelProvider(this).get(modelClass);
+            mViewModels.put(modelClass, viewModel);
+        }
+        return modelClass.cast(mViewModels.get(modelClass));
+    }
 
     protected void beforeOnCreate() {}
     protected void initWindow() {}

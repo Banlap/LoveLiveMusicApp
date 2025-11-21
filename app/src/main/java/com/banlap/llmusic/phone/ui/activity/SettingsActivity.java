@@ -29,6 +29,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
+import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivitySettingsBinding;
 import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogDownloadBinding;
@@ -41,6 +42,9 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.LyricService;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.vm.SettingsVM;
+import com.banlap.llmusic.sql.room.RoomSettings;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
@@ -96,21 +100,24 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
     @Override
     protected void initData() {
+        EventBus.getDefault().register(this);
         mNormalLaunchVideoUrl = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella;
         mNormalLaunchVideoUrl2 = "android.resource://" + getPackageName() + "/" + R.raw.welcomeliella5nd;
-        String strThemeId = SPUtil.getStrValue(getApplicationContext(), SPUtil.SaveThemeId);
-        if(!TextUtils.isEmpty(strThemeId)) {
-            changeTheme(Integer.parseInt(strThemeId));
+        //EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_ROOM_GET_THEME_ID, SettingsActivity.class.getSimpleName()));
+        if(AppData.roomSettings != null && !TextUtils.isEmpty(AppData.roomSettings.saveThemeId)) {
+            try {
+                changeTheme(Integer.parseInt(AppData.roomSettings.saveThemeId));
+            } catch (Exception e) {
+                Log.e(TAG, "saveThemeId转换失败,使用默认参数");
+            }
         }
     }
 
     @SuppressLint("SetTextI18n")
     @Override
     protected void initView() {
-        EventBus.getDefault().register(this);
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
-
         boolean isExistNewVersion = getIntent().getBooleanExtra("IsExistNewVersion", false);
         newVersionUrl = getIntent().getStringExtra("NewVersionUrl");
         newVersionTitle = getIntent().getStringExtra("NewVersionTitle");
@@ -279,7 +286,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     @Subscribe(threadMode = ThreadMode.ASYNC)
     public void ThreadEvent(final ThreadEvent event) {
         switch (event.msgCode) {
-            case ThreadEvent.DOWNLOAD_APP2:
+            case ThreadEvent.THREAD_DOWNLOAD_APP_BY_SETTINGS:
                 String[] permissions_download = { Manifest.permission.WRITE_EXTERNAL_STORAGE };
                 //Android 13中 READ_EXTERNAL_STORAGE 已失效,则使用新的权限 READ_MEDIA_VIDEO
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -292,7 +299,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 }
                 getViewModel().downloadUrl(event.str);
                 break;
-            case ThreadEvent.SELECT_VIDEO_FILE:
+            case ThreadEvent.THREAD_SELECT_VIDEO_FILE:
                 String[] permissions_video = { Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
                 //Android 13中 READ_EXTERNAL_STORAGE 已失效,则使用新的权限 READ_MEDIA_VIDEO
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -317,16 +324,16 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
         switch (event.msgCode) {
-            case ThreadEvent.DOWNLOAD_APP_START2:
+            case ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_START:
                 showLoadingApp();
                 break;
-            case ThreadEvent.DOWNLOAD_APP_LOADING2:
+            case ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_LOADING:
                 if(null != downloadBinding) {
                     downloadBinding.tvValue.setText(""+event.i);
                     downloadBinding.pbProgress.setProgress(event.i);
                 }
                 break;
-            case ThreadEvent.DOWNLOAD_APP_SUCCESS2:
+            case ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_SUCCESS:
                 if(null != mAlertDialog) {
                     mAlertDialog.dismiss();
                 }
@@ -357,7 +364,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                     event.file.delete();
                 }
                 break;
-            case ThreadEvent.DOWNLOAD_APP_ERROR2:
+            case ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_ERROR:
                 if(null != mAlertDialog) {
                     mAlertDialog.dismiss();
                 }
@@ -371,6 +378,18 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 break;
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_ERROR:
                 Log.i(TAG, "设置启动动画失败");
+                break;
+
+            case ThreadEvent.VIEW_ROOM_GET_THEME_ID:
+                if(event.str.equals(SettingsActivity.class.getSimpleName())) {
+                    if(!TextUtils.isEmpty(event.str2)) {
+                        try {
+                            changeTheme(Integer.parseInt(event.str2));
+                        } catch (Exception e) {
+                            Log.e(TAG, "themeId转换失败,");
+                        }
+                    }
+                }
                 break;
         }
     }
@@ -430,7 +449,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         settingVideoBinding.llSelectVideoAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SELECT_VIDEO_FILE));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SELECT_VIDEO_FILE));
             }
         });
 
@@ -479,8 +498,11 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 R.layout.dialog_setting_view_mode, null, false);
         viewModeBinding.tvTitle.setText("设置界面模式");
 
-        String controllerScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.SaveControllerScene);
-
+        //String controllerScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.SaveControllerScene);
+        String controllerScene = "";
+        if(AppData.roomSettings != null && !TextUtils.isEmpty(AppData.roomSettings.saveControllerScene)) {
+            controllerScene = AppData.roomSettings.saveControllerScene;
+        }
         viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.VISIBLE);
         viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.INVISIBLE);
         viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.INVISIBLE);
@@ -589,7 +611,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             @Override
             public void onClick(View v) {
                 if(!"".equals(newVersionUrl)) {
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP2, newVersionUrl));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_DOWNLOAD_APP_BY_SETTINGS, newVersionUrl));
                 }
             }
         });
@@ -858,8 +880,14 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
     /** 改变主题 */
     private void changeTheme(int rId) {
         rThemeId = rId;
-        SPUtil.setStrValue(getApplicationContext(), SPUtil.SaveThemeId, String.valueOf(rId));
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CHANGE_THEME));
+        //SPUtil.setStrValue(getApplicationContext(), SPUtil.SaveThemeId, String.valueOf(rId));
+        //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_ROOM_SAVE_THEME_ID, String.valueOf(rId)));
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppData.saveRoomSettings(roomSetting -> roomSetting.saveThemeId = String.valueOf(rThemeId));
+            }
+        });
         //主题变更
         ThemeHelper.getInstance().settingActivityTheme(this, rId, getViewDataBinding());
     }
@@ -880,13 +908,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             case REQUEST_CODE_DOWNLOAD_APP_2:
                 if(!PermissionUtil.getInstance().checkPermission(this, permissions)) {
                     if(!"".equals(newVersionUrl)){
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP2, newVersionUrl));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_DOWNLOAD_APP_BY_SETTINGS, newVersionUrl));
                     }
                 }
                 break;
             case REQUEST_CODE_SELECT_VIDEO_FILE_2:
                 if(!PermissionUtil.getInstance().checkPermission(this, permissions)) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.SELECT_VIDEO_FILE));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SELECT_VIDEO_FILE));
                 }
                 break;
         }

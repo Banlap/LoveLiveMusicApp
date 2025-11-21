@@ -17,6 +17,8 @@ import com.banlap.llmusic.phone.uivm.vm.WelcomeVM;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 
+import org.greenrobot.eventbus.EventBus;
+
 /**
  * 欢迎页
  * */
@@ -84,7 +86,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
 
     /** 视频保持宽高比 */
     private void setDimension() {
-        float videoProportion = getVideoProportion();
+        float videoProportion = 1.5f;
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         float screenProportion = (float) screenHeight / (float) screenWidth;
@@ -97,10 +99,6 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
             lp.height = (int) ((float) screenWidth * videoProportion);
         }
         getViewDataBinding().vvWelcomeVideo.setLayoutParams(lp);
-    }
-
-    private float getVideoProportion(){
-        return 1.5f;
     }
 
     /** 循环播放欢迎页视频 */

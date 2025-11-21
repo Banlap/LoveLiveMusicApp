@@ -8,11 +8,11 @@ import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Banlap on 2021/11/30
+ * 后续计划去除EventBus 使用liveData + rxjava/Executor处理ui及耗时操作
  */
 public class ThreadEvent<T> {
     public static String ALBUM_LIELLA = "ALBUM_LIELLA";
@@ -27,193 +27,192 @@ public class ThreadEvent<T> {
     public static String ALBUM_A_RISE = "ALBUM_A_RISE";
     public static String ALBUM_OTHER = "ALBUM_OTHER";
 
-    public static final int CONNECT_MYSQL = 0x10;    //连接数据库
-    public static final int CONNECT_MYSQL_LOADING = 0x101;  //连接数据库 加载中
-    public static final int CONNECT_MYSQL_SUCCESS = 0x11;  //连接数据库 成功
-    public static final int CONNECT_MYSQL_ERROR = 0x12;   //连接数据库 失败
-    public static final int GET_SUCCESS = 0x13;            //获取专辑列表成功
-    public static final int GET_ALBUM_SUCCESS = 0x131;     //获取专辑数据成功
-    public static final int GET_LOCAL_PLAY_LIST_SUCCESS = 0x132;  //获取本地列表成功
-    public static final int GET_ERROR = 0x14;
-    public static final int GET_COUNT_SUCCESS = 0x15;
-    public static final int GET_RECOMMEND_SUCCESS = 0x151;    //获取每日推荐数据成功
-    public static final int GET_MESSAGE_SUCCESS = 0x16;
-    public static final int GET_MESSAGE_ERROR = 0x17;
-    public static final int GET_APP_VERSION_SUCCESS = 0x18;
+    public static final int THREAD_CONNECT_MYSQL = 1000;    //连接数据库
+    public static final int VIEW_CONNECT_MYSQL_LOADING = 1001;  //连接数据库 加载中
+    public static final int VIEW_CONNECT_MYSQL_SUCCESS = 1002;  //连接数据库 成功
+    public static final int VIEW_CONNECT_MYSQL_ERROR = 1003;    //连接数据库 失败
+    public static final int VIEW_GET_ALBUM_LIST_SUCCESS = 1010; //获取专辑列表成功
+    public static final int VIEW_GET_ALBUM_DATA_SUCCESS = 1011; //获取专辑数据成功
+    public static final int VIEW_GET_LOCAL_PLAY_LIST_SUCCESS = 1012; //获取本地列表成功
+    public static final int VIEW_GET_ERROR = 1013;
+    public static final int VIEW_GET_ALBUM_COUNT_SUCCESS = 1014; //获取某一个专辑音乐数量
+    public static final int VIEW_GET_RECOMMEND_SUCCESS = 1015;    //获取每日推荐数据成功
+    public static final int VIEW_GET_MESSAGE_SUCCESS = 1016;
+    public static final int VIEW_GET_MESSAGE_ERROR = 1017;
+    public static final int THREAD_GET_APP_VERSION_SUCCESS = 1018; //获取App版本更新
 
-    public static final int GET_TOTAL_LIELLA = 0x1910;
-    public static final int GET_TOTAL_LIELLA_SUCCESS = 0x1920;
-    public static final int GET_TOTAL_LIYUU = 0x1911;
-    public static final int GET_TOTAL_LIYUU_SUCCESS = 0x1921;
-    public static final int GET_TOTAL_SUNNY_PASSION = 0x1912;
-    public static final int GET_TOTAL_SUNNY_PASSION_SUCCESS = 0x1922;
-    public static final int GET_TOTAL_NIJIGASAKI = 0x1913;
-    public static final int GET_TOTAL_NIJIGASAKI_SUCCESS = 0x1923;
-    public static final int GET_TOTAL_AQOURS = 0x1914;
-    public static final int GET_TOTAL_AQOURS_SUCCESS = 0x1924;
-    public static final int GET_TOTAL_US = 0x1915;
-    public static final int GET_TOTAL_US_SUCCESS = 0x1925;
-    public static final int GET_TOTAL_HASUNOSORA = 0x1916;
-    public static final int GET_TOTAL_HASUNOSORA_SUCCESS = 0x1926;
-    public static final int GET_TOTAL_SAINT_SNOW = 0x1917;
-    public static final int GET_TOTAL_SAINT_SNOW_SUCCESS = 0x1927;
-    public static final int GET_TOTAL_A_RISE = 0x1918;
-    public static final int GET_TOTAL_A_RISE_SUCCESS = 0x1928;
-    public static final int GET_TOTAL_OTHER = 0x1919;
-    public static final int GET_TOTAL_OTHER_SUCCESS = 0x1929;
+    public static final int THREAD_GET_TOTAL_LIELLA = 1020;
+    public static final int VIEW_GET_TOTAL_LIELLA_SUCCESS = 1021;
+    public static final int THREAD_GET_TOTAL_LIYUU = 1022;
+    public static final int VIEW_GET_TOTAL_LIYUU_SUCCESS = 1023;
+    public static final int THREAD_GET_TOTAL_SUNNY_PASSION = 1024;
+    public static final int VIEW_GET_TOTAL_SUNNY_PASSION_SUCCESS = 1025;
+    public static final int THREAD_GET_TOTAL_NIJIGASAKI = 1026;
+    public static final int VIEW_GET_TOTAL_NIJIGASAKI_SUCCESS = 1027;
+    public static final int THREAD_GET_TOTAL_AQOURS = 1028;
+    public static final int VIEW_GET_TOTAL_AQOURS_SUCCESS = 1029;
+    public static final int THREAD_GET_TOTAL_US = 1030;
+    public static final int VIEW_GET_TOTAL_US_SUCCESS = 1031;
+    public static final int THREAD_GET_TOTAL_HASUNOSORA = 1032;
+    public static final int VIEW_GET_TOTAL_HASUNOSORA_SUCCESS = 1033;
+    public static final int THREAD_GET_TOTAL_SAINT_SNOW = 1034;
+    public static final int VIEW_GET_TOTAL_SAINT_SNOW_SUCCESS = 1035;
+    public static final int THREAD_GET_TOTAL_A_RISE = 1036;
+    public static final int VIEW_GET_TOTAL_A_RISE_SUCCESS = 1037;
+    public static final int THREAD_GET_TOTAL_OTHER = 1038;
+    public static final int VIEW_GET_TOTAL_OTHER_SUCCESS = 1039;
 
-    public static final int GET_DATA_LIST = 0x20;           //获取所有歌曲
-    public static final int GET_DATA_LIST_BY_LIELLA = 0x201;    //获取Liella所有歌曲
-    public static final int GET_DATA_LIST_BY_SUNNY_PASSION = 0x202; //获取SUNNY PASSION所有歌曲
-    public static final int GET_DATA_LIST_BY_FOUR_YUU = 0x203;    //获取Liyuu所有歌曲
-    public static final int GET_DATA_LIST_BY_NIJIGASAKI = 0x204;  //获取虹团所有歌曲
-    public static final int GET_DATA_LIST_BY_AQOURS = 0x205;  //获取Aqours所有歌曲
-    public static final int GET_DATA_LIST_BY_US = 0x206;  //
-    public static final int GET_DATA_LIST_BY_HASUNOSORA = 0x207; //
-    public static final int GET_DATA_LIST_BY_SAINT_SNOW = 0x208;
-    public static final int GET_DATA_LIST_BY_A_RISE = 0x209;
-    public static final int GET_DATA_LIST_BY_OTHER = 0x2010;
-    public static final int GET_DATA_LIST_BY_BLUEBIRD = 0x2011;
-    public static final int GET_DATA_LIST_BY_LOCAL_PLAY = 0x255;
+    public static final int THREAD_GET_DATA_LIST = 1100;           //获取所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_LIELLA = 1101; //获取Liella所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_SUNNY_PASSION = 1102; //获取SUNNY PASSION所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_FOUR_YUU = 1103; //获取Liyuu所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_NIJIGASAKI = 1104;  //获取虹团所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_AQOURS = 1105;  //获取Aqours所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_US = 1106;  //获取μ's所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_HASUNOSORA = 1107; //获取莲团所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_SAINT_SNOW = 1108; //获取saint snow所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_A_RISE = 1109; //获取arise所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_OTHER = 1110; //获取其他歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_BLUEBIRD = 1111; //获取bluebird所有歌曲
+    public static final int THREAD_GET_DATA_LIST_BY_LOCAL_PLAY = 1112; //获取本地歌曲
 
-    public static final int GET_DATA_LIST_COUNT = 0x21;
-    public static final int GET_DATA_RECOMMEND = 0x211;
-    public static final int GET_DATA_LIST_MESSAGE = 0x22;
-    public static final int GET_DATA_APP_VERSION = 0x23;
+    public static final int GET_DATA_LIST_COUNT = 1150;
+    public static final int THREAD_GET_DATA_RECOMMEND = 1151; //获取每日推荐信息
+    public static final int GET_DATA_LIST_MESSAGE = 1152;
+    public static final int THREAD_GET_DATA_APP_VERSION = 1153; //获取当前app版本信息
 
-    public static final int DOWNLOAD_APP = 0x24;
-    public static final int SCAN_LOCAL_FILE = 0x2401;
-    public static final int SCAN_LOCAL_FILE_SUCCESS = 0x2402;
-    public static final int SCAN_LOCAL_FILE_ERROR = 0x2403;
-    public static final int SCAN_LOCAL_FILE_BY_CHECK_PERMISSION = 0x2404;
-    public static final int SELECT_LOCAL_FILE_SUCCESS = 0x2405;
-    public static final int SELECT_LOCAL_FILE_ERROR = 0x2406;
-    public static final int SELECT_IMG_FILE_SUCCESS = 0x2407;
+    public static final int SCAN_LOCAL_FILE = 1154;
+    public static final int VIEW_SCAN_LOCAL_FILE_SUCCESS = 1155; //扫描本地文件成功
+    public static final int VIEW_SCAN_LOCAL_FILE_ERROR = 1156; //扫描本地文件失败
+    public static final int VIEW_SCAN_LOCAL_FILE_BY_CHECK_PERMISSION = 1157; //扫描本地文件时检查权限
+    public static final int VIEW_SELECT_LOCAL_FILE_SUCCESS = 1158; //选择本地文件成功
+    public static final int SELECT_LOCAL_FILE_ERROR = 1159;
+    public static final int VIEW_SELECT_IMG_FILE_SUCCESS = 1160; //选择图片文件成功
+    public static final int THREAD_SELECT_VIDEO_FILE = 1161; //开始选择图片文件
 
-    public static final int SELECT_VIDEO_FILE = 0x2408;
+    public static final int THREAD_DOWNLOAD_APP_BY_MAIN = 1162; //在主页面进行app下载
+    public static final int VIEW_DOWNLOAD_APP_BY_MAIN_START = 1163; //在主页面上弹窗显示app下载
+    public static final int VIEW_DOWNLOAD_APP_BY_MAIN_LOADING = 1164; //在主页面上更新弹窗显示app下载进度
+    public static final int VIEW_DOWNLOAD_APP_BY_MAIN_SUCCESS = 1165; //在主页面上更新app成功
+    public static final int VIEW_DOWNLOAD_APP_BY_MAIN_ERROR = 1166; //在主页面上更新app失败
+    public static final int THREAD_DOWNLOAD_APP_BY_SETTINGS = 1167; //在设置页面或pad模式下进行app下载
+    public static final int VIEW_DOWNLOAD_APP_BY_SETTINGS_START = 1168;  //在设置页面或pad模式下弹窗显示app下载
+    public static final int VIEW_DOWNLOAD_APP_BY_SETTINGS_LOADING = 1169;  //在设置页面或pad模式下更新弹窗显示app下载进度
+    public static final int VIEW_DOWNLOAD_APP_BY_SETTINGS_SUCCESS = 1170; //在设置页面或pad模式下更新app成功
+    public static final int VIEW_DOWNLOAD_APP_BY_SETTINGS_ERROR = 1171; //在设置页面或pad模式下更新app失败
+    public static final int VIEW_DOWNLOAD_MUSIC = 1172;  //刷新下载音乐进度
+    public static final int VIEW_DOWNLOAD_MUSIC_SHOW = 1173; //展示下载音乐
+    public static final int VIEW_DOWNLOAD_MUSIC_UPDATE= 1174;  //更新展示下载音乐的列表情况
+    public static final int VIEW_DOWNLOAD_MUSIC_FINISH = 1175; //下载音乐完成
+    public static final int VIEW_DOWNLOAD_MUSIC_CANCEL = 1176; //下载音乐取消
 
-    public static final int DOWNLOAD_APP_START = 0x241;
-    public static final int DOWNLOAD_APP_LOADING = 0x242;
-    public static final int DOWNLOAD_APP_SUCCESS = 0x243;
-    public static final int DOWNLOAD_APP_ERROR = 0x244;
-    public static final int DOWNLOAD_APP2 = 0x245;
-    public static final int DOWNLOAD_APP_START2 = 0x246;
-    public static final int DOWNLOAD_APP_LOADING2 = 0x247;
-    public static final int DOWNLOAD_APP_SUCCESS2 = 0x248;
-    public static final int DOWNLOAD_APP_ERROR2 = 0x249;
-    public static final int VIEW_DOWNLOAD_MUSIC = 0x25;
-    public static final int VIEW_DOWNLOAD_MUSIC_SHOW = 0x251;
-    public static final int VIEW_DOWNLOAD_MUSIC_UPDATE= 0x252;
-    public static final int VIEW_DOWNLOAD_MUSIC_FINISH = 0x253;
-    public static final int VIEW_DOWNLOAD_MUSIC_CANCEL = 0x254;
+    public static final int GET_CURRENT_TIME = 1177;
+    public static final int SHOW_FRAGMENT = 1178;
+    public static final int VIEW_PLAY_FINISH_SUCCESS = 1179; //当前音乐播放完成后的处理
+    public static final int VIEW_PLAY_ERROR = 1180; //当前音乐播放失败
+    public static final int THREAD_GET_MUSIC_METADATA = 1181; //获取当前音乐meta数据源
+    public static final int VIEW_GET_MUSIC_METADATA = 1182;  //获取当前音乐meta数据源后处理
+    public static final int VIEW_REFRESH_MUSIC_MEMORY_VALUE = 1183; //刷新音乐文件大小值
 
-    public static final int GET_CURRENT_TIME = 0x30;
-    public static final int SHOW_FRAGMENT = 0x301;
-    public static final int PLAY_FINISH_SUCCESS = 0x31;
-    public static final int PLAY_ERROR = 0x311;
-    public static final int GET_MUSIC_METADATA = 0x312;
-    public static final int VIEW_GET_MUSIC_METADATA = 0x313;
-    public static final int VIEW_REFRESH_MUSIC_MEMORY_VALUE = 0x314; //刷新音乐文件大小值
+    public static final int VIEW_PLAY_LIST_FIRST = 1184; //播放当前第一首音乐
+    public static final int VIEW_PLAY_MUSIC_BY_CHARACTER = 1185;  //角色控制播放
+    public static final int VIEW_PLAY_LOCAL_MUSIC = 1186; //播放本地音乐
+    public static final int VIEW_ADD_LOCAL_MUSIC = 1187; //添加本地音乐到播放列表
+    public static final int VIEW_PLAY_FAVORITE_MUSIC = 1188; //播放收藏音乐
+    public static final int VIEW_ADD_FAVORITE_MUSIC = 1189; //在收藏列表中点击添加到播放列表里
+    public static final int THREAD_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 1190; //添加歌曲到自建歌曲列表里面
+    public static final int THREAD_DELETE_MUSIC_IN_LOCAL_PLAY_LIST = 1191; //删除自建歌曲列表的某一首歌
+    public static final int VIEW_PLAY_RECOMMEND_MUSIC = 1192; //点击每日推荐歌曲
+    public static final int THREAD_SAVE_LOCAL_MUSIC_LIST = 1193; //保存本地文件到列表
+    public static final int THREAD_GET_MUSIC_LYRIC = 1194;   //获取音乐歌词
 
-    public static final int PLAY_LIST_FIRST = 0x32; //播放当前第一首音乐
+    public static final int THREAD_SHOW_IMAGE_URL = 1195;    //展示音乐图片
+    public static final int VIEW_MUSIC_IS_NEXT = 1196;  //播放下一首歌曲
+    public static final int VIEW_MUSIC_IS_LAST = 1197;  //播放上一首歌曲
+    public static final int VIEW_MUSIC_IS_PAUSE = 1198; //歌曲播放或暂停
 
-    public static final int PLAY_MUSIC_BY_CHARACTER = 0x33;  //角色控制播放
-    public static final int PLAY_LOCAL_MUSIC = 0x331;
-    public static final int ADD_LOCAL_MUSIC = 0x332;
-    public static final int PLAY_FAVORITE_MUSIC = 0x333;
-    public static final int ADD_FAVORITE_MUSIC = 0x334;
-    public static final int ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x335;
-    public static final int DELETE_MUSIC_IN_LOCAL_PLAY_LIST = 0x336;
-    public static final int PLAY_RECOMMEND_MUSIC = 0x337;
-    public static final int SAVE_LOCAL_MUSIC_LIST = 0x338;
-    public static final int GET_MUSIC_LYRIC = 0x34;   //获取音乐歌词
+    public static final int VIEW_SHOW_CHARACTER_TALK = 1200;
+    public static final int VIEW_SHOW_CHARACTER_TALK_CONTENT = 1201;
+    public static final int VIEW_HIDE_CHARACTER_TALK = 1202; //隐藏角色对话
+    public static final int VIEW_NORMAL_STATUS_CHARACTER = 1203; //展示角色：正常状态
+    public static final int VIEW_MOVE_STATUS_CHARACTER = 1204; //展示角色：动态
+    public static final int VIEW_LISTEN_STATUS_CHARACTER_LEFT = 1205; //展示角色：听歌状态向左偏移
+    public static final int VIEW_LISTEN_STATUS_CHARACTER_RIGHT = 1206; //展示角色：听歌状态向右偏移
 
-    public static final int SHOW_IMAGE_URL = 0x36;    //展示音乐图片
-    public static final int MUSIC_IS_NEXT = 0x37;
-    public static final int MUSIC_IS_LAST = 0x38;
-    public static final int MUSIC_IS_PAUSE = 0x39;
+    public static final int VIEW_SEEK_BAR_POS = 1207; //刷新当前音乐进度
 
-    public static final int VIEW_SHOW_CHARACTER_TALK = 0x41;
-    public static final int VIEW_SHOW_CHARACTER_TALK_CONTENT = 0x411;
-    public static final int VIEW_HIDE_CHARACTER_TALK = 0x42;
-    public static final int VIEW_NORMAL_STATUS_CHARACTER = 0x43;
-    public static final int VIEW_MOVE_STATUS_CHARACTER = 0x431;
-    public static final int VIEW_LISTEN_STATUS_CHARACTER_LEFT = 0x432;
-    public static final int VIEW_LISTEN_STATUS_CHARACTER_RIGHT = 0x433;
+    public static final int RUNNABLE_DELAY = 1209;
+    public static final int VIEW_SEEK_BAR_RESUME = 1210; //重置进度条参数
+    public static final int VIEW_PAUSE = 1211;   //处理音乐播放或暂停
+    public static final int VIEW_SHOW_VISUALIZER =1212;
+    public static final int VIEW_SHOW_STOP_VISUALIZER = 1213;
+    public static final int VIEW_MUSIC_MSG = 1214;  //展示音乐信息
+    public static final int VIEW_ADD_MUSIC = 1215; //添加音乐到播放列表
+    public static final int VIEW_SAVE_FAVORITE_MUSIC = 1216; //将该歌曲添加到收藏音乐列表中
+    public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 1217; //添加歌曲到自建歌曲列表里面
+    public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 1218; //添加歌曲到自建歌曲列表里面显示成功
+    public static final int VIEW_CANCEL_FAVORITE_MUSIC = 1219; //当前歌曲取消收藏
+    public static final int VIEW_FRESH_FAVORITE_MUSIC = 1220; //刷新当前是否收藏音乐
+    public static final int VIEW_DELETE_MUSIC = 1221; //删除播放列表下的音乐
+    public static final int VIEW_DELETE_LOCAL_MUSIC = 1222; //删除本地歌曲列表下的音乐
+    public static final int VIEW_DELETE_FAVORITE_MUSIC = 1223; //删除收藏音乐列表下的音乐
+    public static final int VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST = 1224; //删除自建歌单里面到某一首歌曲
+    public static final int VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 1225; //删除自建歌单里面到某一首歌曲成功
+    public static final int VIEW_LYRIC = 1226; //展示歌词
+    public static final int VIEW_IMAGE_URL = 1227; //展示音乐图片链接
+    public static final int VIEW_SHOW_OR_HIDE_MASKING_BACKGROUND = 1228; //是否显示遮罩层
+    public static final int VIEW_CHANGE_THEME = 1229; //变更主题
+    public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 1230; //设置启动页面的视频成功
+    public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 1231; //设置启动页面的视频失败
+    public static final int VIEW_CONTROLLER_MODE = 1232; //切换简约播放控制器模式
+    public static final int VIEW_NEW_CONTROLLER_MODE = 1233; //切换新版播放控制器模式
+    public static final int VIEW_BG_MODE = 1234; //切换背景模式
+    public static final int VIEW_INTO_SET_BG = 1235; //设置背景 - 进入系统图片
+    public static final int VIEW_CONTROLLER_MODE_FLOATING = 1236; //点击切换悬浮模式
 
-    public static final int VIEW_SEEK_BAR_POS = 0x50;
-    public static final int UPDATE_NOTIFICATION_SEEK_BAR_POS = 0x501;
+    public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 1237; //点击本地列表或收藏夹列表
+    public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 1238; //隐藏本地列表或收藏夹列表
+    public static final int VIEW_COUNT_DOWN_REFRESH = 1239; //歌曲定时任务刷新
+    public static final int VIEW_COUNT_DOWN_FINISH = 1240; //歌曲定时任务完成
 
-    public static final int RUNNABLE_DELAY = 0x511;
-    public static final int VIEW_SEEK_BAR_RESUME = 0x51;
-    public static final int VIEW_PAUSE = 0x52;   //处理播放或暂停的ui
-    public static final int VIEW_SHOW_VISUALIZER =0x521;
-    public static final int VIEW_SHOW_STOP_VISUALIZER = 0x522;
-    public static final int VIEW_MUSIC_MSG = 0x53;  //展示音乐信息
-    public static final int VIEW_ADD_MUSIC = 0x54;
-    public static final int VIEW_ADD_FAVORITE_MUSIC = 0x541;
-    public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 0x542;
-    public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 0x543;
-    public static final int VIEW_CANCEL_FAVORITE_MUSIC = 0x544;
-    public static final int VIEW_FRESH_FAVORITE_MUSIC = 0x545;
-    public static final int VIEW_DELETE_MUSIC = 0x55;
-    public static final int VIEW_DELETE_LOCAL_MUSIC = 0x551;
-    public static final int VIEW_DELETE_FAVORITE_MUSIC = 0x552;
-    public static final int VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST = 0x553;
-    public static final int VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS = 0x554;
-    public static final int VIEW_LYRIC = 0x56;
-    public static final int VIEW_IMAGE_URL = 0x57;
-    public static final int VIEW_SHOW_OR_HIDE_MASKING_BACKGROUND = 0x58;
-    public static final int VIEW_CHANGE_THEME = 0x59;
-    public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 0x60;
-    public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 0x601;
-    public static final int VIEW_CONTROLLER_MODE = 0x61;
-    public static final int VIEW_NEW_CONTROLLER_MODE = 0x611;
-    public static final int VIEW_BG_MODE = 0x612;
-    public static final int VIEW_INTO_SET_BG = 0x613;
-    public static final int VIEW_CONTROLLER_MODE_FLOATING = 0x614;
-
-    public static final int VIEW_CLICK_LOCAL_OR_FAVORITE = 0x62;
-    public static final int VIEW_HIDE_LOCAL_OR_FAVORITE = 0x621;
-    public static final int VIEW_COUNT_DOWN_REFRESH = 0x631;
-    public static final int VIEW_COUNT_DOWN_FINISH = 0x632;
-
-    public static final int VIEW_SCREEN_LOCK = 0x641;
-    public static final int VIEW_SCREEN_UNLOCK = 0x642;
-    public static final int VIEW_CLOSE_FLOATING_LYRIC = 0x65;
-
+    public static final int VIEW_SCREEN_LOCK = 1241;
+    public static final int VIEW_SCREEN_UNLOCK = 1242;
+    public static final int VIEW_CLOSE_FLOATING_LYRIC = 1243;
 
     /** 蓝牙部分控制 */
-    public static final int BLUETOOTH_DISCONNECT = 0x70;
-    public static final int ACTION_MEDIA_BUTTON = 0x71; //已使用onKeyDown方法实现
+    public static final int VIEW_BLUETOOTH_DISCONNECT = 1244; //蓝牙断开时处理逻辑
+    public static final int VIEW_ACTION_MEDIA_BUTTON = 1245; //已使用onKeyDown方法实现
 
+    /** Room相关 */
+    public static final int VIEW_ROOM_GET_THEME_ID = 1300; //本地存储：获取主题ID值
+    public static final int VIEW_ROOM_GET_CONTROLLER_SCENE = 1301; //本地存储：获取控制器模式
 
     /**
      * Pad版本
      * */
-    public static final int PAD_CONNECT_MYSQL= 0x9101;
-    public static final int PAD_GET_DATA_LIST = 0x9102;
-    public static final int VIEW_PAD_GET_SUCCESS = 0x9103;
-    public static final int VIEW_PAD_CHANGE_FRAGMENT= 0x9110;
-    public static final int VIEW_PAD_CHANGE_LAST_FRAGMENT= 0x9111;
+    public static final int THREAD_PAD_CONNECT_MYSQL = 2000; //pad模式连接数据库
+    public static final int VIEW_PAD_GET_DATA_LIST = 2001;
+    public static final int VIEW_PAD_GET_SUCCESS = 2002;
+    public static final int VIEW_PAD_CHANGE_FRAGMENT= 2003; //pad模式下切换页面
+    public static final int VIEW_PAD_CHANGE_LAST_FRAGMENT= 2004; //pad模式下切换上一个页面
 
-    public static final int PAD_GET_DATA_LIST_BY_LIELLA = 0x9201;    //获取Liella所有歌曲
-    public static final int PAD_GET_DATA_LIST_BY_SUNNY_PASSION = 0x9202; //获取SUNNY PASSION所有歌曲
-    public static final int PAD_GET_DATA_LIST_BY_FOUR_YUU = 0x9203;    //获取Liyuu所有歌曲
-    public static final int PAD_GET_DATA_LIST_BY_NIJIGASAKI = 0x9204;  //获取虹团所有歌曲
-    public static final int PAD_GET_DATA_LIST_BY_AQOURS = 0x9205;  //获取Aqours所有歌曲
-    public static final int PAD_GET_DATA_LIST_BY_US = 0x9206;  //
-    public static final int PAD_GET_DATA_LIST_BY_HASUNOSORA = 0x9207; //
-    public static final int PAD_GET_DATA_LIST_BY_SAINT_SNOW = 0x9208;
-    public static final int PAD_GET_DATA_LIST_BY_A_RISE = 0x9209;
-    public static final int PAD_GET_DATA_LIST_BY_OTHER = 0x9210;
-    public static final int PAD_GET_DATA_LIST_BY_BLUEBIRD = 0x9211;
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_LIELLA = 2010;    //pad模式下获取Liella所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_SUNNY_PASSION = 2011; //pad模式下获取SUNNY PASSION所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_FOUR_YUU = 2012;    //pad模式下获取Liyuu所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_NIJIGASAKI = 2013;  //pad模式下获取虹团所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_AQOURS = 2014;  //pad模式下获取Aqours所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_US = 2015;  //pad模式下获取μ's所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_HASUNOSORA = 2016; //pad模式下获取莲团所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_SAINT_SNOW = 2017; //pad模式下获取saint snow所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_A_RISE = 2018; //pad模式下获取arise所有歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_OTHER = 2019; //pad模式下获取其他歌曲
+    public static final int THREAD_PAD_GET_DATA_LIST_BY_BLUEBIRD = 2020; //pad模式下获取bluebird所有歌曲
 
-    public static final int PAD_GET_DATA_LIST_BY_LOCAL_PLAY = 0x9255;
-    public static final int PAD_VIEW_PLAY_MUSIC = 0x9301;
-    public static final int PAD_VIEW_ADD_MUSIC = 0x9302;
-    public static final int PAD_PLAY_ALL_MUSIC = 0x9303;
-    public static final int PAD_VIEW_GET_MUSIC_METADATA = 0x9313;
+    public static final int PAD_GET_DATA_LIST_BY_LOCAL_PLAY = 2050;
+    public static final int VIEW_PAD_PLAY_MUSIC = 2051; //pad模式下播放歌曲
+    public static final int VIEW_PAD_ADD_MUSIC = 2052; //pad模式下添加歌曲到播放列表
+    public static final int VIEW_PAD_PLAY_ALL_MUSIC = 2053; //pad模式下播放所有歌曲
+    public static final int VIEW_PAD_GET_MUSIC_METADATA = 2054; //pad模式下获取音乐meta数据源
 
 
     public int msgCode;

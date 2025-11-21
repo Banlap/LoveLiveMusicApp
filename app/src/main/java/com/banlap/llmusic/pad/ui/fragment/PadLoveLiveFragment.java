@@ -115,7 +115,7 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
         switch (event.msgCode) {
-            case ThreadEvent.GET_RECOMMEND_SUCCESS:
+            case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
                 if(event.musicList.size() >0) {
                     recommendList.clear();
                     recommendList.addAll(event.musicList);
@@ -161,15 +161,15 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
             if(isDoubleClick()) { return; }
             if (v.getId() == R.id.ll_recommend_1) {
                 if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_RECOMMEND_MUSIC, recommendList.get(0)));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(0)));
                 }
             } else if (v.getId() == R.id.ll_recommend_2) {
                 if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_RECOMMEND_MUSIC, recommendList.get(1)));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(1)));
                 }
             } else if (v.getId() == R.id.ll_recommend_3) {
                 if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_RECOMMEND_MUSIC, recommendList.get(2)));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(2)));
                 }
             } else if (v.getId() == R.id.ll_list_1) {
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_FRAGMENT, ThreadEvent.ALBUM_LIELLA, PadMainActivity.VIEW_PAD_FRAGMENT_DETAIL));

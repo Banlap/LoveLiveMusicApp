@@ -48,10 +48,10 @@ public class MysqlHelper {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             cn= DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.CONNECT_MYSQL_SUCCESS));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CONNECT_MYSQL_SUCCESS));
         } catch (Exception e) {
             e.printStackTrace();
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.CONNECT_MYSQL_ERROR));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CONNECT_MYSQL_ERROR));
         }
         return cn;
     }

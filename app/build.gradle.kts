@@ -20,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 33
         //修改版本号
-        versionCode = 185
+        versionCode = 186
         versionName = "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -208,6 +208,9 @@ android {
         //1.修复当前列表bluebird歌曲显示icon问题
         //2.修复播放进度条ui问题
         //3.修复车机首次点击播放暂停按钮逻辑
+        versionName = "1.8.6"
+        //1.替换缓存数据方式：使用room持久化库
+        //2.优化UI更新问题：使用MutableLiveData管理ui
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")
@@ -249,6 +252,9 @@ dependencies {
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     /** mysql数据库 */
     implementation(files("libs/mysql-connector-java-5.1.49.jar"))
+    /** Room持久化库 高版本2.6.0以上需要gradle8.0 */
+    implementation("androidx.room:room-runtime:2.5.2")
+    annotationProcessor("androidx.room:room-compiler:2.5.2")
     /** 闪屏页面 */
     implementation ("androidx.core:core-splashscreen:1.0.0-alpha01")
 
@@ -272,7 +278,7 @@ dependencies {
     implementation ("com.github.yalantis:ucrop:2.2.6")
     /** Toast新样式 */
     implementation ("com.github.GrenderG:Toasty:1.5.2")
-
+    /** 响应式框架 异步数据流处理 */
     implementation ("io.reactivex.rxjava3:rxjava:3.1.0")
     implementation ("io.reactivex.rxjava3:rxandroid:3.0.0")
 
@@ -293,7 +299,6 @@ dependencies {
 //    implementation 'com.github.centerzx:ShapeBlurView:1.0.5'
     implementation ("com.github.Dimezis:BlurView:version-2.0.6")
 
-    implementation ("com.linroid.filtermenu:library:0.2.3@aar")
 
     /** 内存泄露查询工具 使用后安装app之后会出现检测软件 */
     /*debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.7'

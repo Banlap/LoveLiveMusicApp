@@ -3,7 +3,6 @@ package com.banlap.llmusic.pad.uivm.vm;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -27,10 +26,8 @@ import com.banlap.llmusic.utils.TimeUtil;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -130,16 +127,16 @@ public class PadMainVM extends AndroidViewModel {
             //本地缓存列表
             List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
             if(spList.size() >0){
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_RECOMMEND_SUCCESS, spList));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, spList));
             } else {
                 //获取最新的每日推荐数据
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_DATA_RECOMMEND));
                 SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
             }
             return;
         }
         //获取最新的每日推荐数据
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_RECOMMEND));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_DATA_RECOMMEND));
         SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
     }
 
@@ -306,7 +303,7 @@ public class PadMainVM extends AndroidViewModel {
     /** 下载新版本App */
     public void downloadUrl(String url) {
         isDownloadStop = false;
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START2));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_START));
 
         OkhttpUtil.getInstance().request(url, new OkhttpUtil.OkHttpCallBack() {
             @Override
@@ -317,7 +314,7 @@ public class PadMainVM extends AndroidViewModel {
             @Override
             public void onError(String e) {
                 Log.i("ABMediaPlay", "error " + e);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_ERROR));
             }
         });
     }
@@ -348,10 +345,10 @@ public class PadMainVM extends AndroidViewModel {
             while((len = is.read(bs)) != -1){
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_LOADING2, progress));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_LOADING, progress));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, false));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_SUCCESS, false));
                     os.close();
                     is.close();
                     return;
@@ -361,10 +358,10 @@ public class PadMainVM extends AndroidViewModel {
             //完毕关闭所有连接
             os.close();
             is.close();
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, true, file));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_SUCCESS, true, file));
         } catch (Exception e) {
             Log.i("ABMediaPlay", "error " + e.getMessage());
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_ERROR));
         }
     }
 

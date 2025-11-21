@@ -20,6 +20,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.banlap.llmusic.phone.ui.activity.CustomErrorActivity;
+import com.banlap.llmusic.sql.room.LLMusicDatabase;
+import com.banlap.llmusic.sql.room.RoomSettings;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 
@@ -28,6 +32,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 
@@ -35,13 +40,11 @@ import cat.ereza.customactivityoncrash.config.CaocConfig;
 public class BaseApplication extends Application {
     private final String TAG = BaseApplication.class.getSimpleName();
 
-    //private HttpProxyCacheServer proxy;
-
     private boolean isInApp = false; //是否在应用前台中
     private long lastChangeTime = 0; //上次截图时间
     private AlertDialog mAlertDialog;                   //弹窗
 
-    private static String mCacheMusicName="";
+    public static LLMusicDatabase llMusicDatabase;
 
     ContentObserver contentObserver = new ContentObserver(new Handler()) {
         @Override
@@ -163,6 +166,21 @@ public class BaseApplication extends Application {
                 .errorActivity(CustomErrorActivity.class)
                 .apply();
 
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                //初始化本地数据库
+                llMusicDatabase = LLMusicDatabase.getInstance(getApplicationContext());
+                //获取当前app配置
+                List<RoomSettings> roomSettingsList = llMusicDatabase.settingsDao().getAllSettings();
+                if (roomSettingsList != null && !roomSettingsList.isEmpty()) {
+                    AppData.roomSettings = roomSettingsList.get(0);
+                } else {
+                    AppData.roomSettings = null;  // 后续操作会处理null情况
+                }
+            }
+        });
+
         //注册ActivityLifecycleCallbacks
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
@@ -217,10 +235,6 @@ public class BaseApplication extends Application {
 
     }
 
-
-    public static void setCacheMusicName(String musicName) {
-        mCacheMusicName = musicName;
-    }
 
     /**
      * 音乐播放缓存目录的设置

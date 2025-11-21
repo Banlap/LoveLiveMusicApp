@@ -202,7 +202,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
         switch (event.msgCode) {
-            case ThreadEvent.VIEW_PAD_GET_SUCCESS:
+            case ThreadEvent.VIEW_GET_ALBUM_LIST_SUCCESS:
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
                 musicList.clear();
                 musicList.addAll(event.musicList);
@@ -211,7 +211,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
                 clickSortType = 0;
                 musicListAdapter.notifyDataSetChanged();
                 break;
-            case ThreadEvent.GET_COUNT_SUCCESS:
+            case ThreadEvent.VIEW_GET_ALBUM_COUNT_SUCCESS:
                 getViewDataBinding().tvMusicCount.setText(""+event.i);
                 break;
         }
@@ -226,7 +226,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
             if(v.getId() == R.id.ll_sort) {
                 showSortMenuDialog(v);
             } else if(v.getId() == R.id.ll_all_play) {
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PAD_PLAY_ALL_MUSIC, musicList));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_PLAY_ALL_MUSIC, musicList));
             } else if(v.getId() == R.id.ll_search) {
                 isSearchMusic = true;
                 searchMusic();
@@ -485,7 +485,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
                     @Override
                     public void onClick(View v) {
                         //playMusic(list, position);
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PAD_VIEW_PLAY_MUSIC, list, position));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_PLAY_MUSIC, list, position));
                     }
                 });
 
@@ -498,7 +498,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
                         binding.ivAddAnimatorLight1.setVisibility(View.VISIBLE);
                         AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
                         animatorSet.start();
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PAD_VIEW_ADD_MUSIC, list, position));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_ADD_MUSIC, list, position));
 
                         //addMusic(list, position);
                     }

@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -117,10 +118,11 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
     @Override
     protected void initData() {
+        EventBus.getDefault().register(this);
         mLocalPlayList = new ArrayList<>();
         //自建歌单缓存列表
         List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
-        if(list.size() >0) {
+        if(!list.isEmpty()) {
             mLocalPlayList.addAll(list);
         } else {
             LocalPlayList nullLocalPlayList = new LocalPlayList();
@@ -133,7 +135,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         mLocalMusicList = new ArrayList<>();
         //本地歌曲缓存列表
         List<LocalFile> spList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, LocalFile.class);
-        if(spList.size()>0){
+        if(!spList.isEmpty()){
             mLocalMusicList.addAll(spList);
         } else {
             LocalFile nullLocalFile = new LocalFile();
@@ -146,7 +148,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         mFavoriteList = new ArrayList<>();
         //最爱歌曲缓存列表
         List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-        if(spList2.size()>0){
+        if(!spList2.isEmpty()){
             mFavoriteList.addAll(spList2);
         } else {
             Music nullMusicFile = new Music();
@@ -165,8 +167,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     @SuppressLint("SetTextI18n")
     @Override
     protected void initView() {
-        changeTheme();
-        EventBus.getDefault().register(this);
+        //changeTheme();
         getViewDataBinding().clMain.setVisibility(View.VISIBLE);
         getViewDataBinding().clLocalMusicMain.setVisibility(View.GONE);
 
@@ -313,16 +314,23 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             }
         });
 
+        getViewModel(LocalListFVM.class).getThemeId().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer themeId) {
+                changeTheme(themeId);
+            }
+        });
+
     }
 
     @SuppressLint("SetTextI18n")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
         switch (event.msgCode) {
-            case ThreadEvent.SCAN_LOCAL_FILE_BY_CHECK_PERMISSION:
+            case ThreadEvent.VIEW_SCAN_LOCAL_FILE_BY_CHECK_PERMISSION:
                 checkScanPermission(event.str);
                 break;
-            case ThreadEvent.SCAN_LOCAL_FILE_SUCCESS:
+            case ThreadEvent.VIEW_SCAN_LOCAL_FILE_SUCCESS:
                 if(null != mLocalMusicList) {
                     mLocalMusicList.clear();
                     mLocalMusicList.addAll(event.tList);
@@ -334,9 +342,9 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
                 }
                 break;
-            case ThreadEvent.SCAN_LOCAL_FILE_ERROR:
+            case ThreadEvent.VIEW_SCAN_LOCAL_FILE_ERROR:
                 break;
-            case ThreadEvent. SELECT_LOCAL_FILE_SUCCESS:
+            case ThreadEvent.VIEW_SELECT_LOCAL_FILE_SUCCESS:
                 if(null != mLocalMusicList) {
                     List<LocalFile> localFileList = new ArrayList<>();
                     localFileList.addAll(mLocalMusicList);
@@ -354,14 +362,11 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 }
                 break;
 
-            case ThreadEvent.SELECT_IMG_FILE_SUCCESS:
+            case ThreadEvent.VIEW_SELECT_IMG_FILE_SUCCESS:
                 if(selectImgListener != null) {
                     SelectImgHelper.getInstance().startSelectImg(getContext(), selectImgListener);
                     selectImgListener = null;
                 }
-                break;
-            case ThreadEvent.VIEW_CHANGE_THEME:
-                changeTheme();
                 break;
             case ThreadEvent.VIEW_DELETE_LOCAL_MUSIC:
                 getViewDataBinding().tvMusicCount.setText(""+(mLocalMusicList.size()-2));
@@ -372,7 +377,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
                 getViewDataBinding().tvFavoriteMusicCount.setText("" + (mFavoriteList.size()-2));
                 break;
-            case ThreadEvent.VIEW_ADD_FAVORITE_MUSIC:
+            case ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC:
                 if(event.music != null) {
                     BaseActivity<? extends ViewModel, ? extends ViewDataBinding> activity = LLActivityManager.getInstance().getTopActivity();
                     if (activity == null || activity.isFinishing()) return;
@@ -449,29 +454,15 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     @Override
     public void onResume() {
         super.onResume();
-        changeTheme();
-    }
-
-
-    /**
-     * 改变主题
-     * */
-    private void changeTheme() {
-        String strThemeId = SPUtil.getStrValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.SaveThemeId);
-        if(strThemeId!=null) {
-            if(!strThemeId.equals("")) {
-                rThemeId = Integer.parseInt(strThemeId);
-                changeTheme(rThemeId);
-            }
-        }
     }
 
     /**
      * 变更主题
      * */
-    private void changeTheme(int rThemeId) {
+    private void changeTheme(int themeId) {
+        rThemeId = themeId;
         //主题变更
-        ThemeHelper.getInstance().localListFragmentTheme(getContext(), rThemeId, getViewDataBinding());
+        ThemeHelper.getInstance().localListFragmentTheme(getContext(), themeId, getViewDataBinding());
         if(playListAdapter != null) {
             playListAdapter.notifyDataSetChanged();
         }
@@ -815,7 +806,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_DATA_LIST_BY_LOCAL_PLAY, localPlayList.get(position)));
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_DATA_LIST_BY_LOCAL_PLAY, localPlayList.get(position)));
                             }
                         });
                         binding.llMenu.setOnClickListener(new View.OnClickListener() {
@@ -889,7 +880,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         music.setMusicURL(localFileList.get(position).path);
                         music.setMusicImgByte(localFileList.get(position).pic);
                         music.setLocal(true);
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.PLAY_LOCAL_MUSIC, music, false));
+                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_PLAY_LOCAL_MUSIC, music, false));
                     }
                 });
 
@@ -908,7 +899,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         music.setMusicURL(localFileList.get(position).path);
                         music.setMusicImgByte(localFileList.get(position).pic);
                         music.setLocal(true);
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.ADD_LOCAL_MUSIC, music, false));
+                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_ADD_LOCAL_MUSIC, music, false));
                     }
                 });
 
@@ -982,7 +973,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.PLAY_FAVORITE_MUSIC, favoriteList, position));
+                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_PLAY_FAVORITE_MUSIC, favoriteList, position));
                     }
                 });
 
@@ -992,7 +983,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     public void onClick(View v) {
                         //变更主题
                         ThemeHelper.getInstance().localListAddButtonAnimatorTheme(rThemeId, binding);
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.ADD_FAVORITE_MUSIC, favoriteList, position));
+                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_ADD_FAVORITE_MUSIC, favoriteList, position));
                     }
                 });
 

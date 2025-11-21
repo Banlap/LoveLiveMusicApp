@@ -3,6 +3,8 @@ package com.banlap.llmusic.phone.ui.fragment;
 import android.annotation.SuppressLint;
 import android.view.View;
 
+import androidx.lifecycle.Observer;
+
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseFragment;
 import com.banlap.llmusic.databinding.FragmentMainListBinding;
@@ -34,7 +36,6 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
 
     private static List<Music> recommendList;
     private RequestOptions requestOptions;
-    private int rThemeId =0;                             //当前主题
 
     private int musicNewTotalLiella = 0, musicNewTotalLiyuu = 0, musicNewTotalSunnyPassion = 0, musicNewTotalNIJIGASAKI = 0, musicNewTotalAqours = 0;
     private int musicNewTotalUS = 0, musicNewTotalHASUNOSORA = 0, musicNewTotalSAINTSNOW = 0, musicNewTotalARISE = 0,  musicNewTotalOther = 0;
@@ -77,7 +78,6 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
 
     @Override
     protected void initView() {
-        changeTheme();
         //每日推荐
         getViewDataBinding().ivRecommend1.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().ivRecommend2.setOnClickListener(new ButtonClickListener());
@@ -95,27 +95,27 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         getViewDataBinding().llList9.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList10.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().llList11.setOnClickListener(new ButtonClickListener());
+
+        //观察主题id值变化
+        getViewModel(MainListFVM.class).getThemeId().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer themeId) {
+                changeTheme(themeId);
+            }
+        });
+
     }
 
     /**
-     * 改变主题
+     * 变更主题
      * */
-    private void changeTheme() {
-        String strThemeId = SPUtil.getStrValue(getContext(), SPUtil.SaveThemeId);
-        if(strThemeId!=null) {
-            if(!strThemeId.equals("")) {
-                rThemeId = Integer.parseInt(strThemeId);
-                ThemeHelper.getInstance().mainListFragmentTheme(getContext(), rThemeId, getViewDataBinding());
-            }
-        }
+    private void changeTheme(int rThemeId) {
+        ThemeHelper.getInstance().mainListFragmentTheme(getContext(), rThemeId, getViewDataBinding());
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
-        changeTheme();
-        //refreshTotalNew();
     }
 
     private void refreshTotalNew() {
@@ -140,7 +140,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
         switch (event.msgCode) {
-            case ThreadEvent.GET_RECOMMEND_SUCCESS:
+            case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
                 if(event.musicList.size() >0) {
                     recommendList.clear();
                     recommendList.addAll(event.musicList);
@@ -175,43 +175,43 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                     getViewDataBinding().tvRecommend3.setText(recommendList.get(2).musicName);
                 }
                 break;
-            case ThreadEvent.GET_TOTAL_LIELLA_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_LIELLA_SUCCESS:
                 musicTotalLiella = event.i;
                 getViewDataBinding().tvLiellaNew.setVisibility(musicNewTotalLiella == musicTotalLiella? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_LIYUU_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_LIYUU_SUCCESS:
                 musicTotalLiyuu = event.i;
                 getViewDataBinding().tvFourYuuNew.setVisibility(musicNewTotalLiyuu == musicTotalLiyuu? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_SUNNY_PASSION_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_SUNNY_PASSION_SUCCESS:
                 musicTotalSunnyPassion = event.i;
                 getViewDataBinding().tvSunnyPassionNew.setVisibility(musicNewTotalSunnyPassion == musicTotalSunnyPassion? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_NIJIGASAKI_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_NIJIGASAKI_SUCCESS:
                 musicTotalNIJIGASAKI = event.i;
                 getViewDataBinding().tvNijigasakiNew.setVisibility(musicNewTotalNIJIGASAKI == musicTotalNIJIGASAKI? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_AQOURS_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_AQOURS_SUCCESS:
                 musicTotalAqours = event.i;
                 getViewDataBinding().tvAqoursNew.setVisibility(musicNewTotalAqours == musicTotalAqours? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_US_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_US_SUCCESS:
                 musicTotalUS = event.i;
                 getViewDataBinding().tvUsNew.setVisibility(musicNewTotalUS == musicTotalUS? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_HASUNOSORA_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_HASUNOSORA_SUCCESS:
                 musicTotalHASUNOSORA = event.i;
                 getViewDataBinding().tvHausNew.setVisibility(musicNewTotalHASUNOSORA == musicTotalHASUNOSORA? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_SAINT_SNOW_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_SAINT_SNOW_SUCCESS:
                 musicTotalSAINTSNOW = event.i;
                 getViewDataBinding().tvSaintSnowNew.setVisibility(musicNewTotalSAINTSNOW == musicTotalSAINTSNOW? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_A_RISE_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_A_RISE_SUCCESS:
                 musicTotalARISE = event.i;
                 getViewDataBinding().tvARiseNew.setVisibility(musicNewTotalARISE == musicTotalARISE? View.GONE : View.VISIBLE);
                 break;
-            case ThreadEvent.GET_TOTAL_OTHER_SUCCESS:
+            case ThreadEvent.VIEW_GET_TOTAL_OTHER_SUCCESS:
                 musicTotalOther = event.i;
                 getViewDataBinding().tvOtherNew.setVisibility(musicNewTotalOther == musicTotalOther? View.GONE : View.VISIBLE);
                 break;
@@ -225,38 +225,38 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         public void onClick(View v) {
             if (v.getId() == R.id.iv_recommend_1) {
                 if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_RECOMMEND_MUSIC, recommendList.get(0)));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(0)));
                 }
             } else if (v.getId() == R.id.iv_recommend_2) {
                 if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_RECOMMEND_MUSIC, recommendList.get(1)));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(1)));
                 }
             } else if (v.getId() == R.id.iv_recommend_3) {
                 if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.PLAY_RECOMMEND_MUSIC, recommendList.get(2)));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(2)));
                 }
             } else if (v.getId() == R.id.ll_list_1) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_LIELLA));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_LIELLA));
             } else if (v.getId() == R.id.ll_list_2) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_FOUR_YUU));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_FOUR_YUU));
             } else if (v.getId() == R.id.ll_list_3) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_SUNNY_PASSION));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_SUNNY_PASSION));
             } else if (v.getId() == R.id.ll_list_4) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_NIJIGASAKI));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_NIJIGASAKI));
             } else if (v.getId() == R.id.ll_list_5) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_AQOURS));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_AQOURS));
             } else if (v.getId() == R.id.ll_list_6) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_US));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_US));
             } else if (v.getId() == R.id.ll_list_7) {
-               EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_HASUNOSORA));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_HASUNOSORA));
             } else if (v.getId() == R.id.ll_list_8) {
-               EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_SAINT_SNOW));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_SAINT_SNOW));
             } else if (v.getId() == R.id.ll_list_9) {
-               EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_A_RISE));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_A_RISE));
             } else if (v.getId() == R.id.ll_list_10) {
-               EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_OTHER));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_OTHER));
             } else if (v.getId() == R.id.ll_list_11) {
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.GET_DATA_LIST_BY_BLUEBIRD));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_LIST_BY_BLUEBIRD));
             }
         }
     }

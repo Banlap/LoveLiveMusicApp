@@ -15,14 +15,27 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public abstract class BaseFragment<VM extends ViewModel, VDB extends ViewDataBinding> extends Fragment {
     protected VM mViewModel;
     protected VDB mViewDataBinding;
+    //添加共享 ViewModel
+    protected Map<Class<? extends ViewModel>, ViewModel> mViewModels = new HashMap<>();
 
     public VM getViewModel() { return mViewModel; }
     public VDB getViewDataBinding() { return mViewDataBinding; }
+
+    //获取共享 ViewModel 的方法
+    protected <SVM extends ViewModel> SVM getViewModel(@NonNull Class<SVM> modelClass) {
+        if (!mViewModels.containsKey(modelClass)) {
+            SVM viewModel = new ViewModelProvider(requireActivity()).get(modelClass);
+            mViewModels.put(modelClass, viewModel);
+        }
+        return modelClass.cast(mViewModels.get(modelClass));
+    }
 
     @LayoutRes
     protected abstract int getLayoutId();

@@ -2,7 +2,6 @@ package com.banlap.llmusic.service;
 
 import static com.banlap.llmusic.utils.NotificationHelper.LL_MUSIC_PLAYER;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -31,28 +30,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.media.MediaBrowserServiceCompat;
-import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.datasource.DataSource;
-import androidx.media3.datasource.DataSourceUtil;
 import androidx.media3.datasource.DataSpec;
 import androidx.media3.datasource.DefaultHttpDataSource;
-import androidx.media3.exoplayer.DecoderCounters;
-import androidx.media3.exoplayer.DecoderReuseEvaluation;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.exoplayer.analytics.AnalyticsCollector;
-import androidx.media3.exoplayer.analytics.AnalyticsListener;
-import androidx.media3.exoplayer.source.LoadEventInfo;
-import androidx.media3.exoplayer.source.MediaLoadData;
-import androidx.media3.exoplayer.source.MediaSource;
 
 import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
-import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
@@ -216,14 +205,14 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
             public void onSkipToNext() { //下一首 用于通知栏
                 super.onSkipToNext();
                 Log.i(TAG, "isNextNew");
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_NEXT));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_NEXT));
             }
 
             @Override
             public void onSkipToPrevious() { //上一首 用于通知栏
                 super.onSkipToPrevious();
                 Log.i(TAG, "isPauseNew");
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_LAST));
             }
         });
 
@@ -269,7 +258,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     Bitmap bitmap = bis != null ? BitmapFactory.decodeByteArray(bis, 0, bis.length) : null;
                     if (isPause) {
                         Log.i(TAG, "isPause");
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_PAUSE, musicName, musicSinger, bitmap));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_PAUSE, musicName, musicSinger, bitmap));
                     }
                     break;
                 case INTENT_ACTION_PLAY_NEXT:
@@ -277,7 +266,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     boolean isNext = intent.getBooleanExtra("NextMusic", false);
                     if (isNext) {
                         Log.i(TAG, "isNext");
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_NEXT));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_NEXT));
                     }
                     break;
                 case INTENT_ACTION_PLAY_LAST:
@@ -285,7 +274,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     boolean isLast = intent.getBooleanExtra("LastMusic", false);
                     if (isLast) {
                         Log.i(TAG, "isLast");
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.MUSIC_IS_LAST));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_IS_LAST));
                     }
                     break;
             }
@@ -366,7 +355,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final Music dataSource, final boolean isLoop) {
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_LYRIC, dataSource, isLoop));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
         /** 播放歌曲整体流程2：播放歌曲 */
@@ -396,9 +385,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 //设置当前音乐总信息
                 currentMusic = dataSource;
 
-                //设置缓存时的歌曲名称
-                BaseApplication.setCacheMusicName(dataSource.musicName);
-
                 exoPlayer.setMediaItem(MediaItem.fromUri(dataSource.musicURL));
                 exoPlayer.setRepeatMode(isLoop? Player.REPEAT_MODE_ONE: Player.REPEAT_MODE_OFF);    // 单曲循环or不循环
                 exoPlayer.prepare();
@@ -409,7 +395,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 currentMusic.setMusicFileSize("-- MB");
 
                 //获取MediaMeta内容 后台线程处理，网络缓慢的情况下会卡住
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.GET_MUSIC_METADATA, dataSource));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_METADATA, dataSource));
                 //监听播放状态
                 exoPlayer.addListener(new Player.Listener() {
 
@@ -460,7 +446,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                             case Player.STATE_ENDED:
                                 // 播放结束
                                 Log.i(TAG,"exoplayer播放完成");
-                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_FINISH_SUCCESS));
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_FINISH_SUCCESS));
                                 break;
                         }
                     }
@@ -469,7 +455,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     public void onPlayerError(PlaybackException error) {
                         Player.Listener.super.onPlayerError(error);
                         Log.i(TAG,"isError");
-                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_ERROR));
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_ERROR));
                     }
                 });
 
@@ -499,7 +485,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 }
             } else {
                 isStop = false;
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.PLAY_LIST_FIRST));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_LIST_FIRST));
             }
             updateWidgetUI(context, false);
         }

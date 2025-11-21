@@ -6,38 +6,26 @@ import java.util.concurrent.ThreadFactory;
 
 
 /**
- * 线程池管理类 TODO未处理好
+ * 线程池管理类
  * */
 public class AppExecutors {
-
-    private final Executor mNetworkIO;
-
+    private final Executor diskIO;
+    private static AppExecutors INSTANCE;
 
     public static AppExecutors getInstance() {
-        return new AppExecutors();
-    }
-
-    public AppExecutors() {
-        this.mNetworkIO = Executors.newFixedThreadPool(3, new MyThreadFactory(""));
-    }
-
-    class MyThreadFactory implements ThreadFactory {
-
-        private int count = 0;
-        private String name;
-
-        private MyThreadFactory(String name) {
-            this.name = name;
+        if(INSTANCE == null) {
+            INSTANCE = new AppExecutors(Executors.newSingleThreadExecutor());
         }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            count++;
-            return new Thread(r, name + "-" + count + "-Thread");
-        }
+        return INSTANCE;
     }
 
-    public Executor networkIO() {
-        return mNetworkIO;
+    public AppExecutors(Executor diskIO) {
+        this.diskIO = diskIO;
+    }
+
+
+    public Executor diskIO() {
+        return diskIO;
+
     }
 }

@@ -147,7 +147,10 @@ public class SingleLyricScrollView extends View {
     /**
      * 设置当前主题Id
      * */
-    public void setThemeId(int themeId) { rThemeId = themeId; }
+    public void setThemeId(int themeId) {
+        rThemeId = themeId;
+        invalidate();
+    }
 
     /**
      * 设置当前歌曲的歌词

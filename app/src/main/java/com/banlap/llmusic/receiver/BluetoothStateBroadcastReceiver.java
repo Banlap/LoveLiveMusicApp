@@ -23,7 +23,7 @@ public class BluetoothStateBroadcastReceiver extends BroadcastReceiver {
                     break;
                 case BluetoothDevice.ACTION_ACL_DISCONNECTED:
                     Log.i(TAG, "bluetooth disconnect");
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.BLUETOOTH_DISCONNECT));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_BLUETOOTH_DISCONNECT));
                     break;
             }
         }

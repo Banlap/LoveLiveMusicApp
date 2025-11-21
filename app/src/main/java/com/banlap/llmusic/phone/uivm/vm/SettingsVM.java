@@ -17,8 +17,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 import okhttp3.Response;
 
@@ -40,7 +38,7 @@ public class SettingsVM extends AndroidViewModel {
     /** 下载新版本App */
     public void downloadUrl(String url) {
         isDownloadStop = false;
-        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_START2));
+        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_START));
 
         OkhttpUtil.getInstance().request(url, new OkhttpUtil.OkHttpCallBack() {
             @Override
@@ -51,7 +49,7 @@ public class SettingsVM extends AndroidViewModel {
             @Override
             public void onError(String e) {
                 Log.i("ABMediaPlay", "error " + e);
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_ERROR));
             }
         });
     }
@@ -82,10 +80,10 @@ public class SettingsVM extends AndroidViewModel {
             while((len = is.read(bs)) != -1){
                 total += len;
                 int progress = (int) (100 * (total / (double) contentLength));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_LOADING2, progress));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_LOADING, progress));
                 if(isDownloadStop) {
                     file.delete(); //取消下载则删除文件
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, false));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_SUCCESS, false));
                     os.close();
                     is.close();
                     return;
@@ -95,10 +93,10 @@ public class SettingsVM extends AndroidViewModel {
             //完毕关闭所有连接
             os.close();
             is.close();
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_SUCCESS2, true, file));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_SUCCESS, true, file));
         } catch (Exception e) {
             Log.i("ABMediaPlay", "error " + e.getMessage());
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.DOWNLOAD_APP_ERROR2));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_APP_BY_SETTINGS_ERROR));
         }
     }
 
