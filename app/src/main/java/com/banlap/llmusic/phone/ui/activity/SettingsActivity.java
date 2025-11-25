@@ -372,7 +372,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 break;
             case ThreadEvent.VIEW_SETTING_LAUNCH_VIDEO_SUCCESS:
                 if(!TextUtils.isEmpty(event.str)) {
-                    SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, event.str);
+                    //SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, event.str);
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppData.saveRoomSettings(settings -> settings.launchVideoPath = event.str);
+                        }
+                    });
                     updateLaunchVideoSelectUI(false, "");
                 }
                 break;
@@ -401,7 +407,8 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
         settingVideoBinding.tvTitle.setText("设置启动动画");
         //设置是否开启启动动画
-        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
+//        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
+        String isLaunchVideo = AppData.roomSettings.closeLaunchVideo;
         if(TextUtils.isEmpty(isLaunchVideo)) {
             settingVideoBinding.switchVideo.setChecked(true);
         } else {
@@ -410,14 +417,21 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         settingVideoBinding.switchVideo.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SPUtil.setStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo, settingVideoBinding.switchVideo.isChecked()? "1" : "0");
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppData.saveRoomSettings(settings -> settings.closeLaunchVideo = settingVideoBinding.switchVideo.isChecked()? "1" : "0");
+                    }
+                });
+//                SPUtil.setStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo, settingVideoBinding.switchVideo.isChecked()? "1" : "0");
             }
         });
 
         //选择启动动画ui默认值
         updateLaunchVideoSelectUI(true, "1");
 
-        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
+        //String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
+        String launchVideoPath = AppData.roomSettings.launchVideoPath;
         if(!TextUtils.isEmpty(launchVideoPath)) {
             if(!mNormalLaunchVideoUrl.equals(launchVideoPath) && !mNormalLaunchVideoUrl2.equals(launchVideoPath)) {
                 updateLaunchVideoSelectUI(false, "");
@@ -431,7 +445,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         settingVideoBinding.llSelectVideoNormal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl);
+                //SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl);
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppData.saveRoomSettings(settings -> settings.launchVideoPath = mNormalLaunchVideoUrl);
+                    }
+                });
                 updateLaunchVideoSelectUI(true, "1");
             }
         });
@@ -440,7 +460,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
         settingVideoBinding.llSelectVideoNormal2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl2);
+                //SPUtil.setStrValue(getApplicationContext(), SPUtil.LaunchVideoPath, mNormalLaunchVideoUrl2);
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppData.saveRoomSettings(settings -> settings.launchVideoPath = mNormalLaunchVideoUrl2);
+                    }
+                });
                 updateLaunchVideoSelectUI(true, "2");
             }
         });
@@ -521,9 +547,11 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
 
         viewModeBinding.switchSetBg.setChecked(false);
 
-        String isBGScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.isBGScene);
-        if(isBGScene.equals("1")) {
-            viewModeBinding.switchSetBg.setChecked(true);
+//        String isBGScene = SPUtil.getStrValue(SettingsActivity.this, SPUtil.isBGScene);
+        if(AppData.roomSettings != null) {
+            if(AppData.roomSettings.isBGScene.equals("1")) {
+                viewModeBinding.switchSetBg.setChecked(true);
+            }
         }
 
         viewModeBinding.btCancel.setOnClickListener(new View.OnClickListener() {
@@ -574,7 +602,13 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_BG_MODE));
-                SPUtil.setStrValue(getApplicationContext(), SPUtil.isBGScene, viewModeBinding.switchSetBg.isChecked()? "1" : "0");
+//                SPUtil.setStrValue(getApplicationContext(), SPUtil.isBGScene, viewModeBinding.switchSetBg.isChecked()? "1" : "0");
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppData.saveRoomSettings(settings -> settings.isBGScene = viewModeBinding.switchSetBg.isChecked()? "1" : "0");
+                    }
+                });
             }
         });
 

@@ -14,6 +14,7 @@ import com.banlap.llmusic.base.BaseActivity;
 import com.banlap.llmusic.databinding.ActivityWelcomeBinding;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.phone.uivm.vm.WelcomeVM;
+import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 
@@ -59,7 +60,8 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
         }
 
         //是否显示启动动画
-        String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
+        //String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
+        String isLaunchVideo = AppData.roomSettings.closeLaunchVideo;
         if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
             runActivity();
             return;
@@ -105,7 +107,8 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     private void initVideo() {
         setDimension();
         //判断是否使用了自定义启动动画
-        String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
+        //String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
+        String launchVideoPath = AppData.roomSettings.launchVideoPath;
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.welcomeliella);
         if(!TextUtils.isEmpty(launchVideoPath)) {
             uri = Uri.parse(launchVideoPath);

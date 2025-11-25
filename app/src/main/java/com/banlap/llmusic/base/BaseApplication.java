@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,15 +22,21 @@ import androidx.annotation.RequiresApi;
 
 import com.banlap.llmusic.phone.ui.activity.CustomErrorActivity;
 import com.banlap.llmusic.sql.room.LLMusicDatabase;
+import com.banlap.llmusic.sql.room.RoomMusic;
 import com.banlap.llmusic.sql.room.RoomSettings;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
+import com.banlap.llmusic.utils.SPUtil;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -172,11 +179,21 @@ public class BaseApplication extends Application {
                 //初始化本地数据库
                 llMusicDatabase = LLMusicDatabase.getInstance(getApplicationContext());
                 //获取当前app配置
-                List<RoomSettings> roomSettingsList = llMusicDatabase.settingsDao().getAllSettings();
-                if (roomSettingsList != null && !roomSettingsList.isEmpty()) {
-                    AppData.roomSettings = roomSettingsList.get(0);
+                RoomSettings roomSettings = llMusicDatabase.settingsDao().getFirstData();
+                if (roomSettings != null) {
+                    AppData.roomSettings = roomSettings;
                 } else {
-                    AppData.roomSettings = null;  // 后续操作会处理null情况
+                    AppData.saveRoomSettings(settings -> {
+                        //保存默认参数
+                        settings.saveControllerScene = SPUtil.SaveControllerSceneValue_NewScene;
+                        settings.isBGScene = "0";
+                    });
+                }
+                List<RoomMusic> roomMusicList = llMusicDatabase.musicDao().getAllMusic();
+                if(!roomMusicList.isEmpty()) {
+                    AppData.roomMusicList.addAll(roomMusicList);
+                } else {
+                    AppData.roomMusicList = new ArrayList<>();
                 }
             }
         });
@@ -274,8 +291,5 @@ public class BaseApplication extends Application {
             FileUtil.getInstance().saveCrashLogToFile(e);
         }
     }
-
-
-
 
 }

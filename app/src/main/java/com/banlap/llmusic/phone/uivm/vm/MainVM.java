@@ -19,6 +19,8 @@ import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.DownloadHelper;
@@ -355,7 +357,8 @@ public class MainVM extends AndroidViewModel {
      * 展示每日推荐
      * */
     public static void showRecommendData(Context context) {
-        String recommendDate = SPUtil.getStrValue(context, SPUtil.RecommendDate);
+//        String recommendDate = SPUtil.getStrValue(context, SPUtil.RecommendDate);
+        String recommendDate = AppData.roomSettings.recommendDate;
         if(!TextUtils.isEmpty(recommendDate) && !TimeUtil.isCheckTime(recommendDate, 24)) {
             //本地缓存列表
             List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
@@ -364,13 +367,23 @@ public class MainVM extends AndroidViewModel {
             } else {
                 //获取最新的每日推荐数据
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_RECOMMEND));
-                SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppData.saveRoomSettings(settings -> settings.recommendDate = TimeUtil.getCurrentDateStr());
+                    }
+                });
             }
             return;
         }
         //获取最新的每日推荐数据
         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_RECOMMEND));
-        SPUtil.setStrValue(context, SPUtil.RecommendDate, TimeUtil.getCurrentDateStr());
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppData.saveRoomSettings(settings -> settings.recommendDate = TimeUtil.getCurrentDateStr());
+            }
+        });
     }
 
 

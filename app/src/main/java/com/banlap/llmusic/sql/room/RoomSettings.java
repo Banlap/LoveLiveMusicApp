@@ -9,7 +9,6 @@ import androidx.room.PrimaryKey;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import java.util.List;
 /**
  * 本地数据库表：settings
  * */
@@ -26,6 +25,24 @@ public class RoomSettings {
     //保存控制器场景
     @ColumnInfo(name = "saveControllerScene")
     public String saveControllerScene;
+    //是否背景模式标记
+    @ColumnInfo(name = "isBGScene")
+    public String isBGScene;
+    //壁纸URI
+    @ColumnInfo(name = "backgroundUri")
+    public String backgroundUri;
+    //关闭启动视频标记
+    @ColumnInfo(name = "closeLaunchVideo")
+    public String closeLaunchVideo;
+    //启动视频自定义路径
+    @ColumnInfo(name ="launchVideoPath")
+    public String launchVideoPath;
+    //每日推荐的日期
+    @ColumnInfo(name = "recommendDate")
+    public String recommendDate;
+    //定时任务中歌曲播放后是否停止
+    @ColumnInfo(name = "taskAfterMusicSwitch")
+    public String taskAfterMusicSwitch;
 
     @Dao
     public interface SettingsDao {
@@ -38,8 +55,9 @@ public class RoomSettings {
         @Update
         void update(RoomSettings roomSettings);
 
-        @Query("SELECT * FROM settings")
-        List<RoomSettings> getAllSettings();
+        @Query("SELECT * FROM settings LIMIT 1")
+        RoomSettings getFirstData();
+
     }
 }
 

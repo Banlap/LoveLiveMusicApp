@@ -1,7 +1,5 @@
 package com.banlap.llmusic.model;
 
-import android.graphics.Bitmap;
-
 import java.util.List;
 
 public class LocalPlayList {

@@ -28,6 +28,7 @@ public class SPUtil {
     public static final String CloseLaunchVideo = "CloseLaunchVideo"; //关闭启动视频标记
     public static final String LaunchVideoPath = "LaunchVideoPath"; //启动视频自定义路径
     public static final String RecommendDate = "RecommendDate";  //每日推荐的日期
+    public static final String TaskAfterMusicSwitch = "TaskAfterMusicSwitch"; //定时任务中歌曲播放后是否停止
 
     public static final String LocalPlayListData = "LocalPlayListData"; //自建歌单缓存列表
     public static final String LocalListData = "LocalListData"; //本地歌曲缓存列表
@@ -36,10 +37,10 @@ public class SPUtil {
     public static final String RecommendListData = "RecommendListData"; //每日歌曲缓存列表
     public static final String DownloadMusicListData = "DownloadMusicListData"; //音乐下载列表
 
+    //由于滑动按钮频繁存储数据，以下功能使用缓存存储数据
     public static final String DefaultLyricSizeData = "DefaultLyricSizeData"; //默认歌词字体大小
     public static final String SingleLyricSizeData = "SingleLyricSizeData"; //滚动行歌词字体大小
     public static final String DetailLyricSizeData = "DetailLyricSizeData"; //明细歌词字体大小
-    public static final String TaskAfterMusicSwitch = "TaskAfterMusicSwitch"; //定时任务中歌曲播放后是否停止
 
     /**
      * 各团歌曲总数

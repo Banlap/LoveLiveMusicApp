@@ -699,7 +699,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         dialogTimeTasksBinding.pbLoadingTask.setVisibility(isCountDown? View.VISIBLE : View.GONE);
         dialogTimeTasksBinding.switchTask.setChecked(false);
 
-        String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+        //String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+        String taskSwitch = AppData.roomSettings.taskAfterMusicSwitch;
         if(!TextUtils.isEmpty(taskSwitch) && taskSwitch.equals("1")) {
             dialogTimeTasksBinding.switchTask.setChecked(true);
         }
@@ -757,7 +758,13 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         dialogTimeTasksBinding.switchTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                SPUtil.setStrValue(getApplicationContext(), SPUtil.TaskAfterMusicSwitch, dialogTimeTasksBinding.switchTask.isChecked()? "1" : "0");
+                //SPUtil.setStrValue(getApplicationContext(), SPUtil.TaskAfterMusicSwitch, dialogTimeTasksBinding.switchTask.isChecked()? "1" : "0");
+                AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        AppData.saveRoomSettings(settings -> settings.taskAfterMusicSwitch = dialogTimeTasksBinding.switchTask.isChecked()? "1" : "0");
+                    }
+                });
             }
         });
 
@@ -1254,9 +1261,16 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.VIEW_PLAY_FINISH_SUCCESS:
-                String tsw = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                //String tsw = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                String tsw = AppData.roomSettings.taskAfterMusicSwitch;
                 if(!TextUtils.isEmpty(tsw) && tsw.equals("1")) {
-                    SPUtil.setStrValue(context, SPUtil.TaskAfterMusicSwitch, "0");
+                    //SPUtil.setStrValue(context, SPUtil.TaskAfterMusicSwitch, "0");
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppData.saveRoomSettings(settings -> settings.taskAfterMusicSwitch = "0");
+                        }
+                    });
                     return;
                 }
                 if(playList.size()>0) {
@@ -1387,7 +1401,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     dialogTimeTasksBinding.ivTimeTasks4.setVisibility(View.GONE);
                     dialogTimeTasksBinding.ivTimeTasksCustom.setVisibility(View.GONE);
                 }
-                String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                //String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                String taskSwitch = AppData.roomSettings.taskAfterMusicSwitch;
                 if(!TextUtils.isEmpty(taskSwitch) && taskSwitch.equals("1")) {
                     return;
                 }

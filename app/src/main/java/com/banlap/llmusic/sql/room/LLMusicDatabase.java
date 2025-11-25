@@ -3,20 +3,26 @@ package com.banlap.llmusic.sql.room;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.TypeConverter;
+import androidx.room.TypeConverters;
+
 import android.content.Context;
 
 /**
  * 本地数据库
  * */
 @Database(
-        entities = {RoomSettings.class},
-        version = 2,
+        entities = { RoomSettings.class, RoomMusic.class, RoomLocalPlayList.class},
+        version = LLMusicDatabase.DATABASE_VERSION,
         exportSchema = false
 )
+@TypeConverters({ Converters.class })
 public abstract class LLMusicDatabase extends RoomDatabase {
-    private static final String DATABASE_NAME = "llmusic_db";
-
+    private static final String DATABASE_NAME = "llmusic_db"; //数据库名称
+    public static final int DATABASE_VERSION = 10; //数据库版本号 (结构修改时更新版本号)
     public abstract RoomSettings.SettingsDao settingsDao();
+    public abstract RoomMusic.MusicDao musicDao();
+    public abstract RoomLocalPlayList.LocalPlayListDao localPlayListDao();
 
     private static LLMusicDatabase INSTANCE;
 

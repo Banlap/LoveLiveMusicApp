@@ -9,6 +9,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,11 +17,13 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v4.media.MediaMetadataCompat;
@@ -103,6 +106,7 @@ import com.banlap.llmusic.phone.ui.fragment.MainListFragment;
 import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.LLMusicDatabase;
+import com.banlap.llmusic.sql.room.RoomMusic;
 import com.banlap.llmusic.sql.room.RoomSettings;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.BitmapUtil;
@@ -302,10 +306,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
 
 
-        String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
-        if(TextUtils.isEmpty(isBGScene)) {
-            SPUtil.setStrValue(MainActivity.this, SPUtil.isBGScene, "0");
-        }
+//        String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
+//        if(TextUtils.isEmpty(isBGScene)) {
+//            SPUtil.setStrValue(MainActivity.this, SPUtil.isBGScene, "0");
+//        }
+
 
         requestOptions = new RequestOptions();
         requestOptions.diskCacheStrategy(DiskCacheStrategy.NONE);
@@ -405,12 +410,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             controllerScene = AppData.roomSettings.saveControllerScene;
         } else {
             controllerScene = SPUtil.SaveControllerSceneValue_NewScene;
-            AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                @Override
-                public void run() {
-                    AppData.saveRoomSettings(settings -> settings.saveControllerScene = SPUtil.SaveControllerSceneValue_NewScene);
-                }
-            });
+//            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    AppData.saveRoomSettings(settings -> settings.saveControllerScene = SPUtil.SaveControllerSceneValue_NewScene);
+//                }
+//            });
         }
 
         //动画：初始化将新版音乐控制器移走
@@ -456,10 +461,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         newCurrentMusicList.start();
         newMoreMenu.start();
 
-        String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
-        if(isBGScene.equals("1")) {
-            getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
-            getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
+//        String isBGScene = SPUtil.getStrValue(MainActivity.this, SPUtil.isBGScene);
+        if(AppData.roomSettings != null) {
+            if(AppData.roomSettings.isBGScene.equals("1")) {
+                getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
+                getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
+            }
         }
 
         initDeviceMate();
@@ -488,6 +495,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         musicListAdapter.notifyDataSetChanged();
 
         playMusicListAdapter = new PlayMusicListAdapter(this, playList);
+        //playMusicListAdapter = new PlayMusicListAdapter(this, AppData.roomMusicList);
+
         getViewDataBinding().rvPlayList.setLayoutManager(new LinearLayoutManager(this));
         getViewDataBinding().rvPlayList.setAdapter(playMusicListAdapter);
 
@@ -842,11 +851,26 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     try {
                         Intent intent = result.getData();
                         Uri uri = intent.getData();
-                        //Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                        //getViewDataBinding().ivBg.setImageBitmap(bitmap);
 
                         if(uri != null) {
-                            SPUtil.setStrValue(context,SPUtil.BackgroundUri,uri.toString());
+                            try {
+                                final String id = DocumentsContract.getDocumentId(uri); //获取文件id
+                                if(id.contains(":")) {
+                                    String[] parts = id.split(":");
+                                    long mediaId = Long.parseLong(parts[1]);
+                                    String mediaIdStr = String.valueOf(mediaId);
+                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            AppData.saveRoomSettings(settings -> settings.backgroundUri = mediaIdStr);
+                                        }
+                                    });
+                                } else {
+                                    Log.e(TAG, "intentTakePhotoLauncher 设置失败: ");
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, "intentTakePhotoLauncher error: " + e.getMessage());
+                            }
                         }
 
                         Glide.with(getApplication())
@@ -1025,11 +1049,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public void onResume(){
         super.onResume();
         //获取壁纸数据
-        String strBackgroundUri = SPUtil.getStrValue(getApplicationContext(), SPUtil.BackgroundUri);
-        if(null != strBackgroundUri && !strBackgroundUri.isEmpty()) {
+//        String strBackgroundUri = SPUtil.getStrValue(getApplicationContext(), SPUtil.BackgroundUri);
+        String strBackgroundId = AppData.roomSettings.backgroundUri;
+        Log.i(TAG, "strBackgroundUri: " + strBackgroundId);
+        if(!TextUtils.isEmpty(strBackgroundId)) {
+            long mediaId = Long.parseLong(strBackgroundId);
+            Uri contentUri = ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    mediaId
+            );
             Glide.with(getApplication())
                     .setDefaultRequestOptions(requestOptions)
-                    .load(Uri.parse(strBackgroundUri))
+                    .load(contentUri)
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(getViewDataBinding().ivBg);
         }
@@ -1178,9 +1209,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().tvMessageCount.setText(""+messageList.size());
                 break;
             case ThreadEvent.VIEW_PLAY_FINISH_SUCCESS:
-                String tsw = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                //String tsw = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                String tsw = AppData.roomSettings.taskAfterMusicSwitch;
                 if(!TextUtils.isEmpty(tsw) && tsw.equals("1")) {
-                    SPUtil.setStrValue(context, SPUtil.TaskAfterMusicSwitch, "0");
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppData.saveRoomSettings(settings -> settings.taskAfterMusicSwitch = "0");
+                        }
+                    });
+                    //SPUtil.setStrValue(context, SPUtil.TaskAfterMusicSwitch, "0");
                     return;
                 }
                 if(!playList.isEmpty()) {
@@ -1631,7 +1669,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     dialogTimeTasksBinding.ivTimeTasks4.setVisibility(GONE);
                     dialogTimeTasksBinding.ivTimeTasksCustom.setVisibility(GONE);
                 }
-                String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                //String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                String taskSwitch = AppData.roomSettings.taskAfterMusicSwitch;
                 if(!TextUtils.isEmpty(taskSwitch) && taskSwitch.equals("1")) {
                     return;
                 }
@@ -1812,7 +1851,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.VIEW_BG_MODE:
                 if(View.VISIBLE == getViewDataBinding().clBgMode.getVisibility()) {
-                    getViewDataBinding().clBgMode.setVisibility(GONE);
+                    getViewDataBinding().clBgMode.setVisibility(View.GONE);
                 } else {
                     getViewDataBinding().clBgMode.setVisibility(View.VISIBLE);
                     getViewDataBinding().clBgMode.setOnClickListener(new ButtonClickListener());
@@ -2081,21 +2120,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
                                     }
                                 });
-
-//                        for(int i=0; i<localPlayLists.size(); i++) {
-//                            if(localPlayLists.get(i).playListId == event.i) {
-//                                if(localPlayLists.get(i).getMusicList() != null) {
-//                                    List<Music> musicList1 = localPlayLists.get(i).getMusicList();
-//                                    musicList1.add(event.music);
-//                                    localPlayLists.get(i).setMusicList(musicList1);
-//                                    localPlayLists.get(i).setPlayListCount(localPlayLists.get(i).getMusicList().size());
-//                                    SPUtil.setListValue(this, SPUtil.LocalPlayListData, localPlayLists);
-//                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST));
-//                                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
-//                                }
-//                                return;
-//                            }
-//                        }
                     }
                 }
                 break;
@@ -2413,7 +2437,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 dialogTimeTasksBinding.pbLoadingTask.setVisibility(isCountDown? View.VISIBLE : View.GONE);
                 dialogTimeTasksBinding.switchTask.setChecked(false);
 
-                String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                //String taskSwitch = SPUtil.getStrValue(context, SPUtil.TaskAfterMusicSwitch);
+                String taskSwitch = AppData.roomSettings.taskAfterMusicSwitch;
                 if(!TextUtils.isEmpty(taskSwitch) && taskSwitch.equals("1")) {
                     dialogTimeTasksBinding.switchTask.setChecked(true);
                 }
@@ -2471,7 +2496,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 dialogTimeTasksBinding.switchTask.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                        SPUtil.setStrValue(getApplicationContext(), SPUtil.TaskAfterMusicSwitch, dialogTimeTasksBinding.switchTask.isChecked()? "1" : "0");
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AppData.saveRoomSettings(settings -> settings.taskAfterMusicSwitch = dialogTimeTasksBinding.switchTask.isChecked()? "1" : "0");
+                            }
+                        });
+                        //SPUtil.setStrValue(getApplicationContext(), SPUtil.TaskAfterMusicSwitch, dialogTimeTasksBinding.switchTask.isChecked()? "1" : "0");
                     }
                 });
 
@@ -3832,6 +3863,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         private Context context;
         private List<Music> list;
+        private List<RoomMusic> roomList;
 
         public PlayMusicListAdapter(Context context, List<Music> list) {
             this.context = context;
