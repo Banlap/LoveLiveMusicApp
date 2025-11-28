@@ -20,6 +20,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
@@ -131,7 +132,7 @@ public class MainVM extends AndroidViewModel {
     };
 
     /** 获取歌词文本 */
-    public void showLyric(Music dataSource, final boolean isLoop) {
+    public void showLyric(RoomPlayMusic dataSource, final boolean isLoop) {
         List<MusicLyric> musicLyricList = new ArrayList<>();
         String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
         if(!lyricUrl.equals("")) {
@@ -192,7 +193,7 @@ public class MainVM extends AndroidViewModel {
                                 }
                             }
                             is.close();
-                            EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly.toString(), lyWithoutTime.toString(), musicLyricList));
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly.toString(), lyWithoutTime.toString(), musicLyricList));
                         }
                     } catch (Exception e) {
                         Log.i("ABMediaPlay", "http error " + e.getMessage());
@@ -203,11 +204,11 @@ public class MainVM extends AndroidViewModel {
                 @Override
                 public void onError(String e) {
                     Log.i("ABMediaPlay", "error: " + e);
-                    EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
+                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
                 }
             });
         } else {
-            EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
         }
     }
 
@@ -388,7 +389,7 @@ public class MainVM extends AndroidViewModel {
 
 
     /** 默认存储Music值 */
-    public static Music setMusicMsg(Music musicMsg, boolean isPlaying) {
+    public static RoomPlayMusic setMusicMsg(RoomPlayMusic musicMsg, boolean isPlaying) {
         musicMsg.isPlaying = isPlaying;
         return musicMsg;
     }

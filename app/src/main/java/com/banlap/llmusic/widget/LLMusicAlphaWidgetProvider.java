@@ -45,8 +45,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         String musicName, musicSinger;
-        musicName = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicName : "";
-        musicSinger = (MusicPlayService.currentMusic != null)? MusicPlayService.currentMusic.musicSinger : "";
+        musicName = (MusicPlayService.currentRoomPlayMusic != null)? MusicPlayService.currentRoomPlayMusic.musicName : "";
+        musicSinger = (MusicPlayService.currentRoomPlayMusic != null)? MusicPlayService.currentRoomPlayMusic.musicSinger : "";
         Log.i(TAG, "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
         setRemoteViews(context, appWidgetManager, null);
     }
@@ -85,18 +85,18 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         }
 
         //当小组件重新加入时 获取上次音乐信息
-        String musicNameTemp = MusicPlayService.currentMusic != null? MusicPlayService.currentMusic.musicName : "";
-        String musicSingerTemp = MusicPlayService.currentMusic != null? MusicPlayService.currentMusic.musicSinger : "";
+        String musicNameTemp = MusicPlayService.currentRoomPlayMusic != null? MusicPlayService.currentRoomPlayMusic.musicName : "";
+        String musicSingerTemp = MusicPlayService.currentRoomPlayMusic != null? MusicPlayService.currentRoomPlayMusic.musicSinger : "";
         Bitmap bitmap = null;
 
         if(!TextUtils.isEmpty(musicNameTemp) && !TextUtils.isEmpty(musicSingerTemp)) {
             musicName = musicNameTemp;
             musicSinger = musicSingerTemp;
 
-            if(MusicPlayService.currentMusic.musicImgByte != null) {
+            if(MusicPlayService.currentRoomPlayMusic.musicImgByte != null) {
                 boolean isExistsLastByteArray = false;
                 if(MusicPlayService.lastWidgetByteArray != null) {
-                    if (Arrays.equals(MusicPlayService.lastWidgetByteArray, MusicPlayService.currentMusic.musicImgByte)) {
+                    if (Arrays.equals(MusicPlayService.lastWidgetByteArray, MusicPlayService.currentRoomPlayMusic.musicImgByte)) {
                         isExistsLastByteArray = true;
                         //Log.i(TAG, "byte[] 未变化，跳过解码");
                     } else {
@@ -107,8 +107,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
                 }
 
                 if(!isExistsLastByteArray) {
-                    MusicPlayService.lastWidgetByteArray = MusicPlayService.currentMusic.musicImgByte;
-                    MusicPlayService.lastWidgetBitmapRef = new WeakReference<>(BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte));
+                    MusicPlayService.lastWidgetByteArray = MusicPlayService.currentRoomPlayMusic.musicImgByte;
+                    MusicPlayService.lastWidgetBitmapRef = new WeakReference<>(BitmapUtil.getInstance().showBitmap(MusicPlayService.currentRoomPlayMusic.musicImgByte));
                     //MusicPlayService.lastWidgetBitmapRef = BitmapUtil.getInstance().showBitmap(MusicPlayService.currentMusic.musicImgByte);
                 }
 

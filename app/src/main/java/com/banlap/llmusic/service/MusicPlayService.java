@@ -39,10 +39,10 @@ import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
 
-import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.NotificationHelper;
@@ -98,7 +98,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static PlaybackStateCompat.Builder stateBuilder;
 
     //当前歌曲信息
-    public static Music currentMusic; //当前播放音乐的总信息
+    public static RoomPlayMusic currentRoomPlayMusic; //当前播放音乐的总信息
+
     //作为小组件临时使用的变量
     public static byte[] lastWidgetByteArray; //临时缓存上一次的 byte[]
      // 临时缓存上一次的 Bitmap
@@ -171,7 +172,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, false));
                     updateMusicNotification(true);
                     //updatePlaybackState(PlaybackStateCompat.STATE_PLAYING, mMediaSession);
-                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, false);
+                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentRoomPlayMusic.musicName, currentRoomPlayMusic.musicSinger, currentRoomPlayMusic.musicImgBitmap, false);
                 }
             }
 
@@ -186,7 +187,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, true));
                     updateMusicNotification(false);
                     //updatePlaybackState(PlaybackStateCompat.STATE_PAUSED, mMediaSession);
-                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, true);
+                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentRoomPlayMusic.musicName, currentRoomPlayMusic.musicSinger, currentRoomPlayMusic.musicImgBitmap, true);
                 }
             }
 
@@ -197,7 +198,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                     Log.i(TAG, "onSeekTo");
                     exoPlayer.seekTo((int) pos);
                     updatePlaybackStateByMP(mMediaSession);
-                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentMusic.musicName, currentMusic.musicSinger, currentMusic.musicImgBitmap, false);
+                    NotificationHelper.getInstance().createRemoteViews(MusicPlayService.this, currentRoomPlayMusic.musicName, currentRoomPlayMusic.musicSinger, currentRoomPlayMusic.musicImgBitmap, false);
                 }
             }
 
@@ -241,7 +242,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         mMediaSession.setActive(true);
 
-        currentMusic = new Music();
+        currentRoomPlayMusic = new RoomPlayMusic();
     }
 
     @Override
@@ -290,13 +291,13 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 String musicSinger = intent.getStringExtra("MusicSinger");
                 byte[] res = intent.getByteArrayExtra("MusicBitmap");
 
-                currentMusic.setMusicName(musicName);
-                currentMusic.setMusicSinger(musicSinger);
+                currentRoomPlayMusic.musicName = musicName;
+                currentRoomPlayMusic.musicSinger = musicSinger;
 
                 Bitmap bitmap = null;
                 if(res != null) {
                     bitmap = BitmapFactory.decodeByteArray(res, 0, res.length);
-                    currentMusic.setMusicImgBitmap(bitmap);
+                    currentRoomPlayMusic.musicImgBitmap = bitmap;
                 }
                 Notification notification = NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, bitmap, false);
                 startForeground(LL_MUSIC_PLAYER, notification);
@@ -354,12 +355,12 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         }
 
         /** 播放歌曲整体流程1：获取歌词 */
-        public void showLyric(final Music dataSource, final boolean isLoop) {
+        public void showLyric(final RoomPlayMusic dataSource, final boolean isLoop) {
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
         /** 播放歌曲整体流程2：播放歌曲 */
-        public void player(final Music dataSource, final boolean isLoop, final List<MusicLyric> musicLyrics) {
+        public void player(final RoomPlayMusic dataSource, final boolean isLoop, final List<MusicLyric> musicLyrics) {
             try {
                 stop();
                 //延迟0.2秒处理进度条等ui内容，同时线程休眠0.2秒
@@ -383,16 +384,16 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 mMusicLyricList.addAll(musicLyrics);
 
                 //设置当前音乐总信息
-                currentMusic = dataSource;
+                currentRoomPlayMusic = dataSource;
 
                 exoPlayer.setMediaItem(MediaItem.fromUri(dataSource.musicURL));
                 exoPlayer.setRepeatMode(isLoop? Player.REPEAT_MODE_ONE: Player.REPEAT_MODE_OFF);    // 单曲循环or不循环
                 exoPlayer.prepare();
 
                 //处理歌曲信息
-                currentMusic.setMusicBitrate("--");
-                currentMusic.setMusicMime("--");
-                currentMusic.setMusicFileSize("-- MB");
+                currentRoomPlayMusic.musicBitrate = "--";
+                currentRoomPlayMusic.musicMime = "--";
+                currentRoomPlayMusic.musicFileSize = "-- MB";
 
                 //获取MediaMeta内容 后台线程处理，网络缓慢的情况下会卡住
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_METADATA, dataSource));
@@ -433,7 +434,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                                 mAllPosition = (int) exoPlayer.getDuration();
                                 mAudioSessionId = exoPlayer.getAudioSessionId();
                                 Log.i(TAG, "exoplayer开始播放, mAudioSessionId: " + mAudioSessionId + " exoPlayer.getDuration() " + exoPlayer.getDuration());
-                                MusicPlayService.currentMusic.musicImgBitmap = null;
+                                MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, isStop));
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, (int) exoPlayer.getDuration()));
                                 //updateMlCurrentMusicDetail(dataSource);
@@ -467,12 +468,12 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放或暂停 */
         public void pause(Context context, String musicName, String musicSinger, Bitmap bitmap) {
-            currentMusic.setMusicName(musicName);
-            currentMusic.setMusicSinger(musicSinger);
-            if(currentMusic.musicImgByte != null) {
-                currentMusic.setMusicImgBitmap(BitmapFactory.decodeByteArray(currentMusic.musicImgByte, 0, currentMusic.musicImgByte.length));
+            currentRoomPlayMusic.musicName = musicName;
+            currentRoomPlayMusic.musicSinger = musicSinger;
+            if(currentRoomPlayMusic.musicImgByte != null) {
+                currentRoomPlayMusic.musicImgBitmap = BitmapFactory.decodeByteArray(currentRoomPlayMusic.musicImgByte, 0, currentRoomPlayMusic.musicImgByte.length);
             } else if(bitmap != null) {
-                currentMusic.setMusicImgBitmap(bitmap);
+                currentRoomPlayMusic.musicImgBitmap = bitmap;
             }
 
             if(exoPlayer!=null) {
@@ -493,12 +494,12 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         /** 立即播放 */
         public void playImm(Context context, String musicName, String musicSinger, Bitmap bitmap) {
             if (exoPlayer != null) {
-                currentMusic.setMusicName(musicName);
-                currentMusic.setMusicSinger(musicSinger);
-                if(currentMusic.musicImgByte != null) {
-                    currentMusic.setMusicImgBitmap(BitmapFactory.decodeByteArray(currentMusic.musicImgByte, 0, currentMusic.musicImgByte.length));
+                currentRoomPlayMusic.musicName = musicName;
+                currentRoomPlayMusic.musicSinger = musicSinger;
+                if(currentRoomPlayMusic.musicImgByte != null) {
+                    currentRoomPlayMusic.musicImgBitmap = BitmapFactory.decodeByteArray(currentRoomPlayMusic.musicImgByte, 0, currentRoomPlayMusic.musicImgByte.length);
                 } else if(bitmap != null) {
-                    currentMusic.setMusicImgBitmap(bitmap);
+                    currentRoomPlayMusic.musicImgBitmap = bitmap;
                 }
                 if (!exoPlayer.isPlaying()) {
                     isStop = false;
@@ -588,7 +589,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         }
 
         /** 更新数据源 */
-        public void updateMetadata(Music music) {
+        public void updateMetadata(RoomPlayMusic music) {
             //需要设置数据源，保证高版本显示进度条时更新歌曲进度
             MediaMetadataCompat mediaMetadataCompat;
             if(music.musicImgBitmap !=null) {
@@ -598,7 +599,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, music.musicType)
                         .putBitmap(MediaMetadataCompat.METADATA_KEY_ART,  music.musicImgBitmap)
                         .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, exoPlayer.getDuration()) // 音乐总时长
-                        .putString("IsLocal", music.isLocal()? "1" : "0")
+                        .putString("IsLocal", music.isLocal? "1" : "0")
                         .putString("Path", music.musicURL)
                         .build();
             } else {
@@ -608,7 +609,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, music.musicType)
                         .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, music.musicImg)
                         .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, exoPlayer.getDuration()) // 音乐总时长
-                        .putString("IsLocal", music.isLocal()? "1" : "0")
+                        .putString("IsLocal", music.isLocal? "1" : "0")
                         .putString("Path", music.musicURL)
                         .build();
             }
@@ -631,7 +632,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     /**
      * 获取歌曲MediaMeta的信息
      * */
-    public static Map<String, String> getMediaMeta(Music dataSource) {
+    public static Map<String, String> getMediaMeta(RoomPlayMusic dataSource) {
         Map<String, String> map = new HashMap<>();
         String bitrate = "0";
         String mime ="";

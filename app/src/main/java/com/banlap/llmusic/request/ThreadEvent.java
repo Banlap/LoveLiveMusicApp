@@ -6,6 +6,8 @@ import android.view.KeyEvent;
 
 import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
+import com.banlap.llmusic.sql.room.RoomCustomPlay;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 
 import java.io.File;
 import java.util.List;
@@ -120,10 +122,10 @@ public class ThreadEvent<T> {
     public static final int VIEW_ADD_LOCAL_MUSIC = 1187; //添加本地音乐到播放列表
     public static final int VIEW_PLAY_FAVORITE_MUSIC = 1188; //播放收藏音乐
     public static final int VIEW_ADD_FAVORITE_MUSIC = 1189; //在收藏列表中点击添加到播放列表里
-    public static final int THREAD_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 1190; //添加歌曲到自建歌曲列表里面
-    public static final int THREAD_DELETE_MUSIC_IN_LOCAL_PLAY_LIST = 1191; //删除自建歌曲列表的某一首歌
+    public static final int THREAD_ADD_MUSIC_TO_CUSTOM_PLAY_LIST = 1190; //添加歌曲到自建歌曲列表里面
+    public static final int THREAD_DELETE_MUSIC_IN_CUSTOM_PLAY_LIST = 1191; //删除自建歌曲列表的某一首歌
     public static final int VIEW_PLAY_RECOMMEND_MUSIC = 1192; //点击每日推荐歌曲
-    public static final int THREAD_SAVE_LOCAL_MUSIC_LIST = 1193; //保存本地文件到列表
+    public static final int THREAD_SAVE_MUSIC_DATA = 1193; //保存本地文件到列表
     public static final int THREAD_GET_MUSIC_LYRIC = 1194;   //获取音乐歌词
 
     public static final int THREAD_SHOW_IMAGE_URL = 1195;    //展示音乐图片
@@ -232,6 +234,8 @@ public class ThreadEvent<T> {
     public int i2;
     public boolean b;
     public Music music;
+    public RoomPlayMusic roomPlayMusic;
+    public RoomCustomPlay roomCustomPlay;
     public Bitmap bitmap;
     public SpannableStringBuilder ssb;
     public File file;
@@ -239,7 +243,8 @@ public class ThreadEvent<T> {
     public KeyEvent kt;
 
     public ThreadEvent(int msgCode) { this.msgCode = msgCode; }
-    public ThreadEvent(int msgCode, List<Music> musicList) { this.msgCode = msgCode; this.musicList = musicList; }
+    //public ThreadEvent(int msgCode, List<Music> musicList) { this.msgCode = msgCode; this.musicList = musicList; }
+    public ThreadEvent(int msgCode, List<T> tList) { this.msgCode = msgCode; this.tList = tList; }
     public ThreadEvent(int msgCode, List<T> tList, int i) { this.msgCode = msgCode; this.tList = tList; this.i = i; }
     public ThreadEvent(int msgCode, List<T> tList, String str) { this.msgCode = msgCode; this.tList = tList; this.str = str;}
     public ThreadEvent(int msgCode, String str) { this.msgCode = msgCode; this.str = str; }
@@ -265,5 +270,11 @@ public class ThreadEvent<T> {
     public ThreadEvent(int msgCode, SpannableStringBuilder ssb) { this.msgCode = msgCode; this.ssb = ssb; }
     public ThreadEvent(int msgCode, String[] strArray) { this.msgCode = msgCode; this.strArray = strArray; }
     public ThreadEvent(int msgCode, int[] intArray, String[] strArray) { this.msgCode = msgCode; this.intArray = intArray; this.strArray = strArray; }
-    public ThreadEvent(int msgCode, KeyEvent kt) { this.msgCode = msgCode; this.kt = kt; };
+    public ThreadEvent(int msgCode, KeyEvent kt) { this.msgCode = msgCode; this.kt = kt; }
+
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b, String str, String str2) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; this.str = str; this.str2 = str2; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b, String str, String str2, List<T> tList) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; this.str = str; this.str2 = str2; this.tList = tList; }
 }

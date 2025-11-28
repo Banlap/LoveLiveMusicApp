@@ -15,6 +15,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.banlap.llmusic.model.LocalFile;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.FileUtil;
 
@@ -36,7 +37,7 @@ public class LocalListFVM extends AndroidViewModel {
     private Timer scanTimer;
     //检测扫描线程的任务
     private TimerTask scanTask;
-    private List<LocalFile> localFileList;
+    private List<RoomLocalFile> roomLocalFileList;
     //主题id
     private final MutableLiveData<Integer> themeId = new MutableLiveData<>();
 
@@ -56,10 +57,10 @@ public class LocalListFVM extends AndroidViewModel {
         /*要扫描的文件后缀名*/
         final String[] fileType = { ".mp3", ".flac" };
         final File dir = new File(rootPath);
-        if(null != localFileList) {
-            localFileList.clear();
+        if(roomLocalFileList != null) {
+            roomLocalFileList.clear();
         }
-        localFileList = new ArrayList<>();
+        roomLocalFileList = new ArrayList<>();
 
         scanThread = new Thread(new Runnable() {
             @Override
@@ -74,12 +75,10 @@ public class LocalListFVM extends AndroidViewModel {
             public void run() {
                 Log.i(TAG,"线程状态: " + scanThread.getState().toString());
                 if (scanThread.getState() == Thread.State.TERMINATED) {
-                    LocalFile nullLocalFile = new LocalFile();
-                    LocalFile nullLocalFile2 = new LocalFile();
-                    localFileList.add(nullLocalFile);
-                    localFileList.add(nullLocalFile2);
+                    roomLocalFileList.add(new RoomLocalFile());
+                    roomLocalFileList.add(new RoomLocalFile());
                     /*说明扫描线程结束 扫描完成  更新ui*/
-                    EventBus.getDefault().post(new ThreadEvent<LocalFile>(ThreadEvent.VIEW_SCAN_LOCAL_FILE_SUCCESS, localFileList, ""));
+                    EventBus.getDefault().post(new ThreadEvent<RoomLocalFile>(ThreadEvent.VIEW_SCAN_LOCAL_FILE_SUCCESS, roomLocalFileList, ""));
                     cancelTask();
                 }
             }
@@ -129,10 +128,10 @@ public class LocalListFVM extends AndroidViewModel {
      * 选择文件
      * */
     public void selectFile(Intent intent) {
-        if(null != localFileList) {
-            localFileList.clear();
+        if(roomLocalFileList != null) {
+            roomLocalFileList.clear();
         }
-        localFileList = new ArrayList<>();
+        roomLocalFileList = new ArrayList<>();
         Uri uri = intent.getData();
         if(null != uri) {
             String path = FileUtil.getInstance().getPath(getApplication(), uri);
@@ -176,7 +175,7 @@ public class LocalListFVM extends AndroidViewModel {
             }
 
             if(null != title) {
-                LocalFile localFile = new LocalFile();
+                RoomLocalFile localFile = new RoomLocalFile();
                 localFile.title = title;
                 localFile.album = album;
                 localFile.artist = artist;
@@ -184,11 +183,11 @@ public class LocalListFVM extends AndroidViewModel {
                 localFile.path = path;
                 localFile.pic = pic;
                 localFile.isDelete = false;
-                localFileList.add(localFile);
+                roomLocalFileList.add(localFile);
             }
 
             if(isPost) {
-                EventBus.getDefault().post(new ThreadEvent<LocalFile>(ThreadEvent.VIEW_SELECT_LOCAL_FILE_SUCCESS, localFileList, ""));
+                EventBus.getDefault().post(new ThreadEvent<RoomLocalFile>(ThreadEvent.VIEW_SELECT_LOCAL_FILE_SUCCESS, roomLocalFileList, ""));
             }
 
         } catch(Exception e) {

@@ -50,6 +50,13 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.fvm.LocalListFVM;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.sql.room.Converters;
+import com.banlap.llmusic.sql.room.RoomCustomPlay;
+import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
+import com.banlap.llmusic.sql.room.RoomLocalFile;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
@@ -88,13 +95,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     private final static String TAG = LocalListFragment.class.getSimpleName();
     private Context mContext;
     private AlertDialog mAlertDialog;                   //弹窗
+    private List<RoomCustomPlay> roomCustomPlayList;    //自建歌单数据
+    private List<RoomLocalFile> roomLocalFileList;       //本地歌单数据
+    private List<RoomFavoriteMusic> roomFavoriteList;    //收藏夹歌单数据
     private PlayListAdapter playListAdapter;            //自建歌单适配器
-    private List<LocalPlayList> mLocalPlayList;         //自建歌单数据
-
     private LocalListAdapter localListAdapter;          //本地歌单适配器
-    private List<LocalFile> mLocalMusicList;            //本地歌单数据
     private FavoriteListAdapter favoriteListAdapter;    //收藏夹歌单适配器
-    private List<Music> mFavoriteList;                  //收藏夹歌单数据
     private boolean isShowLocalMusic = false;            //是否点击显示本地歌曲
     private boolean isShowFavoriteMusic = false;         //是否点击显示收藏歌曲
 
@@ -119,43 +125,30 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     @Override
     protected void initData() {
         EventBus.getDefault().register(this);
-        mLocalPlayList = new ArrayList<>();
+        roomCustomPlayList = new ArrayList<>();
         //自建歌单缓存列表
-        List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
-        if(!list.isEmpty()) {
-            mLocalPlayList.addAll(list);
+        if(!AppData.roomCustomPlayList.isEmpty()) {
+            roomCustomPlayList.addAll(AppData.roomCustomPlayList);
         } else {
-            LocalPlayList nullLocalPlayList = new LocalPlayList();
-            mLocalPlayList.add(nullLocalPlayList);
-            mLocalPlayList.add(nullLocalPlayList);
-            mLocalPlayList.add(nullLocalPlayList);
-            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
+            roomCustomPlayList.add(new RoomCustomPlay());
+            roomCustomPlayList.add(new RoomCustomPlay());
+            roomCustomPlayList.add(new RoomCustomPlay());
         }
-
-        mLocalMusicList = new ArrayList<>();
         //本地歌曲缓存列表
-        List<LocalFile> spList = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, LocalFile.class);
-        if(!spList.isEmpty()){
-            mLocalMusicList.addAll(spList);
+        roomLocalFileList = new ArrayList<>();
+        if(!AppData.roomLocalFileList.isEmpty()) {
+            roomLocalFileList.addAll(AppData.roomLocalFileList);
         } else {
-            LocalFile nullLocalFile = new LocalFile();
-            LocalFile nullLocalFile2 = new LocalFile();
-            mLocalMusicList.add(nullLocalFile);
-            mLocalMusicList.add(nullLocalFile2);
-            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
+            roomLocalFileList.add(new RoomLocalFile());
+            roomLocalFileList.add(new RoomLocalFile());
         }
-
-        mFavoriteList = new ArrayList<>();
         //最爱歌曲缓存列表
-        List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-        if(!spList2.isEmpty()){
-            mFavoriteList.addAll(spList2);
+        roomFavoriteList = new ArrayList<>();
+        if(!AppData.roomFavoriteMusicList.isEmpty()) {
+            roomFavoriteList.addAll(AppData.roomFavoriteMusicList);
         } else {
-            Music nullMusicFile = new Music();
-            Music nullMusicFile2 = new Music();
-            mFavoriteList.add(nullMusicFile);
-            mFavoriteList.add(nullMusicFile2);
-            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
+            roomFavoriteList.add(new RoomFavoriteMusic());
+            roomFavoriteList.add(new RoomFavoriteMusic());
         }
 
         requestOptions = new RequestOptions();
@@ -171,7 +164,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         getViewDataBinding().clMain.setVisibility(View.VISIBLE);
         getViewDataBinding().clLocalMusicMain.setVisibility(View.GONE);
 
-        playListAdapter = new PlayListAdapter(getContext(), mLocalPlayList);
+        playListAdapter = new PlayListAdapter(getContext(), roomCustomPlayList);
         getViewDataBinding().rvLocalPlayList.setLayoutManager(new LinearLayoutManager(getContext()));
         getViewDataBinding().rvLocalPlayList.setAdapter(playListAdapter);
 
@@ -181,7 +174,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         RecyclerViewUtils.setViewCache(getViewDataBinding().rvLocalPlayList);
         playListAdapter.notifyDataSetChanged();
 
-        localListAdapter = new LocalListAdapter(getContext(), mLocalMusicList);
+        localListAdapter = new LocalListAdapter(getContext(), roomLocalFileList);
         getViewDataBinding().rvLocalMusicList.setLayoutManager(new LinearLayoutManager(getContext()));
         getViewDataBinding().rvLocalMusicList.setAdapter(localListAdapter);
 
@@ -191,7 +184,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         RecyclerViewUtils.setViewCache(getViewDataBinding().rvLocalMusicList);
         localListAdapter.notifyDataSetChanged();
 
-        favoriteListAdapter = new FavoriteListAdapter(getContext(), mFavoriteList);
+        favoriteListAdapter = new FavoriteListAdapter(getContext(), roomFavoriteList);
         getViewDataBinding().rvFavoriteMusicList.setLayoutManager(new LinearLayoutManager(getContext()));
         getViewDataBinding().rvFavoriteMusicList.setAdapter(favoriteListAdapter);
 
@@ -201,14 +194,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         RecyclerViewUtils.setViewCache(getViewDataBinding().rvFavoriteMusicList);
         favoriteListAdapter.notifyDataSetChanged();
 
-        if(null != mLocalMusicList) {
-            getViewDataBinding().llLocalListNull.setVisibility(mLocalMusicList.size()>2 ? View.GONE : View.VISIBLE);
-            int musicCount = mLocalMusicList.size()-2;
+        if(roomLocalFileList != null) {
+            getViewDataBinding().llLocalListNull.setVisibility(roomLocalFileList.size()>2 ? View.GONE : View.VISIBLE);
+            int musicCount = roomLocalFileList.size()-2;
             getViewDataBinding().tvLocalMusicCount.setText("" + musicCount);
         }
 
-        if(null != mFavoriteList) {
-            int musicCount = mFavoriteList.size()-2;
+        if(roomFavoriteList != null) {
+            int musicCount = roomFavoriteList.size()-2;
             getViewDataBinding().tvFavoriteMusicCount.setText("" + musicCount);
         }
 
@@ -236,17 +229,17 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
                 getViewDataBinding().tvNullLocalList.setText("点击上方的菜单按钮导入本地歌曲");
 
-                if(null != mLocalMusicList) {
-                    int musicCount = mLocalMusicList.size()-2;
+                if(roomLocalFileList != null) {
+                    int musicCount = roomLocalFileList.size()-2;
                     getViewDataBinding().tvMusicCount.setText("" + musicCount);
                     getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
                 }
                 //编辑按钮重置
-                if(null != mLocalMusicList && mLocalMusicList.size() >0) {
-                    for(int i=0; i< mLocalMusicList.size(); i++) {
-                        mLocalMusicList.get(i).setDelete(false);
+                if(roomLocalFileList != null && !roomLocalFileList.isEmpty()) {
+                    for(int i=0; i< roomLocalFileList.size(); i++) {
+                        roomLocalFileList.get(i).isDelete = false;
                     }
-                    localListAdapter.notifyItemRangeChanged(0, mLocalMusicList.size(), R.id.iv_delete);
+                    localListAdapter.notifyItemRangeChanged(0, roomLocalFileList.size(), R.id.iv_delete);
                 }
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CLICK_LOCAL_OR_FAVORITE));
             }
@@ -263,17 +256,17 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 getViewDataBinding().clLocalMusicMain.setVisibility(View.VISIBLE);
 
                 getViewDataBinding().tvNullLocalList.setText("当前没有收藏歌曲");
-                if(null != mFavoriteList) {
-                    int musicCount = mFavoriteList.size()-2;
+                if(roomFavoriteList != null) {
+                    int musicCount = roomFavoriteList.size()-2;
                     getViewDataBinding().tvMusicCount.setText("" + musicCount);
                     getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
                 }
                 //编辑按钮重置
-                if(null != mFavoriteList && mFavoriteList.size() >0) {
-                    for(int i=0; i< mFavoriteList.size(); i++) {
-                        mFavoriteList.get(i).isDelete = false;
+                if(roomFavoriteList != null && !roomFavoriteList.isEmpty()) {
+                    for(int i=0; i< roomFavoriteList.size(); i++) {
+                        roomFavoriteList.get(i).isDelete = false;
                     }
-                    favoriteListAdapter.notifyItemRangeChanged(0, mFavoriteList.size(), R.id.iv_delete);
+                    favoriteListAdapter.notifyItemRangeChanged(0, roomFavoriteList.size(), R.id.iv_delete);
                 }
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CLICK_LOCAL_OR_FAVORITE));
             }
@@ -290,18 +283,18 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             @Override
             public void onClick(View v) {
                 if(isShowLocalMusic) {
-                    if(null != mLocalMusicList && mLocalMusicList.size() >0) {
-                        for(int i=0; i< mLocalMusicList.size(); i++) {
-                            mLocalMusicList.get(i).setDelete(!mLocalMusicList.get(i).isDelete);
+                    if(roomLocalFileList != null && !roomLocalFileList.isEmpty()) {
+                        for(int i=0; i< roomLocalFileList.size(); i++) {
+                            roomLocalFileList.get(i).isDelete = !roomLocalFileList.get(i).isDelete;
                         }
-                        localListAdapter.notifyItemRangeChanged(0, mLocalMusicList.size(), R.id.iv_delete);
+                        localListAdapter.notifyItemRangeChanged(0, roomLocalFileList.size(), R.id.iv_delete);
                     }
                 } else if(isShowFavoriteMusic) {
-                    if(null != mFavoriteList && mFavoriteList.size() >0) {
-                        for(int i=0; i< mFavoriteList.size(); i++) {
-                            mFavoriteList.get(i).isDelete = !mFavoriteList.get(i).isDelete;
+                    if(roomFavoriteList != null && !roomFavoriteList.isEmpty()) {
+                        for(int i=0; i< roomFavoriteList.size(); i++) {
+                            roomFavoriteList.get(i).isDelete = !roomFavoriteList.get(i).isDelete;
                         }
-                        favoriteListAdapter.notifyItemRangeChanged(0, mFavoriteList.size(), R.id.iv_delete);
+                        favoriteListAdapter.notifyItemRangeChanged(0, roomFavoriteList.size(), R.id.iv_delete);
                     }
                 }
             }
@@ -331,34 +324,46 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 checkScanPermission(event.str);
                 break;
             case ThreadEvent.VIEW_SCAN_LOCAL_FILE_SUCCESS:
-                if(null != mLocalMusicList) {
-                    mLocalMusicList.clear();
-                    mLocalMusicList.addAll(event.tList);
-                    getViewDataBinding().llLocalListNull.setVisibility(mLocalMusicList.size()>2 ? View.GONE : View.VISIBLE);
+                if(roomLocalFileList != null  && event.tList != null) {
+                    roomLocalFileList.clear();
+                    roomLocalFileList.addAll(event.tList);
+                    getViewDataBinding().llLocalListNull.setVisibility(roomLocalFileList.size()>2 ? View.GONE : View.VISIBLE);
                     localListAdapter.notifyDataSetChanged();
 
-                    getViewDataBinding().tvMusicCount.setText("" + (mLocalMusicList.size()-2));
-                    getViewDataBinding().tvLocalMusicCount.setText("" + (mLocalMusicList.size()-2));
-                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
+                    getViewDataBinding().tvMusicCount.setText("" + (roomLocalFileList.size()-2));
+                    getViewDataBinding().tvLocalMusicCount.setText("" + (roomLocalFileList.size()-2));
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppData.saveLocalFileMusicList(roomLocalFileList);
+                        }
+                    });
+
+                   // SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
                 }
                 break;
             case ThreadEvent.VIEW_SCAN_LOCAL_FILE_ERROR:
                 break;
             case ThreadEvent.VIEW_SELECT_LOCAL_FILE_SUCCESS:
-                if(null != mLocalMusicList) {
-                    List<LocalFile> localFileList = new ArrayList<>();
-                    localFileList.addAll(mLocalMusicList);
+                if(roomLocalFileList != null) {
+                    List<RoomLocalFile> localFileList = new ArrayList<>(roomLocalFileList);
 
-                    mLocalMusicList.clear();
-                    mLocalMusicList.addAll(event.tList);
-                    mLocalMusicList.addAll(localFileList);
+                    roomLocalFileList.clear();
+                    roomLocalFileList.addAll(event.tList);
+                    roomLocalFileList.addAll(localFileList);
 
-                    getViewDataBinding().llLocalListNull.setVisibility(mLocalMusicList.size()>2 ? View.GONE : View.VISIBLE);
+                    getViewDataBinding().llLocalListNull.setVisibility(roomLocalFileList.size()>2 ? View.GONE : View.VISIBLE);
                     localListAdapter.notifyDataSetChanged();
 
-                    getViewDataBinding().tvMusicCount.setText("" + (mLocalMusicList.size()-2));
-                    getViewDataBinding().tvLocalMusicCount.setText("" + (mLocalMusicList.size()-2));
-                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
+                    getViewDataBinding().tvMusicCount.setText("" + (roomLocalFileList.size()-2));
+                    getViewDataBinding().tvLocalMusicCount.setText("" + (roomLocalFileList.size()-2));
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppData.saveLocalFileMusicList(roomLocalFileList);
+                        }
+                    });
+                    //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);
                 }
                 break;
 
@@ -369,63 +374,73 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 }
                 break;
             case ThreadEvent.VIEW_DELETE_LOCAL_MUSIC:
-                getViewDataBinding().tvMusicCount.setText(""+(mLocalMusicList.size()-2));
-                getViewDataBinding().tvLocalMusicCount.setText("" + (mLocalMusicList.size()-2));
-                getViewDataBinding().llLocalListNull.setVisibility(mLocalMusicList.size()>2 ? View.GONE : View.VISIBLE);
+                getViewDataBinding().tvMusicCount.setText(""+(roomLocalFileList.size()-2));
+                getViewDataBinding().tvLocalMusicCount.setText("" + (roomLocalFileList.size()-2));
+                getViewDataBinding().llLocalListNull.setVisibility(roomLocalFileList.size()>2 ? View.GONE : View.VISIBLE);
                 break;
             case ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC:
-                getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
-                getViewDataBinding().tvFavoriteMusicCount.setText("" + (mFavoriteList.size()-2));
+                getViewDataBinding().tvMusicCount.setText(""+(roomFavoriteList.size()-2));
+                getViewDataBinding().tvFavoriteMusicCount.setText("" + (roomFavoriteList.size()-2));
                 break;
             case ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC:
-                if(event.music != null) {
+                if(event.roomPlayMusic != null) {
+                    List<RoomPlayMusic> list1 = new ArrayList<>();
+                    list1.add(event.roomPlayMusic);
+                    String roomFavoriteMusicStr = Converters.fromPlayMusicList(list1);
+                    List<RoomFavoriteMusic> list2 = Converters.toFavoriteMusicList(roomFavoriteMusicStr);
+                    final RoomFavoriteMusic roomPlayMusic = list2.get(0);
+
                     BaseActivity<? extends ViewModel, ? extends ViewDataBinding> activity = LLActivityManager.getInstance().getTopActivity();
                     if (activity == null || activity.isFinishing()) return;
 
                     //mFavoriteList = Collections.synchronizedList(new ArrayList<>());
-                    new Thread(()->{
-                        List<Music> currentMusicList = new ArrayList<>();
-                        currentMusicList.add(event.music);
-                        List<Music> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                        currentMusicList.addAll(spList2);
-                        Set<Music> uniqueMusicSet = new LinkedHashSet<>(currentMusicList); // 使用LinkedHashSet去重并保留顺序
-                        List<Music> newFavoriteList = new ArrayList<>(uniqueMusicSet);
-                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, newFavoriteList);
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            List<RoomFavoriteMusic> currentMusicList = new ArrayList<>();
+                            currentMusicList.add(roomPlayMusic);
+//                            List<RoomPlayMusic> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
+                            List<RoomFavoriteMusic> roomFavoriteMusicList = AppData.roomFavoriteMusicList;
+                            currentMusicList.addAll(roomFavoriteMusicList);
+                            Set<RoomFavoriteMusic> uniqueMusicSet = new LinkedHashSet<>(currentMusicList); // 使用LinkedHashSet去重并保留顺序
+                            //List<Music> newFavoriteList = new ArrayList<>(uniqueMusicSet);
+                            //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, newFavoriteList);
 
-                        activity.runOnUiThread(()->{
-                            mFavoriteList.clear();
-                            mFavoriteList.addAll(uniqueMusicSet);
-                            favoriteListAdapter.notifyDataSetChanged();
+                            activity.runOnUiThread(()->{
+                                roomFavoriteList.clear();
+                                roomFavoriteList.addAll(uniqueMusicSet);
+                                favoriteListAdapter.notifyDataSetChanged();
 
-                            Toasty.success(activity, "添加收藏成功", Toast.LENGTH_SHORT, true).show();
+                                Toasty.success(activity, "添加收藏成功", Toast.LENGTH_SHORT, true).show();
 
-                            getViewDataBinding().tvFavoriteMusicCount.setText(""+(mFavoriteList.size()-2));
-                            getViewDataBinding().tvMusicCount.setText(""+(mFavoriteList.size()-2));
-                            //刷新ui
-                            if(mFavoriteList != null) {
-                                int musicCount = mFavoriteList.size()-2;
-                                getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
-                            }
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
-                        });
-                    }).start();
+                                getViewDataBinding().tvFavoriteMusicCount.setText(""+(roomFavoriteList.size()-2));
+                                getViewDataBinding().tvMusicCount.setText(""+(roomFavoriteList.size()-2));
+                                //刷新ui
+                                if(roomFavoriteList != null) {
+                                    int musicCount = roomFavoriteList.size()-2;
+                                    getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
+                                }
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
+                            });
+                        }
+                    });
                 }
                 break;
             case ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC:
-                if(mFavoriteList.size() >0 ) {
-                    for(int i=0; i< mFavoriteList.size(); i++) {
-                        if(event.music.musicName.equals(mFavoriteList.get(i).musicName)) {
-                            mFavoriteList.remove(i);
+                if(!roomFavoriteList.isEmpty()) {
+                    for(int i=0; i< roomFavoriteList.size(); i++) {
+                        if(event.music.musicName.equals(roomFavoriteList.get(i).musicName)) {
+                            roomFavoriteList.remove(i);
                             favoriteListAdapter.notifyItemRemoved(i);
-                            favoriteListAdapter.notifyItemRangeChanged(i, mFavoriteList.size());
+                            favoriteListAdapter.notifyItemRangeChanged(i, roomFavoriteList.size());
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
-                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, mFavoriteList);
+                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, roomFavoriteList);
                             break;
                         }
                     }
 
                     //刷新ui
-                    int musicCount = mFavoriteList.size()-2;
+                    int musicCount = roomFavoriteList.size()-2;
                     getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
 
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
@@ -433,10 +448,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST:
             case ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST:
-                mLocalPlayList.clear();
-                List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
-                mLocalPlayList.addAll(list);
-                playListAdapter.notifyDataSetChanged();
+                List<RoomCustomPlay> roomCustomPlays = AppData.roomCustomPlayList;
+                if(!roomCustomPlays.isEmpty()) {
+                    roomCustomPlayList.clear();
+                    roomCustomPlayList.addAll(roomCustomPlays);
+                    playListAdapter.notifyDataSetChanged();
+                }
                 break;
             case ThreadEvent.VIEW_HIDE_LOCAL_OR_FAVORITE:
                 backToMain();
@@ -539,11 +556,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         inputContentBinding = DataBindingUtil.inflate(LayoutInflater.from(getContext()), R.layout.dialog_input_content, null, false);
         inputContentBinding.tvTitle.setText(titleName);
         inputContentBinding.etInput.setHint(content);
+        final RoomCustomPlay roomCustomPlay = roomCustomPlayList.get(position);
         //修改歌单时显示对应信息
         if(!isAddList) {
-            inputContentBinding.etInput.setText(mLocalPlayList.get(position).getPlayListName());
-            if(mLocalPlayList.get(position).playListImgByte != null) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(mLocalPlayList.get(position).playListImgByte, 0, mLocalPlayList.get(position).playListImgByte.length);
+            inputContentBinding.etInput.setText(roomCustomPlay.playListName);
+            if(roomCustomPlay.playListImgByte != null) {
+                Bitmap bitmap = BitmapFactory.decodeByteArray(roomCustomPlay.playListImgByte, 0, roomCustomPlay.playListImgByte.length);
                 inputContentBinding.civImage.setImageBitmap(bitmap);
             }
         }
@@ -594,40 +612,58 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     }
                     //分支判断 是否添加歌单
                     if(isAddList) {
-                        if(mLocalPlayList.size()>=3) {
-                            mLocalPlayList.clear();
-                            LocalPlayList playList = new LocalPlayList();
+                        if(roomCustomPlayList.size()>=3) {
+                            roomCustomPlayList.clear();
+                            RoomCustomPlay roomCustomPlay = new RoomCustomPlay();
                             int id = getRandomId();
-                            playList.setPlayListId(id);
-                            playList.setPlayListName(content);
-                            playList.setPlayListCount(0);
-                            playList.setMusicList(new ArrayList<>());
+                            roomCustomPlay.playListId = id;
+                            roomCustomPlay.playListName = content;
+                            roomCustomPlay.playListCount = 0;
+                            roomCustomPlay.musicListJson = "";
 
                             if(mBitmapImage != null) {
                                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                                 mBitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
                                 byte[] bitmapByte = baos.toByteArray();
-                                playList.setPlayListImgByte(bitmapByte);
+                                roomCustomPlay.playListImgByte = bitmapByte;
                             }
 
-                            mLocalPlayList.add(playList);
-                            List<LocalPlayList> list = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, LocalPlayList.class);
-                            if(list.size()>0) {
-                                mLocalPlayList.addAll(list);
+                            roomCustomPlayList.add(roomCustomPlay);
+                            List<RoomCustomPlay> customPlayList = AppData.roomCustomPlayList;
+                            if(!customPlayList.isEmpty()) {
+                                roomCustomPlayList.addAll(customPlayList);
                             }
-
-                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
+                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AppData.saveRoomCustomPlay(roomCustomPlay);
+                                }
+                            });
+                            //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
                             playListAdapter.notifyDataSetChanged();
                         }
                     } else {
-                        mLocalPlayList.get(position).setPlayListName(content);
+                        int playListId = roomCustomPlay.playListId;
+                        String playListName = roomCustomPlay.playListName;
+                        byte[] bytes = null;
                         if(mBitmapImage != null) {
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
                             mBitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                            byte[] bitmapByte = baos.toByteArray();
-                            mLocalPlayList.get(position).setPlayListImgByte(bitmapByte);
+                            bytes =  baos.toByteArray();
                         }
-                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
+                        final byte[] byteImg = bytes;
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AppData.updateRoomCustomPlay(playListId, customPlay -> {
+                                    customPlay.playListName = playListName;
+                                    if(byteImg != null) {
+                                        customPlay.playListImgByte = byteImg;
+                                    }
+                                });
+                            }
+                        });
+                        //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
                         playListAdapter.notifyDataSetChanged();
                     }
                     
@@ -647,9 +683,9 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
     private int getRandomId() {
         int getRandomId = new Random().nextInt(99999) + 10000;
-        if(mLocalPlayList.size() >0) {
-            for(LocalPlayList list : mLocalPlayList) {
-                if(list.playListId == getRandomId) {
+        if(!roomCustomPlayList.isEmpty()) {
+            for(RoomCustomPlay roomCustomPlay : roomCustomPlayList) {
+                if(roomCustomPlay.playListId == getRandomId) {
                     return getRandomId();
                 }
             }
@@ -711,11 +747,17 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         if(mAlertDialog != null) {
                             mAlertDialog.dismiss();
                         }
-                        if(mLocalPlayList.size() > position) {
-                            mLocalPlayList.remove(position);
+                        if(roomCustomPlayList.size() > position) {
+                            RoomCustomPlay roomCustomPlay = roomCustomPlayList.get(position);
+                            roomCustomPlayList.remove(position);
                             playListAdapter.notifyItemRemoved(position);  //移除了视图但没有进行重新bind的过程，所以此position还是之前的position，因此需要调用notifyItemRangeChanged
-                            playListAdapter.notifyItemRangeChanged(position, mLocalPlayList.size());
-                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
+                            playListAdapter.notifyItemRangeChanged(position, roomCustomPlayList.size());
+                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AppData.deleteCustomPlayList(roomCustomPlay);
+                                }
+                            });
                         }
 
                     }
@@ -740,12 +782,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     public class PlayListAdapter extends RecyclerView.Adapter<PlayListViewHolder> {
 
         private Context context;
-        private List<LocalPlayList> localPlayList;
+        private List<RoomCustomPlay> localPlayList;
         private final int viewTypeAddList = 0;
         private final int viewTypeShowList = 1;
 
 
-        public PlayListAdapter(Context context, List<LocalPlayList> localPlayList) {
+        public PlayListAdapter(Context context, List<RoomCustomPlay> localPlayList) {
             this.context = context;
             this.localPlayList = localPlayList;
         }
@@ -779,7 +821,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                    binding.rlPlayListAdd.setOnClickListener(new View.OnClickListener() {
                        @Override
                        public void onClick(View v) {
-                           if(mLocalPlayList.size() >=20) {
+                           if(roomCustomPlayList.size() >=20) {
                                Toasty.warning(LLActivityManager.getInstance().getTopActivity(), "仅支持添加20个歌单!", Toast.LENGTH_SHORT, true).show();
                                return;
                            }
@@ -791,12 +833,12 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 ItemLocalPlayListBinding binding = DataBindingUtil.getBinding(holder.itemView);
                 if(binding != null) {
                     ThemeHelper.getInstance().localPlayListTheme(context, rThemeId, binding);
-                    if(TextUtils.isEmpty(localPlayList.get(position).getPlayListName())) {
+                    if(TextUtils.isEmpty(localPlayList.get(position).playListName)) {
                         binding.rlMusicAll.setVisibility(View.INVISIBLE);
                     } else {
                         binding.rlMusicAll.setVisibility(View.VISIBLE);
-                        binding.tvPlayListName.setText(localPlayList.get(position).getPlayListName());
-                        binding.tvPlayListCount.setText(localPlayList.get(position).getPlayListCount() + " 首");
+                        binding.tvPlayListName.setText(localPlayList.get(position).playListName);
+                        binding.tvPlayListCount.setText(localPlayList.get(position).playListCount + " 首");
                         if(localPlayList.get(position).playListImgByte != null) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray(localPlayList.get(position).playListImgByte, 0, localPlayList.get(position).playListImgByte.length);
                             binding.ivMusicImg.setImageBitmap(bitmap);
@@ -812,7 +854,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         binding.llMenu.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                showPlayListMenu(v, position, localPlayList.get(position).getPlayListName(), localPlayList.get(position).getPlayListCount());
+                                showPlayListMenu(v, position, localPlayList.get(position).playListName, localPlayList.get(position).playListCount);
                             }
                         });
                     }
@@ -834,9 +876,9 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     public class LocalListAdapter extends RecyclerView.Adapter<LocalListViewHolder> {
 
         private Context context;
-        private List<LocalFile> localFileList;
+        private List<RoomLocalFile> localFileList;
 
-        public LocalListAdapter(Context context, List<LocalFile> localFileList) {
+        public LocalListAdapter(Context context, List<RoomLocalFile> localFileList) {
             this.context = context;
             this.localFileList = localFileList;
         }
@@ -873,14 +915,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     @Override
                     public void onClick(View v) {
                         int id = new Random().nextInt(99999) + 10000;
-                        Music music = new Music();
-                        music.setMusicId(id);
-                        music.setMusicName(localFileList.get(position).title);
-                        music.setMusicSinger(localFileList.get(position).artist);
-                        music.setMusicURL(localFileList.get(position).path);
-                        music.setMusicImgByte(localFileList.get(position).pic);
-                        music.setLocal(true);
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_PLAY_LOCAL_MUSIC, music, false));
+                        RoomPlayMusic music = new RoomPlayMusic();
+                        music.musicId = id;
+                        music.musicName = localFileList.get(position).title;
+                        music.musicSinger = localFileList.get(position).artist;
+                        music.musicURL = localFileList.get(position).path;
+                        music.musicImgByte = localFileList.get(position).pic;
+                        music.isLocal = true;
+                        EventBus.getDefault().post(new ThreadEvent<RoomPlayMusic>(ThreadEvent.VIEW_PLAY_LOCAL_MUSIC, music, false));
                     }
                 });
 
@@ -892,13 +934,13 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         ThemeHelper.getInstance().localListAddButtonAnimatorTheme(rThemeId, binding);
 
                         int id = new Random().nextInt(99999) + 10000;
-                        Music music = new Music();
-                        music.setMusicId(id);
-                        music.setMusicName(localFileList.get(position).title);
-                        music.setMusicSinger(localFileList.get(position).artist);
-                        music.setMusicURL(localFileList.get(position).path);
-                        music.setMusicImgByte(localFileList.get(position).pic);
-                        music.setLocal(true);
+                        RoomPlayMusic music = new RoomPlayMusic();
+                        music.musicId = id;
+                        music.musicName = localFileList.get(position).title;
+                        music.musicSinger = localFileList.get(position).artist;
+                        music.musicURL = localFileList.get(position).path;
+                        music.musicImgByte = localFileList.get(position).pic;
+                        music.isLocal = true;
                         EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_ADD_LOCAL_MUSIC, music, false));
                     }
                 });
@@ -907,12 +949,17 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 binding.llDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        RoomLocalFile roomLocalFile = localFileList.get(position);
                         localFileList.remove(position);
                         localListAdapter.notifyItemRemoved(position);
-                        localListAdapter.notifyItemRangeChanged(position, mLocalMusicList.size() - position);
-                        new Thread(() -> {
-                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, localFileList);
-                        }).start();
+                        localListAdapter.notifyItemRangeChanged(position, roomLocalFileList.size() - position);
+
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AppData.deleteLocalFileMusic(roomLocalFile);
+                            }
+                        });
 
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_LOCAL_MUSIC));
@@ -936,9 +983,9 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     public class FavoriteListAdapter extends RecyclerView.Adapter<FavoriteListViewHolder> {
 
         private Context context;
-        private List<Music> favoriteList;
+        private List<RoomFavoriteMusic> favoriteList;
 
-        public FavoriteListAdapter(Context context, List<Music> favoriteList) {
+        public FavoriteListAdapter(Context context, List<RoomFavoriteMusic> favoriteList) {
             this.context = context;
             this.favoriteList = favoriteList;
         }
@@ -964,7 +1011,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
                 Glide.with(getActivity())
                         .setDefaultRequestOptions(requestOptions)
-                        .load(favoriteList.get(position).getMusicImg())
+                        .load(favoriteList.get(position).musicImg)
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(binding.ivMusicImg);
@@ -973,7 +1020,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_PLAY_FAVORITE_MUSIC, favoriteList, position));
+                        EventBus.getDefault().post(new ThreadEvent<RoomFavoriteMusic>(ThreadEvent.VIEW_PLAY_FAVORITE_MUSIC, favoriteList, position));
                     }
                 });
 
@@ -983,7 +1030,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     public void onClick(View v) {
                         //变更主题
                         ThemeHelper.getInstance().localListAddButtonAnimatorTheme(rThemeId, binding);
-                        EventBus.getDefault().post(new ThreadEvent<Music>(ThreadEvent.VIEW_ADD_FAVORITE_MUSIC, favoriteList, position));
+                        EventBus.getDefault().post(new ThreadEvent<RoomFavoriteMusic>(ThreadEvent.VIEW_ADD_FAVORITE_MUSIC, favoriteList, position));
                     }
                 });
 

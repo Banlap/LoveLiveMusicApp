@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -22,7 +21,11 @@ import androidx.annotation.RequiresApi;
 
 import com.banlap.llmusic.phone.ui.activity.CustomErrorActivity;
 import com.banlap.llmusic.sql.room.LLMusicDatabase;
-import com.banlap.llmusic.sql.room.RoomMusic;
+import com.banlap.llmusic.sql.room.RoomCustomPlay;
+import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
+import com.banlap.llmusic.sql.room.RoomLocalFile;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.sql.room.RoomSettings;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.utils.AppExecutors;
@@ -30,9 +33,6 @@ import com.banlap.llmusic.utils.FileUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SPUtil;
 
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -189,11 +189,37 @@ public class BaseApplication extends Application {
                         settings.isBGScene = "0";
                     });
                 }
-                List<RoomMusic> roomMusicList = llMusicDatabase.musicDao().getAllMusic();
-                if(!roomMusicList.isEmpty()) {
-                    AppData.roomMusicList.addAll(roomMusicList);
+                List<RoomPlayMusic> roomPlayMusicList = llMusicDatabase.musicDao().getAllMusic();
+                if(!roomPlayMusicList.isEmpty()) {
+                    AppData.roomPlayMusicList.addAll(roomPlayMusicList);
                 } else {
-                    AppData.roomMusicList = new ArrayList<>();
+                    AppData.roomPlayMusicList = new ArrayList<>();
+                }
+                List<RoomCustomPlay> roomCustomPlayList = llMusicDatabase.customPlayDao().getAllCustomPlay();
+                if(!roomCustomPlayList.isEmpty()) {
+                    AppData.roomCustomPlayList.addAll(roomCustomPlayList);
+                } else {
+                    AppData.roomCustomPlayList = new ArrayList<>();
+                }
+                List<RoomFavoriteMusic> roomFavoriteMusics = llMusicDatabase.favoriteMusicDao().getAllMusic();
+                if(!roomFavoriteMusics.isEmpty()) {
+                    AppData.roomFavoriteMusicList.addAll(roomFavoriteMusics);
+                } else {
+                    AppData.roomFavoriteMusicList = new ArrayList<>();
+                }
+
+                List<RoomLocalFile> roomLocalFileList = llMusicDatabase.localFileDao().getAllMusic();
+                if(!roomLocalFileList.isEmpty()) {
+                    AppData.roomLocalFileList.addAll(roomLocalFileList);
+                } else {
+                    AppData.roomLocalFileList = new ArrayList<>();
+                }
+
+                List<RoomRecommendMusic> roomRecommendMusicList = llMusicDatabase.recommendMusicDao().getAllMusic();
+                if(!roomRecommendMusicList.isEmpty()) {
+                    AppData.roomRecommendMusicList.addAll(roomRecommendMusicList);
+                } else {
+                    AppData.roomRecommendMusicList = new ArrayList<>();
                 }
             }
         });

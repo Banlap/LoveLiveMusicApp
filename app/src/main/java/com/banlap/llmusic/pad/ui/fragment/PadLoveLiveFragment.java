@@ -11,6 +11,8 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.pad.uivm.fvm.PadLoveLiveFVM;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.SPUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -32,7 +34,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPadLoveliveBinding>
     implements PadLoveLiveFVM.PadLoveLiveCallBack {
 
-    private static List<Music> recommendList;
+    private static List<RoomRecommendMusic> roomRecommendMusicList;
     private RequestOptions requestOptions;
     private int rThemeId =0;                             //当前主题
 
@@ -43,7 +45,7 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
 
     @Override
     protected void initData() {
-        recommendList = new ArrayList<>();
+        roomRecommendMusicList = new ArrayList<>();
         initRequestOptions();
     }
 
@@ -116,38 +118,38 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
     public void MessageEvent(ThreadEvent event) {
         switch (event.msgCode) {
             case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
-                if(event.musicList.size() >0) {
-                    recommendList.clear();
-                    recommendList.addAll(event.musicList);
+                if(!event.tList.isEmpty()) {
+                    roomRecommendMusicList.clear();
+                    roomRecommendMusicList.addAll(event.musicList);
 
-                    SPUtil.setListValue(getContext(), SPUtil.RecommendListData, recommendList);
+                    //SPUtil.setListValue(getContext(), SPUtil.RecommendListData, recommendList);
 
                     Glide.with(getContext())
                             .setDefaultRequestOptions(requestOptions)
-                            .load(recommendList.get(0).getMusicImg())
+                            .load(roomRecommendMusicList.get(0).musicImg)
                             .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                             .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                             .into(getViewDataBinding().ivRecommend1);
 
-                    getViewDataBinding().tvRecommend1.setText(recommendList.get(0).musicName);
+                    getViewDataBinding().tvRecommend1.setText(roomRecommendMusicList.get(0).musicName);
 
                     Glide.with(getContext())
                             .setDefaultRequestOptions(requestOptions)
-                            .load(recommendList.get(1).getMusicImg())
+                            .load(roomRecommendMusicList.get(1).musicImg)
                             .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                             .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                             .into(getViewDataBinding().ivRecommend2);
 
-                    getViewDataBinding().tvRecommend2.setText(recommendList.get(1).musicName);
+                    getViewDataBinding().tvRecommend2.setText(roomRecommendMusicList.get(1).musicName);
 
                     Glide.with(getContext())
                             .setDefaultRequestOptions(requestOptions)
-                            .load(recommendList.get(2).getMusicImg())
+                            .load(roomRecommendMusicList.get(2).musicImg)
                             .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                             .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                             .into(getViewDataBinding().ivRecommend3);
 
-                    getViewDataBinding().tvRecommend3.setText(recommendList.get(2).musicName);
+                    getViewDataBinding().tvRecommend3.setText(roomRecommendMusicList.get(2).musicName);
                 }
                 break;
         }
@@ -160,16 +162,16 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
         public void onClick(View v) {
             if(isDoubleClick()) { return; }
             if (v.getId() == R.id.ll_recommend_1) {
-                if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(0)));
+                if(!roomRecommendMusicList.isEmpty()) {
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, roomRecommendMusicList.get(0)));
                 }
             } else if (v.getId() == R.id.ll_recommend_2) {
-                if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(1)));
+                if(!roomRecommendMusicList.isEmpty()) {
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, roomRecommendMusicList.get(1)));
                 }
             } else if (v.getId() == R.id.ll_recommend_3) {
-                if(recommendList.size() >0) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, recommendList.get(2)));
+                if(!roomRecommendMusicList.isEmpty()) {
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC, roomRecommendMusicList.get(2)));
                 }
             } else if (v.getId() == R.id.ll_list_1) {
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_FRAGMENT, ThreadEvent.ALBUM_LIELLA, PadMainActivity.VIEW_PAD_FRAGMENT_DETAIL));

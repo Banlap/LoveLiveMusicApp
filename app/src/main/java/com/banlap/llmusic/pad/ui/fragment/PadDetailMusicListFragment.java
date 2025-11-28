@@ -26,11 +26,12 @@ import com.banlap.llmusic.databinding.ActivityPadMainBinding;
 import com.banlap.llmusic.databinding.DialogSortMenuBinding;
 import com.banlap.llmusic.databinding.FragmentPadDetailMusicListBinding;
 import com.banlap.llmusic.databinding.ItemMusicListBinding;
-import com.banlap.llmusic.fixed.LiellaMusic;
+import com.banlap.llmusic.fixed.AppMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.pad.uivm.fvm.PadDetailMusicListFVM;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
@@ -60,9 +61,8 @@ import okhttp3.OkHttpClient;
 public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListFVM, FragmentPadDetailMusicListBinding>
     implements PadDetailMusicListFVM.PadDetailMusicListCallBack {
 
-    private static List<Music> recommendList;
-    private static List<Music> musicList;
-    private List<Music> tempMusicList;                  //临时音乐列表
+    private static List<RoomPlayMusic> roomPlayMusicList;
+    private List<RoomPlayMusic> roomTempMusicList;                  //临时音乐列表
     private RequestOptions requestOptions;
     private int rThemeId =0;                             //当前主题
     private int clickSortType = 0;                       //当前点击的排序类型
@@ -83,8 +83,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
     @Override
     protected void initData() {
         activityPadMainBinding = ((PadMainActivity) getActivity()).getBinding();
-        musicList = new ArrayList<>();
-
+        roomPlayMusicList = new ArrayList<>();
     }
 
 
@@ -126,29 +125,29 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
                 String name = getViewDataBinding().etSearchMusic.getText().toString();
                 if (!name.equals("")) {
 
-                    List<Music> nullData = tempMusicList.stream()
-                            .filter(tempMusic -> tempMusic.getMusicType().equals(" "))
+                    List<RoomPlayMusic> nullData = roomTempMusicList.stream()
+                            .filter(tempMusic -> tempMusic.musicType.equals(" "))
                             .collect(Collectors.toList());
 
-                    List<Music> searchList = tempMusicList.stream()
+                    List<RoomPlayMusic> searchList = roomTempMusicList.stream()
                             .filter(tempMusic -> tempMusic.musicName.toLowerCase().contains(name.toLowerCase()))
                             .collect(Collectors.toList());
 
                     if (searchList.size() > 0) {
-                        musicList.clear();
-                        musicList.addAll(searchList);
-                        musicList.addAll(nullData);
+                        roomPlayMusicList.clear();
+                        roomPlayMusicList.addAll(searchList);
+                        roomPlayMusicList.addAll(nullData);
                         musicListAdapter.notifyDataSetChanged();
                         getViewDataBinding().tvNoSearchMusic.setVisibility(View.GONE);
                     } else {
-                        musicList.clear();
+                        roomPlayMusicList.clear();
                         musicListAdapter.notifyDataSetChanged();
                         getViewDataBinding().tvNoSearchMusic.setVisibility(View.VISIBLE);
                     }
                 } else {
-                    musicList.clear();
-                    if(tempMusicList!=null) {
-                        musicList.addAll(tempMusicList);
+                    roomPlayMusicList.clear();
+                    if(roomTempMusicList!=null) {
+                        roomPlayMusicList.addAll(roomTempMusicList);
                     }
                     musicListAdapter.notifyDataSetChanged();
                     getViewDataBinding().tvNoSearchMusic.setVisibility(View.GONE);
@@ -170,7 +169,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
 
     private void initPadMainView() {
 
-        musicListAdapter = new MusicListAdapter(getActivity(), musicList);
+        musicListAdapter = new MusicListAdapter(getActivity(), roomPlayMusicList);
         getViewDataBinding().rvMusicList.setLayoutManager(new LinearLayoutManager(getActivity()));
         getViewDataBinding().rvMusicList.setAdapter(musicListAdapter);
 
@@ -204,9 +203,9 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
         switch (event.msgCode) {
             case ThreadEvent.VIEW_GET_ALBUM_LIST_SUCCESS:
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
-                musicList.clear();
-                musicList.addAll(event.musicList);
-                musicList.addAll(LiellaMusic.getInstance().getNullMusicData());
+                roomPlayMusicList.clear();
+                roomPlayMusicList.addAll(event.musicList);
+                roomPlayMusicList.addAll(AppMusic.getInstance().getNullMusicData());
                 sortList(0);
                 clickSortType = 0;
                 musicListAdapter.notifyDataSetChanged();
@@ -226,7 +225,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
             if(v.getId() == R.id.ll_sort) {
                 showSortMenuDialog(v);
             } else if(v.getId() == R.id.ll_all_play) {
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_PLAY_ALL_MUSIC, musicList));
+                EventBus.getDefault().post(new ThreadEvent<RoomPlayMusic>(ThreadEvent.VIEW_PAD_PLAY_ALL_MUSIC, roomPlayMusicList));
             } else if(v.getId() == R.id.ll_search) {
                 isSearchMusic = true;
                 searchMusic();
@@ -341,45 +340,45 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
      * */
     public void sortList(final int sortType) {
         //将空数据提取 排序后再放到列表最底部
-        List<Music> nullData = new ArrayList<>();
-        for (Music music : musicList) {
-            if(music.getMusicType().equals(" ")) {
+        List<RoomPlayMusic> nullData = new ArrayList<>();
+        for (RoomPlayMusic music : roomPlayMusicList) {
+            if(music.musicType.equals(" ")) {
                 nullData.add(music);
             }
         }
-        if(nullData.size() >0) {
-            for (Music nullMusic : nullData) {
-                musicList.remove(nullMusic);
+        if(!nullData.isEmpty()) {
+            for (RoomPlayMusic nullMusic : nullData) {
+                roomPlayMusicList.remove(nullMusic);
             }
         }
-        Collections.sort(musicList, new Comparator<Music>() {
+        Collections.sort(roomPlayMusicList, new Comparator<RoomPlayMusic>() {
             @Override
-            public int compare(Music o1, Music o2) {
+            public int compare(RoomPlayMusic o1, RoomPlayMusic o2) {
                 Collator collator = Collator.getInstance();
                 if(1 == sortType) {
                     CollationKey key1 = collator
-                            .getCollationKey(String.valueOf(((Music) o1).musicName));
+                            .getCollationKey(String.valueOf(((RoomPlayMusic) o1).musicName));
                     CollationKey key2 = collator
-                            .getCollationKey(String.valueOf(((Music) o2).musicName));
+                            .getCollationKey(String.valueOf(((RoomPlayMusic) o2).musicName));
                     return isUpSortByName ? key1.compareTo(key2) : key2.compareTo(key1);
                 } else if (2 == sortType) {
                     CollationKey key1 = collator
-                            .getCollationKey(String.valueOf(((Music) o1).musicSinger));
+                            .getCollationKey(String.valueOf(((RoomPlayMusic) o1).musicSinger));
                     CollationKey key2 = collator
-                            .getCollationKey(String.valueOf(((Music) o2).musicSinger));
+                            .getCollationKey(String.valueOf(((RoomPlayMusic) o2).musicSinger));
                     return isUpSortBySinger ? key1.compareTo(key2) : key2.compareTo(key1);
                 } else {
                     CollationKey key1 = collator
-                            .getCollationKey(String.valueOf(((Music) o1).musicId));
+                            .getCollationKey(String.valueOf(((RoomPlayMusic) o1).musicId));
                     CollationKey key2 = collator
-                            .getCollationKey(String.valueOf(((Music) o2).musicId));
+                            .getCollationKey(String.valueOf(((RoomPlayMusic) o2).musicId));
                     return isUpSortByTime ? key1.compareTo(key2) : key2.compareTo(key1);
                 }
             }
         });
 
-        if(nullData.size() >0) {
-            musicList.addAll(nullData);
+        if(!nullData.isEmpty()) {
+            roomPlayMusicList.addAll(nullData);
         }
         musicListAdapter.notifyDataSetChanged();
 
@@ -388,17 +387,17 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
 
     /** 点击查找歌曲按钮 */
     public void searchMusic() {
-        tempMusicList = new ArrayList<>();
-        tempMusicList.addAll(musicList);
+        roomTempMusicList = new ArrayList<>();
+        roomTempMusicList.addAll(roomPlayMusicList);
         getViewDataBinding().llShowNormalBar.setVisibility(View.GONE);
         getViewDataBinding().llShowSearchBar.setVisibility(View.VISIBLE);
     }
 
     /** 点击取消搜索 */
     public void searchCancel() {
-        musicList.clear();
-        if(tempMusicList!=null) {
-            musicList.addAll(tempMusicList);
+        roomPlayMusicList.clear();
+        if(roomTempMusicList!=null) {
+            roomPlayMusicList.addAll(roomTempMusicList);
         }
         musicListAdapter.notifyDataSetChanged();
         getViewDataBinding().etSearchMusic.setText("");
@@ -426,14 +425,14 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
     public class MusicListAdapter extends RecyclerView.Adapter<MusicListViewHolder> {
 
         private Context context;
-        private List<Music> list;
+        private List<RoomPlayMusic> list;
         private View mViewHeader;
         private OkHttpClient client;
 
         public static final int ITEM_TYPE_HEADER =0;
         public static final int ITEM_TYPE_CONTENT =1;
 
-        public MusicListAdapter(Context context, List<Music> list) {
+        public MusicListAdapter(Context context, List<RoomPlayMusic> list) {
             this.context = context;
             this.list = list;
             this.client = new OkHttpClient();
@@ -469,9 +468,9 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
 
                 binding.llMore.setVisibility(View.GONE);
 
-                binding.rlMusicAll.setVisibility(list.get(position).getMusicType().equals(" ") ? GONE : View.VISIBLE);
+                binding.rlMusicAll.setVisibility(list.get(position).musicType.equals(" ") ? GONE : View.VISIBLE);
                 Glide.with(context)
-                        .load(list.get(position).getMusicImg())
+                        .load(list.get(position).musicImg)
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().format(DecodeFormat.PREFER_RGB_565).diskCacheStrategy(DiskCacheStrategy.ALL))
                         .thumbnail(0.5f)
