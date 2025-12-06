@@ -67,11 +67,11 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
         getViewDataBinding().tvDate.setText(TimeUtil.getCurrentDateByMD());
         setTime();
 
-        if(!TextUtils.isEmpty(MusicPlayService.currentMusic.musicName)) {
-            getViewDataBinding().tvMusicName.setText(MusicPlayService.currentMusic.musicName);
+        if(!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicName)) {
+            getViewDataBinding().tvMusicName.setText(MusicPlayService.currentRoomPlayMusic.musicName);
         }
-        if(!TextUtils.isEmpty(MusicPlayService.currentMusic.musicSinger)) {
-            getViewDataBinding().tvMusicSinger.setText(MusicPlayService.currentMusic.musicSinger);
+        if(!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicSinger)) {
+            getViewDataBinding().tvMusicSinger.setText(MusicPlayService.currentRoomPlayMusic.musicSinger);
         }
 
         RequestOptions requestOptions = new RequestOptions();
@@ -79,10 +79,10 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
         //requestOptions.override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL); //关键代码，加载原始大小
         requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
 
-        if(MusicPlayService.currentMusic.musicImgBitmap != null) {
+        if(MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null) {
             Glide.with(this)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(MusicPlayService.currentMusic.musicImgBitmap)
+                    .load(MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
                     .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(getViewDataBinding().ivMusicImg);
