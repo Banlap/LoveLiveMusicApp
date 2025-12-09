@@ -21,6 +21,7 @@ import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
@@ -359,12 +360,13 @@ public class MainVM extends AndroidViewModel {
      * */
     public static void showRecommendData(Context context) {
 //        String recommendDate = SPUtil.getStrValue(context, SPUtil.RecommendDate);
-        String recommendDate = AppData.roomSettings.recommendDate;
+        String recommendDate = AppData.roomSettings != null ? AppData.roomSettings.recommendDate : "";
         if(!TextUtils.isEmpty(recommendDate) && !TimeUtil.isCheckTime(recommendDate, 24)) {
             //本地缓存列表
-            List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
-            if(!spList.isEmpty()){
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, spList));
+//            List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
+            List<RoomRecommendMusic> roomRecommendMusicList = AppData.roomRecommendMusicList;
+            if(!roomRecommendMusicList.isEmpty()){
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, roomRecommendMusicList));
             } else {
                 //获取最新的每日推荐数据
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_GET_DATA_RECOMMEND));

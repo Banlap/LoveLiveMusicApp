@@ -119,4 +119,16 @@ public class AppData {
             }
         }
     }
+
+    /**
+     * 删除所有歌曲数据后再保存每日推荐歌曲
+     * */
+    public static void saveRecommendList(List<RoomRecommendMusic> roomRecommendMusicList) {
+        BaseApplication.llMusicDatabase.recommendMusicDao().deleteAll();
+        if(!roomRecommendMusicList.isEmpty()) {
+            for(RoomRecommendMusic recommendMusic : roomRecommendMusicList) {
+                BaseApplication.llMusicDatabase.recommendMusicDao().insert(recommendMusic);
+            }
+        }
+    }
 }

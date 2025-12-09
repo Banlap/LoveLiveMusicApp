@@ -61,7 +61,8 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
 
         //是否显示启动动画
         //String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
-        String isLaunchVideo = AppData.roomSettings.closeLaunchVideo;
+        String isLaunchVideo = AppData.roomSettings != null ? AppData.roomSettings.closeLaunchVideo : "";
+
         if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
             runActivity();
             return;

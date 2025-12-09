@@ -7,6 +7,7 @@ import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.Version;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -72,23 +73,23 @@ public class MysqlHelper {
     }
 
     /** 查询所有数据 */
-    public List<Music> findMusicAll() {
+    public List<RoomPlayMusic> findMusicAll() {
         return findMusicBySql("select * from music");
     }
 
     /** 根据musicType查询数据 */
-    public List<Music> findMusicByMusicTypeSql(String musicType) {
+    public List<RoomPlayMusic> findMusicByMusicTypeSql(String musicType) {
         return findMusicBySql("select * from music where music_type = '" + musicType + "'");
     }
 
     /** 根据musicType和musicSinger查询数据 */
-    public List<Music> findMusicByMusicTypeAndMusicSingerSql(String musicType, String musicSinger) {
+    public List<RoomPlayMusic> findMusicByMusicTypeAndMusicSingerSql(String musicType, String musicSinger) {
         return findMusicBySql("select * from music where music_type = '" + musicType + "' and music_singer = '" + musicSinger + "'");
     }
 
     /** 根据MusicId查询数据 */
-    public List<Music> findMusicByMusicIdSql(String... musicId) {
-        List<Music> musicList = new ArrayList<>();
+    public List<RoomPlayMusic> findMusicByMusicIdSql(String... musicId) {
+        List<RoomPlayMusic> musicList = new ArrayList<>();
 
         if(musicId.length >0) {
             StringBuilder musicIdListStr = new StringBuilder();
@@ -111,7 +112,7 @@ public class MysqlHelper {
      * 随机查询数据
      * @param count 指定查询多少条
      * */
-    public List<Music> findMusicByRandomSql(int count) {
+    public List<RoomPlayMusic> findMusicByRandomSql(int count) {
         return findMusicBySql("select * from music where music_name != '' order by rand() limit " + count);
     }
 
@@ -137,8 +138,8 @@ public class MysqlHelper {
     }
 
     /** 通过sql查询music表数据 */
-    public List<Music> findMusicBySql(String sql) {
-        List<Music> musicList = new ArrayList<>();
+    public List<RoomPlayMusic> findMusicBySql(String sql) {
+        List<RoomPlayMusic> musicList = new ArrayList<>();
         try {
             Connection cn= connectDB();
             PreparedStatement ps = cn.prepareStatement(sql);
@@ -146,14 +147,14 @@ public class MysqlHelper {
             if(rs != null) {
                 //Log.i("MYSQL", "rs: " + rs.getMetaData().getColumnCount());
                 while (rs.next()) {
-                    Music music = new Music();
-                    music.setMusicId(rs.getInt("music_id"));
-                    music.setMusicType(rs.getString("music_type"));
-                    music.setMusicName(rs.getString("music_name"));
-                    music.setMusicSinger(rs.getString("music_singer"));
-                    music.setMusicImg(rs.getString("music_img"));
-                    music.setMusicURL(rs.getString("music_url"));
-                    music.setMusicLyric(rs.getString("music_lyric"));
+                    RoomPlayMusic music = new RoomPlayMusic();
+                    music.musicId = rs.getInt("music_id");
+                    music.musicType = rs.getString("music_type");
+                    music.musicName = rs.getString("music_name");
+                    music.musicSinger = rs.getString("music_singer");
+                    music.musicImg = rs.getString("music_img");
+                    music.musicURL = rs.getString("music_url");
+                    music.musicLyric = rs.getString("music_lyric");
                     musicList.add(music);
                 }
                 rs.close();

@@ -173,56 +173,7 @@ public class BaseApplication extends Application {
                 .errorActivity(CustomErrorActivity.class)
                 .apply();
 
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                //初始化本地数据库
-                llMusicDatabase = LLMusicDatabase.getInstance(getApplicationContext());
-                //获取当前app配置
-                RoomSettings roomSettings = llMusicDatabase.settingsDao().getFirstData();
-                if (roomSettings != null) {
-                    AppData.roomSettings = roomSettings;
-                } else {
-                    AppData.saveRoomSettings(settings -> {
-                        //保存默认参数
-                        settings.saveControllerScene = SPUtil.SaveControllerSceneValue_NewScene;
-                        settings.isBGScene = "0";
-                    });
-                }
-                List<RoomPlayMusic> roomPlayMusicList = llMusicDatabase.musicDao().getAllMusic();
-                if(!roomPlayMusicList.isEmpty()) {
-                    AppData.roomPlayMusicList.addAll(roomPlayMusicList);
-                } else {
-                    AppData.roomPlayMusicList = new ArrayList<>();
-                }
-                List<RoomCustomPlay> roomCustomPlayList = llMusicDatabase.customPlayDao().getAllCustomPlay();
-                if(!roomCustomPlayList.isEmpty()) {
-                    AppData.roomCustomPlayList.addAll(roomCustomPlayList);
-                } else {
-                    AppData.roomCustomPlayList = new ArrayList<>();
-                }
-                List<RoomFavoriteMusic> roomFavoriteMusics = llMusicDatabase.favoriteMusicDao().getAllMusic();
-                if(!roomFavoriteMusics.isEmpty()) {
-                    AppData.roomFavoriteMusicList.addAll(roomFavoriteMusics);
-                } else {
-                    AppData.roomFavoriteMusicList = new ArrayList<>();
-                }
-
-                List<RoomLocalFile> roomLocalFileList = llMusicDatabase.localFileDao().getAllMusic();
-                if(!roomLocalFileList.isEmpty()) {
-                    AppData.roomLocalFileList.addAll(roomLocalFileList);
-                } else {
-                    AppData.roomLocalFileList = new ArrayList<>();
-                }
-
-                List<RoomRecommendMusic> roomRecommendMusicList = llMusicDatabase.recommendMusicDao().getAllMusic();
-                if(!roomRecommendMusicList.isEmpty()) {
-                    AppData.roomRecommendMusicList.addAll(roomRecommendMusicList);
-                } else {
-                    AppData.roomRecommendMusicList = new ArrayList<>();
-                }
-            }
-        });
+        initRoomData();
 
         //注册ActivityLifecycleCallbacks
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
@@ -278,6 +229,58 @@ public class BaseApplication extends Application {
 
     }
 
+    /**
+     * 初始化Room数据
+     * */
+    private void initRoomData() {
+        AppExecutors.getInstance().diskIO().execute(() -> {
+            //初始化本地数据库
+            llMusicDatabase = LLMusicDatabase.getInstance(getApplicationContext());
+            //获取当前app配置
+            RoomSettings roomSettings = llMusicDatabase.settingsDao().getFirstData();
+            if (roomSettings != null) {
+                AppData.roomSettings = roomSettings;
+            } else {
+                AppData.saveRoomSettings(settings -> {
+                    //保存默认参数
+                    settings.saveControllerScene = SPUtil.SaveControllerSceneValue_NewScene;
+                    settings.isBGScene = "0";
+                });
+            }
+            List<RoomPlayMusic> roomPlayMusicList = llMusicDatabase.musicDao().getAllMusic();
+            if(!roomPlayMusicList.isEmpty()) {
+                AppData.roomPlayMusicList.addAll(roomPlayMusicList);
+            } else {
+                AppData.roomPlayMusicList = new ArrayList<>();
+            }
+            List<RoomCustomPlay> roomCustomPlayList = llMusicDatabase.customPlayDao().getAllCustomPlay();
+            if(!roomCustomPlayList.isEmpty()) {
+                AppData.roomCustomPlayList.addAll(roomCustomPlayList);
+            } else {
+                AppData.roomCustomPlayList = new ArrayList<>();
+            }
+            List<RoomFavoriteMusic> roomFavoriteMusics = llMusicDatabase.favoriteMusicDao().getAllMusic();
+            if(!roomFavoriteMusics.isEmpty()) {
+                AppData.roomFavoriteMusicList.addAll(roomFavoriteMusics);
+            } else {
+                AppData.roomFavoriteMusicList = new ArrayList<>();
+            }
+
+            List<RoomLocalFile> roomLocalFileList = llMusicDatabase.localFileDao().getAllMusic();
+            if(!roomLocalFileList.isEmpty()) {
+                AppData.roomLocalFileList.addAll(roomLocalFileList);
+            } else {
+                AppData.roomLocalFileList = new ArrayList<>();
+            }
+
+            List<RoomRecommendMusic> roomRecommendMusicList = llMusicDatabase.recommendMusicDao().getAllMusic();
+            if(!roomRecommendMusicList.isEmpty()) {
+                AppData.roomRecommendMusicList.addAll(roomRecommendMusicList);
+            } else {
+                AppData.roomRecommendMusicList = new ArrayList<>();
+            }
+        });
+    }
 
     /**
      * 音乐播放缓存目录的设置

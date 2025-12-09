@@ -1039,8 +1039,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 Toasty.error(this, "网络连接失败", Toast.LENGTH_SHORT, true).show();
                 break;
             case ThreadEvent.VIEW_GET_ALBUM_LIST_SUCCESS:
+                if(event.tList == null || event.tList.isEmpty()) {
+                    return;
+                }
                 roomOnlineMusicList.clear();
-                roomOnlineMusicList.addAll(event.musicList);
+                roomOnlineMusicList.addAll(event.tList);
                 roomOnlineMusicList.addAll(AppMusic.getInstance().getNullMusicData());
                 musicListAdapter.notifyDataSetChanged();
                 sortList(0);
