@@ -60,7 +60,6 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
         }
 
         //是否显示启动动画
-        //String isLaunchVideo = SPUtil.getStrValue(getApplicationContext(), SPUtil.CloseLaunchVideo);
         String isLaunchVideo = AppData.roomSettings != null ? AppData.roomSettings.closeLaunchVideo : "";
 
         if(!TextUtils.isEmpty(isLaunchVideo) && "0".equals(isLaunchVideo)) {
@@ -76,9 +75,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
      * 进入页面
      * */
     private void runActivity() {
-
         Log.i(TAG, "isPad: " + SystemUtil.isPad(getApplication()));
-//        Log.i(TAG, "isNavBarVisible: " + SystemUtil.isNavBarVisible(getWindow()));
 
         //判断设备是否pad，ps需要考虑通知栏点击和小组件点击 也需要判断
         //Intent intent = new Intent(getApplication(), SystemUtil.isPad(getApplication())? PadMainActivity.class : MainActivity.class);
@@ -108,8 +105,7 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     private void initVideo() {
         setDimension();
         //判断是否使用了自定义启动动画
-        //String launchVideoPath = SPUtil.getStrValue(getApplicationContext(), SPUtil.LaunchVideoPath);
-        String launchVideoPath = AppData.roomSettings.launchVideoPath;
+        String launchVideoPath =  AppData.roomSettings != null ? AppData.roomSettings.launchVideoPath : "";
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.welcomeliella);
         if(!TextUtils.isEmpty(launchVideoPath)) {
             uri = Uri.parse(launchVideoPath);

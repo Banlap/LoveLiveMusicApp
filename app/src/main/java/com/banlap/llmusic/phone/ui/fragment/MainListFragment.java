@@ -59,6 +59,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         EventBus.getDefault().register(this);
         initRequestOptions();
         //updateMusicNew();
+        roomPlayMusicList = new ArrayList<>();
     }
 
     private void updateMusicNew() {
@@ -147,15 +148,15 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         switch (event.msgCode) {
             case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
                 if(!event.tList.isEmpty()) {
-                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<RoomRecommendMusic>(event.tList);
-                    String data = Converters.fromRecommendMusicList(roomRecommendMusicList);
-                    List<RoomPlayMusic> playMusicList = Converters.toPlayMusicList(data);
+                    List<RoomPlayMusic> playMusicList = new ArrayList<RoomPlayMusic>(event.tList);
+                    String data = Converters.fromPlayMusicList(playMusicList);
+                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>();
+                    roomRecommendMusicList.addAll(Converters.toRecommendMusicList(data));
 
-                    if(playMusicList != null && !playMusicList.isEmpty()) {
+                    if(!playMusicList.isEmpty()) {
                         roomPlayMusicList.clear();
                         roomPlayMusicList.addAll(playMusicList);
 
-                        //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.RecommendListData, recommendList);
                         AppExecutors.getInstance().diskIO().execute(new Runnable() {
                             @Override
                             public void run() {

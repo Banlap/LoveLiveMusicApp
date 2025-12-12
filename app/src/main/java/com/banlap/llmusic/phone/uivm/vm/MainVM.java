@@ -359,11 +359,9 @@ public class MainVM extends AndroidViewModel {
      * 展示每日推荐
      * */
     public static void showRecommendData(Context context) {
-//        String recommendDate = SPUtil.getStrValue(context, SPUtil.RecommendDate);
         String recommendDate = AppData.roomSettings != null ? AppData.roomSettings.recommendDate : "";
         if(!TextUtils.isEmpty(recommendDate) && !TimeUtil.isCheckTime(recommendDate, 24)) {
             //本地缓存列表
-//            List<Music> spList = SPUtil.getListValue(context, SPUtil.RecommendListData, Music.class);
             List<RoomRecommendMusic> roomRecommendMusicList = AppData.roomRecommendMusicList;
             if(!roomRecommendMusicList.isEmpty()){
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, roomRecommendMusicList));

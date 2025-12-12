@@ -71,4 +71,14 @@ public class Converters {
         return gson.toJson(musicList, type);
     }
 
+    @TypeConverter
+    public static List<RoomRecommendMusic> toRecommendMusicList(String musicListString) {
+        if (musicListString == null) {
+            return null;
+        }
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<RoomRecommendMusic>>() {}.getType();
+        return gson.fromJson(musicListString, type);
+    }
+
 }
