@@ -1417,6 +1417,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_MSG:
+                MusicPlayService.currentRoomPlayMusic = event.roomPlayMusic;
+
                 lyricScrollView.initView();
                 lyricNewScrollView.initView();
                 lyricNewScrollDetailView.initView();
@@ -1456,24 +1458,23 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
                 getViewDataBinding().tvNewAllTime.setText(TimeUtil.rebuildTime(event.i));
-                String musicName = event.music.musicName;
+                String musicName = MusicPlayService.currentRoomPlayMusic.musicName;
                 getViewDataBinding().tvMusicName.setText(musicName);
                 getViewDataBinding().tvNewMusicName.setText(musicName);
                 getViewDataBinding().tvNewPlayMusicName.setText(musicName);
-                getViewDataBinding().tvSingerName.setText(event.music.musicSinger);
-                getViewDataBinding().tvNewSingerName.setText(event.music.musicSinger);
+                getViewDataBinding().tvSingerName.setText(MusicPlayService.currentRoomPlayMusic.musicSinger);
+                getViewDataBinding().tvNewSingerName.setText(MusicPlayService.currentRoomPlayMusic.musicSinger);
                 getViewDataBinding().tvListSize.setText("(" + roomPlayMusicList.size() + ")");
                 getViewDataBinding().tvNewListSize.setText("(" + roomPlayMusicList.size() + ")");
-                MusicPlayService.currentRoomPlayMusic = event.roomPlayMusic;
 
                 //刷新播放列表的收藏歌曲显示ui
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
 
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load(event.music.isLocal?
-                                (null != event.music.musicImgByte?
-                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : event.music.getMusicImg()
+                        .load(MusicPlayService.currentRoomPlayMusic.isLocal?
+                                (null != MusicPlayService.currentRoomPlayMusic.musicImgByte?
+                                        BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1481,7 +1482,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
 
                 //变更主题
-                ThemeHelper.getInstance().musicBarMusicImgTheme(this, rThemeId, getViewDataBinding(), event.music);
+                ThemeHelper.getInstance().musicBarMusicImgTheme(this, rThemeId, getViewDataBinding(), MusicPlayService.currentRoomPlayMusic);
 
                 if (objectAnimator != null) {
                     objectAnimator.cancel();
@@ -1495,27 +1496,27 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 isClickNextOrLastLoading = false;
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    if(event.music.isLocal) {
-                        if(event.music.musicImgByte != null) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
+                    if(MusicPlayService.currentRoomPlayMusic.isLocal) {
+                        if(MusicPlayService.currentRoomPlayMusic.musicImgByte != null) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length);
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, bitmap, true));
                         } else {
                             MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
-                            startMusicService(true, event.music.musicName, event.music.musicSinger, null);
+                            startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, null);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
                     } else {
-                        if(!event.music.musicImg.isEmpty()) {
+                        if(!MusicPlayService.currentRoomPlayMusic.musicImg.isEmpty()) {
                             //重复调用，在initNotificationHelper中有调用
                             //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
                             MusicPlayService.currentRoomPlayMusic.musicImg = "";
-                            startMusicService(true, event.music.musicName, event.music.musicSinger, event.music.musicImgByte != null? BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : null);
+                            startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, event.music.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte != null? BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : null);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
                     }
                 }
-                initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg, event.music.musicImgByte != null? BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : null);
+                initNotificationHelper(MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, MusicPlayService.currentRoomPlayMusic.musicImgByte != null? BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : null);
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
                 MusicPlayService.currentRoomPlayMusic.musicName = event.str;

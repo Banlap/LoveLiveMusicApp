@@ -49,6 +49,7 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
     @Override
     protected void initData() {
         initRequestOptions();
+        roomPlayMusicList = new ArrayList<>();
     }
 
     private void initRequestOptions() {
@@ -121,12 +122,15 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
         switch (event.msgCode) {
             case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
                 if(!event.tList.isEmpty()) {
-                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(event.tList);
+                    List<RoomPlayMusic> playMusicList = new ArrayList<RoomPlayMusic>(event.tList);
+                    String data = Converters.fromPlayMusicList(playMusicList);
+                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(Converters.toRecommendMusicList(data));
+
                     if(roomRecommendMusicList.isEmpty()) {
                         return;
                     }
-                    String data = Converters.fromRecommendMusicList(roomRecommendMusicList);
-                    roomPlayMusicList = Converters.toPlayMusicList(data);
+
+                    roomPlayMusicList.addAll(playMusicList);
                     if(roomPlayMusicList == null || roomPlayMusicList.isEmpty()) {
                         return;
                     }

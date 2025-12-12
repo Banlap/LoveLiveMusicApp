@@ -10,6 +10,7 @@ import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.sql.room.RoomSettings;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -21,6 +22,18 @@ public class AppData {
     public static List<RoomLocalFile> roomLocalFileList; //本地文件列表
     public static List<RoomCustomPlay> roomCustomPlayList; //自建歌单列表
     public static List<RoomRecommendMusic> roomRecommendMusicList; //每日推荐歌单列表
+
+    /**
+     * 初始化参数
+     * */
+    public static void init() {
+        roomSettings = new RoomSettings();
+        roomPlayMusicList = new ArrayList<>();
+        roomFavoriteMusicList = new ArrayList<>();
+        roomLocalFileList = new ArrayList<>();
+        roomCustomPlayList = new ArrayList<>();
+        roomRecommendMusicList = new ArrayList<>();
+    }
 
     /**
      * 保存settings各种参数

@@ -236,6 +236,8 @@ public class BaseApplication extends Application {
         AppExecutors.getInstance().diskIO().execute(() -> {
             //初始化本地数据库
             llMusicDatabase = LLMusicDatabase.getInstance(getApplicationContext());
+            //初始化数据
+            AppData.init();
             //获取当前app配置
             RoomSettings roomSettings = llMusicDatabase.settingsDao().getFirstData();
             if (roomSettings != null) {
@@ -247,37 +249,30 @@ public class BaseApplication extends Application {
                     settings.isBGScene = "0";
                 });
             }
+
             List<RoomPlayMusic> roomPlayMusicList = llMusicDatabase.musicDao().getAllMusic();
             if(!roomPlayMusicList.isEmpty()) {
                 AppData.roomPlayMusicList.addAll(roomPlayMusicList);
-            } else {
-                AppData.roomPlayMusicList = new ArrayList<>();
             }
+
             List<RoomCustomPlay> roomCustomPlayList = llMusicDatabase.customPlayDao().getAllCustomPlay();
             if(!roomCustomPlayList.isEmpty()) {
                 AppData.roomCustomPlayList.addAll(roomCustomPlayList);
-            } else {
-                AppData.roomCustomPlayList = new ArrayList<>();
             }
+
             List<RoomFavoriteMusic> roomFavoriteMusics = llMusicDatabase.favoriteMusicDao().getAllMusic();
             if(!roomFavoriteMusics.isEmpty()) {
                 AppData.roomFavoriteMusicList.addAll(roomFavoriteMusics);
-            } else {
-                AppData.roomFavoriteMusicList = new ArrayList<>();
             }
 
             List<RoomLocalFile> roomLocalFileList = llMusicDatabase.localFileDao().getAllMusic();
             if(!roomLocalFileList.isEmpty()) {
                 AppData.roomLocalFileList.addAll(roomLocalFileList);
-            } else {
-                AppData.roomLocalFileList = new ArrayList<>();
             }
 
             List<RoomRecommendMusic> roomRecommendMusicList = llMusicDatabase.recommendMusicDao().getAllMusic();
             if(!roomRecommendMusicList.isEmpty()) {
                 AppData.roomRecommendMusicList.addAll(roomRecommendMusicList);
-            } else {
-                AppData.roomRecommendMusicList = new ArrayList<>();
             }
         });
     }

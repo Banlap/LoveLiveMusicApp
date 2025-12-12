@@ -36,6 +36,7 @@ import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
@@ -1552,7 +1553,7 @@ public class ThemeHelper {
     /**
      * MainActivity主题改变 - 播放控制器圆型图片ui
      * */
-    public void musicBarMusicImgTheme(Context context, int rThemeId, ActivityMainBinding vdb, Music music) {
+    public void musicBarMusicImgTheme(Context context, int rThemeId, ActivityMainBinding vdb, RoomPlayMusic music) {
         if(requestOptions == null) {
             requestOptions = new RequestOptions();
             requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
@@ -1565,7 +1566,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1574,7 +1575,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1584,7 +1585,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1593,7 +1594,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1603,7 +1604,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1612,7 +1613,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1622,7 +1623,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple_light)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1631,7 +1632,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple_light)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1641,7 +1642,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1650,7 +1651,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1660,7 +1661,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal ?
                             (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1669,7 +1670,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal ?
                             (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1679,7 +1680,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal ?
                             (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1688,7 +1689,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal ?
                             (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1698,7 +1699,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1707,7 +1708,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1717,7 +1718,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1726,7 +1727,7 @@ public class ThemeHelper {
                     .setDefaultRequestOptions(requestOptions)
                     .load(music.isLocal?
                             (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.getMusicImg()
+                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))

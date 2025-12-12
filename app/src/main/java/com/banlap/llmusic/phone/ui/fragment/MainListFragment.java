@@ -150,8 +150,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                 if(!event.tList.isEmpty()) {
                     List<RoomPlayMusic> playMusicList = new ArrayList<RoomPlayMusic>(event.tList);
                     String data = Converters.fromPlayMusicList(playMusicList);
-                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>();
-                    roomRecommendMusicList.addAll(Converters.toRecommendMusicList(data));
+                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(Converters.toRecommendMusicList(data));
 
                     if(!playMusicList.isEmpty()) {
                         roomPlayMusicList.clear();
