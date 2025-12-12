@@ -1098,6 +1098,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 break;
 
             case ThreadEvent.VIEW_MUSIC_MSG:  //点击播放歌曲后处理
+                MusicPlayService.currentRoomPlayMusic = event.roomPlayMusic;
 //                lyricScrollView.initView();
                 lyricNewScrollView.initView();
                 lyricNewScrollDetailView.initView();
@@ -1129,18 +1130,16 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
 //                getViewDataBinding().tvAllTime.setText(getViewModel().rebuildTime(event.i));
                 getViewDataBinding().tvNewAllTime.setText(TimeUtil.rebuildTime(event.i));
-                String musicName = event.music.musicName;
+                String musicName = MusicPlayService.currentRoomPlayMusic.musicName;
                 getViewDataBinding().tvMusicName.setText(musicName);
                 getViewDataBinding().tvNewMusicName.setText(musicName);
 //                getViewDataBinding().tvNewPlayMusicName.setText(musicName);
-                getViewDataBinding().tvSingerName.setText(event.music.musicSinger);
-                getViewDataBinding().tvNewSingerName.setText(event.music.musicSinger);
+                getViewDataBinding().tvSingerName.setText(MusicPlayService.currentRoomPlayMusic.musicSinger);
+                getViewDataBinding().tvNewSingerName.setText(MusicPlayService.currentRoomPlayMusic.musicSinger);
 //                getViewDataBinding().tvListSize.setText("(" + playList.size() + ")");
                 String size = "(" + roomPlayMusicList.size() + ")";
                 getViewDataBinding().tvNewListSize.setText(size);
                 getViewDataBinding().tvDetailNewListSize.setText(size);
-
-                MusicPlayService.currentRoomPlayMusic = event.roomPlayMusic;
 
 
                 //刷新播放列表的收藏歌曲显示ui
@@ -1148,9 +1147,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load(event.music.isLocal?
-                                (null != event.music.musicImgByte?
-                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : event.music.getMusicImg()
+                        .load(MusicPlayService.currentRoomPlayMusic.isLocal?
+                                (null != MusicPlayService.currentRoomPlayMusic.musicImgByte?
+                                        BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1158,9 +1157,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load(event.music.isLocal?
-                                (null != event.music.musicImgByte?
-                                        BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : event.music.getMusicImg()
+                        .load(MusicPlayService.currentRoomPlayMusic.isLocal?
+                                (null != MusicPlayService.currentRoomPlayMusic.musicImgByte?
+                                        BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1180,26 +1179,26 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 //                objectAnimator.start();
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    if(event.music.isLocal) {
-                        if(null != event.music.musicImgByte) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(event.music.musicImgByte, 0, event.music.musicImgByte.length);
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, bitmap, true));
+                    if(MusicPlayService.currentRoomPlayMusic.isLocal) {
+                        if(null != MusicPlayService.currentRoomPlayMusic.musicImgByte) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length);
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, bitmap, true));
                         } else {
                             MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
-                            startMusicService(true, event.music.musicName, event.music.musicSinger, null);
+                            startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, null);
                             MusicPlayService.updateWidgetUI(context, false);
                         }
                     } else {
-                        if(!event.music.musicImg.isEmpty()) {
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
+                        if(!MusicPlayService.currentRoomPlayMusic.musicImg.isEmpty()) {
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, null, false));
                         } else {
                             MusicPlayService.currentRoomPlayMusic.musicImg = "";
-                            startMusicService(true, event.music.musicName, event.music.musicSinger, null);
+                            startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, null);
                             MusicPlayService.updateWidgetUI(context, false);
                         }
                     }
                 }
-                initNotificationHelper(event.music.musicName, event.music.musicSinger, event.music.musicImg);
+                initNotificationHelper(MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg);
                 break;
             case ThreadEvent.THREAD_SHOW_IMAGE_URL:  //设置状态栏显示对应图片
                 if(event.b) {
