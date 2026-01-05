@@ -148,48 +148,53 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
         switch (event.msgCode) {
             case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
                 if(!event.tList.isEmpty()) {
-                    List<RoomPlayMusic> playMusicList = new ArrayList<RoomPlayMusic>(event.tList);
-                    String data = Converters.fromPlayMusicList(playMusicList);
-                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(Converters.toRecommendMusicList(data));
+                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(event.tList);
+                    String data = Converters.fromRecommendMusicList(roomRecommendMusicList);
+                    List<RoomPlayMusic> playMusicList = new ArrayList<>(Converters.toPlayMusicList(data));
 
-                    if(!playMusicList.isEmpty()) {
-                        roomPlayMusicList.clear();
-                        roomPlayMusicList.addAll(playMusicList);
-
-                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                AppData.saveRecommendList(roomRecommendMusicList);
-                            }
-                        });
-
-                        Glide.with(LLActivityManager.getInstance().getTopActivity())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(roomRecommendMusicList.get(0).musicImg)
-                                .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivRecommend1);
-
-                        getViewDataBinding().tvRecommend1.setText(roomRecommendMusicList.get(0).musicName);
-
-                        Glide.with(LLActivityManager.getInstance().getTopActivity())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(roomRecommendMusicList.get(1).musicImg)
-                                .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivRecommend2);
-
-                        getViewDataBinding().tvRecommend2.setText(roomRecommendMusicList.get(1).musicName);
-
-                        Glide.with(LLActivityManager.getInstance().getTopActivity())
-                                .setDefaultRequestOptions(requestOptions)
-                                .load(roomRecommendMusicList.get(2).musicImg)
-                                .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
-                                .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                                .into(getViewDataBinding().ivRecommend3);
-
-                        getViewDataBinding().tvRecommend3.setText(roomRecommendMusicList.get(2).musicName);
+                    if(roomRecommendMusicList.isEmpty()) {
+                        return;
                     }
+
+                    roomPlayMusicList.clear();
+                    roomPlayMusicList.addAll(playMusicList);
+                    if(roomPlayMusicList == null || roomPlayMusicList.isEmpty()) {
+                        return;
+                    }
+
+                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppData.saveRecommendList(roomRecommendMusicList);
+                        }
+                    });
+
+                    Glide.with(LLActivityManager.getInstance().getTopActivity())
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(roomPlayMusicList.get(0).musicImg)
+                            .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .into(getViewDataBinding().ivRecommend1);
+
+                    getViewDataBinding().tvRecommend1.setText(roomPlayMusicList.get(0).musicName);
+
+                    Glide.with(LLActivityManager.getInstance().getTopActivity())
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(roomPlayMusicList.get(1).musicImg)
+                            .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .into(getViewDataBinding().ivRecommend2);
+
+                    getViewDataBinding().tvRecommend2.setText(roomPlayMusicList.get(1).musicName);
+
+                    Glide.with(LLActivityManager.getInstance().getTopActivity())
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(roomPlayMusicList.get(2).musicImg)
+                            .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .into(getViewDataBinding().ivRecommend3);
+
+                    getViewDataBinding().tvRecommend3.setText(roomPlayMusicList.get(2).musicName);
                 }
                 break;
             case ThreadEvent.VIEW_GET_TOTAL_LIELLA_SUCCESS:

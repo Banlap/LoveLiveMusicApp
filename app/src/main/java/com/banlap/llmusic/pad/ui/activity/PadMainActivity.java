@@ -1030,7 +1030,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.VIEW_PAD_PLAY_MUSIC:
-                if(event.tList.size()>0) {
+                if(!event.tList.isEmpty()) {
                     playMusic(event.tList, event.i);
                 }
                 break;

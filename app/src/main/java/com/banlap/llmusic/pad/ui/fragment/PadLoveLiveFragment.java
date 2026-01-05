@@ -122,18 +122,20 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
         switch (event.msgCode) {
             case ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS:
                 if(!event.tList.isEmpty()) {
-                    List<RoomPlayMusic> playMusicList = new ArrayList<RoomPlayMusic>(event.tList);
-                    String data = Converters.fromPlayMusicList(playMusicList);
-                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(Converters.toRecommendMusicList(data));
+                    List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(event.tList);
+                    String data = Converters.fromRecommendMusicList(roomRecommendMusicList);
+                    List<RoomPlayMusic> playMusicList = new ArrayList<>(Converters.toPlayMusicList(data));
 
                     if(roomRecommendMusicList.isEmpty()) {
                         return;
                     }
 
+                    roomPlayMusicList.clear();
                     roomPlayMusicList.addAll(playMusicList);
                     if(roomPlayMusicList == null || roomPlayMusicList.isEmpty()) {
                         return;
                     }
+
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
