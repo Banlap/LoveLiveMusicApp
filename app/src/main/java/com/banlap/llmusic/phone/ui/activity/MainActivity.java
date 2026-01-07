@@ -108,6 +108,7 @@ import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomCustomPlay;
 import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.BluetoothUtil;
@@ -1929,7 +1930,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 EventBus.getDefault().post(new ThreadEvent<Version>(ThreadEvent.THREAD_GET_APP_VERSION_SUCCESS, MysqlHelper.getInstance().findVersionSql(),""));
                 break;
             case ThreadEvent.THREAD_GET_DATA_RECOMMEND:
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, MysqlHelper.getInstance().findMusicByRandomSql(3)));
+                List<RoomPlayMusic> playMusicList = new ArrayList<>(MysqlHelper.getInstance().findMusicByRandomSql(3));
+                String data = Converters.fromPlayMusicList(playMusicList);
+                List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(Converters.toRecommendMusicList(data));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, roomRecommendMusicList));
                 break;
             case ThreadEvent.THREAD_GET_TOTAL_LIELLA:
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_TOTAL_LIELLA_SUCCESS, ThreadEvent.ALBUM_LIELLA, MysqlHelper.getInstance().findMusicByMusicTypeCount(MysqlHelper.MUSIC_TYPE_LIELLA)));

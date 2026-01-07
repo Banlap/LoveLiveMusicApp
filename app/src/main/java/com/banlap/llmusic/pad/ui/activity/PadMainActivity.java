@@ -80,7 +80,9 @@ import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.phone.uivm.vm.MainVM;
+import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
@@ -1434,7 +1436,10 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 EventBus.getDefault().post(new ThreadEvent<Version>(ThreadEvent.THREAD_GET_APP_VERSION_SUCCESS, MysqlHelper.getInstance().findVersionSql(),""));
                 break;
             case ThreadEvent.THREAD_GET_DATA_RECOMMEND:
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, MysqlHelper.getInstance().findMusicByRandomSql(3)));
+                List<RoomPlayMusic> playMusicList = new ArrayList<>(MysqlHelper.getInstance().findMusicByRandomSql(3));
+                String data = Converters.fromPlayMusicList(playMusicList);
+                List<RoomRecommendMusic> roomRecommendMusicList = new ArrayList<>(Converters.toRecommendMusicList(data));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_RECOMMEND_SUCCESS, roomRecommendMusicList));
                 break;
             case ThreadEvent.THREAD_DOWNLOAD_APP_BY_SETTINGS:
                 String[] permissions_download = { Manifest.permission.WRITE_EXTERNAL_STORAGE };

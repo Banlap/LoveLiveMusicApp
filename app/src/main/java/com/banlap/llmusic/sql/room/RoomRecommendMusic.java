@@ -38,7 +38,7 @@ public class RoomRecommendMusic {
     public int musicFavorite;
     @Ignore
     public boolean isPlaying;
-    @Ignore
+    @ColumnInfo(name = "is_local")
     public boolean isLocal;
     @Ignore
     public boolean isDelete;
