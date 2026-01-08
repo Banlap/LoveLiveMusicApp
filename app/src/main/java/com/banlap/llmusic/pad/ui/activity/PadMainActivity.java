@@ -513,7 +513,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
     public class ButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            if(isDoubleClick()) { return; }
+            if(isDoubleClick()) { return;}
             if(v.getId() == R.id.ll_music_controller_bar) {
                 isIntoMusicController = true;
                 ObjectAnimator animator = MyAnimationUtil.objectAnimatorUpOrDown(activity, false, deviceMaxHeight, getViewDataBinding().clController);
@@ -1037,7 +1037,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.THREAD_GET_MUSIC_LYRIC:
-                getViewModel().showLyric(event.music, event.b);
+                getViewModel().showLyric(event.roomPlayMusic, event.b);
                 break;
             case ThreadEvent.VIEW_LYRIC:
                 if(null != event.tList) {
@@ -1245,7 +1245,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 lastOrNextMusic(false);
                 break;
             case ThreadEvent.VIEW_PLAY_LIST_FIRST:
-                if(isDoubleClick()) { return; }
                 if(!roomPlayMusicList.isEmpty()) {
                     binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
                     roomPlayMusicList.get(0).isPlaying = true;

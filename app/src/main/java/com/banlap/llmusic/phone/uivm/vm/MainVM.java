@@ -135,82 +135,87 @@ public class MainVM extends AndroidViewModel {
     /** 获取歌词文本 */
     public void showLyric(RoomPlayMusic dataSource, final boolean isLoop) {
         List<MusicLyric> musicLyricList = new ArrayList<>();
-        String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
-        if(!lyricUrl.equals("")) {
-            OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
-                @Override
-                public void onSuccess(Response response) {
-                    try {
-                        StringBuilder ly= new StringBuilder();   //歌词文本
-                        StringBuilder lyWithoutTime= new StringBuilder();   //歌词文本
-                        InputStream is = response.body().byteStream();
-                        if (is != null) {
-                            InputStreamReader inputreader = new InputStreamReader(is);
-                            BufferedReader buffreader = new BufferedReader(inputreader);
-                            String line;
-                            int id=0;
-                            //分行读取
-                            while (( line = buffreader.readLine()) != null) {
-                                ly.append(line).append("\n");
-                                lyWithoutTime.append(line.substring(line.indexOf("]") + 1)).append("\n");
+        if(dataSource != null) {
+            String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
+            if(!lyricUrl.equals("")) {
+                OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
+                    @Override
+                    public void onSuccess(Response response) {
+                        try {
+                            StringBuilder ly= new StringBuilder();   //歌词文本
+                            StringBuilder lyWithoutTime= new StringBuilder();   //歌词文本
+                            InputStream is = response.body().byteStream();
+                            if (is != null) {
+                                InputStreamReader inputreader = new InputStreamReader(is);
+                                BufferedReader buffreader = new BufferedReader(inputreader);
+                                String line;
+                                int id=0;
+                                //分行读取
+                                while (( line = buffreader.readLine()) != null) {
+                                    ly.append(line).append("\n");
+                                    lyWithoutTime.append(line.substring(line.indexOf("]") + 1)).append("\n");
 
-                                if(!line.isEmpty()) {
-                                    String time = "", lyric="";
-                                    if("[".equals(line.substring(0,1))) {
-                                        time = line.substring(line.indexOf("[")+1, line.indexOf("]"));
-                                        lyric = line.substring(line.indexOf("]")+1);
-                                    } else {
-                                        lyric = line;
-                                    }
-                                    if(!lyric.isEmpty() && !lyric.trim().isEmpty()) {
-                                        MusicLyric musicLyric = new MusicLyric();
-                                        boolean isSetLyric = false;
-                                        if(!time.isEmpty()) {
-                                            if(!musicLyricList.isEmpty()) {
-                                                for(int i=0; i< musicLyricList.size(); i++) {
-                                                    if(!"00:00".equals(time)) {
-                                                        if(time.equals(musicLyricList.get(i).lyricTime)) {
-                                                            musicLyricList.get(i).setLyricContext2(lyric);
-                                                            isSetLyric = true;
-                                                            break;
+                                    if(!line.isEmpty()) {
+                                        String time = "", lyric="";
+                                        if("[".equals(line.substring(0,1))) {
+                                            time = line.substring(line.indexOf("[")+1, line.indexOf("]"));
+                                            lyric = line.substring(line.indexOf("]")+1);
+                                        } else {
+                                            lyric = line;
+                                        }
+                                        if(!lyric.isEmpty() && !lyric.trim().isEmpty()) {
+                                            MusicLyric musicLyric = new MusicLyric();
+                                            boolean isSetLyric = false;
+                                            if(!time.isEmpty()) {
+                                                if(!musicLyricList.isEmpty()) {
+                                                    for(int i=0; i< musicLyricList.size(); i++) {
+                                                        if(!"00:00".equals(time)) {
+                                                            if(time.equals(musicLyricList.get(i).lyricTime)) {
+                                                                musicLyricList.get(i).setLyricContext2(lyric);
+                                                                isSetLyric = true;
+                                                                break;
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
 
-                                        if(!isSetLyric) {
-                                            musicLyric.setLyricId(id++);
-                                            musicLyric.setLyricTime(time);
-                                            musicLyric.setLyricContext(lyric);
-                                            musicLyric.setLyricContext2("");
-                                            musicLyricList.add(musicLyric);
-                                            if(musicLyricList.size() >1) {
-                                                musicLyricList.get(musicLyricList.size() -2).setLyricEndTime(time);
+                                            if(!isSetLyric) {
+                                                musicLyric.setLyricId(id++);
+                                                musicLyric.setLyricTime(time);
+                                                musicLyric.setLyricContext(lyric);
+                                                musicLyric.setLyricContext2("");
+                                                musicLyricList.add(musicLyric);
+                                                if(musicLyricList.size() >1) {
+                                                    musicLyricList.get(musicLyricList.size() -2).setLyricEndTime(time);
+                                                }
                                             }
-                                        }
 
+                                        }
                                     }
                                 }
+                                is.close();
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly.toString(), lyWithoutTime.toString(), musicLyricList));
                             }
-                            is.close();
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly.toString(), lyWithoutTime.toString(), musicLyricList));
+                        } catch (Exception e) {
+                            Log.i("ABMediaPlay", "http error " + e.getMessage());
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        Log.i("ABMediaPlay", "http error " + e.getMessage());
-                        e.printStackTrace();
                     }
-                }
 
-                @Override
-                public void onError(String e) {
-                    Log.i("ABMediaPlay", "error: " + e);
-                    EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
-                }
-            });
+                    @Override
+                    public void onError(String e) {
+                        Log.i("ABMediaPlay", "error: " + e);
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
+                    }
+                });
+            } else {
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
+            }
         } else {
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
+            Log.e(TAG, "dataSource is null");
         }
+
     }
 
     /** 获取网络图片 */
