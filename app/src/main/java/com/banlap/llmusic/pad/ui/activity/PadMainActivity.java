@@ -84,6 +84,7 @@ import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
+import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
@@ -238,6 +239,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         //连接数据库
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_PAD_CONNECT_MYSQL));
         startAllService();
+        //广播监听蓝牙连接状态
+        BluetoothUtil.getInstance().registerBluetoothReceiver(this);
         initFragment();
     }
 
@@ -1401,6 +1404,26 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
                 }
                 break;
+            case ThreadEvent.VIEW_BLUETOOTH_DISCONNECT:
+                if(binder!=null) {
+                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                }
+                break;
+            case ThreadEvent.VIEW_ACTION_MEDIA_BUTTON:
+                if(null != event.kt) {
+                    if(binder!=null) {
+                        if(KeyEvent.KEYCODE_MEDIA_NEXT == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            lastOrNextMusic(true);
+                        } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            lastOrNextMusic(false);
+                        } else if(KeyEvent.KEYCODE_MEDIA_PLAY == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            binder.playImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                        } else if(KeyEvent.KEYCODE_MEDIA_PAUSE == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
+                            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                        }
+                    }
+                }
+                break;
             case ThreadEvent.VIEW_PAD_PLAY_ALL_MUSIC:  //点击播放所有歌曲
                 allPlayMusic(event.tList);
                 break;
@@ -2279,6 +2302,11 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        if(binder != null) {
+            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+            binder.clearMedia();
+        }
+        BluetoothUtil.getInstance().unRegisterBluetoothReceiver(this);
     }
 
     /** 绑定服务需要ServiceConnection对象 */

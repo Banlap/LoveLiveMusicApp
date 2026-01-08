@@ -1,5 +1,6 @@
 package com.banlap.llmusic.receiver;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -18,6 +19,12 @@ public class BluetoothStateBroadcastReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         if(action!=null) {
             switch (action) {
+                case BluetoothAdapter.ACTION_STATE_CHANGED:
+                    int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+                    if (state == BluetoothAdapter.STATE_TURNING_OFF || state == BluetoothAdapter.STATE_OFF) {
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_BLUETOOTH_DISCONNECT));
+                    }
+                    break;
                 case BluetoothDevice.ACTION_ACL_CONNECTED:
                     Log.i(TAG, "bluetooth connect");
                     break;
