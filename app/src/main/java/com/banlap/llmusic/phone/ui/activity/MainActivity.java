@@ -3658,10 +3658,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 currentPlayMusic.isPlaying = false;
                 binder.showLyric(list.get(position), (playMode == 2));
                 int index = roomPlayMusicList.indexOf(currentPlayMusic);
-                long currentMusicId = currentPlayMusic.id;
-                long nextMusicId = roomPlayMusicList.get(index + 1).id;
                 RoomPlayMusic music = list.get(position);
-                music.id = (currentMusicId + nextMusicId) / 2;
+                if(roomPlayMusicList.size() > index + 1) {
+                    long currentMusicId = currentPlayMusic.id;
+                    long nextMusicId = roomPlayMusicList.get(index + 1).id;
+                    music.id = (currentMusicId + nextMusicId) / 2;
+                } else {
+                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                }
                 roomPlayMusicList.add(index + 1, MainVM.setMusicMsg(music, true));
                 playMusicListAdapter.notifyDataSetChanged();
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, true));

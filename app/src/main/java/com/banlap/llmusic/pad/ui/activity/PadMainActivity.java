@@ -1590,16 +1590,23 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     .findFirst();
 
             if(currentlyPlaying.isPresent()) {
-                RoomPlayMusic music = currentlyPlaying.get();
-                music.isPlaying = false;
+                RoomPlayMusic currentPlayMusic = currentlyPlaying.get();
+                currentPlayMusic.isPlaying = false;
                 binder.showLyric(list.get(position), (playMode == 2));
-                int index = roomPlayMusicList.indexOf(music);
-                roomPlayMusicList.add(index + 1, PadMainVM.setMusicMsg(list.get(position), true));
+                int index = roomPlayMusicList.indexOf(currentPlayMusic);
+                RoomPlayMusic music = list.get(position);
+                if(roomPlayMusicList.size() > index + 1) {
+                    long currentMusicId = currentPlayMusic.id;
+                    long nextMusicId = roomPlayMusicList.get(index + 1).id;
+                    music.id = (currentMusicId + nextMusicId) / 2;
+                } else {
+                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                }
+                roomPlayMusicList.add(index + 1, PadMainVM.setMusicMsg(music, true));
                 playMusicListAdapter.notifyDataSetChanged();
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), true));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, true));
                 return;
             }
-
 
             binder.showLyric(list.get(position), (playMode == 2));
             roomPlayMusicList.add(roomPlayMusicList.size(), PadMainVM.setMusicMsg(list.get(position), true));
