@@ -14,7 +14,9 @@ import java.util.List;
 
 @Entity(tableName = "local_file")
 public class RoomLocalFile {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    @ColumnInfo(name = "id")
+    public long id;
     @ColumnInfo(name = "music_id")
     public int musicId;
     @ColumnInfo(name = "title")
@@ -52,8 +54,7 @@ public class RoomLocalFile {
         @Query("SELECT * FROM local_file where music_id = :id")
         RoomLocalFile getMusicById(String id);
 
-
-        @Query("SELECT * FROM local_file")
+        @Query("SELECT * FROM local_file ORDER BY id ASC")
         List<RoomLocalFile> getAllMusic();
     }
 

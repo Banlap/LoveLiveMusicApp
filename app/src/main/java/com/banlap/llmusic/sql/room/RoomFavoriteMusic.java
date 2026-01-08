@@ -19,7 +19,9 @@ import java.util.List;
  * */
 @Entity(tableName = "favorite_music")
 public class RoomFavoriteMusic {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    @ColumnInfo(name = "id")
+    public long id;
     @ColumnInfo(name = "music_id")
     public int musicId;
     @ColumnInfo(name = "music_type")
@@ -72,7 +74,7 @@ public class RoomFavoriteMusic {
         @Query("SELECT * FROM favorite_music where music_name = :musicName and music_singer = :musicSinger")
         RoomFavoriteMusic getMusicByNameAndSinger(String musicName, String musicSinger);
 
-        @Query("SELECT * FROM favorite_music")
+        @Query("SELECT * FROM favorite_music ORDER BY id ASC")
         List<RoomFavoriteMusic> getAllMusic();
     }
 }

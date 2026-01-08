@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.InputFilter;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +57,7 @@ import com.banlap.llmusic.sql.room.RoomCustomPlay;
 import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
@@ -335,7 +337,19 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
-                            AppData.saveLocalFileMusicList(roomLocalFileList);
+                            try {
+                                if(roomLocalFileList.isEmpty()) {
+                                    return;
+                                }
+                                for(RoomLocalFile music: roomLocalFileList) {
+                                    Thread.sleep(1);
+                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                }
+                                Thread.sleep(10);
+                                AppData.saveLocalFileMusicList(roomLocalFileList);
+                            } catch (Exception e) {
+                                Log.e(TAG, "id error");
+                            }
                         }
                     });
 
@@ -360,7 +374,19 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
-                            AppData.saveLocalFileMusicList(roomLocalFileList);
+                            try {
+                                if(roomLocalFileList.isEmpty()) {
+                                    return;
+                                }
+                                for(RoomLocalFile music: roomLocalFileList) {
+                                    Thread.sleep(1);
+                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                }
+                                Thread.sleep(10);
+                                AppData.saveLocalFileMusicList(roomLocalFileList);
+                            } catch (Exception e) {
+                                Log.e(TAG, "roomLocalFileList id error");
+                            }
                         }
                     });
                     //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalListData, mLocalMusicList);

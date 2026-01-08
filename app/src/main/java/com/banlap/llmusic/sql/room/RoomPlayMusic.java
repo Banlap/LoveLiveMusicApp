@@ -8,6 +8,7 @@ import androidx.room.Delete;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.PrimaryKey;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -18,7 +19,9 @@ import java.util.List;
  * */
 @Entity(tableName = "play_music")
 public class RoomPlayMusic {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
+    @ColumnInfo(name = "id")
+    public long id;
     @ColumnInfo(name = "music_id")
     public int musicId;
     @ColumnInfo(name = "music_type")
@@ -75,7 +78,7 @@ public class RoomPlayMusic {
         @Query("SELECT * FROM play_music where music_name = :musicName and music_singer = :musicSinger")
         RoomPlayMusic getMusicByNameAndSinger(String musicName, String musicSinger);
 
-        @Query("SELECT * FROM play_music")
+        @Query("SELECT * FROM play_music ORDER BY id ASC")
         List<RoomPlayMusic> getAllMusic();
     }
 }

@@ -18,8 +18,10 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.FileUtil;
+import com.banlap.llmusic.utils.SystemUtil;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -107,7 +109,6 @@ public class LocalListFVM extends AndroidViewModel {
                             long totalSpace = file.getTotalSpace();
                             long useSpace = file.getUsableSpace();
                             String absolutePath = file.getAbsolutePath();
-
                             getMusicData(path, false);
 
                         } catch (Exception e) {
@@ -176,6 +177,7 @@ public class LocalListFVM extends AndroidViewModel {
 
             if(null != title) {
                 RoomLocalFile localFile = new RoomLocalFile();
+                localFile.id = System.currentTimeMillis() * SystemUtil.STEP;
                 localFile.title = title;
                 localFile.album = album;
                 localFile.artist = artist;

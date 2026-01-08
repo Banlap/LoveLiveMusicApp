@@ -142,6 +142,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_LISTEN_STATUS_CHARACTER_RIGHT = 1206; //展示角色：听歌状态向右偏移
 
     public static final int VIEW_SEEK_BAR_POS = 1207; //刷新当前音乐进度
+    public static final int THREAD_SAVE_MUSIC_DATA_LIST = 1208; //保存整个列表到本地数据库
 
     public static final int RUNNABLE_DELAY = 1209;
     public static final int VIEW_SEEK_BAR_RESUME = 1210; //重置进度条参数

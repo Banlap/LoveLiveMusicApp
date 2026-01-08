@@ -65,12 +65,16 @@ public class AppData {
         }
     }
 
-
+    /**
+     * 删除本地数据库的单个歌曲
+     * */
     public static void deleteRoomMusic(RoomPlayMusic roomPlayMusic) {
         BaseApplication.llMusicDatabase.musicDao().delete(roomPlayMusic);
     }
 
-
+    /**
+     * 删除本地数据库的所有歌曲
+     * */
     public static void deleteAllRoomMusic() {
         BaseApplication.llMusicDatabase.musicDao().deleteAll();
     }

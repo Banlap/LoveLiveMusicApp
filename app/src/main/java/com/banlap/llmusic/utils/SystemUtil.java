@@ -42,6 +42,7 @@ public class SystemUtil {
     public static SystemUtil getInstance() {
         return new SystemUtil();
     }
+    public static long STEP = 1000L; // music id精度
 
     /**
      * 获取DisplayMetrics

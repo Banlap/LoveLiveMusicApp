@@ -2089,12 +2089,18 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
 
-            case ThreadEvent.THREAD_SAVE_MUSIC_DATA:  //在子线程中保存列表数据
+            case ThreadEvent.THREAD_SAVE_MUSIC_DATA:  //在子线程中保存列表单个数据
                 //List<Music> list = event.musicList;
                 //SPUtil.setListValue(context, SPUtil.PlayListData, list);
-                List<RoomPlayMusic> list = new ArrayList<>();
-                list.add(event.roomPlayMusic);
-                AppData.saveRoomMusic(list);
+                if(event.roomPlayMusic != null) {
+                    RoomPlayMusic music = event.roomPlayMusic;
+                    if(!event.b) {
+                        music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                    }
+                    List<RoomPlayMusic> list = new ArrayList<>();
+                    list.add(music);
+                    AppData.saveRoomMusic(list);
+                }
                 break;
             case ThreadEvent.VIEW_SCREEN_LOCK:
 //                if(binder != null && binder.isPlay()) {
@@ -3015,7 +3021,22 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
-                    AppData.saveRoomMusic(roomPlayMusicList);
+                    try {
+                        if(roomPlayMusicList.isEmpty()) {
+                            return;
+                        }
+                        AppData.deleteAllRoomMusic();
+                        Thread.sleep(10);
+
+                        for(RoomPlayMusic music: roomPlayMusicList) {
+                            Thread.sleep(1);
+                            music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                        }
+                        Thread.sleep(10);
+                        AppData.saveRoomMusic(roomPlayMusicList);
+                    } catch (Exception e) {
+                        Log.e(TAG, "roomPlayMusicList all id error");
+                    }
                 }
             });
             getViewDataBinding().tvListSize.setText("("+ roomPlayMusicList.size() + ")");
@@ -3633,13 +3654,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     .findFirst();
 
             if(currentlyPlaying.isPresent()) {
-                RoomPlayMusic music = currentlyPlaying.get();
-                music.isPlaying = false;
+                RoomPlayMusic currentPlayMusic = currentlyPlaying.get();
+                currentPlayMusic.isPlaying = false;
                 binder.showLyric(list.get(position), (playMode == 2));
-                int index = roomPlayMusicList.indexOf(music);
-                roomPlayMusicList.add(index + 1, MainVM.setMusicMsg(list.get(position), true));
+                int index = roomPlayMusicList.indexOf(currentPlayMusic);
+                long currentMusicId = currentPlayMusic.id;
+                long nextMusicId = roomPlayMusicList.get(index + 1).id;
+                RoomPlayMusic music = list.get(position);
+                music.id = (currentMusicId + nextMusicId) / 2;
+                roomPlayMusicList.add(index + 1, MainVM.setMusicMsg(music, true));
                 playMusicListAdapter.notifyDataSetChanged();
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position)));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, true));
                 return;
             }
             binder.showLyric(list.get(position), (playMode == 2));
@@ -3649,7 +3674,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             roomPlayMusicList.add(MainVM.setMusicMsg(list.get(position), true));
         }
         playMusicListAdapter.notifyDataSetChanged();
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position)));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), false));
         //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
     }
 
@@ -3664,7 +3689,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_ADD_MUSIC));
         }
         playMusicListAdapter.notifyDataSetChanged();
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position)));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), false));
         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
         //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
     }

@@ -1596,7 +1596,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 int index = roomPlayMusicList.indexOf(music);
                 roomPlayMusicList.add(index + 1, PadMainVM.setMusicMsg(list.get(position), true));
                 playMusicListAdapter.notifyDataSetChanged();
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, roomPlayMusicList));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), true));
                 return;
             }
 
@@ -1608,7 +1608,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             roomPlayMusicList.add(PadMainVM.setMusicMsg(list.get(position), true));
         }
         playMusicListAdapter.notifyDataSetChanged();
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, roomPlayMusicList));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), false));
         //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
     }
 
@@ -1628,7 +1628,22 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
-                    AppData.saveRoomMusic(roomPlayMusicList);
+                    try {
+                        if(roomPlayMusicList.isEmpty()) {
+                            return;
+                        }
+                        AppData.deleteAllRoomMusic();
+                        Thread.sleep(10);
+
+                        for(RoomPlayMusic music: roomPlayMusicList) {
+                            Thread.sleep(1);
+                            music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                        }
+                        Thread.sleep(10);
+                        AppData.saveRoomMusic(roomPlayMusicList);
+                    } catch (Exception e) {
+                        Log.e(TAG, "roomPlayMusicList all id error");
+                    }
                 }
             });
             //播放当前第一首音乐
@@ -1717,7 +1732,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_ADD_MUSIC));
         }
         playMusicListAdapter.notifyDataSetChanged();
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, roomPlayMusicList));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), false));
         //EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
     }
 

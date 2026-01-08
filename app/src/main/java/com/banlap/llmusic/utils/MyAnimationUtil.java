@@ -1,5 +1,7 @@
 package com.banlap.llmusic.utils;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -18,8 +20,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.tabs.TabLayout;
 
 /**
@@ -34,8 +38,20 @@ public class MyAnimationUtil {
         Display display = windowManager.getDefaultDisplay();
         ObjectAnimator animator = ObjectAnimator.ofFloat(constraintLayout, "translationX", 0, 0);
         animator.setDuration(300);
-        return animator;
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).pauseRequests();
+            }
 
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).resumeRequests();
+            }
+        });
+        return animator;
     }
 
     /**
@@ -53,6 +69,19 @@ public class MyAnimationUtil {
                 ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
                 : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
         animator.setDuration(300);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).resumeRequests();
+            }
+        });
         return animator;
     }
 
@@ -65,6 +94,19 @@ public class MyAnimationUtil {
                 ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
                 : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
         animator.setDuration(300);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).resumeRequests();
+            }
+        });
         return animator;
     }
 
@@ -79,6 +121,19 @@ public class MyAnimationUtil {
                 : ObjectAnimator.ofFloat(viewGroup, "translationY", moveAxis, 0);
         animator.setRepeatMode(ObjectAnimator.RESTART);
         animator.setDuration(300);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).resumeRequests();
+            }
+        });
         return animator;
     }
 
@@ -93,6 +148,19 @@ public class MyAnimationUtil {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animatorX, animatorY, animatorR);
         animatorSet.setDuration(800);
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(imageView.getContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(imageView.getContext()).resumeRequests();
+            }
+        });
         return animatorSet;
     }
 
@@ -101,6 +169,19 @@ public class MyAnimationUtil {
         ObjectAnimator animator = ObjectAnimator.ofFloat(textView, "alpha", startAxis, endAxis);
         animator.setRepeatMode(ObjectAnimator.RESTART);
         animator.setDuration(120);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(activity.getApplicationContext()).resumeRequests();
+            }
+        });
         return animator;
     }
 
@@ -112,6 +193,19 @@ public class MyAnimationUtil {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animatorX, animatorY);
         animatorSet.setDuration(120);
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(textView.getContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(textView.getContext()).resumeRequests();
+            }
+        });
         return animatorSet;
     }
 
@@ -133,10 +227,19 @@ public class MyAnimationUtil {
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(animatorXStart, animatorMove, animatorXEnd);
         animatorSet.setDuration(120);
+        animatorSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationStart(animation, isReverse);
+                Glide.with(view.getContext()).pauseRequests();
+            }
+
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
+                super.onAnimationEnd(animation, isReverse);
+                Glide.with(view.getContext()).resumeRequests();
+            }
+        });
         return animatorSet;
     }
-
-
-
-
 }

@@ -1,6 +1,7 @@
 package com.banlap.llmusic.phone.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 import android.view.View;
 
 import androidx.lifecycle.Observer;
@@ -19,6 +20,7 @@ import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SPUtil;
+import com.banlap.llmusic.utils.SystemUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -38,7 +40,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  * */
 public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainListBinding>
     implements MainListFVM.MainListCallBack {
-
+    private static final String TAG = MainListFragment.class.getSimpleName();
     public List<RoomPlayMusic> roomPlayMusicList;
 
     private RequestOptions requestOptions;
@@ -165,7 +167,19 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
-                            AppData.saveRecommendList(roomRecommendMusicList);
+                            try {
+                                if(roomRecommendMusicList.isEmpty()) {
+                                    return;
+                                }
+                                for(RoomRecommendMusic music: roomRecommendMusicList) {
+                                    Thread.sleep(1);
+                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                }
+                                Thread.sleep(10);
+                                AppData.saveRecommendList(roomRecommendMusicList);
+                            } catch (Exception e) {
+                                Log.e(TAG, "roomRecommendMusicList id error");
+                            }
                         }
                     });
 
