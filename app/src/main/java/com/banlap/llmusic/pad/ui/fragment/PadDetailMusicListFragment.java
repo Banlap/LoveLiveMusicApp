@@ -204,7 +204,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
             case ThreadEvent.VIEW_GET_ALBUM_LIST_SUCCESS:
                 getViewDataBinding().rlShowLoading.setVisibility(View.GONE);
                 roomPlayMusicList.clear();
-                roomPlayMusicList.addAll(event.musicList);
+                roomPlayMusicList.addAll(event.tList);
                 roomPlayMusicList.addAll(AppMusic.getInstance().getNullMusicData());
                 sortList(0);
                 clickSortType = 0;
