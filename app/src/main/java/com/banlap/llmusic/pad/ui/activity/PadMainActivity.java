@@ -1129,7 +1129,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 //                getViewDataBinding().hpvProgress.setMaxCount(event.i);
 //                getViewDataBinding().pbNewProgress.setMax(event.i);
 //
-                getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+                // getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
 //                getViewDataBinding().pbNewLoadingMusic.setVisibility(View.GONE);
 //                getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
@@ -1183,6 +1183,12 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 //                objectAnimator.setRepeatMode(ValueAnimator.RESTART);//动画重复模式
 //                objectAnimator.start();
 
+              break;
+            case ThreadEvent.VIEW_MUSIC_MSG_UPDATE:
+                getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+                getViewDataBinding().sbNewMusicBar.setMax(event.i);
+                getViewDataBinding().tvNewAllTime.setText(TimeUtil.rebuildTime(event.i));
+
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if(MusicPlayService.currentRoomPlayMusic.isLocal) {
                         if(null != MusicPlayService.currentRoomPlayMusic.musicImgByte) {
@@ -1204,6 +1210,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     }
                 }
                 initNotificationHelper(MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg);
+
                 break;
             case ThreadEvent.THREAD_SHOW_IMAGE_URL:  //设置状态栏显示对应图片
                 if(event.b) {

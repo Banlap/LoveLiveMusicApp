@@ -77,6 +77,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
     public static MediaPlayer mediaPlayer;
     public static ExoPlayer exoPlayer;
+    public static Player.Listener exoPlayerListener;
     public static boolean isStop = true;  //是否暂停
     private boolean isSeekTo = false; //
     private static boolean isUpdateWidgetUI = false; //是否在刷新小组件
@@ -99,6 +100,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
     //当前歌曲信息
     public static RoomPlayMusic currentRoomPlayMusic; //当前播放音乐的总信息
+    public static long latestPlayRequestId = 0; //最新播放的歌曲id
 
     //作为小组件临时使用的变量
     public static byte[] lastWidgetByteArray; //临时缓存上一次的 byte[]
@@ -356,6 +358,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final RoomPlayMusic dataSource, final boolean isLoop) {
+            latestPlayRequestId = System.currentTimeMillis();
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
@@ -363,18 +366,13 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         public void player(final RoomPlayMusic dataSource, final boolean isLoop, final List<MusicLyric> musicLyrics) {
             try {
                 stop();
-                //延迟0.2秒处理进度条等ui内容，同时线程休眠0.2秒
-                new Handler().postDelayed(() -> EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME)), 200);
-                Thread.sleep(200);
 
-                exoPlayer = new ExoPlayer.Builder(getBaseContext()).setLoadControl(
-                                new DefaultLoadControl.Builder().setBufferDurationsMs(
-                                        5000,  // 最小缓冲时间
-                                        10000, // 最大缓冲时间
-                                        1000, // 开始播放前缓冲
-                                        2000 // 重新缓冲后播放前缓冲
-                                ).build()
-                            ).build();
+                //设置当前音乐总信息
+                currentRoomPlayMusic = dataSource;
+                //处理歌曲信息
+                currentRoomPlayMusic.musicBitrate = "--";
+                currentRoomPlayMusic.musicMime = "--";
+                currentRoomPlayMusic.musicFileSize = "-- MB";
 
                 if(null != mMusicLyricList) {
                     mMusicLyricList.clear();
@@ -383,22 +381,22 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 }
                 mMusicLyricList.addAll(musicLyrics);
 
-                //设置当前音乐总信息
-                currentRoomPlayMusic = dataSource;
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, currentRoomPlayMusic, 0, latestPlayRequestId));
+
+                exoPlayer = new ExoPlayer.Builder(getBaseContext()).setLoadControl(
+                        new DefaultLoadControl.Builder().setBufferDurationsMs(
+                                5000,  // 最小缓冲时间
+                                10000, // 最大缓冲时间
+                                1000, // 开始播放前缓冲
+                                2000 // 重新缓冲后播放前缓冲
+                        ).build()
+                ).build();
 
                 exoPlayer.setMediaItem(MediaItem.fromUri(dataSource.musicURL));
                 exoPlayer.setRepeatMode(isLoop? Player.REPEAT_MODE_ONE: Player.REPEAT_MODE_OFF);    // 单曲循环or不循环
-                exoPlayer.prepare();
-
-                //处理歌曲信息
-                currentRoomPlayMusic.musicBitrate = "--";
-                currentRoomPlayMusic.musicMime = "--";
-                currentRoomPlayMusic.musicFileSize = "-- MB";
-
-                //获取MediaMeta内容 后台线程处理，网络缓慢的情况下会卡住
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_METADATA, dataSource));
                 //监听播放状态
-                exoPlayer.addListener(new Player.Listener() {
+                exoPlayerListener = new Player.Listener() {
 
                     @Override
                     public void onPositionDiscontinuity(@NonNull Player.PositionInfo oldPosition, @NonNull Player.PositionInfo newPosition, @Player.DiscontinuityReason int reason) {
@@ -436,7 +434,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                                 Log.i(TAG, "exoplayer开始播放, mAudioSessionId: " + mAudioSessionId + " exoPlayer.getDuration() " + exoPlayer.getDuration());
                                 MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAUSE, isStop));
-                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, (int) exoPlayer.getDuration()));
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG_UPDATE, (int) exoPlayer.getDuration()));
                                 //updateMlCurrentMusicDetail(dataSource);
                                 updateMetadata(dataSource);
                                 updateMusicNotification(exoPlayer.isPlaying());
@@ -458,7 +456,12 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                         Log.i(TAG,"isError");
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_ERROR));
                     }
-                });
+                };
+
+                exoPlayer.addListener(exoPlayerListener);
+                exoPlayer.prepare();
+                //获取MediaMeta内容 后台线程处理，网络缓慢的情况下会卡住
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_METADATA, dataSource));
 
             } catch(Exception e) {
                 e.printStackTrace();
@@ -676,6 +679,9 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         progressHandler.removeCallbacks(progressRunnable);
 
         if (exoPlayer != null) {
+            if(exoPlayerListener != null) {
+                exoPlayer.removeListener(exoPlayerListener);
+            }
             exoPlayer.stop();
             exoPlayer.release();
             exoPlayer = null;

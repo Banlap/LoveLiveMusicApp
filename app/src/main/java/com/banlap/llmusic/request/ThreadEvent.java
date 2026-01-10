@@ -144,12 +144,13 @@ public class ThreadEvent<T> {
     public static final int VIEW_SEEK_BAR_POS = 1207; //刷新当前音乐进度
     public static final int THREAD_SAVE_MUSIC_DATA_LIST = 1208; //保存整个列表到本地数据库
 
-    public static final int RUNNABLE_DELAY = 1209;
-    public static final int VIEW_SEEK_BAR_RESUME = 1210; //重置进度条参数
-    public static final int VIEW_PAUSE = 1211;   //处理音乐播放或暂停
-    public static final int VIEW_SHOW_VISUALIZER =1212;
-    public static final int VIEW_SHOW_STOP_VISUALIZER = 1213;
-    public static final int VIEW_MUSIC_MSG = 1214;  //展示音乐信息
+    public static final int VIEW_SEEK_BAR_RESUME = 1209; //重置进度条参数
+    public static final int VIEW_PAUSE = 1210;   //处理音乐播放或暂停
+    public static final int VIEW_SHOW_VISUALIZER =1211;
+    public static final int VIEW_SHOW_STOP_VISUALIZER = 1212;
+    public static final int VIEW_MUSIC_MSG = 1213;  //展示音乐信息
+    public static final int VIEW_MUSIC_MSG_UPDATE = 1214; //更新音乐信息
+
     public static final int VIEW_ADD_MUSIC = 1215; //添加音乐到播放列表
     public static final int VIEW_SAVE_FAVORITE_MUSIC = 1216; //将该歌曲添加到收藏音乐列表中
     public static final int VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST = 1217; //添加歌曲到自建歌曲列表里面
@@ -234,6 +235,7 @@ public class ThreadEvent<T> {
     public int i;
     public int i2;
     public boolean b;
+    public long l;
     public Music music;
     public RoomPlayMusic roomPlayMusic;
     public RoomCustomPlay roomCustomPlay;
@@ -275,7 +277,9 @@ public class ThreadEvent<T> {
 
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i, long l) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; this.l = l;}
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b, long l) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; this.l = l;}
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b, String str, String str2) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; this.str = str; this.str2 = str2; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b, String str, String str2, List<T> tList) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; this.str = str; this.str2 = str2; this.tList = tList; }
 }

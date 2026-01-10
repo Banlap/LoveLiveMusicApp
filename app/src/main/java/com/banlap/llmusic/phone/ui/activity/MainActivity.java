@@ -1418,6 +1418,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_MSG:
+                if (event.l !=  MusicPlayService.latestPlayRequestId) {
+                    return; // 丢弃过期音乐信息
+                }
                 MusicPlayService.currentRoomPlayMusic = event.roomPlayMusic;
 
                 lyricScrollView.initView();
@@ -1452,9 +1455,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbNewProgress.setMax(event.i);
                 getViewDataBinding().qcpProgress.setMaxProgress(event.i);
 
-                getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
-                getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
-                getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
+//                getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+//                getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
+//                getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
@@ -1496,6 +1499,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 objectAnimator.start();
 
                 isClickNextOrLastLoading = false;
+                 break;
+            case ThreadEvent.VIEW_MUSIC_MSG_UPDATE:
+                getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+                getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
+                getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
+                getViewDataBinding().sbMusicBar.setMax(event.i);
+                getViewDataBinding().sbNewMusicBar.setMax(event.i);
+                getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
+                getViewDataBinding().tvNewAllTime.setText(TimeUtil.rebuildTime(event.i));
+
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if(MusicPlayService.currentRoomPlayMusic.isLocal) {
                         if(MusicPlayService.currentRoomPlayMusic.musicImgByte != null) {
@@ -1518,6 +1531,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     }
                 }
                 initNotificationHelper(MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, MusicPlayService.currentRoomPlayMusic.musicImgByte != null? BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : null);
+
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
                 MusicPlayService.currentRoomPlayMusic.musicName = event.str;
@@ -1808,10 +1822,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     @Override
                     public void run() {
                         List<RoomFavoriteMusic> spTempList = BaseApplication.llMusicDatabase.favoriteMusicDao().getAllMusic();
-                        if(!spTempList.isEmpty()) {
-                            setMusicFavorite(spTempList);
-                        }
                         runOnUiThread(()->{
+                            if(!spTempList.isEmpty()) {
+                                setMusicFavorite(spTempList);
+                            }
                             playMusicListAdapter.notifyDataSetChanged();
                             //刷新新播放界面是否收藏歌曲
                             setCurrentMusicFavorite(spTempList, MusicPlayService.currentRoomPlayMusic.musicName);
@@ -2824,6 +2838,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         if(!roomPlayMusicList.isEmpty()) {
             if(roomPlayMusicList.size() == 1) {
                 binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
+                // 单曲情况：确保它被标记为播放中（如果还没标记）
+                roomPlayMusicList.get(0).isPlaying = true;
+                // 只需刷新这一项（如果之前不是 playing）
+                playMusicListAdapter.notifyItemChanged(0);
             } else {
 
                 Optional<RoomPlayMusic> currentMusicPlayList = roomPlayMusicList.stream()
@@ -2832,32 +2850,38 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 if(currentMusicPlayList.isPresent()) {
                     RoomPlayMusic currentMusic = currentMusicPlayList.get();
-                    int index = roomPlayMusicList.indexOf(currentMusic);
+                    int oldIndex = roomPlayMusicList.indexOf(currentMusic);
                     currentMusic.isPlaying = false;
+
+                    int newIndex = -1; //新播放歌曲索引
 
                     if(playMode ==1) {
                         int rand = new Random().nextInt(roomPlayMusicList.size());
-                        while (index == rand) {
+                        while (oldIndex == rand) {
                             rand = new Random().nextInt(roomPlayMusicList.size());
                         }
-                        binder.showLyric(roomPlayMusicList.get(rand), false);
-                        roomPlayMusicList.get(rand).isPlaying = true;
-
+                        newIndex = rand;
                     } else if(playMode == 2) {
-                        binder.showLyric(currentMusic, true);
+                        newIndex = oldIndex;
                     } else {
                         if (isNext) {
-                            int nextIndex = (index + 1) % roomPlayMusicList.size();
-                            binder.showLyric(roomPlayMusicList.get(nextIndex), false);
-                            roomPlayMusicList.get(nextIndex).isPlaying = true;
+                            newIndex  = (oldIndex + 1) % roomPlayMusicList.size();
                         } else {
-                            int prevIndex = (index == 0) ? roomPlayMusicList.size() - 1 : index - 1;
-                            binder.showLyric(roomPlayMusicList.get(prevIndex), false);
-                            roomPlayMusicList.get(prevIndex).isPlaying = true;
+                            newIndex  = (oldIndex == 0) ? roomPlayMusicList.size() - 1 : oldIndex - 1;
                         }
                     }
+                    // 设置新播放项
+                    if (newIndex != oldIndex || playMode == 2) {
+                        roomPlayMusicList.get(newIndex).isPlaying = true;
+                    }
+                    // 调用播放服务
+                    binder.showLyric(roomPlayMusicList.get(newIndex), (playMode == 2));
 
-                    playMusicListAdapter.notifyDataSetChanged();
+                    // 只刷新 old 和 new 位置
+                    if (oldIndex != newIndex) {
+                        playMusicListAdapter.notifyItemChanged(oldIndex);
+                    }
+                    playMusicListAdapter.notifyItemChanged(newIndex);
                 }
 
             }
@@ -3648,7 +3672,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 播放当前点击的歌曲 */
     private void playMusic(List<RoomPlayMusic> list, int position) {
         if(!roomPlayMusicList.isEmpty()){
-
             Optional<RoomPlayMusic> currentlyPlaying = roomPlayMusicList.stream()
                     .filter(music -> music.isPlaying)
                     .findFirst();
@@ -3861,6 +3884,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         public void onBindViewHolder(@NonNull PlayMusicListViewHolder holder, @SuppressLint("RecyclerView") final int position) {
             ItemPlayListBinding binding = DataBindingUtil.getBinding(holder.itemView);
             if(binding != null) {
+                // 设置默认值（防残留）
+                binding.tvMusicName.setText("");
+                binding.tvSingerName.setText("");
 
                 binding.tvOrderNum.setVisibility(roomList.get(position).isPlaying? GONE : View.VISIBLE);
 

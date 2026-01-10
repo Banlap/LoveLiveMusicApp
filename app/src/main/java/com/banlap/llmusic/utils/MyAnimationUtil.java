@@ -37,7 +37,7 @@ public class MyAnimationUtil {
         WindowManager windowManager = activity.getWindowManager();
         Display display = windowManager.getDefaultDisplay();
         ObjectAnimator animator = ObjectAnimator.ofFloat(constraintLayout, "translationX", 0, 0);
-        animator.setDuration(300);
+        animator.setDuration(200);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
@@ -68,7 +68,7 @@ public class MyAnimationUtil {
         ObjectAnimator animator = isRun ?
                 ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
                 : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
-        animator.setDuration(300);
+        animator.setDuration(200);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
@@ -93,7 +93,7 @@ public class MyAnimationUtil {
         ObjectAnimator animator = isRun ?
                 ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
                 : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
-        animator.setDuration(300);
+        animator.setDuration(200);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
@@ -120,7 +120,7 @@ public class MyAnimationUtil {
                 ObjectAnimator.ofFloat(viewGroup, "translationY", 0, moveAxis)
                 : ObjectAnimator.ofFloat(viewGroup, "translationY", moveAxis, 0);
         animator.setRepeatMode(ObjectAnimator.RESTART);
-        animator.setDuration(300);
+        animator.setDuration(200);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
