@@ -1451,13 +1451,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     lyricNewScrollDetailView.setLyricSize(detailSizeInt);
                 }
 
-                getViewDataBinding().hpvProgress.setMaxCount(event.i);
-                getViewDataBinding().pbNewProgress.setMax(event.i);
-                getViewDataBinding().qcpProgress.setMaxProgress(event.i);
-
 //                getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
 //                getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
 //                getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
+                getViewDataBinding().hpvProgress.setMaxCount(event.i);
+                getViewDataBinding().pbNewProgress.setMax(event.i);
+                getViewDataBinding().qcpProgress.setMaxProgress(event.i);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
@@ -1504,6 +1503,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
                 getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
                 getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
+                getViewDataBinding().hpvProgress.setMaxCount(event.i);
+                getViewDataBinding().pbNewProgress.setMax(event.i);
+                getViewDataBinding().qcpProgress.setMaxProgress(event.i);
                 getViewDataBinding().sbMusicBar.setMax(event.i);
                 getViewDataBinding().sbNewMusicBar.setMax(event.i);
                 getViewDataBinding().tvAllTime.setText(TimeUtil.rebuildTime(event.i));
