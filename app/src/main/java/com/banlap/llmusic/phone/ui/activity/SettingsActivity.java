@@ -679,7 +679,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 String cache = CacheUtil.clearAllCacheAfter(v.getContext());
                 getViewDataBinding().tvCacheValue.setText(cache);
                 //清除当前播放列表所有歌曲
-                SPUtil.setListValue(getApplicationContext(), SPUtil.PlayListData, new ArrayList<>());
+                //SPUtil.setListValue(getApplicationContext(), SPUtil.PlayListData, new ArrayList<>());
                 //标记
                 isRestartAfterClean = true;
 

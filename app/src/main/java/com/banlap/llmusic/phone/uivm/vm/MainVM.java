@@ -399,6 +399,13 @@ public class MainVM extends AndroidViewModel {
         return musicMsg;
     }
 
+    public static List<RoomPlayMusic> setAllMusicState(List<RoomPlayMusic> list) {
+        for (RoomPlayMusic music : list) {
+            music.isPlaying = false;
+        }
+        return list;
+    }
+
     /** 下载音乐文件 */
     public void downloadMusic(String fileName, String url) {
 

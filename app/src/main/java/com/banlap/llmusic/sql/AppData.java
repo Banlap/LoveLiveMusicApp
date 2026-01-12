@@ -125,6 +125,14 @@ public class AppData {
         BaseApplication.llMusicDatabase.localFileDao().delete(localFile);
     }
 
+
+    /**
+     * 删除本地歌曲文件
+     * */
+    public static void deleteFavoriteMusic(RoomFavoriteMusic favoriteMusic) {
+        BaseApplication.llMusicDatabase.favoriteMusicDao().delete(favoriteMusic);
+    }
+
     /**
      * 删除所有本地歌曲数据后再保存本地歌曲
      * */

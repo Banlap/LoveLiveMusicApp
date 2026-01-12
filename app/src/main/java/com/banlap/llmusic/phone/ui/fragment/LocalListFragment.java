@@ -456,11 +456,18 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 if(!roomFavoriteList.isEmpty()) {
                     for(int i=0; i< roomFavoriteList.size(); i++) {
                         if(event.music.musicName.equals(roomFavoriteList.get(i).musicName)) {
+                            RoomFavoriteMusic deleteFavoriteMusic = roomFavoriteList.get(i);
                             roomFavoriteList.remove(i);
                             favoriteListAdapter.notifyItemRemoved(i);
                             favoriteListAdapter.notifyItemRangeChanged(i, roomFavoriteList.size());
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
-                            SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, roomFavoriteList);
+                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AppData.deleteFavoriteMusic(deleteFavoriteMusic);
+                                }
+                            });
+                            //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, roomFavoriteList);
                             break;
                         }
                     }
@@ -1065,11 +1072,18 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 binding.llDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        RoomFavoriteMusic deleteFavoriteMusic = favoriteList.get(position);
                         favoriteList.remove(position);
                         favoriteListAdapter.notifyItemRemoved(position);
                         favoriteListAdapter.notifyItemRangeChanged(position, favoriteList.size());
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DELETE_FAVORITE_MUSIC));
-                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, favoriteList);
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AppData.deleteFavoriteMusic(deleteFavoriteMusic);
+                            }
+                        });
+                        //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, favoriteList);
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                     }
                 });
