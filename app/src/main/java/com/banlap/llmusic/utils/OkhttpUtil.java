@@ -32,7 +32,7 @@ public class OkhttpUtil {
      * GET请求 - enqueue异步
      * @param url 请求地址
      * */
-    public void request(String url, OkHttpCallBack okHttpCallBack){
+    public Call request(String url, OkHttpCallBack okHttpCallBack){
         try {
             Request request = new Request.Builder()
                     .url(url)
@@ -54,9 +54,10 @@ public class OkhttpUtil {
                     okHttpCallBack.onError("response.body is null");
                 }
             });
-
+            return call;
         } catch (Exception e) {
             okHttpCallBack.onError(e.getMessage());
+            return null;
         }
     }
 

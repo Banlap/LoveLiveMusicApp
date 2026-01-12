@@ -61,6 +61,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import okhttp3.Call;
+
 /**
  * 音乐播放服务
  * @author Banlap on 2021/12/6
@@ -78,6 +80,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static MediaPlayer mediaPlayer;
     public static ExoPlayer exoPlayer;
     public static Player.Listener exoPlayerListener;
+    public static Call currentLyricCall = null; // 成员变量
+
     public static boolean isStop = true;  //是否暂停
     private boolean isSeekTo = false; //
     private static boolean isUpdateWidgetUI = false; //是否在刷新小组件
@@ -358,7 +362,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final RoomPlayMusic dataSource, final boolean isLoop) {
-            latestPlayRequestId = System.currentTimeMillis();
+            latestPlayRequestId = dataSource.id;
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
@@ -715,7 +719,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         if(MusicPlayService.currentRoomPlayMusic == null || playMusic == null) {
             return false;
         }
-        return playMusic.musicName.equals(MusicPlayService.currentRoomPlayMusic.musicName);
+        return playMusic.id == MusicPlayService.currentRoomPlayMusic.id;
     }
 
     /** 更新小组件UI */

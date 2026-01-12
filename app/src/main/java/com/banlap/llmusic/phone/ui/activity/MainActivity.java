@@ -2830,9 +2830,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             if(roomPlayMusicList.size() == 1) {
                 binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
             } else {
-
                 Optional<RoomPlayMusic> currentMusicPlayList = roomPlayMusicList.stream()
-                        .filter(playMusic -> playMusic.musicName.equals(MusicPlayService.currentRoomPlayMusic.musicName))
+                        .filter(playMusic -> playMusic.id == (MusicPlayService.latestPlayRequestId))
                         .findFirst();
 
                 if(currentMusicPlayList.isPresent()) {
@@ -2859,6 +2858,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                     // 调用播放服务
                     binder.showLyric(roomPlayMusicList.get(newIndex), (playMode == 2));
+                } else {
+                    binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
                 }
             }
         }

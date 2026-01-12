@@ -19,6 +19,7 @@ import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
@@ -136,9 +137,12 @@ public class MainVM extends AndroidViewModel {
     public void showLyric(RoomPlayMusic dataSource, final boolean isLoop) {
         List<MusicLyric> musicLyricList = new ArrayList<>();
         if(dataSource != null) {
+            if (MusicPlayService.currentLyricCall != null && !MusicPlayService.currentLyricCall.isCanceled()) {
+                MusicPlayService.currentLyricCall.cancel();
+            }
             String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
             if(!lyricUrl.equals("")) {
-                OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
+                MusicPlayService.currentLyricCall = OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
                     @Override
                     public void onSuccess(Response response) {
                         try {
@@ -210,9 +214,11 @@ public class MainVM extends AndroidViewModel {
                     }
                 });
             } else {
+                MusicPlayService.currentLyricCall = null;
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
             }
         } else {
+            MusicPlayService.currentLyricCall = null;
             Log.e(TAG, "dataSource is null");
         }
 

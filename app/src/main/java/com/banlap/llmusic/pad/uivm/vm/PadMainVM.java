@@ -17,6 +17,7 @@ import androidx.lifecycle.AndroidViewModel;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
@@ -158,9 +159,12 @@ public class PadMainVM extends AndroidViewModel {
     public void showLyric(RoomPlayMusic dataSource, final boolean isLoop) {
         List<MusicLyric> musicLyricList = new ArrayList<>();
         if(dataSource != null) {
+            if (MusicPlayService.currentLyricCall != null && !MusicPlayService.currentLyricCall.isCanceled()) {
+                MusicPlayService.currentLyricCall.cancel();
+            }
             String lyricUrl = dataSource.musicLyric != null ? dataSource.musicLyric : "";
             if(!lyricUrl.equals("")) {
-                OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
+                MusicPlayService.currentLyricCall = OkhttpUtil.getInstance().request(lyricUrl, new OkhttpUtil.OkHttpCallBack() {
                     @Override
                     public void onSuccess(Response response) {
                         try {
@@ -220,6 +224,7 @@ public class PadMainVM extends AndroidViewModel {
                                 EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, ly, lyWithoutTime, musicLyricList));
                             }
                         } catch (Exception e) {
+                            MusicPlayService.currentLyricCall = null;
                             Log.i("ABMediaPlay", "http error " + e.getMessage());
                             e.printStackTrace();
                         }
@@ -228,13 +233,16 @@ public class PadMainVM extends AndroidViewModel {
                     @Override
                     public void onError(String e) {
                         Log.i("ABMediaPlay", "error: " + e);
+                        MusicPlayService.currentLyricCall = null;
                         EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
                     }
                 });
             } else {
+                MusicPlayService.currentLyricCall = null;
                 EventBus.getDefault().post(new ThreadEvent<MusicLyric>(ThreadEvent.VIEW_LYRIC, dataSource, isLoop, "", "", musicLyricList));
             }
         } else {
+            MusicPlayService.currentLyricCall = null;
             Log.e(TAG, "dataSource is null");
         }
     }
