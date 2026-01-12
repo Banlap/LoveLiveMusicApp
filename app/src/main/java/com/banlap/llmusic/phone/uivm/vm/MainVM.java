@@ -392,20 +392,6 @@ public class MainVM extends AndroidViewModel {
         });
     }
 
-
-    /** 默认存储Music值 */
-    public static RoomPlayMusic setMusicMsg(RoomPlayMusic musicMsg, boolean isPlaying) {
-        musicMsg.isPlaying = isPlaying;
-        return musicMsg;
-    }
-
-    public static List<RoomPlayMusic> setAllMusicState(List<RoomPlayMusic> list) {
-        for (RoomPlayMusic music : list) {
-            music.isPlaying = false;
-        }
-        return list;
-    }
-
     /** 下载音乐文件 */
     public void downloadMusic(String fileName, String url) {
 

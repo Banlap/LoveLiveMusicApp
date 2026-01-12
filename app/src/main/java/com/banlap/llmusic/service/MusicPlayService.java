@@ -710,6 +710,14 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         return isFind;
     }
 
+    /** 当前的歌曲是否正在播放 */
+    public static boolean currentMusicIsPlay(RoomPlayMusic playMusic) {
+        if(MusicPlayService.currentRoomPlayMusic == null || playMusic == null) {
+            return false;
+        }
+        return playMusic.musicName.equals(MusicPlayService.currentRoomPlayMusic.musicName);
+    }
+
     /** 更新小组件UI */
     public static void updateWidgetUI(Context context, boolean isLoading) {
         if(exoPlayer !=null && exoPlayer.isPlaying()) {

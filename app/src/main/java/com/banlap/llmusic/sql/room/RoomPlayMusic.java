@@ -38,8 +38,6 @@ public class RoomPlayMusic {
     public String musicLyric;
     @Ignore
     public int musicFavorite;
-    @Ignore
-    public boolean isPlaying;
     @ColumnInfo(name = "is_local")
     public boolean isLocal;
     @Ignore

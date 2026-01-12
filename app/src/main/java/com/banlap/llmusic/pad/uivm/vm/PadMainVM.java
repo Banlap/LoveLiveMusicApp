@@ -274,13 +274,6 @@ public class PadMainVM extends AndroidViewModel {
         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
     }
 
-    /** 默认存储Music值 */
-    public static RoomPlayMusic setMusicMsg(RoomPlayMusic musicMsg, boolean isPlaying) {
-        musicMsg.isPlaying = isPlaying;
-        return musicMsg;
-    }
-
-
     /** 角色默认状态 */
     public static void initAnimatedCharacter(String characterName) {
         android.os.Message message = new Message();
