@@ -89,9 +89,9 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static int mStartPosition;  //当前歌曲播放时间
     public static int mAllPosition;    //当前歌曲总时间
 
-    public static Handler appWidgetHandler = new Handler();
+    public static Handler appWidgetHandler = new Handler(Looper.getMainLooper());
     public static Runnable appWidgetRunnable;
-    public static Handler musicNotificationHandler = new Handler();
+    public static Handler musicNotificationHandler = new Handler(Looper.getMainLooper());
     public static Runnable musicNotificationRunnable;
 
     public static long STEP = 1000L; // music id精度
