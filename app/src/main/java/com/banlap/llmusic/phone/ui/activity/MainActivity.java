@@ -2096,7 +2096,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(event.roomPlayMusic != null) {
                     RoomPlayMusic music = event.roomPlayMusic;
                     if(!event.b) {
-                        music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                        music.id = MusicPlayService.createMusicId();
                     }
                     List<RoomPlayMusic> list = new ArrayList<>();
                     list.add(music);
@@ -3027,7 +3027,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                         for(RoomPlayMusic music: roomPlayMusicList) {
                             Thread.sleep(1);
-                            music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                            music.id = MusicPlayService.createMusicId();
                         }
                         Thread.sleep(10);
                         AppData.saveRoomMusic(roomPlayMusicList);
@@ -3659,7 +3659,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     long nextMusicId = roomPlayMusicList.get(index + 1).id;
                     music.id = (currentMusicId + nextMusicId) / 2;
                 } else {
-                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                    music.id = MusicPlayService.createMusicId();
                 }
                 roomPlayMusicList.add(index + 1, music);
                 playMusicListAdapter.notifyDataSetChanged();

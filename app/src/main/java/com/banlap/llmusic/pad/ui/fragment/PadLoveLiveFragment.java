@@ -12,6 +12,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.pad.uivm.fvm.PadLoveLiveFVM;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
@@ -147,7 +148,7 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
                                 }
                                 for(RoomRecommendMusic music: roomRecommendMusicList) {
                                     Thread.sleep(1);
-                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                    music.id = MusicPlayService.createMusicId();
                                 }
                                 Thread.sleep(10);
                                 AppData.saveRecommendList(roomRecommendMusicList);

@@ -94,6 +94,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static Handler musicNotificationHandler = new Handler();
     public static Runnable musicNotificationRunnable;
 
+    public static long STEP = 1000L; // music id精度
+
     public static final int DELAY_MILLIS = 1000;  //延迟1s发送
     public static int mAudioSessionId;
 
@@ -633,7 +635,10 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         return mAudioSessionId;
     }
 
-
+    /** 生成全新的music id */
+    public static long createMusicId() {
+        return System.currentTimeMillis() * STEP;
+    }
     /**
      * 获取歌曲MediaMeta的信息
      * */

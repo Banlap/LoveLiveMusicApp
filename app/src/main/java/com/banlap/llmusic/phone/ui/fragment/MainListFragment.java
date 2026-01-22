@@ -13,6 +13,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.fvm.MainListFVM;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
@@ -173,7 +174,7 @@ public class MainListFragment extends BaseFragment<MainListFVM, FragmentMainList
                                 }
                                 for(RoomRecommendMusic music: roomRecommendMusicList) {
                                     Thread.sleep(1);
-                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                    music.id = MusicPlayService.createMusicId();
                                 }
                                 Thread.sleep(10);
                                 AppData.saveRecommendList(roomRecommendMusicList);

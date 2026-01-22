@@ -1617,7 +1617,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     long nextMusicId = roomPlayMusicList.get(index + 1).id;
                     music.id = (currentMusicId + nextMusicId) / 2;
                 } else {
-                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                    music.id = MusicPlayService.createMusicId();
                 }
                 roomPlayMusicList.add(index + 1, music);
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, true));
@@ -1660,7 +1660,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
                         for(RoomPlayMusic music: roomPlayMusicList) {
                             Thread.sleep(1);
-                            music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                            music.id = MusicPlayService.createMusicId();
                         }
                         Thread.sleep(10);
                         AppData.saveRoomMusic(roomPlayMusicList);

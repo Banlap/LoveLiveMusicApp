@@ -15,6 +15,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.banlap.llmusic.model.LocalFile;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.FileUtil;
@@ -177,7 +178,7 @@ public class LocalListFVM extends AndroidViewModel {
 
             if(null != title) {
                 RoomLocalFile localFile = new RoomLocalFile();
-                localFile.id = System.currentTimeMillis() * SystemUtil.STEP;
+                localFile.id = MusicPlayService.createMusicId();
                 localFile.title = title;
                 localFile.album = album;
                 localFile.artist = artist;

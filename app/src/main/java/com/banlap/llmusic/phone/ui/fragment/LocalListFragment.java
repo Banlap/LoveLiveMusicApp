@@ -51,6 +51,7 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.fvm.LocalListFVM;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomCustomPlay;
@@ -343,7 +344,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                 }
                                 for(RoomLocalFile music: roomLocalFileList) {
                                     Thread.sleep(1);
-                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                    music.id = MusicPlayService.createMusicId();
                                 }
                                 Thread.sleep(10);
                                 AppData.saveLocalFileMusicList(roomLocalFileList);
@@ -380,7 +381,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                 }
                                 for(RoomLocalFile music: roomLocalFileList) {
                                     Thread.sleep(1);
-                                    music.id = System.currentTimeMillis() * SystemUtil.STEP;
+                                    music.id = MusicPlayService.createMusicId();
                                 }
                                 Thread.sleep(10);
                                 AppData.saveLocalFileMusicList(roomLocalFileList);
