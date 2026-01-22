@@ -104,7 +104,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
     //当前歌曲信息
     public static RoomPlayMusic currentRoomPlayMusic; //当前播放音乐的总信息
-    public static long latestPlayRequestId = 0; //最新播放的歌曲id
 
     //作为小组件临时使用的变量
     public static byte[] lastWidgetByteArray; //临时缓存上一次的 byte[]
@@ -362,7 +361,6 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final RoomPlayMusic dataSource, final boolean isLoop) {
-            latestPlayRequestId = dataSource.id;
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
@@ -386,7 +384,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 mMusicLyricList.addAll(musicLyrics);
 
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, currentRoomPlayMusic, 0, latestPlayRequestId));
+                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, currentRoomPlayMusic, 0));
 
                 exoPlayer = new ExoPlayer.Builder(getBaseContext()).setLoadControl(
                         new DefaultLoadControl.Builder().setBufferDurationsMs(

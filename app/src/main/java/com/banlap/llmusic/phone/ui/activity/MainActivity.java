@@ -1404,10 +1404,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_MSG:
-                if (event.l != MusicPlayService.latestPlayRequestId) {
-                    Log.i(TAG, "丢弃过期音乐信息: event.l>>" + event.l+ ">>latestPlayRequestId>>" + MusicPlayService.latestPlayRequestId);
-                    return; // 丢弃过期音乐信息
-                }
                 MusicPlayService.currentRoomPlayMusic = event.roomPlayMusic;
 
                 lyricScrollView.initView();
@@ -2831,7 +2827,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
             } else {
                 Optional<RoomPlayMusic> currentMusicPlayList = roomPlayMusicList.stream()
-                        .filter(playMusic -> playMusic.id == (MusicPlayService.latestPlayRequestId))
+                        .filter(MusicPlayService::currentMusicIsPlay)
                         .findFirst();
 
                 if(currentMusicPlayList.isPresent()) {
@@ -3676,7 +3672,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             binder.showLyric(list.get(position), (playMode == 2));
             roomPlayMusicList.add(list.get(position));
         }
-        playMusicListAdapter.notifyDataSetChanged();
+        //playMusicListAdapter.notifyDataSetChanged();
         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), false));
         //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
     }
