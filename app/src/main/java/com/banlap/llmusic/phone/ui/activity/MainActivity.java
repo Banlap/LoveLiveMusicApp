@@ -1040,7 +1040,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 Toasty.error(this, "网络连接失败", Toast.LENGTH_SHORT, true).show();
                 break;
             case ThreadEvent.VIEW_GET_ALBUM_LIST_SUCCESS:
-                if(event.tList == null || event.tList.isEmpty()) {
+                if(event.tList == null) {
                     return;
                 }
                 roomOnlineMusicList.clear();
@@ -2026,13 +2026,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.THREAD_GET_DATA_LIST_BY_LOCAL_PLAY:
                 if(event.t != null) {
-                    LocalPlayList localPlayList = (LocalPlayList) event.t;
-                    List<Music> musicList1 = new ArrayList<>();
-                    if(localPlayList.getMusicList() != null && !localPlayList.getMusicList().isEmpty()) {
-                        musicList1.addAll(localPlayList.getMusicList());
+                    RoomCustomPlay localPlayList = (RoomCustomPlay) event.t;
+                    List<RoomPlayMusic> musicList1 = new ArrayList<>();
+                    if(!TextUtils.isEmpty(localPlayList.musicListJson)) {
+                        musicList1.addAll(Converters.toPlayMusicList(localPlayList.musicListJson));
                     }
                     EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_ALBUM_LIST_SUCCESS, musicList1));
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_LOCAL_PLAY_LIST_SUCCESS, localPlayList.getPlayListName(), localPlayList.getPlayListCount(), localPlayList.getPlayListId(), localPlayList.getPlayListImgByte()));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_GET_LOCAL_PLAY_LIST_SUCCESS, localPlayList.playListName, localPlayList.playListCount, localPlayList.playListId, localPlayList.playListImgByte));
                 }
                 break;
             case ThreadEvent.THREAD_GET_MUSIC_LYRIC:
