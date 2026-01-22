@@ -1401,6 +1401,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         binder.resetMusicPlayer();
                         MusicPlayService.currentRoomPlayMusic = new RoomPlayMusic();
                     }
+                    updateStopCharacterStatus();
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_MSG:
@@ -1667,7 +1668,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     CharacterHelper.showListenStatusCharacter(CharacterHelper.CHARACTER_NAME_KANON, false);
                 }
                 break;
-
+            case ThreadEvent.VIEW_UPDATE_CHARACTER_STATUS:
+                updateStopCharacterStatus();
+                break;
             case ThreadEvent.VIEW_SCAN_LOCAL_FILE_SUCCESS:
                 getViewDataBinding().rlShowLoading.setVisibility(GONE);
                 if(null != dialogLocalFileBinding) {
@@ -2613,9 +2616,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         + "." + CharacterService.class.getSimpleName())) {
 
                  stopService(intentCharacterService);
-                 MainVM.stopHandler();           //关闭角色并停止handler
-                 MainVM.stopTalkHandler();
-                 getViewDataBinding().ivCharacterStatus.setVisibility(View.GONE);
+                 updateStopCharacterStatus();
 
                  if(!mCharacterName.equals(characterName)) {
                      showCharacterAuth(characterName);
@@ -2665,6 +2666,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             mAlertDialog.getWindow().setLayout((int)(SystemUtil.getInstance().getDM(this).widthPixels * 0.8), ViewGroup.LayoutParams.WRAP_CONTENT);
         }
 
+    }
+
+    /** 关闭角色状态并刷新ui */
+    public void updateStopCharacterStatus() {
+        MainVM.stopHandler();
+        MainVM.stopTalkHandler();
+        getViewDataBinding().ivCharacterStatus.setVisibility(View.GONE);
     }
 
     /** 点击当前音乐img */
@@ -3286,6 +3294,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 点击删除当前歌单列表所有歌曲 */
     public void deletePlayListAll(View view) {
+        if (roomPlayMusicList.isEmpty()) { //列表为空的时候不做弹窗
+            return;
+        }
         DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_default, null, false);
 
@@ -3448,8 +3459,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         MusicPlayService.stopAppWidgetRunnable();
         MusicPlayService.stopMusicNotificationRunnable();
         MusicPlayService.clearMediaSession();
-        MainVM.stopHandler();
-        MainVM.stopTalkHandler();
+        updateStopCharacterStatus();
         DownloadReceiver.stopHandler();
         unbindService(conn);
         stopService(intentService);

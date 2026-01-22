@@ -1851,6 +1851,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 点击删除当前歌单列表所有歌曲 */
     public void deletePlayListAll(View view) {
+        if (roomPlayMusicList.isEmpty()) { //列表为空的时候不做弹窗
+            return;
+        }
         DialogDefaultBinding defaultBinding = DataBindingUtil.inflate(LayoutInflater.from(this),
                 R.layout.dialog_default, null, false);
 

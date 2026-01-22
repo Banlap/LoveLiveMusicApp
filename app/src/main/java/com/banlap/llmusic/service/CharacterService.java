@@ -277,8 +277,7 @@ public class CharacterService extends Service {
                             + "." + CharacterService.class.getSimpleName())) {
 
                         stopService(MainActivity.intentCharacterService);
-                        MainVM.stopHandler();           //关闭角色并停止handler
-                        MainVM.stopTalkHandler();
+                        EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_UPDATE_CHARACTER_STATUS));
                     }
                 }
             } else if(v.getId() == R.id.ll_last_music) {

@@ -134,7 +134,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_MUSIC_IS_PAUSE = 1198; //歌曲播放或暂停
 
     public static final int VIEW_SHOW_CHARACTER_TALK = 1200;
-    public static final int VIEW_SHOW_CHARACTER_TALK_CONTENT = 1201;
+    public static final int VIEW_UPDATE_CHARACTER_STATUS = 1201;
     public static final int VIEW_HIDE_CHARACTER_TALK = 1202; //隐藏角色对话
     public static final int VIEW_NORMAL_STATUS_CHARACTER = 1203; //展示角色：正常状态
     public static final int VIEW_MOVE_STATUS_CHARACTER = 1204; //展示角色：动态
