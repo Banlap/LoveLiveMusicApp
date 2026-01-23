@@ -1586,7 +1586,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         if(!roomPlayMusicList.isEmpty()){
             int currentIndex = MusicPlayService.currentMusicPlayIndex(roomPlayMusicList);
             if(currentIndex != -1) {
-                RoomPlayMusic currentPlayMusic = list.get(currentIndex);
+                RoomPlayMusic currentPlayMusic = roomPlayMusicList.get(currentIndex);
                 if(roomPlayMusicList.size() > currentIndex + 1) {
                     long currentMusicId = currentPlayMusic.id;
                     long nextMusicId = roomPlayMusicList.get(currentIndex + 1).id;
