@@ -277,6 +277,7 @@ public class ThreadEvent<T> {
 
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i, int i2) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; this.i2 = i2; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i, long l) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; this.l = l;}
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b, long l) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; this.l = l;}

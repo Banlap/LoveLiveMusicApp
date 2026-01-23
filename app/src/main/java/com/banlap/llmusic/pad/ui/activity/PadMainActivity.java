@@ -1222,8 +1222,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
-                MusicPlayService.currentRoomPlayMusic.musicName = event.str;
-                MusicPlayService.currentRoomPlayMusic.musicSinger = event.str2;
+                //MusicPlayService.currentRoomPlayMusic.musicName = event.str;
+                //MusicPlayService.currentRoomPlayMusic.musicSinger = event.str2;
                 if(event.bitmap != null) {
                     MusicPlayService.currentRoomPlayMusic.musicImgBitmap = event.bitmap;
                 }
@@ -1275,51 +1275,32 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     return;
                 }
                 if(!roomPlayMusicList.isEmpty()) {
+                    int currentIndex = MusicPlayService.currentMusicPlayIndex(roomPlayMusicList);
                     //判断播放模式
                     switch (playMode) {
                         case 0: //顺序播放
-                            Log.i("ABMediaPlay","0");
-                            boolean isInto = false;
-                            for (int i = 0; i < roomPlayMusicList.size(); i++) {
-                                if (MusicPlayService.currentMusicIsPlay(roomPlayMusicList.get(i))) {
-                                    if(i+1<roomPlayMusicList.size()) {
-                                        isInto = true;
-                                        binder.showLyric(roomPlayMusicList.get(i+1), (playMode == 2));
-                                        break;
-                                    }
-                                }
-                            }
+                            Log.i(TAG,"顺序播放");
+                            int newIndex = (currentIndex != -1 && currentIndex + 1 < roomPlayMusicList.size())? currentIndex + 1 : 0;
+                            binder.showLyric(roomPlayMusicList.get(newIndex), (playMode == 2));
 
-                            if(!isInto){
-                                binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
-                            }
                             //变更主题
                             //ThemeHelper.getInstance().playButtonTheme(rThemeId, getViewDataBinding());
                             getViewDataBinding().ivPlay.setBackgroundResource(R.drawable.selector_play_black_selected);
                             getViewDataBinding().ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_33_selected);
                             break;
                         case 1: //随机播放
-                            Log.i("ABMediaPlay","1");
-                            boolean isIntoRand = false;
-                            for (int i = 0; i < roomPlayMusicList.size(); i++) {
-                                if(MusicPlayService.currentMusicIsPlay(roomPlayMusicList.get(i))) {
-                                    isIntoRand = true;
-                                    int rand = new Random().nextInt(roomPlayMusicList.size());
-                                    while(i == rand) {
-                                        rand = new Random().nextInt(roomPlayMusicList.size());
-                                    }
-                                    binder.showLyric(roomPlayMusicList.get(rand), (playMode == 2));
-                                    break;
+                            Log.i(TAG,"随机播放");
+                            int rand = new Random().nextInt(roomPlayMusicList.size());
+                            if(currentIndex != -1) {
+                                while(currentIndex == rand) {
+                                    rand = new Random().nextInt(roomPlayMusicList.size());
                                 }
                             }
+                            binder.showLyric(roomPlayMusicList.get(rand), (playMode == 2));
 
-                            if(!isIntoRand) {
-                                int rand = new Random().nextInt(roomPlayMusicList.size());
-                                binder.showLyric(roomPlayMusicList.get(rand), (playMode == 2));
-                            }
                             break;
                         case 2: //单曲循环
-                            Log.i("ABMediaPlay","2");
+                            Log.i(TAG,"单曲循环");
                             break;
                     }
                 } else {
@@ -1601,38 +1582,29 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 播放当前点击的歌曲 */
     private void playMusic(List<RoomPlayMusic> list, int position) {
+        RoomPlayMusic music = list.get(position);
         if(!roomPlayMusicList.isEmpty()){
-
-            Optional<RoomPlayMusic> currentlyPlaying = roomPlayMusicList.stream()
-                    .filter(MusicPlayService::currentMusicIsPlay)
-                    .findFirst();
-
-            if(currentlyPlaying.isPresent()) {
-                RoomPlayMusic currentPlayMusic = currentlyPlaying.get();
-                binder.showLyric(list.get(position), (playMode == 2));
-                int index = roomPlayMusicList.indexOf(currentPlayMusic);
-                RoomPlayMusic music = list.get(position);
-                if(roomPlayMusicList.size() > index + 1) {
+            int currentIndex = MusicPlayService.currentMusicPlayIndex(roomPlayMusicList);
+            if(currentIndex != -1) {
+                RoomPlayMusic currentPlayMusic = list.get(currentIndex);
+                if(roomPlayMusicList.size() > currentIndex + 1) {
                     long currentMusicId = currentPlayMusic.id;
-                    long nextMusicId = roomPlayMusicList.get(index + 1).id;
+                    long nextMusicId = roomPlayMusicList.get(currentIndex + 1).id;
                     music.id = (currentMusicId + nextMusicId) / 2;
                 } else {
                     music.id = MusicPlayService.createMusicId();
                 }
-                roomPlayMusicList.add(index + 1, music);
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, true));
-                return;
+                binder.showLyric(music, (playMode == 2));
+                roomPlayMusicList.add(currentIndex + 1, music);
+            } else {
+                binder.showLyric(list.get(position), (playMode == 2));
+                roomPlayMusicList.add(roomPlayMusicList.size(), list.get(position));
             }
-
-            binder.showLyric(list.get(position), (playMode == 2));
-            roomPlayMusicList.add(roomPlayMusicList.size(), list.get(position));
         } else {
             binder.showLyric(list.get(position), (playMode == 2));
             roomPlayMusicList.add(list.get(position));
         }
-        playMusicListAdapter.notifyDataSetChanged();
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, list.get(position), false));
-        //SPUtil.setListValue(context, SPUtil.PlayListData, playList);
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, false));
     }
 
     /** 点击播放全部歌曲 */
@@ -1747,7 +1719,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
     /** 添加当前点击的歌曲 */
     private void addMusic(List<RoomPlayMusic> list, int position) {
         roomPlayMusicList.add(list.get(position));
-
         if(roomPlayMusicList.size()==1) {
             binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
         } else {
@@ -1811,21 +1782,18 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 播放上一首或下一首歌曲 */
     public void lastOrNextMusic(final boolean isNext) {
-        if (!roomPlayMusicList.isEmpty()) {
-            if (roomPlayMusicList.size() == 1) {
+        if(!roomPlayMusicList.isEmpty()) {
+            if(roomPlayMusicList.size() == 1) {
                 binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
             } else {
-
-                Optional<RoomPlayMusic> currentMusicPlayList = roomPlayMusicList.stream()
-                        .filter(MusicPlayService::currentMusicIsPlay)
-                        .findFirst();
-
-                if (currentMusicPlayList.isPresent()) {
-                    RoomPlayMusic currentMusic = currentMusicPlayList.get();
-                    int oldIndex = roomPlayMusicList.indexOf(currentMusic);
-
+                if (MusicPlayService.currentRoomPlayMusic == null) {
+                    binder.showLyric(roomPlayMusicList.get(0), (playMode == 2));
+                    return;
+                }
+                // 直接查找当前歌曲在列表中的位置
+                int oldIndex = MusicPlayService.currentMusicPlayIndex(roomPlayMusicList);
+                if(oldIndex != -1) {
                     int newIndex = -1; //新播放歌曲索引
-
                     if(playMode ==1) {
                         int rand = new Random().nextInt(roomPlayMusicList.size());
                         while (oldIndex == rand) {
@@ -1841,7 +1809,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                             newIndex  = (oldIndex == 0) ? roomPlayMusicList.size() - 1 : oldIndex - 1;
                         }
                     }
-
                     // 调用播放服务
                     binder.showLyric(roomPlayMusicList.get(newIndex), (playMode == 2));
                 }
@@ -1995,6 +1962,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
         private Context context;
         private List<RoomPlayMusic> list;
+        private int currentPlayingIndex = -1;
 
         public PlayMusicListAdapter(Context context, List<RoomPlayMusic> list) {
             this.context = context;
@@ -2014,7 +1982,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             ItemPlayListBinding binding = DataBindingUtil.getBinding(holder.itemView);
             if(binding != null) {
 
-                binding.tvOrderNum.setVisibility(MusicPlayService.currentMusicIsPlay(list.get(position))? View.GONE : View.VISIBLE);
+                binding.tvOrderNum.setVisibility(MusicPlayService.currentMusicIsPlay(position, list)? View.GONE : View.VISIBLE);
 
                 int num = position+1;
                 binding.tvOrderNum.setText(num<10? "0"+num : ""+num);
@@ -2045,28 +2013,28 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
                 //变更主题
                 //ThemeHelper.getInstance().playListTheme(context, rThemeId, binding, list.get(position).isPlaying);
-                binding.tvOrderNum.setTextColor(MusicPlayService.currentMusicIsPlay(list.get(position))? context.getResources().getColor(R.color.light_f9) :  context.getResources().getColor(R.color.black));
-                binding.tvMusicName.setTextColor(MusicPlayService.currentMusicIsPlay(list.get(position))?  context.getResources().getColor(R.color.light_f9) :  context.getResources().getColor(R.color.black));
-                binding.tvSingerName.setTextColor(MusicPlayService.currentMusicIsPlay(list.get(position))?  context.getResources().getColor(R.color.light_f9) :  context.getResources().getColor(R.color.black));
+                binding.tvOrderNum.setTextColor(MusicPlayService.currentMusicIsPlay(position, list)? context.getResources().getColor(R.color.light_f9) :  context.getResources().getColor(R.color.black));
+                binding.tvMusicName.setTextColor(MusicPlayService.currentMusicIsPlay(position, list)?  context.getResources().getColor(R.color.light_f9) :  context.getResources().getColor(R.color.black));
+                binding.tvSingerName.setTextColor(MusicPlayService.currentMusicIsPlay(position, list)?  context.getResources().getColor(R.color.light_f9) :  context.getResources().getColor(R.color.black));
                 binding.ivDelete.setBackgroundResource(R.drawable.selector_delete_selected_2);
-                binding.ivMusicRail.setVisibility(MusicPlayService.currentMusicIsPlay(list.get(position))? View.VISIBLE : GONE);
+                binding.ivMusicRail.setVisibility(MusicPlayService.currentMusicIsPlay(position, list)? View.VISIBLE : GONE);
 
 
                 //点击播放列表的歌曲
                 binding.getRoot().setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(!MusicPlayService.currentMusicIsPlay(list.get(position))) {
+                        if(!MusicPlayService.currentMusicIsPlay(position, list)) {
                             binder.showLyric(list.get(position), (playMode == 2));
                         }
                     }
                 });
                 //当前播放的歌曲列表不显示删除按钮
-                binding.llDelete.setVisibility(MusicPlayService.currentMusicIsPlay(list.get(position))? View.INVISIBLE : View.VISIBLE);
+                binding.llDelete.setVisibility(MusicPlayService.currentMusicIsPlay(position, list)? View.INVISIBLE : View.VISIBLE);
                 binding.llDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(!MusicPlayService.currentMusicIsPlay(list.get(position))) {
+                        if(!MusicPlayService.currentMusicIsPlay(position, list)) {
                             RoomPlayMusic roomPlayMusic = list.get(position);
                             list.remove(position);
                             playMusicListAdapter.notifyDataSetChanged();
@@ -2098,6 +2066,20 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         @Override
         public void onItemDismiss(int position) {
 
+        }
+
+        // 更新当前播放状态（只刷新两个item）
+        public void updatePlayingState(int newPosition) {
+            int oldPosition = currentPlayingIndex;
+            currentPlayingIndex = newPosition;
+
+            // 局部刷新
+            if (oldPosition >= 0 && oldPosition < getItemCount()) {
+                notifyItemChanged(oldPosition, "UPDATE_PLAYING_STATE");
+            }
+            if (currentPlayingIndex >= 0 && currentPlayingIndex < getItemCount()) {
+                notifyItemChanged(currentPlayingIndex, "UPDATE_PLAYING_STATE");
+            }
         }
 
     }

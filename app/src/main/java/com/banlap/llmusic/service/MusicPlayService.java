@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import okhttp3.Call;
 
@@ -106,6 +107,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
     //当前歌曲信息
     public static RoomPlayMusic currentRoomPlayMusic; //当前播放音乐的总信息
+
+    private static final AtomicReference<RoomPlayMusic> currentRoomPlayMusicRef = new AtomicReference<>();
 
     //作为小组件临时使用的变量
     public static byte[] lastWidgetByteArray; //临时缓存上一次的 byte[]
@@ -298,8 +301,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 String musicSinger = intent.getStringExtra("MusicSinger");
                 byte[] res = intent.getByteArrayExtra("MusicBitmap");
 
-                currentRoomPlayMusic.musicName = musicName;
-                currentRoomPlayMusic.musicSinger = musicSinger;
+                //currentRoomPlayMusic.musicName = musicName;
+                //currentRoomPlayMusic.musicSinger = musicSinger;
 
                 Bitmap bitmap = null;
                 if(res != null) {
@@ -363,6 +366,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放歌曲整体流程1：获取歌词 */
         public void showLyric(final RoomPlayMusic dataSource, final boolean isLoop) {
+            Log.i(TAG, "currentMusic: " + dataSource.musicName + " " + dataSource.musicSinger);
+            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, dataSource, 0));
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_MUSIC_LYRIC, dataSource, isLoop));
         }
 
@@ -372,7 +377,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 stop();
 
                 //设置当前音乐总信息
-                currentRoomPlayMusic = dataSource;
+                //currentRoomPlayMusic = dataSource;
                 //处理歌曲信息
                 currentRoomPlayMusic.musicBitrate = "--";
                 currentRoomPlayMusic.musicMime = "--";
@@ -386,7 +391,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
                 mMusicLyricList.addAll(musicLyrics);
 
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_SEEK_BAR_RESUME));
-                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, currentRoomPlayMusic, 0));
+//                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_MUSIC_MSG, currentRoomPlayMusic, 0));
 
                 exoPlayer = new ExoPlayer.Builder(getBaseContext()).setLoadControl(
                         new DefaultLoadControl.Builder().setBufferDurationsMs(
@@ -475,7 +480,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
 
         /** 播放或暂停 */
         public void pause(Context context, String musicName, String musicSinger, Bitmap bitmap) {
-            currentRoomPlayMusic.musicName = musicName;
+           // currentRoomPlayMusic.musicName = musicName;
             currentRoomPlayMusic.musicSinger = musicSinger;
             if(currentRoomPlayMusic.musicImgByte != null) {
                 currentRoomPlayMusic.musicImgBitmap = BitmapFactory.decodeByteArray(currentRoomPlayMusic.musicImgByte, 0, currentRoomPlayMusic.musicImgByte.length);
@@ -501,8 +506,8 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         /** 立即播放 */
         public void playImm(Context context, String musicName, String musicSinger, Bitmap bitmap) {
             if (exoPlayer != null) {
-                currentRoomPlayMusic.musicName = musicName;
-                currentRoomPlayMusic.musicSinger = musicSinger;
+                ///currentRoomPlayMusic.musicName = musicName;
+                //currentRoomPlayMusic.musicSinger = musicSinger;
                 if(currentRoomPlayMusic.musicImgByte != null) {
                     currentRoomPlayMusic.musicImgBitmap = BitmapFactory.decodeByteArray(currentRoomPlayMusic.musicImgByte, 0, currentRoomPlayMusic.musicImgByte.length);
                 } else if(bitmap != null) {
@@ -717,12 +722,19 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         return isFind;
     }
 
-    /** 当前的歌曲是否正在播放 */
-    public static boolean currentMusicIsPlay(RoomPlayMusic playMusic) {
-        if(MusicPlayService.currentRoomPlayMusic == null || playMusic == null) {
-            return false;
+    /**
+     * 获取当前播放歌曲的index
+     * */
+    public static int currentMusicPlayIndex(List<RoomPlayMusic> playMusicList) {
+        if(MusicPlayService.currentRoomPlayMusic == null || MusicPlayService.currentRoomPlayMusic.id == 0 || playMusicList.isEmpty()) {
+            return -1;
         }
-        return playMusic.id == MusicPlayService.currentRoomPlayMusic.id;
+        return playMusicList.indexOf(MusicPlayService.currentRoomPlayMusic);
+    }
+
+    /** 当前的歌曲是否正在播放 */
+    public static boolean currentMusicIsPlay(int pos, List<RoomPlayMusic> playMusicList) {
+        return MusicPlayService.currentMusicPlayIndex(playMusicList) == pos;
     }
 
     /** 更新小组件UI */
