@@ -1582,6 +1582,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 播放当前点击的歌曲 */
     private void playMusic(List<RoomPlayMusic> list, int position) {
+        boolean isCreateId = false;
         RoomPlayMusic music = list.get(position);
         if(!roomPlayMusicList.isEmpty()){
             int currentIndex = MusicPlayService.currentMusicPlayIndex(roomPlayMusicList);
@@ -1596,6 +1597,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 }
                 binder.showLyric(music, (playMode == 2));
                 roomPlayMusicList.add(currentIndex + 1, music);
+                isCreateId = true;
             } else {
                 binder.showLyric(list.get(position), (playMode == 2));
                 roomPlayMusicList.add(roomPlayMusicList.size(), list.get(position));
@@ -1604,7 +1606,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             binder.showLyric(list.get(position), (playMode == 2));
             roomPlayMusicList.add(list.get(position));
         }
-        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, false));
+        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, isCreateId));
     }
 
     /** 点击播放全部歌曲 */
