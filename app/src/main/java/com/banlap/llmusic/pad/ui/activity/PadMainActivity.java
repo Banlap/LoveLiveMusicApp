@@ -73,8 +73,10 @@ import com.banlap.llmusic.model.Version;
 import com.banlap.llmusic.pad.ui.fragment.PadDetailMusicListFragment;
 import com.banlap.llmusic.pad.ui.fragment.PadLoveLiveFragment;
 import com.banlap.llmusic.pad.uivm.vm.PadMainVM;
+import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.CharacterService;
+import com.banlap.llmusic.service.LyricService;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.MysqlHelper;
@@ -1232,10 +1234,50 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 MusicPlayService.updateWidgetUI(context, false);
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC:
+                String size1 = "(" + roomPlayMusicList.size() + ")";
+                getViewDataBinding().tvNewListSize.setText(size1);
+                getViewDataBinding().tvDetailNewListSize.setText(size1);
+                break;
             case ThreadEvent.VIEW_DELETE_MUSIC:
                 String size2 = "(" + roomPlayMusicList.size() + ")";
                 getViewDataBinding().tvNewListSize.setText(size2);
                 getViewDataBinding().tvDetailNewListSize.setText(size2);
+
+                //如果是删除全部按钮则 清除现在的播放信息及状态
+                if(event.b) {
+                    //ThemeHelper.getInstance().resetDefaultStatusTheme(this, 0, getViewDataBinding(), binder);
+
+                    //重置所有状态
+                    getViewDataBinding().tvMusicName.setText("MusicName");
+                    getViewDataBinding().tvSingerName.setText("SingerName");
+                    getViewDataBinding().tvNewMusicName.setText("MusicName");
+                    getViewDataBinding().tvNewSingerName.setText("SingerName");
+                    getViewDataBinding().tvNewStartTime.setText("00:00");
+                    getViewDataBinding().tvNewAllTime.setText("00:00");
+                    getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
+
+
+                    //清空歌词
+                    List<MusicLyric> list = new ArrayList<>();
+                    lyricNewScrollDetailView.setMusicLyrics(list);
+                    lyricNewScrollView.setMusicLyrics(list);
+                    LyricService.setMusicLyrics(list);
+                    musicLyricList.clear();
+
+                    Glide.with(context)
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(R.mipmap.ic_llmp_new_2)
+                            .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .into(getViewDataBinding().civMusicImg);
+
+                    if(binder!=null) {
+                        binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                        binder.clearMedia();
+                        binder.resetMusicPlayer();
+                        MusicPlayService.currentRoomPlayMusic = new RoomPlayMusic();
+                    }
+                }
                 break;
             case ThreadEvent.VIEW_PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {

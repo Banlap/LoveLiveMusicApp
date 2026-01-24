@@ -63,6 +63,9 @@ public class RoomFavoriteMusic {
         @Delete
         void delete(RoomFavoriteMusic roomPlayMusic);
 
+        @Query("DELETE FROM favorite_music")
+        void deleteAll();
+
         @Update
         void update(RoomFavoriteMusic roomPlayMusic);
 

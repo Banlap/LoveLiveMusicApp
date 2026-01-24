@@ -59,7 +59,7 @@ public class ThemeHelper {
     /**
      * MainActivity主题改变 - 整体ui
      * */
-    public void changeTheme(Context context, int rThemeId, ActivityMainBinding vdb, MusicPlayService.MusicBinder binder) {
+    public void changeTheme(Context context, int rThemeId, ActivityMainBinding vdb, MusicPlayService.MusicBinder binder, boolean isFavorite) {
         if(requestOptions == null) {
             requestOptions = new RequestOptions();
             requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
@@ -137,7 +137,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_black_33);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_black_33);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more_black_33);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_black_33);
@@ -181,7 +181,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_33_selected);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -288,7 +288,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
@@ -332,7 +332,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_blue_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -439,7 +439,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
@@ -483,7 +483,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -591,7 +591,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_purple);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_purple);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more_purple);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_purple);
@@ -635,7 +635,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -742,7 +742,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_orange);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_orange);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more_orange);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_orange);
@@ -786,7 +786,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -895,7 +895,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down_light);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode_light);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more_light);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play_light);
@@ -936,7 +936,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -1043,7 +1043,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
@@ -1087,7 +1087,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_red_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
@@ -1194,7 +1194,7 @@ public class ThemeHelper {
 
             vdb.ivCloseControllerMode.setBackgroundResource(R.drawable.ic_arrow_down);
             vdb.ivNewChangeMode.setBackgroundResource(R.drawable.ic_bg_mode);
-            vdb.ivNewMyFavorite.setBackgroundResource(MainActivity.isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
+            vdb.ivNewMyFavorite.setBackgroundResource(isFavorite? R.drawable.ic_favorite_red : R.drawable.ic_favorite_empty_red);
 
             vdb.ivNewMore.setBackgroundResource(R.drawable.ic_more);
             vdb.ivNewChangePlayMode.setBackgroundResource(R.drawable.ic_order_play);
@@ -1238,7 +1238,7 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_stars);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.currentRoomPlayMusic != null && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)

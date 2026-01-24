@@ -644,6 +644,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
     public static long createMusicId() {
         return System.currentTimeMillis() * STEP;
     }
+
     /**
      * 获取歌曲MediaMeta的信息
      * */
@@ -686,6 +687,13 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         return map;
     }
 
+    /**
+     * 当前歌曲信息是否存在
+     * */
+    public static boolean isExistsCurrentMusic() {
+        return (MusicPlayService.currentRoomPlayMusic != null && MusicPlayService.currentRoomPlayMusic.id != 0);
+    }
+
     /** 关闭 */
     public void stop() {
         progressHandler.removeCallbacks(progressRunnable);
@@ -726,7 +734,7 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
      * 获取当前播放歌曲的index
      * */
     public static int currentMusicPlayIndex(List<RoomPlayMusic> playMusicList) {
-        if(MusicPlayService.currentRoomPlayMusic == null || MusicPlayService.currentRoomPlayMusic.id == 0 || playMusicList.isEmpty()) {
+        if(!MusicPlayService.isExistsCurrentMusic() || playMusicList.isEmpty()) {
             return -1;
         }
         return playMusicList.indexOf(MusicPlayService.currentRoomPlayMusic);

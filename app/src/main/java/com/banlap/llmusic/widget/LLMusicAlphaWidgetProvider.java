@@ -45,8 +45,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
         String musicName, musicSinger;
-        musicName = (MusicPlayService.currentRoomPlayMusic != null)? MusicPlayService.currentRoomPlayMusic.musicName : "";
-        musicSinger = (MusicPlayService.currentRoomPlayMusic != null)? MusicPlayService.currentRoomPlayMusic.musicSinger : "";
+        musicName = MusicPlayService.isExistsCurrentMusic()? MusicPlayService.currentRoomPlayMusic.musicName : "";
+        musicSinger = MusicPlayService.isExistsCurrentMusic()? MusicPlayService.currentRoomPlayMusic.musicSinger : "";
         Log.i(TAG, "update success: musicName:" + musicName + " musicSinger: " + musicSinger );
         setRemoteViews(context, appWidgetManager, null);
     }
@@ -85,8 +85,8 @@ public class LLMusicAlphaWidgetProvider extends AppWidgetProvider {
         }
 
         //当小组件重新加入时 获取上次音乐信息
-        String musicNameTemp = MusicPlayService.currentRoomPlayMusic != null? MusicPlayService.currentRoomPlayMusic.musicName : "";
-        String musicSingerTemp = MusicPlayService.currentRoomPlayMusic != null? MusicPlayService.currentRoomPlayMusic.musicSinger : "";
+        String musicNameTemp = MusicPlayService.isExistsCurrentMusic()? MusicPlayService.currentRoomPlayMusic.musicName : "";
+        String musicSingerTemp = MusicPlayService.isExistsCurrentMusic()? MusicPlayService.currentRoomPlayMusic.musicSinger : "";
         Bitmap bitmap = null;
 
         if(!TextUtils.isEmpty(musicNameTemp) && !TextUtils.isEmpty(musicSingerTemp)) {

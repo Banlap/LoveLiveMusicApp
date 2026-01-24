@@ -80,6 +80,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -149,10 +151,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         roomFavoriteList = new ArrayList<>();
         if(!AppData.roomFavoriteMusicList.isEmpty()) {
             roomFavoriteList.addAll(AppData.roomFavoriteMusicList);
-        } else {
-            roomFavoriteList.add(new RoomFavoriteMusic());
-            roomFavoriteList.add(new RoomFavoriteMusic());
         }
+        AppData.addNullDataForFavorite(roomFavoriteList);
 
         requestOptions = new RequestOptions();
         requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
@@ -411,28 +411,26 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 break;
             case ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC:
                 if(event.roomPlayMusic != null) {
-                    List<RoomPlayMusic> list1 = new ArrayList<>();
-                    list1.add(event.roomPlayMusic);
-                    String roomFavoriteMusicStr = Converters.fromPlayMusicList(list1);
-                    List<RoomFavoriteMusic> list2 = Converters.toFavoriteMusicList(roomFavoriteMusicStr);
-                    final RoomFavoriteMusic roomPlayMusic = list2.get(0);
+                    String roomFavoriteMusicStr = Converters.fromPlayMusicList(Collections.singletonList(event.roomPlayMusic));
+                    List<RoomFavoriteMusic> list = Converters.toFavoriteMusicList(roomFavoriteMusicStr);
 
                     BaseActivity<? extends ViewModel, ? extends ViewDataBinding> activity = LLActivityManager.getInstance().getTopActivity();
-                    if (activity == null || activity.isFinishing()) return;
+                    if (activity == null || activity.isFinishing() || list == null) return;
+
+                    final RoomFavoriteMusic roomPlayMusic = list.get(0);
 
                     //mFavoriteList = Collections.synchronizedList(new ArrayList<>());
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
-                            List<RoomFavoriteMusic> currentMusicList = new ArrayList<>();
-                            currentMusicList.add(roomPlayMusic);
+                            Set<RoomFavoriteMusic> uniqueMusicSet = new LinkedHashSet<>(); // 使用LinkedHashSet去重并保留顺序
+                            uniqueMusicSet.add(roomPlayMusic);
+                            uniqueMusicSet.addAll(roomFavoriteList);
+                            List<RoomFavoriteMusic> newFavoriteList = new ArrayList<>(uniqueMusicSet);
+                            AppData.saveFavoriteList(newFavoriteList);
 //                            List<RoomPlayMusic> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                            List<RoomFavoriteMusic> roomFavoriteMusicList = AppData.roomFavoriteMusicList;
-                            currentMusicList.addAll(roomFavoriteMusicList);
-                            Set<RoomFavoriteMusic> uniqueMusicSet = new LinkedHashSet<>(currentMusicList); // 使用LinkedHashSet去重并保留顺序
                             //List<Music> newFavoriteList = new ArrayList<>(uniqueMusicSet);
                             //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, newFavoriteList);
-
                             activity.runOnUiThread(()->{
                                 roomFavoriteList.clear();
                                 roomFavoriteList.addAll(uniqueMusicSet);
@@ -456,7 +454,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             case ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC:
                 if(!roomFavoriteList.isEmpty()) {
                     for(int i=0; i< roomFavoriteList.size(); i++) {
-                        if(event.music.musicName.equals(roomFavoriteList.get(i).musicName)) {
+                        if(event.roomPlayMusic.musicId == roomFavoriteList.get(i).musicId) {
                             RoomFavoriteMusic deleteFavoriteMusic = roomFavoriteList.get(i);
                             roomFavoriteList.remove(i);
                             favoriteListAdapter.notifyItemRemoved(i);

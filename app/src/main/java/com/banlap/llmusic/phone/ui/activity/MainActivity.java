@@ -196,7 +196,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public static boolean isPlay = false;               //判断是否播放音乐
     public static boolean isOnTouchSeekBar = false;      //是否按着控制条
 
-    public static boolean isFavorite = false;           //当前歌曲是否已收藏
+    public boolean isFavorite = false;           //当前歌曲是否已收藏
     private AlertDialog mAlertDialog;                   //弹窗
     private PopupWindow mPopupWindow;                   //弹窗
     private int musicListSize = 0;                      //获取总播放列表数
@@ -1796,7 +1796,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             if(!spTempList.isEmpty()) {
                                 setMusicFavorite(spTempList);
                             }
-                            //playMusicListAdapter.notifyDataSetChanged();
+                            playMusicListAdapter.notifyDataSetChanged();
                             //刷新新播放界面是否收藏歌曲
                             setCurrentMusicFavorite(spTempList, MusicPlayService.currentRoomPlayMusic.musicName);
                         });
@@ -2152,7 +2152,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             } else if(v.getId() == R.id.rl_new_play_controller) { //打开新版音乐播放页面
                 showOrHideNewController(false);
             } else if(v.getId() == R.id.iv_new_my_favorite) {
-                if(MusicPlayService.currentRoomPlayMusic != null) {
+                if(MusicPlayService.isExistsCurrentMusic()) {
                     if(!isFavorite) {
                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC, MusicPlayService.currentRoomPlayMusic));
                     } else {
@@ -2248,7 +2248,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 改变主题 */
     private void changeTheme(int rId) {
         //刷新ui
-        ThemeHelper.getInstance().changeTheme(this, rId, getViewDataBinding(), binder);
+        ThemeHelper.getInstance().changeTheme(this, rId, getViewDataBinding(), binder, isFavorite);
         musicListAdapter.notifyDataSetChanged();
         playMusicListAdapter.notifyDataSetChanged();
         //处理其他页面
@@ -3784,8 +3784,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private void setMusicFavorite(List<RoomFavoriteMusic> favoriteList) {
         roomPlayMusicList.forEach(playMusic ->{
            boolean isFavorite = favoriteList.stream().anyMatch(favoriteMusic ->
-                   !TextUtils.isEmpty(playMusic.musicName) && !TextUtils.isEmpty(favoriteMusic.musicName)
-                           && playMusic.musicName.equals(favoriteMusic.musicName));
+                   playMusic.musicId == favoriteMusic.musicId);
            playMusic.musicFavorite = isFavorite? 1 : 0;
         });
     }

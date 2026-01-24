@@ -156,4 +156,27 @@ public class AppData {
             }
         }
     }
+
+
+    /**
+     * 删除所有收藏歌曲数据后再保存收藏歌曲
+     * */
+    public static void saveFavoriteList(List<RoomFavoriteMusic> roomFavoriteMusicList) {
+        BaseApplication.llMusicDatabase.favoriteMusicDao().deleteAll();
+        if(!roomFavoriteMusicList.isEmpty()) {
+            for(RoomFavoriteMusic favoriteMusic : roomFavoriteMusicList) {
+                if(favoriteMusic.id != 0) {
+                    BaseApplication.llMusicDatabase.favoriteMusicDao().insert(favoriteMusic);
+                }
+            }
+        }
+    }
+
+    /**
+     * 添加空数据 收藏列表
+     * */
+    public static void addNullDataForFavorite(List<RoomFavoriteMusic> roomFavoriteList) {
+        roomFavoriteList.add(new RoomFavoriteMusic());
+        roomFavoriteList.add(new RoomFavoriteMusic());
+    }
 }
