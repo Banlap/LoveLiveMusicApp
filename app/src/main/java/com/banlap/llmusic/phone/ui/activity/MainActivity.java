@@ -3632,6 +3632,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private void playMusic(List<RoomPlayMusic> list, int position) {
         boolean isCreateId = false;
         RoomPlayMusic music = list.get(position);
+        Log.i(TAG, "oldMusicId: " + music.id);
         if(!roomPlayMusicList.isEmpty()){
             int currentIndex = MusicPlayService.currentMusicPlayIndex(roomPlayMusicList);
             if(currentIndex != -1) {
@@ -3639,20 +3640,24 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(roomPlayMusicList.size() > currentIndex + 1) {
                     long currentMusicId = currentPlayMusic.id;
                     long nextMusicId = roomPlayMusicList.get(currentIndex + 1).id;
-                    music.id = (currentMusicId + nextMusicId) / 2;
+                    music = music.copyWithNewId((currentMusicId + nextMusicId) / 2);
                 } else {
-                    music.id = MusicPlayService.createMusicId();
+                    music = music.copyWithNewId(MusicPlayService.createMusicId());
                 }
-                binder.showLyric(music, (playMode == 2));
+
                 roomPlayMusicList.add(currentIndex + 1, music);
+                Log.i(TAG, "newMusicId: " + music.id);
+                binder.showLyric(music, (playMode == 2));
                 isCreateId = true;
             } else {
-                binder.showLyric(list.get(position), (playMode == 2));
-                roomPlayMusicList.add(roomPlayMusicList.size(), list.get(position));
+                music = music.copyWithNewId(MusicPlayService.createMusicId());
+                roomPlayMusicList.add(roomPlayMusicList.size(), music);
+                binder.showLyric(music, (playMode == 2));
             }
         } else {
-            binder.showLyric(list.get(position), (playMode == 2));
-            roomPlayMusicList.add(list.get(position));
+            music = music.copyWithNewId(MusicPlayService.createMusicId());
+            binder.showLyric(music, (playMode == 2));
+            roomPlayMusicList.add(music);
         }
         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, isCreateId));
     }
@@ -3829,6 +3834,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         @Override
         public void onBindViewHolder(@NonNull PlayMusicListViewHolder holder, @SuppressLint("RecyclerView") final int position) {
             ItemPlayListBinding binding = DataBindingUtil.getBinding(holder.itemView);
+            Log.i(TAG, "list: musicId: " + roomList.get(position).id);
             if(binding != null) {
                 // 设置默认值（防残留）
                 binding.tvMusicName.setText("");

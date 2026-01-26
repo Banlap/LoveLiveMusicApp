@@ -14,6 +14,8 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 import java.util.List;
+import java.util.Objects;
+
 /**
  * 播放列表
  * */
@@ -78,5 +80,27 @@ public class RoomPlayMusic {
 
         @Query("SELECT * FROM play_music ORDER BY id ASC")
         List<RoomPlayMusic> getAllMusic();
+    }
+
+    public RoomPlayMusic copyWithNewId(long id) {
+        RoomPlayMusic roomPlayMusic = new RoomPlayMusic();
+        roomPlayMusic.id = id; // 新 ID
+        roomPlayMusic.musicId = this.musicId;
+        roomPlayMusic.musicType = this.musicType;
+        roomPlayMusic.musicName = this.musicName;
+        roomPlayMusic.musicSinger = this.musicSinger;
+        roomPlayMusic.musicURL = this.musicURL;
+        roomPlayMusic.musicImg = this.musicImg;
+        roomPlayMusic.musicLyric = this.musicLyric;
+        roomPlayMusic.musicFavorite = this.musicFavorite;
+        roomPlayMusic.isLocal = this.isLocal;
+        roomPlayMusic.isDelete = this.isDelete;
+        roomPlayMusic.musicImgByte = this.musicImgByte;
+        roomPlayMusic.musicImgBitmap = this.musicImgBitmap;
+        roomPlayMusic.musicBitrate = this.musicBitrate;
+        roomPlayMusic.musicMime = this.musicMime;
+        roomPlayMusic.musicFileSize = this.musicFileSize;
+        roomPlayMusic.musicQuality = this.musicQuality;
+        return roomPlayMusic;
     }
 }

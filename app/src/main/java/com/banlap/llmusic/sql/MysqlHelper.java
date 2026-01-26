@@ -22,7 +22,7 @@ import java.util.List;
  * @author Banlap on 2021/11/3
  */
 public class MysqlHelper {
-
+    private static final String TAG = MysqlHelper.class.getSimpleName();
     private static final String URL= BuildConfig.MYSQL_URL;
     private static final String USERNAME= BuildConfig.MYSQL_ACCOUNT;
     private static final String PASSWORD= BuildConfig.MYSQL_PASSWORD;
@@ -51,7 +51,7 @@ public class MysqlHelper {
             cn= DriverManager.getConnection(URL, USERNAME, PASSWORD);
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CONNECT_MYSQL_SUCCESS));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "connectDB error: " + e.getMessage());
             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_CONNECT_MYSQL_ERROR));
         }
         return cn;

@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -737,7 +738,12 @@ public class MusicPlayService extends MediaBrowserServiceCompat {
         if(!MusicPlayService.isExistsCurrentMusic() || playMusicList.isEmpty()) {
             return -1;
         }
-        return playMusicList.indexOf(MusicPlayService.currentRoomPlayMusic);
+        for (int i = 0; i < playMusicList.size(); i++) {
+            if (Objects.equals(playMusicList.get(i).id, MusicPlayService.currentRoomPlayMusic.id)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /** 当前的歌曲是否正在播放 */

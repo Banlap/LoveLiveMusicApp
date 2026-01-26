@@ -137,16 +137,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         } else {
             roomCustomPlayList.add(new RoomCustomPlay());
             roomCustomPlayList.add(new RoomCustomPlay());
-            roomCustomPlayList.add(new RoomCustomPlay());
         }
         //本地歌曲缓存列表
         roomLocalFileList = new ArrayList<>();
         if(!AppData.roomLocalFileList.isEmpty()) {
             roomLocalFileList.addAll(AppData.roomLocalFileList);
-        } else {
-            roomLocalFileList.add(new RoomLocalFile());
-            roomLocalFileList.add(new RoomLocalFile());
         }
+        AppData.addNullDataLocalFile(roomLocalFileList);
+
         //最爱歌曲缓存列表
         roomFavoriteList = new ArrayList<>();
         if(!AppData.roomFavoriteMusicList.isEmpty()) {
@@ -342,10 +340,6 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                 if(roomLocalFileList.isEmpty()) {
                                     return;
                                 }
-                                for(RoomLocalFile music: roomLocalFileList) {
-                                    Thread.sleep(1);
-                                    music.id = MusicPlayService.createMusicId();
-                                }
                                 Thread.sleep(10);
                                 AppData.saveLocalFileMusicList(roomLocalFileList);
                             } catch (Exception e) {
@@ -378,10 +372,6 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             try {
                                 if(roomLocalFileList.isEmpty()) {
                                     return;
-                                }
-                                for(RoomLocalFile music: roomLocalFileList) {
-                                    Thread.sleep(1);
-                                    music.id = MusicPlayService.createMusicId();
                                 }
                                 Thread.sleep(10);
                                 AppData.saveLocalFileMusicList(roomLocalFileList);
@@ -1041,12 +1031,22 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 binding.tvMusicName.setText(favoriteList.get(position).musicName);
                 binding.tvSingerName.setText(favoriteList.get(position).musicSinger);
 
-                Glide.with(getActivity())
-                        .setDefaultRequestOptions(requestOptions)
-                        .load(favoriteList.get(position).musicImg)
-                        .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
-                        .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
-                        .into(binding.ivMusicImg);
+                if(favoriteList.get(position).isLocal) {
+                    if(null != favoriteList.get(position).musicImgByte) {
+                        byte[] b = favoriteList.get(position).musicImgByte;
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+                        binding.ivMusicImg.setImageBitmap(bitmap);
+                    } else {
+                        binding.ivMusicImg.setImageResource(R.mipmap.ic_llmp_new);
+                    }
+                } else {
+                    Glide.with(context)
+                            .setDefaultRequestOptions(requestOptions)
+                            .load(favoriteList.get(position).musicImg)
+                            .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .into(binding.ivMusicImg);
+                }
 
                 //点击播放列表的歌曲
                 binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {

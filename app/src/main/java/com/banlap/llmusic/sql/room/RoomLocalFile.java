@@ -58,4 +58,19 @@ public class RoomLocalFile {
         List<RoomLocalFile> getAllMusic();
     }
 
+    public RoomLocalFile copyWithNewId(long id) {
+        RoomLocalFile roomLocalFile = new RoomLocalFile();
+        roomLocalFile.id = id;
+        roomLocalFile.musicId = this.musicId;
+        roomLocalFile.title = this.title;
+        roomLocalFile.album = this.album;
+        roomLocalFile.artist = this.artist;
+        roomLocalFile.duration = this.duration;
+        roomLocalFile.path = this.path;
+        roomLocalFile.pic = this.pic;
+        roomLocalFile.picStr = this.picStr;
+        roomLocalFile.isDelete = this.isDelete;
+        return roomLocalFile;
+    }
+
 }

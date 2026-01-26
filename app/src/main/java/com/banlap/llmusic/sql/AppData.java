@@ -140,7 +140,9 @@ public class AppData {
         BaseApplication.llMusicDatabase.localFileDao().deleteAll();
         if(!roomLocalFileList.isEmpty()) {
             for(RoomLocalFile localFile : roomLocalFileList) {
-                BaseApplication.llMusicDatabase.localFileDao().insert(localFile);
+                if(localFile.id != 0) {
+                    BaseApplication.llMusicDatabase.localFileDao().insert(localFile);
+                }
             }
         }
     }
@@ -178,5 +180,13 @@ public class AppData {
     public static void addNullDataForFavorite(List<RoomFavoriteMusic> roomFavoriteList) {
         roomFavoriteList.add(new RoomFavoriteMusic());
         roomFavoriteList.add(new RoomFavoriteMusic());
+    }
+
+    /**
+     * 添加空数据 本地文件列表
+     * */
+    public static void addNullDataLocalFile(List<RoomLocalFile> roomLocalFileList) {
+        roomLocalFileList.add(new RoomLocalFile());
+        roomLocalFileList.add(new RoomLocalFile());
     }
 }
