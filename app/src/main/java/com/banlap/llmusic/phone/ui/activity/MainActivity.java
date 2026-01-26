@@ -2074,8 +2074,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
 
             case ThreadEvent.THREAD_SAVE_MUSIC_DATA:  //在子线程中保存列表单个数据
-                //List<Music> list = event.musicList;
-                //SPUtil.setListValue(context, SPUtil.PlayListData, list);
                 if(event.roomPlayMusic != null) {
                     RoomPlayMusic music = event.roomPlayMusic;
                     if(!event.b) {
@@ -3008,13 +3006,14 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         }
                         AppData.deleteAllRoomMusic();
                         Thread.sleep(10);
-
+                        List<RoomPlayMusic> playMusicList = new ArrayList<>();
                         for(RoomPlayMusic music: roomPlayMusicList) {
                             Thread.sleep(1);
-                            music.id = MusicPlayService.createMusicId();
+                            music = music.copyWithNewId(MusicPlayService.createMusicId());
+                            playMusicList.add(music);
                         }
                         Thread.sleep(10);
-                        AppData.saveRoomMusic(roomPlayMusicList);
+                        AppData.saveRoomMusic(playMusicList);
                     } catch (Exception e) {
                         Log.e(TAG, "roomPlayMusicList all id error");
                     }

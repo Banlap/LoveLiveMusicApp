@@ -1633,20 +1633,22 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 if(roomPlayMusicList.size() > currentIndex + 1) {
                     long currentMusicId = currentPlayMusic.id;
                     long nextMusicId = roomPlayMusicList.get(currentIndex + 1).id;
-                    music.id = (currentMusicId + nextMusicId) / 2;
+                    music = music.copyWithNewId((currentMusicId + nextMusicId) / 2);
                 } else {
-                    music.id = MusicPlayService.createMusicId();
+                    music = music.copyWithNewId(MusicPlayService.createMusicId());
                 }
-                binder.showLyric(music, (playMode == 2));
                 roomPlayMusicList.add(currentIndex + 1, music);
+                binder.showLyric(music, (playMode == 2));
                 isCreateId = true;
             } else {
-                binder.showLyric(list.get(position), (playMode == 2));
-                roomPlayMusicList.add(roomPlayMusicList.size(), list.get(position));
+                music = music.copyWithNewId(MusicPlayService.createMusicId());
+                roomPlayMusicList.add(roomPlayMusicList.size(), music);
+                binder.showLyric(music, (playMode == 2));
             }
         } else {
-            binder.showLyric(list.get(position), (playMode == 2));
-            roomPlayMusicList.add(list.get(position));
+            music = music.copyWithNewId(MusicPlayService.createMusicId());
+            roomPlayMusicList.add(music);
+            binder.showLyric(music, (playMode == 2));
         }
         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SAVE_MUSIC_DATA, music, isCreateId));
     }
@@ -1674,12 +1676,14 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                         AppData.deleteAllRoomMusic();
                         Thread.sleep(10);
 
+                        List<RoomPlayMusic> playMusicList = new ArrayList<>();
                         for(RoomPlayMusic music: roomPlayMusicList) {
                             Thread.sleep(1);
-                            music.id = MusicPlayService.createMusicId();
+                            music = music.copyWithNewId(MusicPlayService.createMusicId());
+                            playMusicList.add(music);
                         }
                         Thread.sleep(10);
-                        AppData.saveRoomMusic(roomPlayMusicList);
+                        AppData.saveRoomMusic(playMusicList);
                     } catch (Exception e) {
                         Log.e(TAG, "roomPlayMusicList all id error");
                     }

@@ -83,7 +83,9 @@ public class AppData {
      * 保存自建歌单数据
      * */
     public static void saveRoomCustomPlay(RoomCustomPlay customPlay) {
-        BaseApplication.llMusicDatabase.customPlayDao().insert(customPlay);
+        if(customPlay.playListId != 0) {
+            BaseApplication.llMusicDatabase.customPlayDao().insert(customPlay);
+        }
     }
 
     /**
@@ -188,5 +190,14 @@ public class AppData {
     public static void addNullDataLocalFile(List<RoomLocalFile> roomLocalFileList) {
         roomLocalFileList.add(new RoomLocalFile());
         roomLocalFileList.add(new RoomLocalFile());
+    }
+
+    /**
+     * 添加空数据 自建列表
+     * */
+    public static void addNullDataCustomPlay(List<RoomCustomPlay> roomCustomPlayList, int addSize) {
+        for (int i=0; i < addSize; i++) {
+            roomCustomPlayList.add(new RoomCustomPlay());
+        }
     }
 }

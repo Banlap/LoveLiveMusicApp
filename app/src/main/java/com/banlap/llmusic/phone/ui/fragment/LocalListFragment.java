@@ -36,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
+import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.base.BaseFragment;
 import com.banlap.llmusic.databinding.DialogDefaultBinding;
 import com.banlap.llmusic.databinding.DialogInputContentBinding;
@@ -44,27 +45,22 @@ import com.banlap.llmusic.databinding.FragmentLocalListBinding;
 import com.banlap.llmusic.databinding.ItemLocalMusicListBinding;
 import com.banlap.llmusic.databinding.ItemLocalPlayListAddBinding;
 import com.banlap.llmusic.databinding.ItemLocalPlayListBinding;
-import com.banlap.llmusic.model.LocalFile;
 import com.banlap.llmusic.model.Music;
-import com.banlap.llmusic.model.LocalPlayList;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.fvm.LocalListFVM;
-import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomCustomPlay;
 import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
-import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
-import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SelectImgHelper;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.bumptech.glide.Glide;
@@ -80,7 +76,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -134,10 +129,9 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         //自建歌单缓存列表
         if(!AppData.roomCustomPlayList.isEmpty()) {
             roomCustomPlayList.addAll(AppData.roomCustomPlayList);
-        } else {
-            roomCustomPlayList.add(new RoomCustomPlay());
-            roomCustomPlayList.add(new RoomCustomPlay());
         }
+        AppData.addNullDataCustomPlay(roomCustomPlayList, 3);
+
         //本地歌曲缓存列表
         roomLocalFileList = new ArrayList<>();
         if(!AppData.roomLocalFileList.isEmpty()) {
@@ -636,9 +630,10 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     if(isAddList) {
                         if(roomCustomPlayList.size()>=3) {
                             roomCustomPlayList.clear();
+                            AppData.addNullDataCustomPlay(roomCustomPlayList, 1);
+
                             RoomCustomPlay roomCustomPlay = new RoomCustomPlay();
-                            int id = getRandomId();
-                            roomCustomPlay.playListId = id;
+                            roomCustomPlay.playListId = getRandomId();
                             roomCustomPlay.playListName = content;
                             roomCustomPlay.playListCount = 0;
                             roomCustomPlay.musicListJson = "";
@@ -651,18 +646,22 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             }
 
                             roomCustomPlayList.add(roomCustomPlay);
-                            List<RoomCustomPlay> customPlayList = AppData.roomCustomPlayList;
-                            if(!customPlayList.isEmpty()) {
-                                roomCustomPlayList.addAll(customPlayList);
-                            }
+
                             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                                 @Override
                                 public void run() {
+                                    List<RoomCustomPlay> customPlayList = BaseApplication.llMusicDatabase.customPlayDao().getAllCustomPlay();
+                                    LLActivityManager.getInstance().getTopActivity().runOnUiThread(() -> {
+                                        if(!customPlayList.isEmpty()) {
+                                            roomCustomPlayList.addAll(customPlayList);
+                                        }
+                                        AppData.addNullDataCustomPlay(roomCustomPlayList, 3);
+                                        playListAdapter.notifyDataSetChanged();
+                                    });
                                     AppData.saveRoomCustomPlay(roomCustomPlay);
                                 }
                             });
                             //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
-                            playListAdapter.notifyDataSetChanged();
                         }
                     } else {
                         int playListId = roomCustomPlay.playListId;
@@ -804,19 +803,19 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     public class PlayListAdapter extends RecyclerView.Adapter<PlayListViewHolder> {
 
         private Context context;
-        private List<RoomCustomPlay> localPlayList;
+        private List<RoomCustomPlay> customPlayList;
         private final int viewTypeAddList = 0;
         private final int viewTypeShowList = 1;
 
 
         public PlayListAdapter(Context context, List<RoomCustomPlay> localPlayList) {
             this.context = context;
-            this.localPlayList = localPlayList;
+            this.customPlayList = localPlayList;
         }
 
         @Override
         public int getItemViewType(int position) {
-            if(position == localPlayList.size()-3) { //倒数前两条未空数据
+            if(position == customPlayList.size()-3) { //倒数前两条未空数据
                 return viewTypeAddList;
             }
             return viewTypeShowList;
@@ -855,14 +854,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 ItemLocalPlayListBinding binding = DataBindingUtil.getBinding(holder.itemView);
                 if(binding != null) {
                     ThemeHelper.getInstance().localPlayListTheme(context, rThemeId, binding);
-                    if(TextUtils.isEmpty(localPlayList.get(position).playListName)) {
+                    if(TextUtils.isEmpty(customPlayList.get(position).playListName)) {
                         binding.rlMusicAll.setVisibility(View.INVISIBLE);
                     } else {
                         binding.rlMusicAll.setVisibility(View.VISIBLE);
-                        binding.tvPlayListName.setText(localPlayList.get(position).playListName);
-                        binding.tvPlayListCount.setText(localPlayList.get(position).playListCount + " 首");
-                        if(localPlayList.get(position).playListImgByte != null) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(localPlayList.get(position).playListImgByte, 0, localPlayList.get(position).playListImgByte.length);
+                        binding.tvPlayListName.setText(customPlayList.get(position).playListName);
+                        binding.tvPlayListCount.setText(customPlayList.get(position).playListCount + " 首");
+                        if(customPlayList.get(position).playListImgByte != null) {
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(customPlayList.get(position).playListImgByte, 0, customPlayList.get(position).playListImgByte.length);
                             binding.ivMusicImg.setImageBitmap(bitmap);
                         } else {
                             binding.ivMusicImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover_4));
@@ -870,13 +869,13 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         binding.rlMusicAll.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_DATA_LIST_BY_LOCAL_PLAY, localPlayList.get(position)));
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_GET_DATA_LIST_BY_LOCAL_PLAY, customPlayList.get(position)));
                             }
                         });
                         binding.llMenu.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                showPlayListMenu(v, position, localPlayList.get(position).playListName, localPlayList.get(position).playListCount);
+                                showPlayListMenu(v, position, customPlayList.get(position).playListName, customPlayList.get(position).playListCount);
                             }
                         });
                     }
@@ -887,7 +886,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
         @Override
         public int getItemCount() {
-            return localPlayList.size();
+            return customPlayList.size();
         }
     }
 
