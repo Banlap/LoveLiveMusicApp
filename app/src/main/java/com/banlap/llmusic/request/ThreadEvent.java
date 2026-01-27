@@ -257,6 +257,7 @@ public class ThreadEvent<T> {
     public ThreadEvent(int msgCode, String str, String str2, String str3, boolean b) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3; this.b = b; }
     public ThreadEvent(int msgCode, String str, int i) { this.msgCode = msgCode; this.str = str; this.i = i;}
     public ThreadEvent(int msgCode, String str, int i, int i2, byte[] byteArray) { this.msgCode = msgCode; this.str = str; this.i = i; this.i2 = i2; this.byteArray = byteArray; }
+    public ThreadEvent(int msgCode, String str, int i, long l, byte[] byteArray) { this.msgCode = msgCode; this.str = str; this.i = i; this.l = l; this.byteArray = byteArray; }
     public ThreadEvent(int msgCode, Double d) { this.msgCode = msgCode; this.d = d; }
     public ThreadEvent(int msgCode, int i) { this.msgCode = msgCode; this.i = i; }
     public ThreadEvent(int msgCode, int i, int i2) { this.msgCode = msgCode; this.i = i; this.i2 = i2;}
@@ -277,6 +278,7 @@ public class ThreadEvent<T> {
 
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; }
+    public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, long l) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.l = l; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i, int i2) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; this.i2 = i2; }
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, int i, long l) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.i = i; this.l = l;}
     public ThreadEvent(int msgCode, RoomPlayMusic roomPlayMusic, boolean b) { this.msgCode = msgCode; this.roomPlayMusic = roomPlayMusic; this.b = b; }

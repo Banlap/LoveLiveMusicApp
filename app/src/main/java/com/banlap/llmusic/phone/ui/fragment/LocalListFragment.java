@@ -50,6 +50,7 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.fvm.LocalListFVM;
+import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomCustomPlay;
@@ -630,10 +631,9 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                     if(isAddList) {
                         if(roomCustomPlayList.size()>=3) {
                             roomCustomPlayList.clear();
-                            AppData.addNullDataCustomPlay(roomCustomPlayList, 1);
 
                             RoomCustomPlay roomCustomPlay = new RoomCustomPlay();
-                            roomCustomPlay.playListId = getRandomId();
+                            roomCustomPlay.playListId = (int) MusicPlayService.createMusicId();
                             roomCustomPlay.playListName = content;
                             roomCustomPlay.playListCount = 0;
                             roomCustomPlay.musicListJson = "";
@@ -659,13 +659,13 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                         playListAdapter.notifyDataSetChanged();
                                     });
                                     AppData.saveRoomCustomPlay(roomCustomPlay);
+                                    AppData.roomCustomPlayList.clear();
+                                    AppData.roomCustomPlayList.addAll(roomCustomPlayList);
                                 }
                             });
-                            //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.LocalPlayListData, mLocalPlayList);
                         }
                     } else {
                         int playListId = roomCustomPlay.playListId;
-                        String playListName = roomCustomPlay.playListName;
                         byte[] bytes = null;
                         if(mBitmapImage != null) {
                             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -673,11 +673,13 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             bytes =  baos.toByteArray();
                         }
                         final byte[] byteImg = bytes;
+                        roomCustomPlayList.get(position).playListName = content;
+                        roomCustomPlayList.get(position).playListImgByte = byteImg;
                         AppExecutors.getInstance().diskIO().execute(new Runnable() {
                             @Override
                             public void run() {
                                 AppData.updateRoomCustomPlay(playListId, customPlay -> {
-                                    customPlay.playListName = playListName;
+                                    customPlay.playListName = content;
                                     if(byteImg != null) {
                                         customPlay.playListImgByte = byteImg;
                                     }
@@ -701,19 +703,6 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         Objects.requireNonNull(mAlertDialog.getWindow()).setBackgroundDrawableResource(R.drawable.shape_button_white_3);
         mAlertDialog.show();
     }
-
-    private int getRandomId() {
-        int getRandomId = new Random().nextInt(99999) + 10000;
-        if(!roomCustomPlayList.isEmpty()) {
-            for(RoomCustomPlay roomCustomPlay : roomCustomPlayList) {
-                if(roomCustomPlay.playListId == getRandomId) {
-                    return getRandomId();
-                }
-            }
-        }
-        return getRandomId;
-    }
-
 
     /** 弹窗 自建歌单菜单选项 */
     @SuppressLint("SetTextI18n")
@@ -777,6 +766,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                 @Override
                                 public void run() {
                                     AppData.deleteCustomPlayList(roomCustomPlay);
+                                    AppData.roomCustomPlayList.clear();
+                                    AppData.roomCustomPlayList.addAll(roomCustomPlayList);
                                 }
                             });
                         }

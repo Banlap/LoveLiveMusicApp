@@ -18,7 +18,7 @@ import android.content.Context;
 @TypeConverters({ Converters.class })
 public abstract class LLMusicDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "llmusic_db"; //数据库名称
-    public static final int DATABASE_VERSION = 18; //数据库版本号 (结构修改时更新版本号)
+    public static final int DATABASE_VERSION = 19; //数据库版本号 (结构修改时更新版本号)
     public abstract RoomSettings.SettingsDao settingsDao();
     public abstract RoomPlayMusic.MusicDao musicDao();
     public abstract RoomCustomPlay.CustomPlayDao customPlayDao();

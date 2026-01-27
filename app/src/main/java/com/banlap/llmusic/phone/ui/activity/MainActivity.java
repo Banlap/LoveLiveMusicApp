@@ -268,6 +268,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         roomPlayMusicList.addAll(AppData.roomPlayMusicList);
         roomFavoriteMusicList.addAll(AppData.roomFavoriteMusicList);
+        roomCustomPlayList.addAll(AppData.roomCustomPlayList);
 
         //最爱歌曲缓存列表
         RoomFavoriteMusic roomFavoriteMusic = new RoomFavoriteMusic();
@@ -2030,22 +2031,30 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.THREAD_ADD_MUSIC_TO_CUSTOM_PLAY_LIST:   //添加在线音乐到自建歌单里面
                 if(event.roomPlayMusic != null) {
+                    RoomPlayMusic music = event.roomPlayMusic;
 //                    List<LocalPlayList> localPlayLists = SPUtil.getListValue(this, SPUtil.LocalPlayListData, LocalPlayList.class);
-                    if(!AppData.roomCustomPlayList.isEmpty()) {
-                        AppData.roomCustomPlayList.stream()
+                    if(!roomCustomPlayList.isEmpty()) {
+                        roomCustomPlayList.stream()
                                 .filter(playList -> playList.playListId == event.i)
                                 .findFirst()
                                 .ifPresent(playList -> {
-                                    List<RoomPlayMusic> musicList = Converters.toPlayMusicList(playList.musicListJson);
-                                    //List<Music> musicList = playList.getMusicList();
+                                    List<RoomPlayMusic> musicList = playList.musicListJson.isEmpty() ? new ArrayList<>() : Converters.toPlayMusicList(playList.musicListJson);
                                     if (musicList != null) {
-                                        musicList.add(event.roomPlayMusic);
+                                        musicList.add(music);
                                         String musicListJson = Converters.fromPlayMusicList(musicList);
-                                        playList.musicListJson = musicListJson != null? musicListJson : "";
-                                        playList.playListCount = musicList.size();
-                                        //SPUtil.setListValue(this, SPUtil.LocalPlayListData, localPlayLists);
+                                        int updateCount = musicList.size();
+                                        playList.musicListJson = musicListJson; //更新ui
+                                        playList.playListCount = updateCount;
                                         if(musicListJson != null) {
-                                            AppData.saveRoomCustomPlayByMusicJson(event.i, customPlay -> customPlay.musicListJson = musicListJson );
+                                            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    AppData.saveRoomCustomPlayByMusicJson(event.i, customPlay -> {
+                                                        customPlay.musicListJson = musicListJson;
+                                                        customPlay.playListCount = updateCount;
+                                                    });
+                                                }
+                                            });
                                         }
                                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST));
                                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_ADD_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
@@ -2057,15 +2066,28 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
             case ThreadEvent.THREAD_DELETE_MUSIC_IN_CUSTOM_PLAY_LIST:  //删除自建歌单里面到某一首歌曲
                 if(event.tList != null) {
+                    List<RoomPlayMusic> list = event.tList;
                     //List<LocalPlayList> localPlayLists = SPUtil.getListValue(this, SPUtil.LocalPlayListData, LocalPlayList.class);
-                    if (!AppData.roomCustomPlayList.isEmpty()) {
-                        AppData.roomCustomPlayList.stream()
+                    if (!roomCustomPlayList.isEmpty()) {
+                        roomCustomPlayList.stream()
                                 .filter(playList -> playList.playListId == event.i)
                                 .findFirst()
                                 .ifPresent(playList -> {
-                                    String musicListJson = Converters.fromPlayMusicList(event.tList);
-                                    playList.musicListJson = !TextUtils.isEmpty(musicListJson) ? musicListJson : "";
-                                    playList.playListCount = playList.playListCount -1;
+                                    String musicListJson = Converters.fromPlayMusicList(list);
+                                    int updateCount = playList.playListCount -1;
+                                    playList.musicListJson = musicListJson; //更新ui
+                                    playList.playListCount = updateCount;
+                                    if(musicListJson != null) {
+                                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                AppData.saveRoomCustomPlayByMusicJson(event.i, customPlay -> {
+                                                    customPlay.musicListJson = musicListJson;
+                                                    customPlay.playListCount = updateCount;
+                                                });
+                                            }
+                                        });
+                                    }
                                     EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST));
                                     EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_DELETE_MUSIC_TO_LOCAL_PLAY_LIST_SUCCESS));
                                 });
@@ -3722,12 +3744,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 //展示自建列表
                 getViewDataBinding().rlDisableClick2.setVisibility(View.VISIBLE);
                 DialogAddMusicToLocalListBinding dialogAddMusicToLocalListBinding = DataBindingUtil.inflate(LayoutInflater.from(v.getContext()), R.layout.dialog_add_music_to_local_list, null, false);
-
-                addMusicCustomListAdapter = new AddMusicCustomListAdapter(v.getContext(), roomCustomPlayList, list.get(position));
+                RoomPlayMusic music = list.get(position).copyWithNewId(MusicPlayService.createMusicId());
+                addMusicCustomListAdapter = new AddMusicCustomListAdapter(v.getContext(), roomCustomPlayList, music);
                 dialogAddMusicToLocalListBinding.rvLocalMusicList.setLayoutManager(new LinearLayoutManager(v.getContext()));
                 dialogAddMusicToLocalListBinding.rvLocalMusicList.setAdapter(addMusicCustomListAdapter);
                 roomCustomPlayList.clear();
-//                List<RoomCustomPlay> list = SPUtil.getListValue(v.getContext(), SPUtil.LocalPlayListData, LocalPlayList.class);
                 if(!AppData.roomCustomPlayList.isEmpty()) {
                     roomCustomPlayList.addAll(AppData.roomCustomPlayList);
                 }
@@ -3760,10 +3781,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 musicListAdapter.notifyItemRemoved(position);
                 musicListAdapter.notifyItemRangeChanged(position, roomOnlineMusicList.size());
 
-                List<RoomPlayMusic> list1 = new ArrayList<>(list);
-                list1.removeIf(roomPlayMusic -> roomPlayMusic.musicName.equals(" "));
+                List<RoomPlayMusic> updateList = new ArrayList<>(list);
+                updateList.removeIf(roomPlayMusic -> roomPlayMusic.id == 0);
                 if(clickLocalPlayListId != 0) {
-                    EventBus.getDefault().post(new ThreadEvent<RoomPlayMusic>(ThreadEvent.THREAD_DELETE_MUSIC_IN_CUSTOM_PLAY_LIST, list1, clickLocalPlayListId));
+                    EventBus.getDefault().post(new ThreadEvent<RoomPlayMusic>(ThreadEvent.THREAD_DELETE_MUSIC_IN_CUSTOM_PLAY_LIST, updateList, clickLocalPlayListId));
                 }
             }
         });
