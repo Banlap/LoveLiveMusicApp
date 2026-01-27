@@ -431,6 +431,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                     getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
                                 }
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_UPDATE_IS_CAN_CLICK_FAVORITE));
                             });
                         }
                     });
@@ -451,7 +452,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                     AppData.deleteFavoriteMusic(deleteFavoriteMusic);
                                 }
                             });
-                            //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, roomFavoriteList);
+                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_UPDATE_IS_CAN_CLICK_FAVORITE));
                             break;
                         }
                     }

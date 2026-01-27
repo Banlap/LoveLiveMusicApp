@@ -165,7 +165,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_LYRIC = 1226; //展示歌词
     public static final int VIEW_IMAGE_URL = 1227; //展示音乐图片链接
     public static final int VIEW_SHOW_OR_HIDE_MASKING_BACKGROUND = 1228; //是否显示遮罩层
-    public static final int VIEW_CHANGE_THEME = 1229; //变更主题
+    public static final int VIEW_UPDATE_IS_CAN_CLICK_FAVORITE = 1229; //刷新当前是否收藏音乐
     public static final int VIEW_SETTING_LAUNCH_VIDEO_SUCCESS = 1230; //设置启动页面的视频成功
     public static final int VIEW_SETTING_LAUNCH_VIDEO_ERROR = 1231; //设置启动页面的视频失败
     public static final int VIEW_CONTROLLER_MODE = 1232; //切换简约播放控制器模式

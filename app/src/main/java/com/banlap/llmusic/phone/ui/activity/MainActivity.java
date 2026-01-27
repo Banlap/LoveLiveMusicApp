@@ -193,10 +193,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private boolean isShowNewMusicList = false;         //判断是否显新版音乐清单
     private boolean isShowMoreMenu = false;             //判断是否显更多菜单
 
-    public static boolean isPlay = false;               //判断是否播放音乐
-    public static boolean isOnTouchSeekBar = false;      //是否按着控制条
+    public boolean isOnTouchSeekBar = false;      //是否按着控制条
 
-    public boolean isFavorite = false;           //当前歌曲是否已收藏
+    public boolean isCanClickFavorite = true;          //是否能点击收藏
+    public boolean isFavorite = false;                  //当前歌曲是否已收藏
     private AlertDialog mAlertDialog;                   //弹窗
     private PopupWindow mPopupWindow;                   //弹窗
     private int musicListSize = 0;                      //获取总播放列表数
@@ -956,7 +956,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 初始化角色服务 */
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void startCharacterService(String characterName) {
-        intentCharacterService.putExtra("IsPlayMusic", isPlay);
+        intentCharacterService.putExtra("IsPlayMusic", !MusicPlayService.isStop);
         intentCharacterService.putExtra("CharacterName", characterName);
         startForegroundService(intentCharacterService);
     }
@@ -1296,7 +1296,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
 
             case ThreadEvent.VIEW_PAUSE:
-                isPlay = !event.b;
+                //isPlay = !event.b;
                 lyricScrollView.posLock(event.b);
                 lyricNewScrollDetailView.posLock(event.b);
                 lyricNewScrollView.posLock(event.b);
@@ -1804,6 +1804,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     }
                 });
                 break;
+            case ThreadEvent.VIEW_UPDATE_IS_CAN_CLICK_FAVORITE:
+                isCanClickFavorite = true;
+                break;
             case ThreadEvent.VIEW_GET_MUSIC_METADATA:
                 if(!TextUtils.isEmpty(event.str)){
                     MusicPlayService.currentRoomPlayMusic.musicBitrate = event.str;
@@ -2172,7 +2175,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             } else if(v.getId() == R.id.rl_new_play_controller) { //打开新版音乐播放页面
                 showOrHideNewController(false);
             } else if(v.getId() == R.id.iv_new_my_favorite) {
-                if(MusicPlayService.isExistsCurrentMusic()) {
+                if(MusicPlayService.isExistsCurrentMusic() && isCanClickFavorite) {
+                    isCanClickFavorite = false;
                     if(!isFavorite) {
                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC, MusicPlayService.currentRoomPlayMusic));
                     } else {
