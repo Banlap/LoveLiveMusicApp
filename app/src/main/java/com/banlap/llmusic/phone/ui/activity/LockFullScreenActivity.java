@@ -79,10 +79,10 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
         //requestOptions.override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL); //关键代码，加载原始大小
         requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
 
-        if(MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null) {
+        if(MusicPlayService.currentRoomPlayMusic.musicImgByte != null) {
             Glide.with(this)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                    .load(MusicPlayService.currentRoomPlayMusic.musicImgByte)
                     .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(getViewDataBinding().ivMusicImg);

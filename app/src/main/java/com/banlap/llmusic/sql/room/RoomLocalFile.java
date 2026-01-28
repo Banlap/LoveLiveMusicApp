@@ -31,8 +31,6 @@ public class RoomLocalFile {
     public String path;
     @ColumnInfo(name = "pic")
     public byte[] pic;
-    @ColumnInfo(name = "pic_str")
-    public String picStr;
     @Ignore
     public boolean isDelete;
 
@@ -68,7 +66,6 @@ public class RoomLocalFile {
         roomLocalFile.duration = this.duration;
         roomLocalFile.path = this.path;
         roomLocalFile.pic = this.pic;
-        roomLocalFile.picStr = this.picStr;
         roomLocalFile.isDelete = this.isDelete;
         return roomLocalFile;
     }

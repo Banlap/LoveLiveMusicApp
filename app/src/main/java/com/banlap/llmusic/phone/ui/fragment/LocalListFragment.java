@@ -58,6 +58,7 @@ import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.utils.AppExecutors;
+import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
@@ -579,7 +580,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         if(!isAddList) {
             inputContentBinding.etInput.setText(roomCustomPlay.playListName);
             if(roomCustomPlay.playListImgByte != null) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(roomCustomPlay.playListImgByte, 0, roomCustomPlay.playListImgByte.length);
+                Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(roomCustomPlay.playListImgByte);
                 inputContentBinding.civImage.setImageBitmap(bitmap);
             }
         }
@@ -853,7 +854,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                         binding.tvPlayListName.setText(customPlayList.get(position).playListName);
                         binding.tvPlayListCount.setText(customPlayList.get(position).playListCount + " 首");
                         if(customPlayList.get(position).playListImgByte != null) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(customPlayList.get(position).playListImgByte, 0, customPlayList.get(position).playListImgByte.length);
+                            Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(customPlayList.get(position).playListImgByte);
                             binding.ivMusicImg.setImageBitmap(bitmap);
                         } else {
                             binding.ivMusicImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover_4));
@@ -917,7 +918,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
                 if(null != localFileList.get(position).pic) {
                     byte[] b = localFileList.get(position).pic;
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+                    Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(b);
                     binding.ivMusicImg.setImageBitmap(bitmap);
                 } else {
                     binding.ivMusicImg.setImageResource(R.mipmap.ic_llmp_new);
@@ -1025,7 +1026,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 if(favoriteList.get(position).isLocal) {
                     if(null != favoriteList.get(position).musicImgByte) {
                         byte[] b = favoriteList.get(position).musicImgByte;
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(b, 0, b.length);
+                        Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(b);
                         binding.ivMusicImg.setImageBitmap(bitmap);
                     } else {
                         binding.ivMusicImg.setImageResource(R.mipmap.ic_llmp_new);

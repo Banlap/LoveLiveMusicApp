@@ -240,6 +240,7 @@ public class ThreadEvent<T> {
     public RoomPlayMusic roomPlayMusic;
     public RoomCustomPlay roomCustomPlay;
     public Bitmap bitmap;
+    public Bitmap bitmap2;
     public SpannableStringBuilder ssb;
     public File file;
     public Double d;
@@ -254,6 +255,7 @@ public class ThreadEvent<T> {
     public ThreadEvent(int msgCode, String str, String str2) { this.msgCode = msgCode; this.str = str; this.str2 = str2; }
     public ThreadEvent(int msgCode, String str, String str2, String str3) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3;}
     public ThreadEvent(int msgCode, String str, String str2, String str3,  Bitmap bitmap, boolean b) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3; this.bitmap = bitmap; this.b = b; }
+    public ThreadEvent(int msgCode, String str, String str2, String str3, byte[] byteArray, boolean b) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3; this.byteArray = byteArray; this.b = b; }
     public ThreadEvent(int msgCode, String str, String str2, String str3, boolean b) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.str3 = str3; this.b = b; }
     public ThreadEvent(int msgCode, String str, int i) { this.msgCode = msgCode; this.str = str; this.i = i;}
     public ThreadEvent(int msgCode, String str, int i, int i2, byte[] byteArray) { this.msgCode = msgCode; this.str = str; this.i = i; this.i2 = i2; this.byteArray = byteArray; }
@@ -271,6 +273,8 @@ public class ThreadEvent<T> {
     public ThreadEvent(int msgCode, Music music, boolean b, String str, String str2) { this.msgCode = msgCode; this.music = music; this.b = b; this.str = str; this.str2 = str2; }
     public ThreadEvent(int msgCode, Music music, boolean b, String str, String str2, List<T> tList) { this.msgCode = msgCode; this.music = music; this.b = b; this.str = str; this.str2 = str2; this.tList = tList; }
     public ThreadEvent(int msgCode, String str, String str2, Bitmap bitmap) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.bitmap = bitmap; }
+    public ThreadEvent(int msgCode, String str, String str2, Bitmap bitmap, Bitmap bitmap2) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.bitmap = bitmap; this.bitmap2 = bitmap2; }
+    public ThreadEvent(int msgCode, String str, String str2, byte[] byteArray) { this.msgCode = msgCode; this.str = str; this.str2 = str2; this.byteArray = byteArray; }
     public ThreadEvent(int msgCode, SpannableStringBuilder ssb) { this.msgCode = msgCode; this.ssb = ssb; }
     public ThreadEvent(int msgCode, String[] strArray) { this.msgCode = msgCode; this.strArray = strArray; }
     public ThreadEvent(int msgCode, int[] intArray, String[] strArray) { this.msgCode = msgCode; this.intArray = intArray; this.strArray = strArray; }

@@ -86,6 +86,7 @@ import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
+import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
@@ -1155,8 +1156,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load(MusicPlayService.currentRoomPlayMusic.isLocal?
-                                (null != MusicPlayService.currentRoomPlayMusic.musicImgByte?
-                                        BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
+                                (MusicPlayService.currentRoomPlayMusic.musicImgByte != null?
+                                        BitmapUtil.getInstance().showBitmapOrigin(MusicPlayService.currentRoomPlayMusic.musicImgByte) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1165,8 +1166,8 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load(MusicPlayService.currentRoomPlayMusic.isLocal?
-                                (null != MusicPlayService.currentRoomPlayMusic.musicImgByte?
-                                        BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
+                                (MusicPlayService.currentRoomPlayMusic.musicImgByte != null?
+                                        BitmapUtil.getInstance().showBitmapOrigin(MusicPlayService.currentRoomPlayMusic.musicImgByte) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1196,16 +1197,15 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if(MusicPlayService.currentRoomPlayMusic.isLocal) {
                         if(null != MusicPlayService.currentRoomPlayMusic.musicImgByte) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length);
+                            Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(MusicPlayService.currentRoomPlayMusic.musicImgByte);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, bitmap, true));
                         } else {
-                            MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
                             startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, null);
                             MusicPlayService.updateWidgetUI(context, false);
                         }
                     } else {
                         if(!MusicPlayService.currentRoomPlayMusic.musicImg.isEmpty()) {
-                            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, null, false));
+                            //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, new byte[]{}, false));
                         } else {
                             MusicPlayService.currentRoomPlayMusic.musicImg = "";
                             startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, null);
@@ -1227,10 +1227,10 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 //MusicPlayService.currentRoomPlayMusic.musicName = event.str;
                 //MusicPlayService.currentRoomPlayMusic.musicSinger = event.str2;
                 if(event.bitmap != null) {
-                    MusicPlayService.currentRoomPlayMusic.musicImgBitmap = event.bitmap;
+                    MusicPlayService.currentRoomPlayMusic.musicImgByte = BitmapUtil.getInstance().bitmapToByteArray(event.bitmap);
                 }
 
-                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentRoomPlayMusic.musicImgBitmap, false);
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, MusicPlayService.currentRoomPlayMusic.musicImgByte, false);
                 MusicPlayService.updateWidgetUI(context, false);
                 break;
             case ThreadEvent.VIEW_ADD_MUSIC:
@@ -1272,7 +1272,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                             .into(getViewDataBinding().civMusicImg);
 
                     if(binder!=null) {
-                        binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                        binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                         binder.clearMedia();
                         binder.resetMusicPlayer();
                         MusicPlayService.currentRoomPlayMusic = new RoomPlayMusic();
@@ -1281,13 +1281,13 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 break;
             case ThreadEvent.VIEW_PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {
-                    binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_IS_PAUSE:
                 if(isDoubleClick()) { return; }
                 if(binder!=null) {
-                    binder.pause(this, event.str, event.str2, event.bitmap);
+                    binder.pause(this, event.str, event.str2, event.byteArray);
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_IS_NEXT:
@@ -1420,12 +1420,12 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                     return;
                 }
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
                 break;
             case ThreadEvent.VIEW_BLUETOOTH_DISCONNECT:
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
                 break;
             case ThreadEvent.VIEW_ACTION_MEDIA_BUTTON:
@@ -1436,9 +1436,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
                             lastOrNextMusic(false);
                         } else if(KeyEvent.KEYCODE_MEDIA_PLAY == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.playImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                            binder.playImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                         } else if(KeyEvent.KEYCODE_MEDIA_PAUSE == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                         }
                     }
                 }
@@ -1761,7 +1761,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 点击播放按钮 */
     public void padPlayButtonClick(View view) {
-        binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+        binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
     }
 
     /** 添加当前点击的歌曲 */
@@ -2294,7 +2294,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
             }
         } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
             if(isFirstBluetoothControl){
@@ -2302,7 +2302,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
             }
         } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
             lastOrNextMusic(true);
@@ -2318,7 +2318,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         super.onDestroy();
         EventBus.getDefault().unregister(this);
         if(binder != null) {
-            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
             binder.clearMedia();
         }
         BluetoothUtil.getInstance().unRegisterBluetoothReceiver(this);

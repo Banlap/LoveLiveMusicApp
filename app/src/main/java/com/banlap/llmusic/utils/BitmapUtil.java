@@ -57,6 +57,13 @@ public class BitmapUtil {
     }
 
     /**
+     * 展示图片，原图
+     * */
+    public Bitmap showBitmapOrigin(byte[] imageByteArr) {
+        return BitmapFactory.decodeByteArray(imageByteArr, 0, imageByteArr.length);
+    }
+
+    /**
      * bitmap转换字节数组：默认PNG 压缩100
      * */
     public byte[] bitmapToByteArray(Bitmap bitmap) {
@@ -86,7 +93,7 @@ public class BitmapUtil {
     /**
      * 获取bitmap的大小
      */
-    public static int getBitmapSize(Bitmap bitmap) {
+    public int getBitmapSize(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {    //API 19
             return bitmap.getAllocationByteCount();
         }
@@ -110,7 +117,7 @@ public class BitmapUtil {
         return outputStream.toByteArray();
     }
 
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    public int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // 原始图片的宽、高
         final int height = options.outHeight;
         final int width = options.outWidth;

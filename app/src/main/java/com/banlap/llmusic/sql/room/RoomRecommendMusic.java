@@ -44,8 +44,6 @@ public class RoomRecommendMusic {
     public boolean isDelete;
     @ColumnInfo(name = "music_img_byte")
     public byte[] musicImgByte;
-    @Ignore
-    public Bitmap musicImgBitmap;
     @ColumnInfo(name = "music_bitrate")
     public String musicBitrate;
     @ColumnInfo(name = "music_mime")

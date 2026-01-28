@@ -86,18 +86,14 @@ public class NotificationHelper {
      * 创建音乐通知，使用MediaStyle方式 （低版本通知）
      * */
     @SuppressLint("RemoteViewLayout")
-    public Notification createRemoteViews(Context context, String musicName, String musicSinger, Bitmap bitmap, boolean isPause) {
-
+    public Notification createRemoteViews(Context context, String musicName, String musicSinger, byte[] bitmapByte, boolean isPause) {
         //播放与暂停
         Intent intentServiceIsPause = new Intent(context, MusicPlayService.class);
         intentServiceIsPause.setAction(MusicPlayService.INTENT_ACTION_PLAY);
         intentServiceIsPause.putExtra("IsPauseMusic", true);
         intentServiceIsPause.putExtra("MusicName", musicName);
         intentServiceIsPause.putExtra("MusicSinger", musicSinger);
-        if(bitmap !=null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
-            byte[] bitmapByte = baos.toByteArray();
+        if(bitmapByte != null) {
             intentServiceIsPause.putExtra("MusicBitmap", bitmapByte);
         } else {
             intentServiceIsPause.putExtra("MusicBitmap", (byte[]) null);
@@ -159,10 +155,8 @@ public class NotificationHelper {
         builder.setContentText(musicSinger);
         builder.setOngoing(false); //传统通知时，控制播放时是否能划走通知
 
-        if(bitmap !=null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);  //压缩图片50% 防止显示不到图片
-            builder.setLargeIcon(bitmap);
+        if(bitmapByte !=null) {
+            builder.setLargeIcon(BitmapUtil.getInstance().showBitmapOrigin(bitmapByte));
         } else {
             builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_llmp_new_2));
         }

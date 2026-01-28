@@ -335,7 +335,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private void autoMusic() {
         String isAutoMusic = getIntent().getStringExtra("IsAutoMusic");
         if(!TextUtils.isEmpty(isAutoMusic) && isAutoMusic.equals("1")) {
-            binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+            binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
         }
     }
 
@@ -881,7 +881,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 Log.i(TAG, "点击了悬浮播放按钮");
                 if(isDoubleClick()) { return; }
                 if (binder !=null) {
-                    binder.pause(MainActivity.this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pause(MainActivity.this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
             }
         });
@@ -938,15 +938,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 初始化音乐服务 */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void startMusicService(boolean isPlayMusic, String musicName, String musicSinger, Bitmap bitmap) {
+    private void startMusicService(boolean isPlayMusic, String musicName, String musicSinger, byte[] bitmapByte) {
         intentService.putExtra("IsPlayMusic", isPlayMusic);
         intentService.putExtra("MusicName", musicName);
         intentService.putExtra("MusicSinger", musicSinger);
-        if(bitmap!=null) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);//把bitmap100%高质量压缩 到 output对象里
-            byte[] result = bos.toByteArray();
-            intentService.putExtra("MusicBitmap", result);
+        if(bitmapByte != null) {
+//            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//            bitmap.compress(Bitmap.CompressFormat.PNG, 100, bos);//把bitmap100%高质量压缩 到 output对象里
+//            byte[] result = bos.toByteArray();
+            intentService.putExtra("MusicBitmap", bitmapByte);
         } else {
             intentService.putExtra("MusicBitmap", (byte[]) null);
         }
@@ -963,11 +963,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 初始化通知栏消息 */
     @SuppressLint("RemoteViewLayout")
-    private void initNotificationHelper(String musicName, String musicSinger, String imgUrl, Bitmap musicImageBitmap) {
+    private void initNotificationHelper(String musicName, String musicSinger, String imgUrl, byte[] bitmapByte) {
         if(!TextUtils.isEmpty(imgUrl)) {
-            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SHOW_IMAGE_URL, musicName, musicSinger, imgUrl, musicImageBitmap, false));
+            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_SHOW_IMAGE_URL, musicName, musicSinger, imgUrl, bitmapByte, false));
         } else {
-            NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, musicImageBitmap, true);
+            NotificationHelper.getInstance().createRemoteViews(this, musicName, musicSinger, bitmapByte, true);
             MusicPlayService.updateWidgetUI(MainActivity.this, false);
         }
     }
@@ -1090,7 +1090,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             case ThreadEvent.VIEW_GET_LOCAL_PLAY_LIST_SUCCESS:
                 updateMusicDetailMessage(event.str, event.str, "", getViewDataBinding().ivLogo, R.drawable.ic_music_cover_4, 80, 80);
                 if(event.byteArray != null && event.byteArray.length >0) {
-                    Bitmap bitmap = BitmapFactory.decodeByteArray(event.byteArray, 0, event.byteArray.length);
+                    Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(event.byteArray);
                     getViewDataBinding().ivLogo.setImageBitmap(bitmap);
                 }
                 getViewDataBinding().tvCount.setText("" + event.i);
@@ -1208,7 +1208,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 break;
             case ThreadEvent.VIEW_PLAY_MUSIC_BY_CHARACTER:
                 if(binder!=null) {
-                    binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
                 break;
             case ThreadEvent.VIEW_PLAY_RECOMMEND_MUSIC:   //点击播放每日推荐的歌曲 并添加到播放列表
@@ -1245,7 +1245,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             case ThreadEvent.VIEW_MUSIC_IS_PAUSE:
                 if(isDoubleClick()) { return; }
                 if(binder!=null) {
-                    binder.pause(this, event.str, event.str2, event.bitmap);
+                    binder.pause(this, event.str, event.str2, event.byteArray);
                 }
                 break;
             case ThreadEvent.VIEW_MUSIC_IS_NEXT:
@@ -1376,7 +1376,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             .into(getViewDataBinding().civMusicImg);
 
                     if(binder!=null) {
-                        binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                        binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                         binder.clearMedia();
                         binder.resetMusicPlayer();
                         MusicPlayService.currentRoomPlayMusic = new RoomPlayMusic();
@@ -1440,8 +1440,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
                         .load(MusicPlayService.currentRoomPlayMusic.isLocal?
-                                (null != MusicPlayService.currentRoomPlayMusic.musicImgByte?
-                                        BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
+                                (MusicPlayService.currentRoomPlayMusic.musicImgByte != null?
+                                        BitmapUtil.getInstance().showBitmapOrigin(MusicPlayService.currentRoomPlayMusic.musicImgByte) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
                         )
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1481,10 +1481,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if(MusicPlayService.currentRoomPlayMusic.isLocal) {
                         if(MusicPlayService.currentRoomPlayMusic.musicImgByte != null) {
-                            Bitmap bitmap = BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length);
+                            Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(MusicPlayService.currentRoomPlayMusic.musicImgByte);
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.THREAD_SHOW_IMAGE_URL, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, bitmap, true));
                         } else {
-                            MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
+                            //MusicPlayService.currentRoomPlayMusic.musicImgBitmap = null;
                             startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, null);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
@@ -1494,30 +1494,30 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                             //EventBus.getDefault().post(new ThreadEvent(ThreadEvent.SHOW_IMAGE_URL, event.music.musicName, event.music.musicSinger, event.music.musicImg, null, false));
                         } else {
                             MusicPlayService.currentRoomPlayMusic.musicImg = "";
-                            startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, event.music.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte != null? BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : null);
+                            startMusicService(true, MusicPlayService.currentRoomPlayMusic.musicName, event.music.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                             MusicPlayService.updateWidgetUI(MainActivity.this, false);
                         }
                     }
                 }
-                initNotificationHelper(MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, MusicPlayService.currentRoomPlayMusic.musicImgByte != null? BitmapFactory.decodeByteArray(MusicPlayService.currentRoomPlayMusic.musicImgByte, 0, MusicPlayService.currentRoomPlayMusic.musicImgByte.length) : null);
+                initNotificationHelper(MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImg, MusicPlayService.currentRoomPlayMusic.musicImgByte);
 
                 break;
             case ThreadEvent.VIEW_IMAGE_URL:
-                //MusicPlayService.currentRoomPlayMusic.musicName = event.str;
-                //MusicPlayService.currentRoomPlayMusic.musicSinger = event.str2;
-
                 if(event.bitmap != null) {
-                    MusicPlayService.currentRoomPlayMusic.musicImgBitmap = event.bitmap;
                     MusicPlayService.currentRoomPlayMusic.musicImgByte = BitmapUtil.getInstance().bitmapToByteArray(event.bitmap);
                     //设置
                     getViewDataBinding().qcpProgress.setIcon(event.bitmap);
+                }
+
+                if(event.bitmap2 != null) {
+                    //MusicPlayService.currentRoomPlayMusic.musicImgOriginByte = BitmapUtil.getInstance().bitmapToByteArray(event.bitmap2);
                 }
 
                 if(binder !=null) {
                     binder.updateMetadata(MusicPlayService.currentRoomPlayMusic);
                 }
 
-                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, (event.bitmap != null) ? event.bitmap : MusicPlayService.currentRoomPlayMusic.musicImgBitmap, false);
+                NotificationHelper.getInstance().createRemoteViews(this, event.str, event.str2, MusicPlayService.currentRoomPlayMusic.musicImgByte, false);
                 MusicPlayService.updateWidgetUI(MainActivity.this, false);
 
                 break;
@@ -1597,12 +1597,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     return;
                 }
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
                 break;
             case ThreadEvent.VIEW_BLUETOOTH_DISCONNECT:
                 if(binder!=null) {
-                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                    binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                 }
                 break;
             case ThreadEvent.VIEW_ACTION_MEDIA_BUTTON:
@@ -1613,9 +1613,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
                             lastOrNextMusic(false);
                         } else if(KeyEvent.KEYCODE_MEDIA_PLAY == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.playImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                            binder.playImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                         } else if(KeyEvent.KEYCODE_MEDIA_PAUSE == event.kt.getKeyCode() && KeyEvent.ACTION_DOWN == event.kt.getKeyCode()) {
-                            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
                         }
                     }
                 }
@@ -2800,7 +2800,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 点击播放按钮 */
     public void playButtonClick(View view)  {
-        binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+        binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
     }
 
     /** 点击切换播放模式按钮 */
@@ -3453,7 +3453,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         Log.i(TAG, "Stop - UnbindService");
         EventBus.getDefault().unregister(this);
         if(binder != null) {
-            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+            binder.pauseImm(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
             binder.clearMedia();
         }
         getViewDataBinding().ccvShowVisualizer.release();
@@ -3531,11 +3531,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 binder.clearMedia();
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_LIST_FIRST));
             } else {
-                binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+                binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
             }
         } else if (KeyEvent.KEYCODE_MEDIA_PAUSE == keyCode && keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
             isFirstBluetoothControl = false;
-            binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgBitmap);
+            binder.pause(this, MusicPlayService.currentRoomPlayMusic.musicName, MusicPlayService.currentRoomPlayMusic.musicSinger, MusicPlayService.currentRoomPlayMusic.musicImgByte);
         } else if(KeyEvent.KEYCODE_MEDIA_NEXT == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
             lastOrNextMusic(true);
         } else if(KeyEvent.KEYCODE_MEDIA_PREVIOUS == keyCode && KeyEvent.ACTION_DOWN == keyEvent.getAction()) {
@@ -4060,7 +4060,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     binding.llMusicAll.setVisibility(View.VISIBLE);
                     binding.tvMusicListName.setText(list.get(position).playListName);
                     if(list.get(position).playListImgByte != null) {
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(list.get(position).playListImgByte, 0, list.get(position).playListImgByte.length);
+                        Bitmap bitmap = BitmapUtil.getInstance().showBitmapOrigin(list.get(position).playListImgByte);
                         binding.civImage.setImageBitmap(bitmap);
                     } else {
                         binding.civImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_music_cover_4));

@@ -181,16 +181,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_black_33_selected);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -332,16 +332,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_blue_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -483,16 +483,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -635,16 +635,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_purple_selected);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -786,16 +786,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_orange_selected);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -936,16 +936,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_light_selected);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -1087,16 +1087,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.selector_play_circle_red_selected);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);
@@ -1238,16 +1238,16 @@ public class ThemeHelper {
                 vdb.ivPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_stars);
                 vdb.ivNewPanelPlay.setBackgroundResource(R.drawable.ic_play_circle_white);
             }
-            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgBitmap != null)) {
+            if(MusicPlayService.isExistsCurrentMusic() && (!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg) || MusicPlayService.currentRoomPlayMusic.musicImgByte != null)) {
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivMusicImg);
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgBitmap)
+                        .load((!TextUtils.isEmpty(MusicPlayService.currentRoomPlayMusic.musicImg))? MusicPlayService.currentRoomPlayMusic.musicImg : MusicPlayService.currentRoomPlayMusic.musicImgByte)
                         .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(vdb.ivNewMusicImg);

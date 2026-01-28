@@ -235,21 +235,18 @@ public class MainVM extends AndroidViewModel {
                     //inputStream调用一次后会被清空
                     byte[] inputStream2ByteArr = BitmapUtil.getInstance().inputStream2ByteArr(inputStream);
                     Bitmap bitmap = BitmapUtil.getInstance().showBitmap(inputStream2ByteArr);
-                    if(bitmap != null) {
-                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap));
-                    } else {
-                        EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
-                    }
+                    Bitmap bitmapOrigin = BitmapUtil.getInstance().showBitmapOrigin(inputStream2ByteArr);
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, bitmap, bitmapOrigin));
                 } catch (Exception e) {
                     Log.e(TAG, "error " + e.getMessage());
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger,  null, null));
                 }
             }
 
             @Override
             public void onError(String e) {
                 Log.e(TAG, "error: " + e);
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger, dataSource, (Bitmap) null, false));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_IMAGE_URL, musicName, musicSinger,  null,  null));
             }
         });
     }

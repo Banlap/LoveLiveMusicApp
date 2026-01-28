@@ -46,8 +46,6 @@ public class RoomPlayMusic {
     public boolean isDelete;
     @ColumnInfo(name = "music_img_byte")
     public byte[] musicImgByte;
-    @Ignore
-    public Bitmap musicImgBitmap;
     @ColumnInfo(name = "music_bitrate")
     public String musicBitrate;
     @ColumnInfo(name = "music_mime")
@@ -96,7 +94,6 @@ public class RoomPlayMusic {
         roomPlayMusic.isLocal = this.isLocal;
         roomPlayMusic.isDelete = this.isDelete;
         roomPlayMusic.musicImgByte = this.musicImgByte;
-        roomPlayMusic.musicImgBitmap = this.musicImgBitmap;
         roomPlayMusic.musicBitrate = this.musicBitrate;
         roomPlayMusic.musicMime = this.musicMime;
         roomPlayMusic.musicFileSize = this.musicFileSize;
