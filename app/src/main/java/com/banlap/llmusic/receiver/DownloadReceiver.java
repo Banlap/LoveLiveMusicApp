@@ -12,8 +12,10 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.sql.room.RoomDownloadMusic;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SPUtil;
@@ -27,6 +29,7 @@ import java.util.List;
  * */
 public class DownloadReceiver extends BroadcastReceiver {
     private static final String TAG = DownloadReceiver.class.getSimpleName();
+    public static long fileId;  //数据库id
     public static long downloadId;  //下载id
     public static String fileName;  //文件名
     public static int currentPos = 0; //记录当前下载数值
@@ -117,13 +120,19 @@ public class DownloadReceiver extends BroadcastReceiver {
      * 更新列表状态
      * */
     private void updateList() {
-        List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-        if(splist.size() >0) {
-            splist.stream().filter(music -> music.fileName.equals(fileName))
+        if(!AppData.roomDownloadMusicList.isEmpty()) {
+            AppData.roomDownloadMusicList.stream().filter(music -> music.id == fileId)
                     .findFirst()
                     .ifPresent(music -> {
-                        music.setStatus(DownloadMusic.DownloadSuccess);
-                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, splist);
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AppData.updateRoomDownloadMusic(music.id, roomDownloadMusic -> {
+                                    roomDownloadMusic.status = RoomDownloadMusic.DownloadSuccess;
+                                });
+                            }
+                        });
+                        music.status = RoomDownloadMusic.DownloadSuccess;
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_MUSIC_UPDATE));
                     });
         }

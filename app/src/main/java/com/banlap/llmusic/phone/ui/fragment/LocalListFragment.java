@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -139,14 +138,14 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
         if(!AppData.roomLocalFileList.isEmpty()) {
             roomLocalFileList.addAll(AppData.roomLocalFileList);
         }
-        AppData.addNullDataLocalFile(roomLocalFileList);
+        AppData.addNullDataLocalFile(roomLocalFileList, 2);
 
         //最爱歌曲缓存列表
         roomFavoriteList = new ArrayList<>();
         if(!AppData.roomFavoriteMusicList.isEmpty()) {
             roomFavoriteList.addAll(AppData.roomFavoriteMusicList);
         }
-        AppData.addNullDataForFavorite(roomFavoriteList);
+        AppData.addNullDataForFavorite(roomFavoriteList, 2);
 
         requestOptions = new RequestOptions();
         requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
@@ -652,7 +651,7 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                                 @Override
                                 public void run() {
-                                    List<RoomCustomPlay> customPlayList = BaseApplication.llMusicDatabase.customPlayDao().getAllCustomPlay();
+                                    List<RoomCustomPlay> customPlayList = AppData.getCustomPlayList();
                                     LLActivityManager.getInstance().getTopActivity().runOnUiThread(() -> {
                                         if(!customPlayList.isEmpty()) {
                                             roomCustomPlayList.addAll(customPlayList);

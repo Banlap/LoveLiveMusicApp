@@ -11,7 +11,7 @@ import android.content.Context;
  * 本地数据库
  * */
 @Database(
-        entities = { RoomSettings.class, RoomPlayMusic.class, RoomCustomPlay.class, RoomFavoriteMusic.class, RoomLocalFile.class, RoomRecommendMusic.class},
+        entities = { RoomSettings.class, RoomPlayMusic.class, RoomCustomPlay.class, RoomFavoriteMusic.class, RoomLocalFile.class, RoomRecommendMusic.class, RoomDownloadMusic.class},
         version = LLMusicDatabase.DATABASE_VERSION,
         exportSchema = false
 )
@@ -25,6 +25,7 @@ public abstract class LLMusicDatabase extends RoomDatabase {
     public abstract RoomFavoriteMusic.FavoriteMusicDao favoriteMusicDao();
     public abstract RoomLocalFile.LocalFileDao localFileDao();
     public abstract RoomRecommendMusic.RecommendMusicDao recommendMusicDao();
+    public abstract RoomDownloadMusic.DownloadMusicDao downloadMusicDao();
 
     private static LLMusicDatabase INSTANCE;
 

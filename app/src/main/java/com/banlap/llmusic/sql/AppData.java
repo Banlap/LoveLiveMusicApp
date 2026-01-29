@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.sql.room.RoomCustomPlay;
+import com.banlap.llmusic.sql.room.RoomDownloadMusic;
 import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
@@ -22,6 +23,7 @@ public class AppData {
     public static List<RoomLocalFile> roomLocalFileList; //本地文件列表
     public static List<RoomCustomPlay> roomCustomPlayList; //自建歌单列表
     public static List<RoomRecommendMusic> roomRecommendMusicList; //每日推荐歌单列表
+    public static List<RoomDownloadMusic> roomDownloadMusicList; //下载歌曲列表
 
     /**
      * 初始化参数
@@ -33,6 +35,7 @@ public class AppData {
         roomLocalFileList = new ArrayList<>();
         roomCustomPlayList = new ArrayList<>();
         roomRecommendMusicList = new ArrayList<>();
+        roomDownloadMusicList = new ArrayList<>();
     }
 
     /**
@@ -79,6 +82,9 @@ public class AppData {
         BaseApplication.llMusicDatabase.musicDao().deleteAll();
     }
 
+    public static List<RoomCustomPlay> getCustomPlayList() {
+        return BaseApplication.llMusicDatabase.customPlayDao().getAllMusic();
+    }
     /**
      * 保存自建歌单数据
      * */
@@ -100,6 +106,7 @@ public class AppData {
             Log.e(TAG, "更新自建歌单数据失败");
         }
     }
+
     /**
      * 根据自建歌单id更新歌曲列表数据
      * */
@@ -161,6 +168,12 @@ public class AppData {
         }
     }
 
+    /**
+     * 查询收藏音乐列表
+     * */
+    public static List<RoomFavoriteMusic> getFavoriteMusicList() {
+        return BaseApplication.llMusicDatabase.favoriteMusicDao().getAllMusic();
+    }
 
     /**
      * 删除所有收藏歌曲数据后再保存收藏歌曲
@@ -177,19 +190,57 @@ public class AppData {
     }
 
     /**
+     * 获取下载音乐列表
+     * */
+    public static List<RoomDownloadMusic> getDownloadMusicList() {
+        return BaseApplication.llMusicDatabase.downloadMusicDao().getAllMusic();
+    }
+
+    /**
+     *
+     * 添加一条下载音乐数据
+     * */
+    public static void saveDownloadMusic(RoomDownloadMusic roomDownloadMusic) {
+        BaseApplication.llMusicDatabase.downloadMusicDao().insert(roomDownloadMusic);
+    }
+
+
+    /**
+     * 更新下载歌曲数据
+     * */
+    public static void updateRoomDownloadMusic(int id, Consumer<RoomDownloadMusic> setter) {
+        RoomDownloadMusic roomDownloadMusic = BaseApplication.llMusicDatabase.downloadMusicDao().getMusicById(id);
+        if(roomDownloadMusic != null) {
+            setter.accept(roomDownloadMusic);
+            BaseApplication.llMusicDatabase.downloadMusicDao().update(roomDownloadMusic);
+        } else {
+            Log.e(TAG, "更新下载歌曲数据失败");
+        }
+    }
+
+    /**
+     * 清除所有下载音乐记录
+     * */
+    public static void deleteAllDownloadMusic() {
+        BaseApplication.llMusicDatabase.downloadMusicDao().deleteAll();
+    }
+
+    /**
      * 添加空数据 收藏列表
      * */
-    public static void addNullDataForFavorite(List<RoomFavoriteMusic> roomFavoriteList) {
-        roomFavoriteList.add(new RoomFavoriteMusic());
-        roomFavoriteList.add(new RoomFavoriteMusic());
+    public static void addNullDataForFavorite(List<RoomFavoriteMusic> roomFavoriteList, int addSize) {
+        for (int i=0; i < addSize; i++) {
+            roomFavoriteList.add(new RoomFavoriteMusic());
+        }
     }
 
     /**
      * 添加空数据 本地文件列表
      * */
-    public static void addNullDataLocalFile(List<RoomLocalFile> roomLocalFileList) {
-        roomLocalFileList.add(new RoomLocalFile());
-        roomLocalFileList.add(new RoomLocalFile());
+    public static void addNullDataLocalFile(List<RoomLocalFile> roomLocalFileList, int addSize) {
+        for (int i=0; i < addSize; i++) {
+            roomLocalFileList.add(new RoomLocalFile());
+        }
     }
 
     /**
@@ -200,4 +251,15 @@ public class AppData {
             roomCustomPlayList.add(new RoomCustomPlay());
         }
     }
+
+    /**
+     * 添加空数据 下载列表
+     * */
+    public static void addNullDataDownloadMusic(List<RoomDownloadMusic> roomDownloadMusicList, int addSize) {
+        for (int i=0; i < addSize; i++) {
+            roomDownloadMusicList.add(new RoomDownloadMusic());
+        }
+    }
+
+
 }

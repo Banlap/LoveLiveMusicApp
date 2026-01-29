@@ -22,6 +22,7 @@ import androidx.annotation.RequiresApi;
 import com.banlap.llmusic.phone.ui.activity.CustomErrorActivity;
 import com.banlap.llmusic.sql.room.LLMusicDatabase;
 import com.banlap.llmusic.sql.room.RoomCustomPlay;
+import com.banlap.llmusic.sql.room.RoomDownloadMusic;
 import com.banlap.llmusic.sql.room.RoomFavoriteMusic;
 import com.banlap.llmusic.sql.room.RoomLocalFile;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
@@ -36,7 +37,6 @@ import com.banlap.llmusic.utils.SPUtil;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -255,7 +255,7 @@ public class BaseApplication extends Application {
                 AppData.roomPlayMusicList.addAll(roomPlayMusicList);
             }
 
-            List<RoomCustomPlay> roomCustomPlayList = llMusicDatabase.customPlayDao().getAllCustomPlay();
+            List<RoomCustomPlay> roomCustomPlayList = llMusicDatabase.customPlayDao().getAllMusic();
             if(!roomCustomPlayList.isEmpty()) {
                 AppData.roomCustomPlayList.addAll(roomCustomPlayList);
             }
@@ -273,6 +273,11 @@ public class BaseApplication extends Application {
             List<RoomRecommendMusic> roomRecommendMusicList = llMusicDatabase.recommendMusicDao().getAllMusic();
             if(!roomRecommendMusicList.isEmpty()) {
                 AppData.roomRecommendMusicList.addAll(roomRecommendMusicList);
+            }
+
+            List<RoomDownloadMusic> roomDownloadMusicList = llMusicDatabase.downloadMusicDao().getAllMusic();
+            if(!roomDownloadMusicList.isEmpty()) {
+                AppData.roomDownloadMusicList.addAll(roomDownloadMusicList);
             }
         });
     }

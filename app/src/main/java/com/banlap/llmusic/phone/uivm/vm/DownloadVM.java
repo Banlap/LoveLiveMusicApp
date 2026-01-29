@@ -13,9 +13,10 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
-import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.SPUtil;
@@ -53,9 +54,14 @@ public class DownloadVM extends AndroidViewModel {
      * 清空列表
      * */
     public void deleteList() {
-        List<DownloadMusic> list = new ArrayList<>();
-        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, list);
-        callBack.refreshList();
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppData.deleteAllDownloadMusic();
+                callBack.refreshList();
+            }
+        });
+
     }
 
     public interface DownloadCallBack {

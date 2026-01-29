@@ -15,12 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-import com.banlap.llmusic.model.DownloadMusic;
-import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.sql.room.RoomDownloadMusic;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
 import com.banlap.llmusic.utils.AppExecutors;
@@ -397,12 +396,12 @@ public class MainVM extends AndroidViewModel {
 
     /** 下载音乐文件 */
     public void downloadMusic(String fileName, String url) {
-
-        DownloadMusic downloadMusic = new DownloadMusic();
-        downloadMusic.setDownloadId("");
-        downloadMusic.setFileName(fileName);
-        downloadMusic.setUrl(url);
-        downloadMusic.setStatus(DownloadMusic.DownloadWaiting);
+        RoomDownloadMusic downloadMusic = new RoomDownloadMusic();
+        downloadMusic.id = (int) MusicPlayService.createMusicId();
+        downloadMusic.downloadId = "";
+        downloadMusic.fileName = fileName;
+        downloadMusic.url = url;
+        downloadMusic.status = RoomDownloadMusic.DownloadWaiting;
 
         DownloadHelper.addDownloadFile(downloadMusic);
         DownloadHelper.startDownload();

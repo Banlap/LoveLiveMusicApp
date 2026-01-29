@@ -14,9 +14,10 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
+import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.sql.room.RoomDownloadMusic;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.UUID;
 
 /**
  * 下载管理
@@ -32,9 +34,9 @@ import java.util.Queue;
 public class DownloadHelper {
     private static final String TAG = DownloadHelper.class.getSimpleName();
 
-    public static Queue<DownloadMusic> downloadMusicQueue = new LinkedList<>();
-    public static DownloadManager downloadManager;
-    public static DownloadReceiver downloadReceiver;
+    private static Queue<RoomDownloadMusic> downloadMusicQueue = new LinkedList<>();
+    private static DownloadManager downloadManager;
+    private static DownloadReceiver downloadReceiver;
 
 
     /**
@@ -51,15 +53,24 @@ public class DownloadHelper {
     /**
      * 添加下载任务
      * */
-    public static void addDownloadFile(DownloadMusic downloadMusic) {
+    public static void addDownloadFile(RoomDownloadMusic roomDownloadMusic) {
         downloadMusicQueue = new LinkedList<>();
-        downloadMusicQueue.add(downloadMusic);
-        List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-        if(splist.size()>0) {
-            downloadMusicQueue.addAll(splist);
-        }
-        List<DownloadMusic> list = new ArrayList<>(downloadMusicQueue);
-        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, list);
+        downloadMusicQueue.add(roomDownloadMusic);
+
+//        List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
+//        if(splist.size()>0) {
+//            downloadMusicQueue.addAll(splist);
+//        }
+//        List<DownloadMusic> list = new ArrayList<>(downloadMusicQueue);
+//        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, list);
+
+        AppData.roomDownloadMusicList.add(roomDownloadMusic);
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                AppData.saveDownloadMusic(roomDownloadMusic);
+            }
+        });
     }
 
     /**
@@ -67,11 +78,21 @@ public class DownloadHelper {
      * */
     public static void getDownloadList() {
         if(!isDownloading()) {
-            List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-            if(splist.size()>0) {
-                downloadMusicQueue = new LinkedList<>();
-                downloadMusicQueue.addAll(splist);
-            }
+            AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                @Override
+                public void run() {
+                    List<RoomDownloadMusic> list = AppData.getDownloadMusicList();
+                    if(!list.isEmpty()) {
+                        downloadMusicQueue = new LinkedList<>();
+                        downloadMusicQueue.addAll(list);
+                    }
+                }
+            });
+//            List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
+//            if(splist.size()>0) {
+//                downloadMusicQueue = new LinkedList<>();
+//                downloadMusicQueue.addAll(splist);
+//            }
         }
     }
 
@@ -106,18 +127,24 @@ public class DownloadHelper {
      * */
     public static void startDownload() {
         if(downloadManager != null && !downloadMusicQueue.isEmpty() && !isDownloading()) {
-            if(downloadMusicQueue.size()>0) {
-                DownloadMusic downloadMusic = downloadMusicQueue.poll();
-                if(downloadMusic != null && (downloadMusic.status.equals(DownloadMusic.DownloadWaiting) || downloadMusic.status.equals(DownloadMusic.Downloading))) {
-                    long downloadId = downloadFile(downloadMusic.fileName, downloadMusic.url);
-                    List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-                    if(splist.size() >0) {
-                        splist.stream().filter(music -> music.fileName.equals(downloadMusic.fileName))
+            if(!downloadMusicQueue.isEmpty()) {
+                RoomDownloadMusic downloadMusic = downloadMusicQueue.poll();
+                if(downloadMusic != null && (downloadMusic.status.equals(RoomDownloadMusic.DownloadWaiting) || downloadMusic.status.equals(RoomDownloadMusic.Downloading))) {
+                    long downloadId = downloadFile(downloadMusic);
+
+                    if(!AppData.roomDownloadMusicList.isEmpty()) {
+                        AppData.roomDownloadMusicList.stream().filter(music -> music.id == downloadMusic.id)
                                 .findFirst()
                                 .ifPresent(music -> {
-                                    music.setStatus(DownloadMusic.Downloading);
-                                    music.setDownloadId(downloadId + "");
-                                    SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, splist);
+                                    AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            AppData.updateRoomDownloadMusic(music.id, roomDownloadMusic->{
+                                                roomDownloadMusic.status = RoomDownloadMusic.Downloading;
+                                            });
+                                        }
+                                    });
+                                    music.status = RoomDownloadMusic.Downloading;
                                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_MUSIC_UPDATE));
                                 });
                     }
@@ -146,13 +173,19 @@ public class DownloadHelper {
      * 更新列表状态
      * */
     public static void updateList() {
-        List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-        if(splist.size() >0) {
-            splist.stream().filter(music -> music.fileName.equals(DownloadReceiver.fileName))
+        if(!AppData.roomDownloadMusicList.isEmpty()) {
+            AppData.roomDownloadMusicList.stream().filter(music -> music.id == DownloadReceiver.fileId)
                     .findFirst()
                     .ifPresent(music -> {
-                        music.setStatus(DownloadMusic.DownloadError);
-                        SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, splist);
+                        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                AppData.updateRoomDownloadMusic(music.id, roomDownloadMusic -> {
+                                    roomDownloadMusic.status = RoomDownloadMusic.DownloadError;
+                                });
+                            }
+                        });
+                        music.status = RoomDownloadMusic.DownloadError;
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_DOWNLOAD_MUSIC_UPDATE));
 
                         DownloadReceiver.downloadId = 0;
@@ -162,17 +195,20 @@ public class DownloadHelper {
     }
 
 
-    public static long downloadFile(String fileName, String url) {
-        return downloadFile("LLMusic音乐下载管理", fileName, url);
+    public static long downloadFile(RoomDownloadMusic roomDownloadMusic) {
+        return downloadFile("LLMusic音乐下载管理", roomDownloadMusic);
     }
 
     /**
      * 下载文件
      * */
-    public static long downloadFile(String title, String fileName, String url) {
+    public static long downloadFile(String title, RoomDownloadMusic roomDownloadMusic) {
         if(downloadManager != null) {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+            String url = roomDownloadMusic.url;
+            int fileId = roomDownloadMusic.id;
+            String fileName = roomDownloadMusic.fileName;
 
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
             // 检查并创建目标目录
             File downloadDirectory = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "LLMusicDownload");
             if (!downloadDirectory.exists()) {
@@ -191,6 +227,7 @@ public class DownloadHelper {
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
             DownloadReceiver.downloadId = downloadManager.enqueue(request);
+            DownloadReceiver.fileId = fileId;
             DownloadReceiver.fileName = fileName;
             DownloadReceiver.startHandler();
             //将下载请求添加到任务对列

@@ -37,7 +37,7 @@ public class RoomCustomPlay {
         void update(RoomCustomPlay roomCustomPlay);
 
         @Query("SELECT * FROM custom_play")
-        List<RoomCustomPlay> getAllCustomPlay();
+        List<RoomCustomPlay> getAllMusic();
 
         @Query("SELECT * FROM custom_play WHERE play_list_id = :id")
         RoomCustomPlay getCustomPlayById(int id);

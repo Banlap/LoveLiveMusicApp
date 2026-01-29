@@ -21,18 +21,15 @@ import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityDownloadBinding;
 import com.banlap.llmusic.databinding.DialogDownloadMenuBinding;
 import com.banlap.llmusic.databinding.ItemDownloadListBinding;
-import com.banlap.llmusic.model.DownloadMusic;
 import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.phone.uivm.vm.DownloadVM;
-import com.banlap.llmusic.sql.room.RoomSettings;
+import com.banlap.llmusic.sql.room.RoomDownloadMusic;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.DownloadHelper;
-import com.banlap.llmusic.utils.LLActivityManager;
 import com.banlap.llmusic.utils.PxUtil;
-import com.banlap.llmusic.utils.SPUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,7 +44,7 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
     implements DownloadVM.DownloadCallBack {
 
     private static final String TAG = DownloadActivity.class.getSimpleName();
-    public List<DownloadMusic> downloadMusicList;
+    public List<RoomDownloadMusic> downloadMusicList;
     public DownloadListAdapter downloadListAdapter;
     private int rThemeId =0;
 
@@ -60,15 +57,9 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
     protected void initData() {
         EventBus.getDefault().register(this);
         downloadMusicList = new ArrayList<>();
-
-        List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-
-        if(splist.size()>0) {
-            downloadMusicList.addAll(splist);
-        }
-
-        downloadMusicList.add(new DownloadMusic());
-        downloadMusicList.add(new DownloadMusic());
+        downloadMusicList.addAll(AppData.roomDownloadMusicList);
+        downloadMusicList.add(new RoomDownloadMusic());
+        downloadMusicList.add(new RoomDownloadMusic());
 
     }
 
@@ -115,10 +106,29 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
 
     @Override
     public void refreshList() {
-        List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-        downloadMusicList.clear();
-        downloadMusicList.addAll(splist);
-        downloadListAdapter.notifyDataSetChanged();
+        runOnUiThread(()-> {
+            downloadMusicList.clear();
+            downloadMusicList.addAll(AppData.roomDownloadMusicList);
+            AppData.addNullDataDownloadMusic(downloadMusicList, 2);
+            downloadListAdapter.notifyDataSetChanged();
+        });
+//        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                List<RoomDownloadMusic> list = AppData.getDownloadMusicList();
+//                runOnUiThread(()-> {
+//                    downloadMusicList.clear();
+//                    if (!list.isEmpty()) {
+//                        downloadMusicList.addAll(list);
+//                    }
+//                    AppData.addNullDataDownloadMusic(downloadMusicList, 2);
+//                    downloadListAdapter.notifyDataSetChanged();
+//
+//                    AppData.roomDownloadMusicList.clear();
+//                    AppData.roomDownloadMusicList.addAll(downloadMusicList);
+//                });
+//            }
+//        });
     }
 
 
@@ -185,12 +195,7 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
                 getViewDataBinding().llDownloadNull.setVisibility(View.GONE);
                 break;
             case ThreadEvent.VIEW_DOWNLOAD_MUSIC_UPDATE:
-                List<DownloadMusic> splist = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.DownloadMusicListData, DownloadMusic.class);
-                if(splist.size()>0) {
-                    downloadMusicList.clear();
-                    downloadMusicList.addAll(splist);
-                    downloadListAdapter.notifyDataSetChanged();
-                }
+                refreshList();
                 break;
             case ThreadEvent.VIEW_DOWNLOAD_MUSIC_FINISH:
                 getViewDataBinding().pbProgress.setProgress(event.i);
@@ -222,9 +227,9 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
     public class DownloadListAdapter extends RecyclerView.Adapter<DownloadListViewHolder> {
 
         private Context context;
-        private List<DownloadMusic> list;
+        private List<RoomDownloadMusic> list;
 
-        public DownloadListAdapter(Context context, List<DownloadMusic> list) {
+        public DownloadListAdapter(Context context, List<RoomDownloadMusic> list) {
             this.context = context;
             this.list = list;
         }
@@ -247,14 +252,19 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
                 binding.tvFileName.setText(!TextUtils.isEmpty(fileName) ? fileName : "");
                 String status = list.get(position).status;
                 if(!TextUtils.isEmpty(status)) {
-                    if(status.equals("0")) {
-                        binding.tvStatus.setText("已完成");
-                    } else if(status.equals("1")) {
-                        binding.tvStatus.setText("下载中");
-                    } else if(status.equals("2")) {
-                        binding.tvStatus.setText("失败");
-                    } else if(status.equals("3")) {
-                        binding.tvStatus.setText("等待中");
+                    switch (status) {
+                        case "0":
+                            binding.tvStatus.setText("已完成");
+                            break;
+                        case "1":
+                            binding.tvStatus.setText("下载中");
+                            break;
+                        case "2":
+                            binding.tvStatus.setText("失败");
+                            break;
+                        case "3":
+                            binding.tvStatus.setText("等待中");
+                            break;
                     }
                 } else {
                     binding.tvStatus.setText("");
