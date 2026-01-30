@@ -139,6 +139,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -1437,12 +1439,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 //刷新播放列表的收藏歌曲显示ui
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
 
+                byte[] imgByte = null;
+                if(MusicPlayService.currentRoomPlayMusic.musicImgByte != null) {
+                    imgByte = MusicPlayService.currentRoomPlayMusic.musicImgByte;
+                }
                 Glide.with(context)
                         .setDefaultRequestOptions(requestOptions)
-                        .load(MusicPlayService.currentRoomPlayMusic.isLocal?
-                                (MusicPlayService.currentRoomPlayMusic.musicImgByte != null?
-                                        BitmapUtil.getInstance().showBitmapOrigin(MusicPlayService.currentRoomPlayMusic.musicImgByte) : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg
-                        )
+                        .load(MusicPlayService.currentRoomPlayMusic.isLocal? (imgByte != null? imgByte : R.mipmap.ic_llmp_new_2) : MusicPlayService.currentRoomPlayMusic.musicImg)
                         .transform(new RoundedCornersTransformation(20, 0, RoundedCornersTransformation.CornerType.ALL))
                         .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                         .into(getViewDataBinding().civMusicImg);
@@ -1510,7 +1513,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 }
 
                 if(event.bitmap2 != null) {
-                    //MusicPlayService.currentRoomPlayMusic.musicImgOriginByte = BitmapUtil.getInstance().bitmapToByteArray(event.bitmap2);
+                    //MusicPlayService.currentRoomPlayMusic.musicImgOriginByte = new String(BitmapUtil.getInstance().bitmapToByteArray(event.bitmap2), StandardCharsets.UTF_8);
                 }
 
                 if(binder !=null) {

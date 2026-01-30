@@ -49,14 +49,11 @@ public class RoomLocalFile {
         @Update
         void update(RoomLocalFile roomPlayMusic);
 
-        @Query("SELECT * FROM local_file where music_id = :id")
-        RoomLocalFile getMusicById(String id);
-
         @Query("SELECT * FROM local_file ORDER BY id ASC")
         List<RoomLocalFile> getAllMusic();
     }
 
-    public RoomLocalFile copyWithNewId(long id) {
+    public RoomLocalFile copy(long id) {
         RoomLocalFile roomLocalFile = new RoomLocalFile();
         roomLocalFile.id = id;
         roomLocalFile.musicId = this.musicId;

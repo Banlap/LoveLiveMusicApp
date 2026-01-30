@@ -1564,37 +1564,26 @@ public class ThemeHelper {
         if(rThemeId == R.id.ll_theme_normal) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else if(rThemeId == R.id.ll_theme_blue) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg
                     )
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_0E)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
@@ -1602,133 +1591,91 @@ public class ThemeHelper {
         } else if(rThemeId == R.id.ll_theme_dark) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.white)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else if(rThemeId == R.id.ll_theme_white) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple_light)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.purple_light)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else if(rThemeId == R.id.ll_theme_orange) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.orange_0b)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else if(rThemeId == R.id.ll_theme_light) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal ?
-                            (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal ? (null != music.musicImgByte ? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal ?
-                            (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal ? (null != music.musicImgByte ? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_b5)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else if(rThemeId == R.id.ll_theme_red) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal ?
-                            (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal ? (null != music.musicImgByte ? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal ?
-                            (null != music.musicImgByte ?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal ? (null != music.musicImgByte ? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.red_3a)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else if(rThemeId == R.id.ll_theme_stars) {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.blue_be)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);
         } else {
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivMusicImg);
             Glide.with(context)
                     .setDefaultRequestOptions(requestOptions)
-                    .load(music.isLocal?
-                            (null != music.musicImgByte?
-                                    BitmapFactory.decodeByteArray(music.musicImgByte, 0, music.musicImgByte.length) : R.mipmap.ic_music_default_new) : music.musicImg
-                    )
+                    .load(music.isLocal? (null != music.musicImgByte? music.musicImgByte : R.mipmap.ic_music_default_new) : music.musicImg)
                     .transform(new CropCircleWithBorderTransformation(5, context.getResources().getColor(R.color.light_f9)))
                     .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
                     .into(vdb.ivNewMusicImg);

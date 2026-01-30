@@ -82,9 +82,13 @@ public class AppData {
         BaseApplication.llMusicDatabase.musicDao().deleteAll();
     }
 
+    /**
+     * 获取自建歌单列表数据
+     * */
     public static List<RoomCustomPlay> getCustomPlayList() {
         return BaseApplication.llMusicDatabase.customPlayDao().getAllMusic();
     }
+
     /**
      * 保存自建歌单数据
      * */

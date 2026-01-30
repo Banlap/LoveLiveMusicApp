@@ -81,6 +81,10 @@ public class RoomPlayMusic {
     }
 
     public RoomPlayMusic copyWithNewId(long id) {
+        return copy(id);
+    }
+
+    public RoomPlayMusic copy(long id) {
         RoomPlayMusic roomPlayMusic = new RoomPlayMusic();
         roomPlayMusic.id = id; // 新 ID
         roomPlayMusic.musicId = this.musicId;

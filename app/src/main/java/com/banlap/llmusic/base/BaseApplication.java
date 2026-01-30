@@ -37,6 +37,7 @@ import com.banlap.llmusic.utils.SPUtil;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -260,9 +261,9 @@ public class BaseApplication extends Application {
                 AppData.roomCustomPlayList.addAll(roomCustomPlayList);
             }
 
-            List<RoomFavoriteMusic> roomFavoriteMusics = llMusicDatabase.favoriteMusicDao().getAllMusic();
-            if(!roomFavoriteMusics.isEmpty()) {
-                AppData.roomFavoriteMusicList.addAll(roomFavoriteMusics);
+            List<RoomFavoriteMusic> roomFavoriteMusicList = llMusicDatabase.favoriteMusicDao().getAllMusic();
+            if(!roomFavoriteMusicList.isEmpty()) {
+                AppData.roomFavoriteMusicList.addAll(roomFavoriteMusicList);
             }
 
             List<RoomLocalFile> roomLocalFileList = llMusicDatabase.localFileDao().getAllMusic();

@@ -2,13 +2,6 @@ package com.banlap.llmusic.phone.uivm.vm;
 
 
 import android.app.Application;
-import android.app.DownloadManager;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -18,13 +11,8 @@ import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.DownloadHelper;
-import com.banlap.llmusic.utils.LLActivityManager;
-import com.banlap.llmusic.utils.SPUtil;
 
 import org.greenrobot.eventbus.EventBus;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class DownloadVM extends AndroidViewModel {
 
