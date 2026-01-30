@@ -250,8 +250,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     private final PublishSubject<String> textChangeSubject = PublishSubject.create();
 
-//    public LLMusicDatabase llMusicDatabase;
-
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
 

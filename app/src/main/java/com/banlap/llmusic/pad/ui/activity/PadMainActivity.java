@@ -135,6 +135,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     private PadMainFragmentStateAdapter padMainFragmentStateAdapter;
     private Fragment currentFragment;
+    private Fragment loveliveMainFragment;
+    private Fragment loveliveDetailFragment;
+
     //碎片ID值
     public static int VIEW_PAD_FRAGMENT_MAIN = 0;  //LoveLive页面
     public static int VIEW_PAD_FRAGMENT_DETAIL = 1;  //LoveLive列表详细页面
@@ -417,22 +420,28 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     /** 初始化碎片 */
     private void initFragment() {
-        Fragment fragment = new PadLoveLiveFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fcv_fragment, fragment);
-        fragmentTransaction.commit();
-
-        currentFragment = fragment;
+        loveliveMainFragment = new PadLoveLiveFragment();
+        loveliveDetailFragment = new PadDetailMusicListFragment();
+        changeFragment(loveliveMainFragment);
     }
 
     /** 切换碎片 */
     private void changeFragment(Fragment fragment) {
-        if (fragment != null) {
+        if (fragment != null && fragment != currentFragment) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.fcv_fragment, fragment);
-            fragmentTransaction.addToBackStack(null); // 添加到back stack以支持返回操作
+
+            if(currentFragment != null) {
+                fragmentTransaction.hide(currentFragment);
+            }
+
+            if(fragment.isAdded()){
+                fragmentTransaction.show(fragment);
+            } else {
+                fragmentTransaction.add(R.id.fcv_fragment, fragment);
+            }
+            //fragmentTransaction.replace(R.id.fcv_fragment, fragment);
+            //fragmentTransaction.addToBackStack(null); // 添加到back stack以支持返回操作
             fragmentTransaction.commit();
 
             currentFragment = fragment;
@@ -987,10 +996,10 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 if(event.i == VIEW_PAD_FRAGMENT_MAIN) {
                     isIntoMusicDetail = false;
                     getViewDataBinding().tvTittleName.setText("LoveLive");
-                    changeFragment(new PadLoveLiveFragment());
+                    changeFragment(loveliveMainFragment);
                 } else if(event.i == VIEW_PAD_FRAGMENT_DETAIL) {
                     isIntoMusicDetail = true;
-                    changeFragment(new PadDetailMusicListFragment());
+                    changeFragment(loveliveDetailFragment);
                     if(event.str.equals(ThreadEvent.ALBUM_LIELLA)) {
                         getViewDataBinding().tvTittleName.setText("Liella!");
                         EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.THREAD_PAD_GET_DATA_LIST_BY_LIELLA));
@@ -1030,12 +1039,16 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
                 break;
 
             case ThreadEvent.VIEW_PAD_CHANGE_LAST_FRAGMENT:
+                if(!isIntoMusicDetail) {
+                    return;
+                }
                 isIntoMusicDetail = false;
                 getViewDataBinding().tvTittleName.setText("LoveLive"); //ps:后续更改
-                FragmentManager fm = this.getSupportFragmentManager();
-                if(fm.getBackStackEntryCount()>0) {
-                    fm.popBackStack();
-                }
+                changeFragment(loveliveMainFragment);
+//                FragmentManager fm = this.getSupportFragmentManager();
+//                if(fm.getBackStackEntryCount()>0) {
+//                    fm.popBackStack();
+//                }
                 break;
             case ThreadEvent.VIEW_PAD_PLAY_MUSIC:
                 if(!event.tList.isEmpty()) {
@@ -2280,10 +2293,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             if(isIntoMusicDetail) { //进入明细后返回主页
                 isIntoMusicDetail = false;
                 getViewDataBinding().tvTittleName.setText("LoveLive"); //ps:后续更改
-                FragmentManager fm = this.getSupportFragmentManager();
-                if(fm.getBackStackEntryCount()>0) {
-                    fm.popBackStack();
-                }
+                changeFragment(loveliveMainFragment);
                 return true;
             }
 

@@ -21,7 +21,7 @@
             android:id="@+id/cl_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
+            android:visibility="visible"
             >
 
             <View
@@ -466,10 +466,12 @@
                 app:layout_constraintEnd_toStartOf="@+id/view_right_bar"
                 >
 
-                <RelativeLayout
+                <LinearLayout
                     android:id="@+id/rl_title_bar"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -479,7 +481,7 @@
                     android:layout_marginBottom="10dp">
 
                     <LinearLayout
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:id="@+id/ll_back"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -501,18 +503,20 @@
 
                     <TextView
                         android:id="@+id/tv_tittle_name"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginStart="15dp"
+                        android:textAlignment="center"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="5dp"
                         android:text="标题"
+                        android:singleLine="true"
                         android:textColor="@color/light_ff"
                         android:textSize="20dp"
                         android:visibility="visible" />
 
                     <LinearLayout
-                        android:visibility="gone"
+                        android:visibility="invisible"
                         android:id="@+id/ll_other"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -533,7 +537,7 @@
 
                     </LinearLayout>
 
-                </RelativeLayout>
+                </LinearLayout>
 
 
                 <androidx.fragment.app.FragmentContainerView
@@ -869,7 +873,7 @@
             android:id="@+id/cl_controller"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible"
+            android:visibility="gone"
             >
 
             <eightbitlab.com.blurview.BlurView

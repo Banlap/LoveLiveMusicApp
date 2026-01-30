@@ -66,8 +66,10 @@ public class PadLoveLiveFragment extends BaseFragment<PadLoveLiveFVM, FragmentPa
     protected void initView() {
         EventBus.getDefault().register(this);
 
-        ((PadMainActivity) getActivity()).getBinding().llBack.setVisibility(View.GONE);
-        ((PadMainActivity) getActivity()).getViewModel().showRecommendData(getContext());
+        if(getActivity() != null) {
+            ((PadMainActivity) getActivity()).getBinding().llBack.setVisibility(View.INVISIBLE);
+            ((PadMainActivity) getActivity()).getViewModel().showRecommendData(getContext());
+        }
         changeTheme();
         //每日推荐
         getViewDataBinding().llRecommend1.setOnClickListener(new ButtonClickListener());

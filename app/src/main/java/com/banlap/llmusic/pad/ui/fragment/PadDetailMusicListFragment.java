@@ -197,6 +197,17 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
 
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(hidden) {
+            getViewDataBinding().rlShowLoading.setVisibility(View.VISIBLE);
+            roomPlayMusicList.clear();
+            roomPlayMusicList.addAll(AppMusic.getInstance().getNullMusicData());
+            musicListAdapter.notifyDataSetChanged();
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void MessageEvent(ThreadEvent event) {
