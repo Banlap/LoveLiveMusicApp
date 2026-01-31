@@ -1670,43 +1670,45 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
     @SuppressLint("SetTextI18n")
     public void allPlayMusic(List<RoomPlayMusic> musicList) {
         if(!musicList.isEmpty()) {
-            roomPlayMusicList.clear();
-            List<RoomPlayMusic> list = musicList.stream()
-                    .filter(music -> !music.musicType.equals(" "))
-                    .collect(Collectors.toList());
-
-            roomPlayMusicList.addAll(list);
-            playMusicListAdapter.notifyDataSetChanged();
-            //保存当前列表数据
-            //SPUtil.setListValue(this, SPUtil.PlayListData, playList);
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if(roomPlayMusicList.isEmpty()) {
-                            return;
-                        }
+                        roomPlayMusicList.clear();
+                        List<RoomPlayMusic> list = musicList.stream()
+                                .filter(music -> !music.musicType.equals(" "))
+                                .collect(Collectors.toList());
+
                         AppData.deleteAllRoomMusic();
                         Thread.sleep(10);
-
                         List<RoomPlayMusic> playMusicList = new ArrayList<>();
-                        for(RoomPlayMusic music: roomPlayMusicList) {
+                        for(RoomPlayMusic music: list) {
                             Thread.sleep(1);
                             music = music.copyWithNewId(MusicPlayService.createMusicId());
                             playMusicList.add(music);
                         }
                         Thread.sleep(10);
                         AppData.saveRoomMusic(playMusicList);
+
+                        roomPlayMusicList.addAll(playMusicList);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String size = "("+ roomPlayMusicList.size() + ")";
+                                getViewDataBinding().tvNewListSize.setText(size);
+                                getViewDataBinding().tvDetailNewListSize.setText(size);
+                                //播放当前第一首音乐
+                                EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_LIST_FIRST));
+                            }
+                        });
                     } catch (Exception e) {
                         Log.e(TAG, "roomPlayMusicList all id error");
                     }
                 }
             });
-            //播放当前第一首音乐
-            EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PLAY_LIST_FIRST));
-            String size = "("+ roomPlayMusicList.size() + ")";
-            getViewDataBinding().tvNewListSize.setText(size);
-            getViewDataBinding().tvDetailNewListSize.setText(size);
+
+
         }
     }
 

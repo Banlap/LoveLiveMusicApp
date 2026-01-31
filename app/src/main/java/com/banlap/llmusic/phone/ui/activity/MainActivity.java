@@ -3016,40 +3016,44 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     @SuppressLint("SetTextI18n")
     public void allPlayMusic() {
         if(musicListSize!=0) {
-            roomPlayMusicList.clear();
-            List<RoomPlayMusic> list = roomOnlineMusicList.stream()
-                    .filter(music -> !music.musicType.equals(" "))
-                    .collect(Collectors.toList());
-            roomPlayMusicList.addAll(list);
-            playMusicListAdapter.notifyDataSetChanged();
-            //保存当前列表数据
-            //SPUtil.setListValue(this, SPUtil.PlayListData, playList);
             AppExecutors.getInstance().diskIO().execute(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        if(roomPlayMusicList.isEmpty()) {
-                            return;
-                        }
+                        roomPlayMusicList.clear();
+                        List<RoomPlayMusic> list = roomOnlineMusicList.stream()
+                                .filter(music -> !music.musicType.equals(" "))
+                                .collect(Collectors.toList());
+
                         AppData.deleteAllRoomMusic();
                         Thread.sleep(10);
                         List<RoomPlayMusic> playMusicList = new ArrayList<>();
-                        for(RoomPlayMusic music: roomPlayMusicList) {
+                        for(RoomPlayMusic music: list) {
                             Thread.sleep(1);
                             music = music.copyWithNewId(MusicPlayService.createMusicId());
                             playMusicList.add(music);
                         }
                         Thread.sleep(10);
                         AppData.saveRoomMusic(playMusicList);
+
+                        roomPlayMusicList.addAll(playMusicList);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String size = "("+ roomPlayMusicList.size() + ")";
+                                getViewDataBinding().tvListSize.setText("("+ size + ")");
+                                getViewDataBinding().tvNewListSize.setText("("+ size + ")");
+                                //播放当前第一首音乐
+                                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_LIST_FIRST));
+                            }
+                        });
                     } catch (Exception e) {
                         Log.e(TAG, "roomPlayMusicList all id error");
                     }
                 }
             });
-            getViewDataBinding().tvListSize.setText("("+ roomPlayMusicList.size() + ")");
-            getViewDataBinding().tvNewListSize.setText("("+ roomPlayMusicList.size() + ")");
-            //播放当前第一首音乐
-            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PLAY_LIST_FIRST));
+
         }
     }
 
