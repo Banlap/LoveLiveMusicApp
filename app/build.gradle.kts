@@ -212,6 +212,7 @@ android {
         //1.替换缓存数据方式：使用room持久化库
         //2.优化UI更新问题：使用MutableLiveData管理ui
         //3.优化连续切换歌曲时信息不同步问题、优化关闭蓝牙后暂停歌曲
+        //4.优化pad版本下点击切换页面缓慢问题
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")
