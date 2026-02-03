@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -51,6 +50,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -67,13 +67,12 @@ import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogTimePickerBinding;
 import com.banlap.llmusic.databinding.DialogTimeTasksBinding;
 import com.banlap.llmusic.databinding.ItemPlayListBinding;
-import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.model.Version;
+import com.banlap.llmusic.pad.SharedViewModel;
 import com.banlap.llmusic.pad.ui.fragment.PadDetailMusicListFragment;
 import com.banlap.llmusic.pad.ui.fragment.PadLoveLiveFragment;
 import com.banlap.llmusic.pad.uivm.vm.PadMainVM;
-import com.banlap.llmusic.phone.ui.ThemeHelper;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.CharacterService;
 import com.banlap.llmusic.service.LyricService;
@@ -81,7 +80,6 @@ import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.sql.AppData;
 import com.banlap.llmusic.sql.MysqlHelper;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
-import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.sql.room.Converters;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.sql.room.RoomRecommendMusic;
@@ -95,7 +93,6 @@ import com.banlap.llmusic.utils.MyAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
-import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 import com.banlap.llmusic.utils.TimeUtil;
 import com.banlap.llmusic.widget.LyricScrollView;
@@ -116,7 +113,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -184,8 +180,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     private RequestOptions requestOptions;
 
-    //歌曲缓存
-    private BaseApplication baseApplication;
+    public SharedViewModel sharedViewModel;
 
     @Override
     protected int getLayoutId() {
@@ -228,10 +223,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         requestOptions = new RequestOptions();
         requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
         requestOptions.format(DecodeFormat.PREFER_RGB_565); //设置为这种格式去掉透明度通道，可以减少内存占有
-
-
-        baseApplication = (BaseApplication) getApplication();
-//        proxyCacheServer = baseApplication.getProxy(this);
 
     }
 
@@ -359,6 +350,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     @SuppressLint("SetTextI18n")
     private void initMainView() {
+        sharedViewModel = new ViewModelProvider(this,
+                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
+                .get(SharedViewModel.class);
         getViewDataBinding().clMain.setVisibility(View.VISIBLE);
         getViewDataBinding().clController.setVisibility(View.VISIBLE);
         getViewDataBinding().clController.setOnClickListener(new ButtonClickListener());
@@ -2293,6 +2287,10 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             }
 
             if(isIntoMusicDetail) { //进入明细后返回主页
+                if(Boolean.TRUE.equals(sharedViewModel.getIsSearch().getValue())) { //判断是否在搜索歌曲状态
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CANCEL_SEARCH));
+                    sharedViewModel.setIsSearch(false);
+                }
                 isIntoMusicDetail = false;
                 getViewDataBinding().tvTittleName.setText("LoveLive"); //ps:后续更改
                 changeFragment(loveliveMainFragment);

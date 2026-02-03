@@ -217,6 +217,7 @@ public class ThreadEvent<T> {
     public static final int VIEW_PAD_ADD_MUSIC = 2052; //pad模式下添加歌曲到播放列表
     public static final int VIEW_PAD_PLAY_ALL_MUSIC = 2053; //pad模式下播放所有歌曲
     public static final int VIEW_PAD_GET_MUSIC_METADATA = 2054; //pad模式下获取音乐meta数据源
+    public static final int VIEW_PAD_CANCEL_SEARCH = 2055; //pad模式下取消搜索歌曲状态
 
 
     public int msgCode;

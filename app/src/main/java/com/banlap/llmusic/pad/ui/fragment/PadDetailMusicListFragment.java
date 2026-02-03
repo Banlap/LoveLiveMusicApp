@@ -17,6 +17,7 @@ import android.widget.PopupWindow;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,6 +29,7 @@ import com.banlap.llmusic.databinding.FragmentPadDetailMusicListBinding;
 import com.banlap.llmusic.databinding.ItemMusicListBinding;
 import com.banlap.llmusic.fixed.AppMusic;
 import com.banlap.llmusic.model.Music;
+import com.banlap.llmusic.pad.SharedViewModel;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.pad.uivm.fvm.PadDetailMusicListFVM;
 import com.banlap.llmusic.request.ThreadEvent;
@@ -69,7 +71,8 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
     private boolean isUpSortByTime = false;               //是否向上排序：时间
     private boolean isUpSortByName = false;               //是否向上排序：歌曲名称
     private boolean isUpSortBySinger = false;             //是否向上排序：歌手名称
-    private boolean isSearchMusic = false;              //判断是否处于搜索音乐状态
+    public boolean isSearchMusic = false;              //判断是否处于搜索音乐状态
+    public SharedViewModel sharedViewModel;
 
     private ActivityPadMainBinding activityPadMainBinding;
     private MusicListAdapter musicListAdapter;
@@ -102,7 +105,9 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
             activityPadMainBinding.llBack.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_LAST_FRAGMENT));
+                    //pad模式下返回按钮
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CANCEL_SEARCH)); //取消搜索歌曲状态
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CHANGE_LAST_FRAGMENT)); //返回上一页
                 }
             });
         }
@@ -168,7 +173,9 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
     }
 
     private void initPadMainView() {
-
+        sharedViewModel = new ViewModelProvider(requireActivity(),
+                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
+                .get(SharedViewModel.class);
         musicListAdapter = new MusicListAdapter(getActivity(), roomPlayMusicList);
         getViewDataBinding().rvMusicList.setLayoutManager(new LinearLayoutManager(getActivity()));
         getViewDataBinding().rvMusicList.setAdapter(musicListAdapter);
@@ -224,6 +231,9 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
             case ThreadEvent.VIEW_GET_ALBUM_COUNT_SUCCESS:
                 getViewDataBinding().tvMusicCount.setText(""+event.i);
                 break;
+            case ThreadEvent.VIEW_PAD_CANCEL_SEARCH:
+                searchCancel();
+                break;
         }
     }
 
@@ -238,10 +248,10 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
             } else if(v.getId() == R.id.ll_all_play) {
                 EventBus.getDefault().post(new ThreadEvent<RoomPlayMusic>(ThreadEvent.VIEW_PAD_PLAY_ALL_MUSIC, roomPlayMusicList));
             } else if(v.getId() == R.id.ll_search) {
-                isSearchMusic = true;
+                sharedViewModel.setIsSearch(true);
                 searchMusic();
             } else if (v.getId() == R.id.ll_cancel) {
-                isSearchMusic = false;
+                sharedViewModel.setIsSearch(false);
                 searchCancel();
             }
         }
