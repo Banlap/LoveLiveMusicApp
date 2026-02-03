@@ -396,26 +396,28 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                 break;
             case ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC:
                 if(event.roomPlayMusic != null) {
-                    String roomFavoriteMusicStr = Converters.fromPlayMusicList(Collections.singletonList(event.roomPlayMusic));
+                    RoomPlayMusic favoriteMusic = event.roomPlayMusic;
+                    if(favoriteMusic.id == 0) { //则为在线歌曲时点击收藏
+                        favoriteMusic.id = MusicPlayService.createMusicId();
+                    }
+                    String roomFavoriteMusicStr = Converters.fromPlayMusicList(Collections.singletonList(favoriteMusic));
                     List<RoomFavoriteMusic> list = Converters.toFavoriteMusicList(roomFavoriteMusicStr);
 
                     BaseActivity<? extends ViewModel, ? extends ViewDataBinding> activity = LLActivityManager.getInstance().getTopActivity();
                     if (activity == null || activity.isFinishing() || list == null) return;
 
-                    final RoomFavoriteMusic roomPlayMusic = list.get(0);
+                    final RoomFavoriteMusic roomFavoriteMusic = list.get(0);
 
                     //mFavoriteList = Collections.synchronizedList(new ArrayList<>());
                     AppExecutors.getInstance().diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
                             Set<RoomFavoriteMusic> uniqueMusicSet = new LinkedHashSet<>(); // 使用LinkedHashSet去重并保留顺序
-                            uniqueMusicSet.add(roomPlayMusic);
+                            uniqueMusicSet.add(roomFavoriteMusic);
                             uniqueMusicSet.addAll(roomFavoriteList);
                             List<RoomFavoriteMusic> newFavoriteList = new ArrayList<>(uniqueMusicSet);
                             AppData.saveFavoriteList(newFavoriteList);
-//                            List<RoomPlayMusic> spList2 = SPUtil.getListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, Music.class);
-                            //List<Music> newFavoriteList = new ArrayList<>(uniqueMusicSet);
-                            //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, newFavoriteList);
+//
                             activity.runOnUiThread(()->{
                                 roomFavoriteList.clear();
                                 roomFavoriteList.addAll(uniqueMusicSet);

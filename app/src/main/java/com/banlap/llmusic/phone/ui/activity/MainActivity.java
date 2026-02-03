@@ -3732,14 +3732,24 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         dialogMoreMenuBinding.tvMusicName.setText(list.get(position).musicName);
         dialogMoreMenuBinding.tvMusicSinger.setText(list.get(position).musicSinger);
 
+        boolean isFavorite = !AppData.roomFavoriteMusicList.isEmpty() &&
+                AppData.roomFavoriteMusicList.stream().anyMatch(favoriteMusic ->
+                list.get(position).musicId == favoriteMusic.musicId);
+
+        dialogMoreMenuBinding.tvFavorite.setText(isFavorite? "取消收藏" : "默认收藏");
+
+        final boolean finalIsFavorite = isFavorite;
         dialogMoreMenuBinding.llAddFavorite.setOnClickListener(new View.OnClickListener() {  //在线歌曲添加到收藏列表
             @Override
             public void onClick(View v) {
                 if(mPopupWindow != null) {
                     mPopupWindow.dismiss();
                 }
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC, list.get(position)));
-
+                if(!finalIsFavorite) { //非收藏的进行收藏歌曲
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_SAVE_FAVORITE_MUSIC, list.get(position)));
+                } else {
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CANCEL_FAVORITE_MUSIC, list.get(position)));
+                }
             }
         });
 
