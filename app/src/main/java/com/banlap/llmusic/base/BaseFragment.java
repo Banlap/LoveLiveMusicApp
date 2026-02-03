@@ -28,7 +28,10 @@ public abstract class BaseFragment<VM extends ViewModel, VDB extends ViewDataBin
     public VM getViewModel() { return mViewModel; }
     public VDB getViewDataBinding() { return mViewDataBinding; }
 
-    //获取共享 ViewModel 的方法
+    /**
+     * 获取共享ViewModel的方法
+     * @apiNote 需要传入指定的class类才能获取viewModel内方法
+     * */
     protected <SVM extends ViewModel> SVM getViewModel(@NonNull Class<SVM> modelClass) {
         if (!mViewModels.containsKey(modelClass)) {
             SVM viewModel = new ViewModelProvider(requireActivity()).get(modelClass);

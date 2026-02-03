@@ -69,9 +69,9 @@ import com.banlap.llmusic.databinding.DialogTimeTasksBinding;
 import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.model.MusicLyric;
 import com.banlap.llmusic.model.Version;
-import com.banlap.llmusic.pad.SharedViewModel;
 import com.banlap.llmusic.pad.ui.fragment.PadDetailMusicListFragment;
 import com.banlap.llmusic.pad.ui.fragment.PadLoveLiveFragment;
+import com.banlap.llmusic.pad.uivm.fvm.PadDetailMusicListFVM;
 import com.banlap.llmusic.pad.uivm.vm.PadMainVM;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.CharacterService;
@@ -180,7 +180,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     private RequestOptions requestOptions;
 
-    public SharedViewModel sharedViewModel;
 
     @Override
     protected int getLayoutId() {
@@ -350,9 +349,6 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
     @SuppressLint("SetTextI18n")
     private void initMainView() {
-        sharedViewModel = new ViewModelProvider(this,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication()))
-                .get(SharedViewModel.class);
         getViewDataBinding().clMain.setVisibility(View.VISIBLE);
         getViewDataBinding().clController.setVisibility(View.VISIBLE);
         getViewDataBinding().clController.setOnClickListener(new ButtonClickListener());
@@ -2287,9 +2283,9 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             }
 
             if(isIntoMusicDetail) { //进入明细后返回主页
-                if(Boolean.TRUE.equals(sharedViewModel.getIsSearch().getValue())) { //判断是否在搜索歌曲状态
+                if(Boolean.TRUE.equals(getViewModel(PadDetailMusicListFVM.class).getIsSearch().getValue())) { //判断是否在搜索歌曲状态
                     EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_PAD_CANCEL_SEARCH));
-                    sharedViewModel.setIsSearch(false);
+                    getViewModel(PadDetailMusicListFVM.class).setIsSearch(false);
                 }
                 isIntoMusicDetail = false;
                 getViewDataBinding().tvTittleName.setText("LoveLive"); //ps:后续更改
