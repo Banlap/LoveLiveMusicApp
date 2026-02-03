@@ -61,17 +61,19 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
         downloadMusicList.add(new RoomDownloadMusic());
         downloadMusicList.add(new RoomDownloadMusic());
 
+        if(AppData.roomSettings != null && !TextUtils.isEmpty(AppData.roomSettings.saveThemeId)) {
+            try {
+                changeTheme(Integer.parseInt(AppData.roomSettings.saveThemeId));
+            } catch (Exception e) {
+                Log.e(TAG, "saveThemeId转换失败,使用默认参数");
+            }
+        }
+
     }
 
     /** 改变主题 */
     private void changeTheme(int rId) {
         rThemeId = rId;
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-            @Override
-            public void run() {
-                AppData.saveRoomSettings(roomSetting -> roomSetting.saveThemeId = String.valueOf(rThemeId));
-            }
-        });
         //主题变更
         ThemeHelper.getInstance().downloadActivityTheme(this, rId, getViewDataBinding());
     }
@@ -112,23 +114,6 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
             AppData.addNullDataDownloadMusic(downloadMusicList, 2);
             downloadListAdapter.notifyDataSetChanged();
         });
-//        AppExecutors.getInstance().diskIO().execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                List<RoomDownloadMusic> list = AppData.getDownloadMusicList();
-//                runOnUiThread(()-> {
-//                    downloadMusicList.clear();
-//                    if (!list.isEmpty()) {
-//                        downloadMusicList.addAll(list);
-//                    }
-//                    AppData.addNullDataDownloadMusic(downloadMusicList, 2);
-//                    downloadListAdapter.notifyDataSetChanged();
-//
-//                    AppData.roomDownloadMusicList.clear();
-//                    AppData.roomDownloadMusicList.addAll(downloadMusicList);
-//                });
-//            }
-//        });
     }
 
 
@@ -211,7 +196,8 @@ public class DownloadActivity extends BaseActivity<DownloadVM, ActivityDownloadB
                 if(event.str.equals(DownloadActivity.class.getSimpleName())) {
                     if(!TextUtils.isEmpty(event.str2)) {
                         try {
-                            changeTheme(Integer.parseInt(event.str2));
+                            rThemeId = Integer.parseInt(event.str2);
+                            changeTheme(rThemeId);
                         } catch (Exception e) {
                             Log.e(TAG, "themeId转换失败, ");
                         }

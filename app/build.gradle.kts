@@ -20,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 33
         //修改版本号
-        versionCode = 186
+        versionCode = 187
         versionName = "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -213,6 +213,10 @@ android {
         //2.优化UI更新问题：使用MutableLiveData管理ui
         //3.优化连续切换歌曲时信息不同步问题、优化关闭蓝牙后暂停歌曲
         //4.优化pad版本下点击切换页面缓慢问题
+        versionName = "1.8.7"
+        //1.解决pad模式下点击搜索歌曲后返回时取消搜索状态、播放列表刷新问题
+        //2.优化在线歌曲列表时点击收藏逻辑
+        //3.解决下载列表页面主题ui问题
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")
