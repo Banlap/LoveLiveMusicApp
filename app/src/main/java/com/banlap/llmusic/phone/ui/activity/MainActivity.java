@@ -1793,7 +1793,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        List<RoomFavoriteMusic> spTempList = AppData.getFavoriteMusicList();
+                        List<RoomFavoriteMusic> spTempList = new ArrayList<>(AppData.roomFavoriteMusicList);
                         runOnUiThread(()->{
                             if(!spTempList.isEmpty()) {
                                 setMusicFavorite(spTempList);

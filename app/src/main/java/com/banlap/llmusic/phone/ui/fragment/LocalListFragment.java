@@ -426,10 +426,11 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                 getViewDataBinding().tvFavoriteMusicCount.setText(""+(roomFavoriteList.size()-2));
                                 getViewDataBinding().tvMusicCount.setText(""+(roomFavoriteList.size()-2));
                                 //刷新ui
-                                if(roomFavoriteList != null) {
-                                    int musicCount = roomFavoriteList.size()-2;
-                                    getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
-                                }
+                                int musicCount = roomFavoriteList.size()-2;
+                                getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
+                                AppData.roomFavoriteMusicList.clear();
+                                AppData.roomFavoriteMusicList.addAll(roomFavoriteList);
+
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                                 EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_UPDATE_IS_CAN_CLICK_FAVORITE));
                             });
@@ -452,15 +453,20 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                                     AppData.deleteFavoriteMusic(deleteFavoriteMusic);
                                 }
                             });
+                            AppData.roomFavoriteMusicList.clear();
+                            AppData.roomFavoriteMusicList.addAll(roomFavoriteList);
+                            EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                             EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_UPDATE_IS_CAN_CLICK_FAVORITE));
                             break;
                         }
                     }
 
+
                     //刷新ui
                     int musicCount = roomFavoriteList.size()-2;
                     getViewDataBinding().llLocalListNull.setVisibility(musicCount >0 ? View.GONE : View.VISIBLE);
-
+                    AppData.roomFavoriteMusicList.clear();
+                    AppData.roomFavoriteMusicList.addAll(roomFavoriteList);
                     EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                 }
                 break;
@@ -1074,6 +1080,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
                             }
                         });
                         //SPUtil.setListValue(LLActivityManager.getInstance().getTopActivity(), SPUtil.FavoriteListData, favoriteList);
+                        AppData.roomFavoriteMusicList.clear();
+                        AppData.roomFavoriteMusicList.addAll(favoriteList);
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_FRESH_FAVORITE_MUSIC));
                     }
                 });
