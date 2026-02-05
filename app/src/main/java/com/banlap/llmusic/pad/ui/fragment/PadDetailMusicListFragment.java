@@ -17,7 +17,6 @@ import android.widget.PopupWindow;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +31,7 @@ import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.pad.uivm.fvm.PadDetailMusicListFVM;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
-import com.banlap.llmusic.utils.MyAnimationUtil;
+import com.banlap.llmusic.utils.LLAnimationUtil;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
 import com.bumptech.glide.Glide;
@@ -509,8 +508,7 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
                         //变更主题
                         //ThemeHelper.getInstance().musicListAddButtonAnimatorTheme(rThemeId, binding);
                         binding.ivAddAnimatorLight1.setVisibility(View.VISIBLE);
-                        AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-                        animatorSet.start();
+                        LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
                         EventBus.getDefault().post(new ThreadEvent(ThreadEvent.VIEW_PAD_ADD_MUSIC, list, position));
 
                         //addMusic(list, position);

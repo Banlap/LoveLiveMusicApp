@@ -16,7 +16,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -68,7 +67,6 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
-import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityMainBinding;
 import com.banlap.llmusic.databinding.DialogAddMusicToLocalListBinding;
 import com.banlap.llmusic.databinding.DialogChangeModeMenuBinding;
@@ -86,7 +84,6 @@ import com.banlap.llmusic.databinding.ItemAddMusicLocalListBinding;
 import com.banlap.llmusic.databinding.ItemMusicListBinding;
 import com.banlap.llmusic.databinding.ItemPlayListBinding;
 import com.banlap.llmusic.fixed.AppMusic;
-import com.banlap.llmusic.model.LocalPlayList;
 import com.banlap.llmusic.model.Message;
 import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.model.MusicLyric;
@@ -116,7 +113,7 @@ import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
 import com.banlap.llmusic.utils.DownloadHelper;
 import com.banlap.llmusic.utils.FileUtil;
-import com.banlap.llmusic.utils.MyAnimationUtil;
+import com.banlap.llmusic.utils.LLAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
@@ -138,9 +135,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.text.CollationKey;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -149,7 +143,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -385,8 +378,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().tvVersion.setVisibility(GONE);
 
         //动画：初始化将详细页面移走
-        ObjectAnimator detailPanelDefault = MyAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clAlbumDetail);
-        detailPanelDefault.start();
+        LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clAlbumDetail);
 
         String controllerScene = "";
         if(AppData.roomSettings != null && !TextUtils.isEmpty(AppData.roomSettings.saveControllerScene)) {
@@ -396,11 +388,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
 
         //动画：初始化将新版音乐控制器移走
-        ObjectAnimator newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, this), getViewDataBinding().rlNewPlayController);
+        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, this), getViewDataBinding().rlNewPlayController);
         //动画：初始化将新版播放列表移走
-        ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(325, this), getViewDataBinding().clNewCurrentMusicList);
+        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(325, this), getViewDataBinding().clNewCurrentMusicList);
         //动画：初始化将更多菜单移走
-        ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
+        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
 
         //配置简约模式下控制器高度
         ViewGroup.MarginLayoutParams marginLayoutParams1 = (ViewGroup.MarginLayoutParams) getViewDataBinding().clCurrentMusicPanel.getLayoutParams();
@@ -419,24 +411,19 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         if(!TextUtils.isEmpty(controllerScene)) {
             if(controllerScene.equals(SPUtil.SaveControllerSceneValue_NewScene)) {
                 //隐藏默认音乐控制界面
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, PxUtil.getInstance().dp2px(300, this), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, PxUtil.getInstance().dp2px(300, this), getViewDataBinding().rlPlayController);
+
                 //有场景值时显示新版播放列表
-                newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
                 getViewDataBinding().clFloatingController.setVisibility(View.GONE);
             } else if(controllerScene.equals(SPUtil.SaveControllerSceneValue_FloatingScene)) {
                 //隐藏默认音乐控制界面
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, PxUtil.getInstance().dp2px(300, this), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, PxUtil.getInstance().dp2px(300, this), getViewDataBinding().rlPlayController);
 
-                newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
                 getViewDataBinding().clFloatingController.setVisibility(View.VISIBLE);
             }
         }
-
-        newPlayController.start();
-        newCurrentMusicList.start();
-        newMoreMenu.start();
 
         if(AppData.roomSettings != null) {
             if(AppData.roomSettings.isBGScene.equals("1")) {
@@ -450,11 +437,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         DisplayMetrics dm = SystemUtil.getInstance().getDM(this);
         heightPixels = (dm != null)? PxUtil.getInstance().dp2px(dm.heightPixels, this) : 750;
         //
-        controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, heightPixels, getViewDataBinding().clControllerMode);
-        controllerModeAnimator.start();
+        LLAnimationUtil.objectAnimatorUpOrDown(this, true, heightPixels, getViewDataBinding().clControllerMode);
 
-        textAnimator = MyAnimationUtil.objectAnimatorShowOrHide(MainActivity.this,  0, 0, getViewDataBinding().tvTitleBar);
-        textAnimator.start();
+        LLAnimationUtil.objectAnimatorShowOrHide(MainActivity.this,  0, 0, getViewDataBinding().tvTitleBar);
 
         getViewDataBinding().llShowNormalBar.setVisibility(View.VISIBLE);
         getViewDataBinding().llShowSearchBar.setVisibility(GONE);
@@ -559,22 +544,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 if(0 == position) {
-                    AnimatorSet animatorSet = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, 1, (float) 1.3);
-                    AnimatorSet animatorSet2 = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, (float) 1.3, 1);
-                    animatorSet.start();
-                    animatorSet2.start();
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, 1, (float) 1.3);
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, (float) 1.3, 1);
 
-                    AnimatorSet animatorSetMove = MyAnimationUtil.animatorSetMove(getViewDataBinding().vLine, false);
-                    animatorSetMove.start();
+                    LLAnimationUtil.animatorSetMove(getViewDataBinding().vLine, false);
 
                 } else if(1 == position) {
-                    AnimatorSet animatorSet = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover,  (float) 1.3, 1);
-                    AnimatorSet animatorSet2 = MyAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, 1, (float) 1.3);
-                    animatorSet.start();
-                    animatorSet2.start();
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover,  (float) 1.3, 1);
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, 1, (float) 1.3);
 
-                    AnimatorSet animatorSetMove = MyAnimationUtil.animatorSetMove(getViewDataBinding().vLine, true);
-                    animatorSetMove.start();
+                    LLAnimationUtil.animatorSetMove(getViewDataBinding().vLine, true);
                 }
             }
 
@@ -737,17 +716,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 //Toast.makeText(MainActivity.this, "vo: " + verticalOffset, Toast.LENGTH_SHORT).show();
                 if(Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) {
                     if(isChangeScrollRange) {
-                        textAnimator = MyAnimationUtil.objectAnimatorShowOrHide(MainActivity.this,  0, 1, getViewDataBinding().tvTitleBar);
-                        textAnimator.start();
+                        LLAnimationUtil.objectAnimatorShowOrHide(MainActivity.this,  0, 1, getViewDataBinding().tvTitleBar);
                         isFinishAnimator = false;
                         isChangeScrollRange = false;
                     }
                 } else {
                     isChangeScrollRange = true;
                     if(!isFinishAnimator) {
-                        textAnimator = MyAnimationUtil.objectAnimatorShowOrHide(MainActivity.this, 1, 0, getViewDataBinding().tvTitleBar);
+                        LLAnimationUtil.objectAnimatorShowOrHide(MainActivity.this, 1, 0, getViewDataBinding().tvTitleBar);
                         isFinishAnimator = true;
-                        textAnimator.start();
                     }
                 }
             }
@@ -1050,10 +1027,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 musicListAdapter.notifyDataSetChanged();
                 sortList(0);
                 clickSortType = 0;
-                ObjectAnimator mainPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, false, getViewDataBinding().clMain);
-                ObjectAnimator detailPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, true, getViewDataBinding().clAlbumDetail);
-                mainPanelChangeObjectAnimator.start();
-                detailPanelChangeObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, false, getViewDataBinding().clMain);
+                LLAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, true, getViewDataBinding().clAlbumDetail);
                 getViewDataBinding().rlShowLoading.setVisibility(GONE);
                 isNotMain = true;
                 isClickLocalOrFavorite = false;
@@ -1696,17 +1671,15 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = false;
                 isShowNewPlayController = false;
 
-                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-                controllerModeAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
 
-                ObjectAnimator newPlayController1 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
-                newPlayController1.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
                 //先升起再下降
-                ObjectAnimator musicControllerAnimatorUp = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimatorUp.start();
-                ObjectAnimator musicControllerAnimatorDown = MyAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().clCurrentAllPanel.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimatorDown.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().clCurrentAllPanel.getHeight(), getViewDataBinding().rlPlayController);
+
                 //重置状态
                 isClick = false;
                 isShowMusicPanel = false;
@@ -1727,14 +1700,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = false;
                 isShowNewPlayController = true;
 
-                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-                controllerModeAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
 
-                ObjectAnimator newPlayController2 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
-                newPlayController2.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
 //
                 if(isClick) { //是否点击了旧版的播放器 按钮其中一个
                     getViewDataBinding().rlDisableClick.setVisibility(GONE);
@@ -1753,14 +1723,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = false;
                 isShowNewPlayController = false;
 
-                controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-                controllerModeAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
 
-                ObjectAnimator newPlayController3 = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
-                newPlayController3.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
-                musicControllerAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                musicControllerAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
 
                 getViewDataBinding().clFloatingController.setVisibility(View.VISIBLE);
 
@@ -2163,10 +2130,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     searchCancel();
                     isSearchMusic = false;
                 }
-                ObjectAnimator mainPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, true, getViewDataBinding().clMain);
-                ObjectAnimator detailPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, false, getViewDataBinding().clAlbumDetail);
-                mainPanelChangeObjectAnimator.start();
-                detailPanelChangeObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, true, getViewDataBinding().clMain);
+                LLAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, false, getViewDataBinding().clAlbumDetail);
                 isNotMain = false;
             } else if(v.getId() == R.id.fl_new_change_mode) {
                 //intoSettings();
@@ -2878,8 +2843,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         if(isClick){
             if(isShowMusicList&&!isShowMusicPanel){
-                ObjectAnimator allPanelObjectAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
-                allPanelObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
 
                 getViewDataBinding().btPlay.setVisibility(View.VISIBLE);
                 getViewDataBinding().btChangePlayMode.setVisibility(View.INVISIBLE);
@@ -2888,10 +2852,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             } else {
                 isShowMusicPanel=!isShowMusicPanel;
 
-                ObjectAnimator musicPanelObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(this, true, false, getViewDataBinding().clCurrentMusicPanel);
-                ObjectAnimator musicListObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(this, false, true, getViewDataBinding().clCurrentMusicList);
-                musicPanelObjectAnimator.start();
-                musicListObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorLeftOrRight(this, true, false, getViewDataBinding().clCurrentMusicPanel);
+                LLAnimationUtil.objectAnimatorLeftOrRight(this, false, true, getViewDataBinding().clCurrentMusicList);
 
                 getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
                 getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
@@ -2899,10 +2861,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().btChangePlayMode.setVisibility(View.INVISIBLE);
             }
         } else {
-            ObjectAnimator allPanelObjectAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
-            allPanelObjectAnimator.start();
-            ObjectAnimator musicListObjectAnimator = MyAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicList);
-            musicListObjectAnimator.start();
+            LLAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
+
+            LLAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicList);
 
             getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
             getViewDataBinding().btPlay.setVisibility(View.VISIBLE);
@@ -2925,12 +2886,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         if(!isShowNewMusicList) {
             getViewDataBinding().rlDisableClick3.setVisibility(View.VISIBLE);
-            ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().clNewCurrentMusicList);
-            newCurrentMusicList.start();
+            LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().clNewCurrentMusicList);
         } else {
             getViewDataBinding().rlDisableClick3.setVisibility(View.GONE);
-            ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().clNewCurrentMusicList);
-            newCurrentMusicList.start();
+            LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().clNewCurrentMusicList);
         }
         isShowNewMusicList = !isShowNewMusicList;
     }
@@ -2944,12 +2903,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         ThemeHelper.getInstance().rlMoreSetDialogTheme(MainActivity.this, rThemeId, getViewDataBinding());
         if(!isShowMoreMenu) {
             getViewDataBinding().rlDisableClick4.setVisibility(View.VISIBLE);
-            ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
-            newMoreMenu.start();
+            LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
         } else {
             getViewDataBinding().rlDisableClick4.setVisibility(View.GONE);
-            ObjectAnimator newMoreMenu = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
-            newMoreMenu.start();
+            LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(500, this), getViewDataBinding().rlMoreSetDialog);
         }
         isShowMoreMenu = !isShowMoreMenu;
     }
@@ -2962,8 +2919,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         if(isClick) {
             if(isShowMusicPanel&&!isShowMusicList) {
-                ObjectAnimator allPanelObjectAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
-                allPanelObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
 
                 getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
                 getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
@@ -2971,10 +2927,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isClick = !isClick;
             } else {
                 isShowMusicList = !isShowMusicList;
-                ObjectAnimator musicPanelObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(this, true, true, getViewDataBinding().clCurrentMusicPanel);
-                ObjectAnimator musicListObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
-                musicPanelObjectAnimator.start();
-                musicListObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorLeftOrRight(this, true, true, getViewDataBinding().clCurrentMusicPanel);
+                LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
 
                 getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
                 getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
@@ -2982,10 +2936,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
             }
         } else {
-            ObjectAnimator allPanelObjectAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
-            allPanelObjectAnimator.start();
-            ObjectAnimator musicPanelObjectAnimator = MyAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicPanel);
-            musicPanelObjectAnimator.start();
+            LLAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
+            LLAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicPanel);
 
             getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
             getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
@@ -3001,8 +2953,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /** 隐藏所有播放View */
     public void hideAllMusicView() {
         int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight();
-        ObjectAnimator allPanelObjectAnimator = MyAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
-        allPanelObjectAnimator.start();
+        LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
 
         getViewDataBinding().btPlay.setVisibility(View.VISIBLE);
         getViewDataBinding().btChangePlayMode.setVisibility(View.INVISIBLE);
@@ -3200,11 +3151,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 是否展示新的音乐控制器 */
     public void showOrHideNewController(boolean isShow) {
-        controllerModeAnimator = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, isShow, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-        controllerModeAnimator.start();
+        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, isShow, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, !isShow, PxUtil.getInstance().dp2px(!isShow? 185: 85, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
-        ObjectAnimator newPlayController = MyAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, !isShow, PxUtil.getInstance().dp2px(!isShow? 185: 85, MainActivity.this), getViewDataBinding().rlNewPlayController);
-        newPlayController.start();
         isShowControllerModePanel = !isShow;
         isShowNewPlayController = isShow;
     }
@@ -3518,10 +3467,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     searchCancel();
                     isSearchMusic = false;
                 }
-                ObjectAnimator mainPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, true, getViewDataBinding().clMain);
-                ObjectAnimator detailPanelChangeObjectAnimator = MyAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, false, getViewDataBinding().clAlbumDetail);
-                mainPanelChangeObjectAnimator.start();
-                detailPanelChangeObjectAnimator.start();
+                LLAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, true, true, getViewDataBinding().clMain);
+                LLAnimationUtil.objectAnimatorLeftOrRight(MainActivity.this, false, false, getViewDataBinding().clAlbumDetail);
                 isNotMain = false;
                 return true;
             }

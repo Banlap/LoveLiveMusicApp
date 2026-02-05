@@ -50,7 +50,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -58,7 +57,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
-import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityPadMainBinding;
 import com.banlap.llmusic.databinding.DialogCharacterMenuBinding;
 import com.banlap.llmusic.databinding.DialogDefaultBinding;
@@ -89,7 +87,7 @@ import com.banlap.llmusic.utils.BluetoothUtil;
 import com.banlap.llmusic.utils.CacheUtil;
 import com.banlap.llmusic.utils.CharacterHelper;
 import com.banlap.llmusic.utils.CountDownHelper;
-import com.banlap.llmusic.utils.MyAnimationUtil;
+import com.banlap.llmusic.utils.LLAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
@@ -384,15 +382,12 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         }
 
         getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
-        ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorLeftOrRightNew(PadMainActivity.this, true, false, deviceMaxHeight, getViewDataBinding().clCurrentMusicList);
-        newCurrentMusicList.start();
+        LLAnimationUtil.objectAnimatorLeftOrRightNew(PadMainActivity.this, true, false, deviceMaxHeight, getViewDataBinding().clCurrentMusicList);
 
-        ObjectAnimator animator = MyAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
-        animator.start();
+        LLAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
 
         getViewDataBinding().clNewDetailCurrentMusicList.setVisibility(View.VISIBLE);
-        ObjectAnimator newDetailCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
-        newDetailCurrentMusicList.start();
+        LLAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
 
     }
 
@@ -521,8 +516,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             if(isDoubleClick()) { return;}
             if(v.getId() == R.id.ll_music_controller_bar) {
                 isIntoMusicController = true;
-                ObjectAnimator animator = MyAnimationUtil.objectAnimatorUpOrDown(activity, false, deviceMaxHeight, getViewDataBinding().clController);
-                animator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(activity, false, deviceMaxHeight, getViewDataBinding().clController);
             } else if(v.getId() == R.id.ll_version_main) {
                 if(isExistNewVersion) {
                     showUpgradeApp();
@@ -552,20 +546,18 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             } else if(v.getId() == R.id.fl_current_list) {
                 if(isShowMusicList) {
                     getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
-                    ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, false, getViewDataBinding().clCurrentMusicList);
-                    newCurrentMusicList.start();
+                    LLAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, false, getViewDataBinding().clCurrentMusicList);
+
                 } else {
                     getViewDataBinding().rlDisableClick.setVisibility(View.VISIBLE);
                     getViewDataBinding().rlDisableClick.setOnClickListener(new ButtonClickListener());
-                    ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, true, getViewDataBinding().clCurrentMusicList);
-                    newCurrentMusicList.start();
+                    LLAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, true, getViewDataBinding().clCurrentMusicList);
                 }
                 isShowMusicList = !isShowMusicList;
             } else if(v.getId() == R.id.rl_disable_click) {
                 if(isShowMusicList) {
                     getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
-                    ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, false, getViewDataBinding().clCurrentMusicList);
-                    newCurrentMusicList.start();
+                    LLAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, false, getViewDataBinding().clCurrentMusicList);
                     isShowMusicList = false;
                 }
             } else if(v.getId() == R.id.ll_character) {
@@ -579,25 +571,21 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
             } else if(v.getId() == R.id.fl_close) {
                 isIntoMusicController = false;
                 getViewDataBinding().clMain.setVisibility(View.VISIBLE);
-                ObjectAnimator animator = MyAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
-                animator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
             } else if(v.getId() == R.id.iv_new_current_list) {
                 if(!isShowDetailMusicList) {
                     getViewDataBinding().rlDetailDisableClick.setVisibility(View.VISIBLE);
                     getViewDataBinding().rlDetailDisableClick.setOnClickListener(new ButtonClickListener());
-                    ObjectAnimator newDetailCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, false, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
-                    newDetailCurrentMusicList.start();
+                    LLAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, false, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
                 } else {
                     getViewDataBinding().rlDetailDisableClick.setVisibility(View.GONE);
-                    ObjectAnimator newDetailCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
-                    newDetailCurrentMusicList.start();
+                    LLAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
                 }
                 isShowDetailMusicList = !isShowDetailMusicList;
             } else if(v.getId() == R.id.rl_detail_disable_click) {
                 if(isShowDetailMusicList) {
                     getViewDataBinding().rlDetailDisableClick.setVisibility(View.GONE);
-                    ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
-                    newCurrentMusicList.start();
+                    LLAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
                     isShowDetailMusicList = false;
                 }
             } else if(v.getId() == R.id.iv_new_more) {
@@ -2260,24 +2248,21 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
 
             if(isShowDetailMusicList) { //是否点击播放控制器的当前列表
                 getViewDataBinding().rlDetailDisableClick.setVisibility(View.GONE);
-                ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
-                newCurrentMusicList.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(PadMainActivity.this, true, deviceMaxHeight, getViewDataBinding().clNewDetailCurrentMusicList);
                 isShowDetailMusicList = false;
                 return true;
             }
 
             if(isIntoMusicController) { //是否点击播放控制器
                 getViewDataBinding().clMain.setVisibility(View.VISIBLE);
-                ObjectAnimator animator = MyAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
-                animator.start();
+                LLAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
                 isIntoMusicController = false;
                 return true;
             }
 
             if(isShowMusicList) { //当前播放列表
                 getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
-                ObjectAnimator newCurrentMusicList = MyAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, false, getViewDataBinding().clCurrentMusicList);
-                newCurrentMusicList.start();
+                LLAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, false, false, getViewDataBinding().clCurrentMusicList);
                 isShowMusicList = false;
                 return true;
             }

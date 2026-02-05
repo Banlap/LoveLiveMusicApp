@@ -37,7 +37,7 @@ import com.banlap.llmusic.model.Music;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
-import com.banlap.llmusic.utils.MyAnimationUtil;
+import com.banlap.llmusic.utils.LLAnimationUtil;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -2931,8 +2931,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
         } else if(rThemeId == R.id.ll_theme_blue) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.VISIBLE);
@@ -2942,8 +2941,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlue);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlue);
         } else if(rThemeId == R.id.ll_theme_dark) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -2953,8 +2951,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlack);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlack);
         } else if (rThemeId == R.id.ll_theme_white) {
             binding.ivAddAnimator.setVisibility(View.VISIBLE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -2964,8 +2961,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimator);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimator);
         } else if (rThemeId == R.id.ll_theme_orange) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -2975,8 +2971,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorOrange);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorOrange);
         } else if(rThemeId == R.id.ll_theme_light) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -2986,8 +2981,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.VISIBLE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight2);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight2);
         } else if(rThemeId == R.id.ll_theme_red) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -2997,8 +2991,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.VISIBLE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorRed);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorRed);
         } else if(rThemeId == R.id.ll_theme_stars) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3008,8 +3001,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.VISIBLE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorStars);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorStars);
         } else {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3019,8 +3011,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
         }
     }
 
@@ -3876,8 +3867,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
         } else if(rThemeId == R.id.ll_theme_blue) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.VISIBLE);
@@ -3887,8 +3877,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlue);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlue);
         } else if(rThemeId == R.id.ll_theme_dark) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3898,8 +3887,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlack);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorBlack);
         } else if (rThemeId == R.id.ll_theme_white) {
             binding.ivAddAnimator.setVisibility(View.VISIBLE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3909,8 +3897,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimator);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimator);
         } else if (rThemeId == R.id.ll_theme_orange) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3920,8 +3907,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorOrange);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorOrange);
         } else if(rThemeId == R.id.ll_theme_light) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3931,8 +3917,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.VISIBLE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight2);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight2);
         } else if(rThemeId == R.id.ll_theme_red) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3942,8 +3927,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.VISIBLE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorRed);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorRed);
         } else if(rThemeId == R.id.ll_theme_stars) {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3953,8 +3937,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.VISIBLE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorStars);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorStars);
         } else {
             binding.ivAddAnimator.setVisibility(View.GONE);
             binding.ivAddAnimatorBlue.setVisibility(View.GONE);
@@ -3964,8 +3947,7 @@ public class ThemeHelper {
             binding.ivAddAnimatorLight2.setVisibility(View.GONE);
             binding.ivAddAnimatorRed.setVisibility(View.GONE);
             binding.ivAddAnimatorStars.setVisibility(View.GONE);
-            AnimatorSet animatorSet = MyAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
-            animatorSet.start();
+            LLAnimationUtil.animatorSetAddMusic(binding.ivAddAnimatorLight1);
         }
     }
 

@@ -14,7 +14,7 @@ import com.banlap.llmusic.databinding.ActivityLockFullScreenBinding;
 import com.banlap.llmusic.service.MusicPlayService;
 import com.banlap.llmusic.phone.uivm.vm.LockFullScreenVM;
 import com.banlap.llmusic.utils.CountDownHelper;
-import com.banlap.llmusic.utils.MyAnimationUtil;
+import com.banlap.llmusic.utils.LLAnimationUtil;
 import com.banlap.llmusic.utils.NotificationHelper;
 import com.banlap.llmusic.utils.TimeUtil;
 import com.bumptech.glide.Glide;
@@ -134,7 +134,7 @@ public class LockFullScreenActivity extends BaseActivity<LockFullScreenVM, Activ
                 if(endX > -100) {
                     CountDownHelper.pauseImm();
                     finish();
-                    MyAnimationUtil.objectAnimatorLeftOrRight(this, false, true, getViewDataBinding().llMain);
+                    LLAnimationUtil.objectAnimatorLeftOrRight(this, false, true, getViewDataBinding().llMain);
                     //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 } else {
                     getViewDataBinding().getRoot().setX(0);
