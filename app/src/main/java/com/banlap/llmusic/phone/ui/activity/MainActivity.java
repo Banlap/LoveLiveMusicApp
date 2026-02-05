@@ -377,6 +377,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
         getViewDataBinding().tvVersion.setVisibility(GONE);
 
+        //在线列表滑动
+        musicListAdapter = new MusicListAdapter(this, roomOnlineMusicList);
+        getViewDataBinding().rvMusicList.setLayoutManager(new LinearLayoutManager(this));
+        getViewDataBinding().rvMusicList.setAdapter(musicListAdapter);
+
+        //当滑动列表时停止加载图片资源，不滑动时继续加载图片资源
+        RecyclerViewUtils.scrollSuspend(this, getViewDataBinding().rvMusicList);
+        //加大RecyclerView 的缓存，用空间换时间，来提高滚动的流畅性
+        RecyclerViewUtils.setViewCache(getViewDataBinding().rvMusicList);
+        musicListAdapter.notifyDataSetChanged();
+
         //动画：初始化将详细页面移走
         LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clAlbumDetail);
 
@@ -444,16 +455,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().llShowNormalBar.setVisibility(View.VISIBLE);
         getViewDataBinding().llShowSearchBar.setVisibility(GONE);
 
-        musicListAdapter = new MusicListAdapter(this, roomOnlineMusicList);
-        getViewDataBinding().rvMusicList.setLayoutManager(new LinearLayoutManager(this));
-        getViewDataBinding().rvMusicList.setAdapter(musicListAdapter);
-
-        //当滑动列表时停止加载图片资源，不滑动时继续加载图片资源
-        RecyclerViewUtils.scrollSuspend(this, getViewDataBinding().rvMusicList);
-        //加大RecyclerView 的缓存，用空间换时间，来提高滚动的流畅性
-        RecyclerViewUtils.setViewCache(getViewDataBinding().rvMusicList);
-
-        musicListAdapter.notifyDataSetChanged();
 
         playMusicListAdapter = new PlayMusicListAdapter(this, roomPlayMusicList);
 

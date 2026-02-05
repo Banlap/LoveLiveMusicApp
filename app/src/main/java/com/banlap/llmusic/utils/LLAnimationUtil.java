@@ -58,25 +58,25 @@ public class LLAnimationUtil {
     }
 
     /** banlap：恢复动画位置 */
-    public static void objectAnimatorInit(Activity activity, ConstraintLayout constraintLayout) {
+    public static void objectAnimatorInit(Activity activity, ViewGroup viewGroup) {
         WindowManager windowManager = activity.getWindowManager();
         Display display = windowManager.getDefaultDisplay();
-        ObjectAnimator animator = ObjectAnimator.ofFloat(constraintLayout, "translationX", 0, 0);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(viewGroup, "translationX", 0, 0);
         animator.setDuration(200);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
-        startAnimatorSafely(constraintLayout, animator);
+        startAnimatorSafely(viewGroup, animator);
     }
 
     /**
@@ -98,13 +98,13 @@ public class LLAnimationUtil {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
         startAnimatorSafely(viewGroup, animator);
@@ -123,13 +123,13 @@ public class LLAnimationUtil {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
         startAnimatorSafely(viewGroup, animator);
@@ -150,24 +150,24 @@ public class LLAnimationUtil {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
         startAnimatorSafely(viewGroup, animator);
     }
 
     /** banlap: 添加按钮 抛物线动画效果 */
-    public static void animatorSetAddMusic(ImageView imageView) {
-        imageView.setVisibility(View.VISIBLE);
-        ObjectAnimator animatorX = ObjectAnimator.ofFloat(imageView, "translationX", 0, 45);
-        ObjectAnimator animatorY = ObjectAnimator.ofFloat(imageView, "translationY", 0, -20, 0, 100, 300);
-        ObjectAnimator animatorR = ObjectAnimator.ofFloat(imageView, "rotation", 0, 360);
+    public static void animatorSetAddMusic(View viewGroup) {
+        viewGroup.setVisibility(View.VISIBLE);
+        ObjectAnimator animatorX = ObjectAnimator.ofFloat(viewGroup, "translationX", 0, 45);
+        ObjectAnimator animatorY = ObjectAnimator.ofFloat(viewGroup, "translationY", 0, -20, 0, 100, 300);
+        ObjectAnimator animatorR = ObjectAnimator.ofFloat(viewGroup, "rotation", 0, 360);
         animatorR.setDuration(1000);
 
         AnimatorSet animatorSet = new AnimatorSet();
@@ -177,37 +177,37 @@ public class LLAnimationUtil {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(imageView.getContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(imageView.getContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
-        startAnimatorSafely(imageView, animatorSet);
+        startAnimatorSafely(viewGroup, animatorSet);
     }
 
     /** banlap: 动画效果  隐藏与显示 */
-    public static void objectAnimatorShowOrHide(Activity activity, float startAxis, float endAxis, TextView textView) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(textView, "alpha", startAxis, endAxis);
+    public static void objectAnimatorShowOrHide(Activity activity, float startAxis, float endAxis, View viewGroup) {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(viewGroup, "alpha", startAxis, endAxis);
         animator.setRepeatMode(ObjectAnimator.RESTART);
         animator.setDuration(120);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(activity.getApplicationContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
-        startAnimatorSafely(textView, animator);
+        startAnimatorSafely(viewGroup, animator);
     }
 
     /** banlap: 添加动画效果 放大缩小 */
@@ -222,13 +222,13 @@ public class LLAnimationUtil {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(textView.getContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(textView.getContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
         startAnimatorSafely(textView, animatorSet);
@@ -256,13 +256,13 @@ public class LLAnimationUtil {
             @Override
             public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationStart(animation, isReverse);
-                Glide.with(view.getContext()).pauseRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
             }
 
             @Override
             public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
                 super.onAnimationEnd(animation, isReverse);
-                Glide.with(view.getContext()).resumeRequests();
+                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
             }
         });
         startAnimatorSafely(view, animatorSet);
