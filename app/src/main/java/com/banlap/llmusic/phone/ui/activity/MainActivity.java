@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -39,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
@@ -372,6 +374,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().clNewCurrentMusicList.setVisibility(View.VISIBLE);
         getViewDataBinding().rlMoreSetDialog.setVisibility(View.VISIBLE);
 
+        getViewDataBinding().clControllerMode.setClipToOutline(true);
+        getViewDataBinding().clControllerMode.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 50);
+            }
+        });
         getViewDataBinding().pbLoadingMusic.setVisibility(View.INVISIBLE);
         getViewDataBinding().pbNewLoadingMusic.setVisibility(GONE);
         getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);

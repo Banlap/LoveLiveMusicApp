@@ -3546,10 +3546,12 @@ public class ThemeHelper {
             vdb.tvGroup1.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup2.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup3.setTextColor(context.getResources().getColor(R.color.white));
+            vdb.tvGroup4.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvGroup0.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup1.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup2.setBackgroundResource(R.drawable.selector_normal_selected);
             vdb.tvGroup3.setBackgroundResource(R.drawable.selector_normal_selected);
+            vdb.tvGroup4.setBackgroundResource(R.drawable.selector_normal_selected);
         } else if(rThemeId == R.id.ll_theme_dark) {
             vdb.tvGroup0.setTextColor(context.getResources().getColor(R.color.white));
             vdb.tvRecommend1.setTextColor(context.getResources().getColor(R.color.white));

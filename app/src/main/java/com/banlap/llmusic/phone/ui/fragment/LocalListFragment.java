@@ -59,6 +59,7 @@ import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.banlap.llmusic.utils.AppExecutors;
 import com.banlap.llmusic.utils.BitmapUtil;
 import com.banlap.llmusic.utils.LLActivityManager;
+import com.banlap.llmusic.utils.LLAnimationUtil;
 import com.banlap.llmusic.utils.PermissionUtil;
 import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.RecyclerViewUtils;
@@ -158,7 +159,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
     protected void initView() {
         //changeTheme();
         getViewDataBinding().clMain.setVisibility(View.VISIBLE);
-        getViewDataBinding().clLocalMusicMain.setVisibility(View.GONE);
+        getViewDataBinding().clLocalMusicMain.setVisibility(View.VISIBLE);
+        LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), false, false, getViewDataBinding().clLocalMusicMain);
 
         playListAdapter = new PlayListAdapter(getContext(), roomCustomPlayList);
         getViewDataBinding().rvLocalPlayList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -218,10 +220,10 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             public void onClick(View v) {
                 isShowLocalMusic = true;
                 isShowFavoriteMusic = false;
-                getViewDataBinding().clMain.setVisibility(View.GONE);
                 getViewDataBinding().rvLocalMusicList.setVisibility(View.VISIBLE);
                 getViewDataBinding().rvFavoriteMusicList.setVisibility(View.GONE);
-                getViewDataBinding().clLocalMusicMain.setVisibility(View.VISIBLE);
+                LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), true, false, getViewDataBinding().clMain);
+                LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), false, true, getViewDataBinding().clLocalMusicMain);
 
                 getViewDataBinding().tvNullLocalList.setText("点击上方的菜单按钮导入本地歌曲");
 
@@ -246,10 +248,10 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
             public void onClick(View v) {
                 isShowLocalMusic = false;
                 isShowFavoriteMusic = true;
-                getViewDataBinding().clMain.setVisibility(View.GONE);
                 getViewDataBinding().rvLocalMusicList.setVisibility(View.GONE);
                 getViewDataBinding().rvFavoriteMusicList.setVisibility(View.VISIBLE);
-                getViewDataBinding().clLocalMusicMain.setVisibility(View.VISIBLE);
+                LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), true, false, getViewDataBinding().clMain);
+                LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), false, true, getViewDataBinding().clLocalMusicMain);
 
                 getViewDataBinding().tvNullLocalList.setText("当前没有收藏歌曲");
                 if(roomFavoriteList != null) {
@@ -489,8 +491,8 @@ public class LocalListFragment extends BaseFragment<LocalListFVM, FragmentLocalL
 
     /** 返回到主页 */
     private void backToMain() {
-        getViewDataBinding().clMain.setVisibility(View.VISIBLE);
-        getViewDataBinding().clLocalMusicMain.setVisibility(View.GONE);
+        LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), true, true, getViewDataBinding().clMain);
+        LLAnimationUtil.objectAnimatorLeftOrRight(requireActivity(), false, false, getViewDataBinding().clLocalMusicMain);
     }
 
 

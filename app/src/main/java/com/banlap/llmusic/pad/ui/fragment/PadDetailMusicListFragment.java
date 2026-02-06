@@ -189,7 +189,6 @@ public class PadDetailMusicListFragment extends BaseFragment<PadDetailMusicListF
     @Override
     public void onPause() {
         super.onPause();
-        EventBus.getDefault().unregister(this);
     }
     @Override
     public void viewBack() {
