@@ -3,7 +3,6 @@ package com.banlap.llmusic.phone.ui.activity;
 import static android.view.View.GONE;
 
 import android.Manifest;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
@@ -245,13 +244,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     private final PublishSubject<String> textChangeSubject = PublishSubject.create();
 
-    private float startY = 0;
-    private float originalY = 0;
-    private float startY3 = 0;
-    private float originalY3 = 0;
-    private long mLastTime;
-    private boolean isMove = false;
-
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
 
@@ -386,6 +378,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().pbNewLoadingMusic2.setVisibility(GONE);
         getViewDataBinding().tvVersion.setVisibility(GONE);
 
+
         //在线列表滑动
         musicListAdapter = new MusicListAdapter(this, roomOnlineMusicList);
         getViewDataBinding().rvMusicList.setLayoutManager(new LinearLayoutManager(this));
@@ -442,7 +435,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
                 getViewDataBinding().clFloatingController.setVisibility(View.VISIBLE);
+            } else {
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
             }
+
         }
 
         if(AppData.roomSettings != null) {
@@ -652,101 +648,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         });
 
         //新版播放控制器滑动画动处理
-        getViewDataBinding().rlNewPlayController.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        isMove = false;
-                        mLastTime = System.currentTimeMillis();
-                        startY = event.getY();
-                        originalY = getViewDataBinding().clControllerMode.getTranslationY();
-                        startY3 = event.getY();
-                        originalY3 = getViewDataBinding().rlNewPlayController.getTranslationY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        isMove = true;
-                        //float dy = event.getY() - startY;
-                        //float newTranslation = originalY + dy;
-                        // 限制范围：0 到 -height
-                        //newTranslation = Math.max(-getViewDataBinding().clControllerMode.getHeight(), Math.max(0, newTranslation));
-                        //getViewDataBinding().clControllerMode.setTranslationY(newTranslation);
-
-                        float dy3 = event.getY() - startY3;
-                        float newTranslation3 = originalY3 - dy3;
-                        newTranslation3 = Math.max(-getViewDataBinding().rlNewPlayController.getHeight(), Math.min(0, -newTranslation3));
-                        getViewDataBinding().rlNewPlayController.setTranslationY(newTranslation3);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        long mCurrentTime = System.currentTimeMillis();
-                        int mStopY = (int) event.getY();
-                        //判断时间
-                        if (mCurrentTime - mLastTime < 500) {
-                            //判断移动距离
-                            isMove = Math.abs(startY - mStopY) >= 10;
-                        } else {
-                            isMove = true;
-                        }
-                        if(isMove) {
-                            // 吸附逻辑
-                            if (getViewDataBinding().rlNewPlayController.getTranslationY() < getViewDataBinding().rlNewPlayController.getHeight()) {
-                                getViewDataBinding().clControllerMode.animate().translationY(0).start();
-                                isShowControllerModePanel = true;
-                                isShowNewPlayController = false;
-
-                                getViewDataBinding().rlNewPlayController.animate().translationY(PxUtil.getInstance().dp2px( 85, MainActivity.this)).start();
-                            } else {
-                                getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
-                                getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
-                            }
-                        }
-
-                        break;
-                }
-                return isMove;
-            }
-        });
-
+        getViewDataBinding().rlNewPlayController.setOnTouchListener(new ViewTouchListener());
         //新版播放页面滑动画动处理
-        getViewDataBinding().clControllerMode.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        startY = event.getY();
-                        originalY = getViewDataBinding().clControllerMode.getTranslationY();
-                        startY3 = event.getY();
-                        originalY3 = getViewDataBinding().rlNewPlayController.getTranslationY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        float dy = event.getY() - startY;
-                        float newTranslation = originalY + dy;
-                        // 限制范围：0 到 -height
-                        newTranslation = Math.max(-getViewDataBinding().clControllerMode.getHeight(), Math.max(0, newTranslation));
-                        getViewDataBinding().clControllerMode.setTranslationY(newTranslation);
-
-
-//                        float dy3 = event.getY() - startY3;
-//                        float newTranslation3 = originalY3 - dy3;
-//                        newTranslation3 = Math.max(-getViewDataBinding().rlNewPlayController.getHeight(), Math.min(0, -newTranslation3));
-//                        getViewDataBinding().rlNewPlayController.setTranslationY(newTranslation3);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        // 吸附逻辑
-                        if (getViewDataBinding().clControllerMode.getTranslationY() < getViewDataBinding().clControllerMode.getHeight()) {
-                            getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
-                            isShowControllerModePanel = false;
-                            isShowNewPlayController = true;
-                            getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
-                        } else {
-                            getViewDataBinding().clControllerMode.animate().translationY(0).start();
-                            getViewDataBinding().rlNewPlayController.animate().translationY(getViewDataBinding().rlNewPlayController.getHeight()).start();
-                        }
-                        break;
-                }
-                return false;
-            }
-        });
+        getViewDataBinding().clControllerMode.setOnTouchListener(new ViewTouchListener());
+        //两行歌词页面滑动画动处理
+        getViewDataBinding().lvNewShowLyric.setOnTouchListener(new ViewTouchListener());
+        getViewDataBinding().rlPlayController.setOnTouchListener(new ViewTouchListener());
         //更多菜单
         getViewDataBinding().llSystemSet.setOnClickListener(new ButtonClickListener());
 
@@ -2278,6 +2185,101 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
     }
 
+    /** 触摸滑动事件 */
+    public class ViewTouchListener implements View.OnTouchListener {
+        private long mLastTime;
+        private boolean isMove = false;
+        private float startYcMode = 0;
+        private float startYnpControl = 0;
+        private float startYnsLyric = 0;
+        private float startYpControl = 0;
+        private float originalYcMode = 0;
+        private float originalYnpControl = 0;
+        private float originalYpControl = 0;
+
+        @SuppressLint("ClickableViewAccessibility")
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    isMove = false;
+                    mLastTime = System.currentTimeMillis();
+                    startYcMode = event.getY();
+                    startYnpControl = event.getY();
+                    startYnsLyric = event.getY();
+                    startYpControl = event.getY();
+                    originalYcMode = getViewDataBinding().clControllerMode.getTranslationY();
+                    originalYnpControl = getViewDataBinding().rlNewPlayController.getTranslationY();
+                    originalYpControl = getViewDataBinding().clCurrentAllPanel.getTranslationY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    isMove = true;
+                    if(v.getId() == R.id.rl_new_play_controller) {
+                        float newTranslation = originalYnpControl - (event.getY() - startYnpControl);
+                        newTranslation = Math.max(-getViewDataBinding().rlNewPlayController.getHeight(), Math.min(0, -newTranslation));
+                        getViewDataBinding().rlNewPlayController.setTranslationY(newTranslation);
+                    } else if(v.getId() == R.id.cl_controller_mode || v.getId() == R.id.lv_new_show_lyric) {
+                        float newTranslation = originalYcMode + (event.getY() - startYcMode);
+                        newTranslation = Math.max(-getViewDataBinding().clControllerMode.getHeight(), Math.max(0, newTranslation));
+                        getViewDataBinding().clControllerMode.setTranslationY(newTranslation);
+                    } else if(v.getId() == R.id.rl_play_controller) {
+                        float newTranslation = originalYpControl - (event.getY() - startYpControl);
+                        newTranslation = Math.max(-getViewDataBinding().rlPlayController.getHeight(), Math.min(0, -newTranslation));
+                        getViewDataBinding().rlPlayController.setTranslationY(newTranslation);
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    int stopY = (int) event.getY();
+                    isMove = isTouchMove(stopY);
+                    if(isMove) {
+                        if(v.getId() == R.id.rl_new_play_controller) {
+                            // 吸附逻辑
+                            if (getViewDataBinding().rlNewPlayController.getTranslationY() < originalYnpControl) {
+                                getViewDataBinding().clControllerMode.animate().translationY(0).start();
+                                isShowControllerModePanel = true;
+                                isShowNewPlayController = false;
+                                getViewDataBinding().rlNewPlayController.animate().translationY(PxUtil.getInstance().dp2px(85, MainActivity.this)).start();
+                            } else {
+                                getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
+                                getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
+                            }
+                        } else if (v.getId() == R.id.cl_controller_mode) {
+                            // 吸附逻辑
+                            if (-getViewDataBinding().clControllerMode.getTranslationY() < originalYcMode) {
+                                getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
+                                isShowControllerModePanel = false;
+                                isShowNewPlayController = true;
+                                getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
+                            } else {
+                                getViewDataBinding().clControllerMode.animate().translationY(0).start();
+                                getViewDataBinding().rlNewPlayController.animate().translationY(PxUtil.getInstance().dp2px(185, v.getContext())).start();
+                            }
+                        } else if(v.getId() == R.id.lv_new_show_lyric) {
+                            if (startYnsLyric < stopY) {
+                                getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
+                                isShowControllerModePanel = false;
+                                isShowNewPlayController = true;
+                                getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
+                            } else {
+                                getViewDataBinding().clControllerMode.animate().translationY(0).start();
+                                getViewDataBinding().rlNewPlayController.animate().translationY(PxUtil.getInstance().dp2px(185, v.getContext())).start();
+                            }
+                        } else if(v.getId() == R.id.rl_play_controller) {
+                            //getViewDataBinding().clCurrentAllPanel.animate().translationY(panelMoveAxis).start();
+                        }
+                    }
+                    break;
+            }
+            return isMove;
+        }
+
+        //是否移动
+        private boolean isTouchMove(int stopY) {
+            long mCurrentTime = System.currentTimeMillis();
+            return mCurrentTime - mLastTime >= 500 || Math.abs(startYcMode - stopY) >= 10;
+        }
+    }
+
     /** 显示弹窗更新App */
     private void showUpgradeApp(){
 
@@ -2950,6 +2952,45 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
     }
 
+    /** 显示当前播放面板 */
+    public void showOrHideMusicPlayerPanel() {
+        //Log.i("CLICK:", "isClick: " +isClick + " isShowMusicPanel: " + isShowMusicPanel + " isShowMusicList: " + isShowMusicList);
+        //clCurrentAllPanel隐藏会首次没有高度，需给固定值
+        int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
+
+        if(isClick) {
+            if(isShowMusicPanel&&!isShowMusicList) {
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
+
+                getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
+                getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
+                getViewDataBinding().rlDisableClick.setVisibility(isClick ? View.GONE : View.VISIBLE);
+                isClick = !isClick;
+            } else {
+                isShowMusicList = !isShowMusicList;
+                LLAnimationUtil.objectAnimatorLeftOrRight(this, true, true, getViewDataBinding().clCurrentMusicPanel);
+                LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
+
+                getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
+                getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
+                getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
+                getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
+            }
+        } else {
+            LLAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
+            LLAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicPanel);
+
+            getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
+            getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
+            getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
+            getViewDataBinding().clCurrentMusicList.setVisibility(isClick ? View.VISIBLE: View.GONE);
+            getViewDataBinding().clCurrentMusicPanel.setVisibility(isClick ? View.GONE : View.VISIBLE);
+            getViewDataBinding().rlDisableClick.setVisibility(isClick ? View.GONE : View.VISIBLE);
+            isClick = !isClick;
+        }
+        isShowMusicPanel = !isShowMusicPanel;
+    }
+
     /** 显示当前播放列表 */
     public void showOrHideMusicPlayerList() {
         //Log.i("CLICK:", "isClick: " +isClick + " isShowMusicPanel: " + isShowMusicPanel + " isShowMusicList: " + isShowMusicList);
@@ -3026,44 +3067,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         isShowMoreMenu = !isShowMoreMenu;
     }
 
-    /** 显示当前播放面板 */
-    public void showOrHideMusicPlayerPanel() {
-        //Log.i("CLICK:", "isClick: " +isClick + " isShowMusicPanel: " + isShowMusicPanel + " isShowMusicList: " + isShowMusicList);
-        //clCurrentAllPanel隐藏会首次没有高度，需给固定值
-        int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
-
-        if(isClick) {
-            if(isShowMusicPanel&&!isShowMusicList) {
-                LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
-
-                getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
-                getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
-                getViewDataBinding().rlDisableClick.setVisibility(isClick ? View.GONE : View.VISIBLE);
-                isClick = !isClick;
-            } else {
-                isShowMusicList = !isShowMusicList;
-                LLAnimationUtil.objectAnimatorLeftOrRight(this, true, true, getViewDataBinding().clCurrentMusicPanel);
-                LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
-
-                getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
-                getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
-                getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
-                getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
-            }
-        } else {
-            LLAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
-            LLAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicPanel);
-
-            getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
-            getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
-            getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
-            getViewDataBinding().clCurrentMusicList.setVisibility(isClick ? View.VISIBLE: View.GONE);
-            getViewDataBinding().clCurrentMusicPanel.setVisibility(isClick ? View.GONE : View.VISIBLE);
-            getViewDataBinding().rlDisableClick.setVisibility(isClick ? View.GONE : View.VISIBLE);
-            isClick = !isClick;
-        }
-        isShowMusicPanel = !isShowMusicPanel;
-    }
 
     /** 隐藏所有播放View */
     public void hideAllMusicView() {

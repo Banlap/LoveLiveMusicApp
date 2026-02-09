@@ -382,7 +382,7 @@ public class PadMainActivity extends BaseActivity<PadMainVM, ActivityPadMainBind
         }
 
         getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
-        LLAnimationUtil.objectAnimatorLeftOrRightNew(PadMainActivity.this, true, false, deviceMaxHeight, getViewDataBinding().clCurrentMusicList);
+        LLAnimationUtil.objectAnimatorLeftOrRight(PadMainActivity.this, true, false, deviceMaxHeight, getViewDataBinding().clCurrentMusicList);
 
         LLAnimationUtil.objectAnimatorUpOrDown(activity, true, deviceMaxHeight*2, getViewDataBinding().clController);
 

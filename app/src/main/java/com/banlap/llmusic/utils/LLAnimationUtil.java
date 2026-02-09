@@ -88,31 +88,17 @@ public class LLAnimationUtil {
     public static void objectAnimatorLeftOrRight(Activity activity, boolean isLeft, boolean isRun, ViewGroup viewGroup) {
         WindowManager windowManager = activity.getWindowManager();
         Display display = windowManager.getDefaultDisplay();
-        int displayAxis = isLeft ? -display.getWidth() * 2 - 100 : display.getWidth() * 2 - 100;
-
-        ObjectAnimator animator = isRun ?
-                ObjectAnimator.ofFloat(viewGroup, "translationX", displayAxis, 0)
-                : ObjectAnimator.ofFloat(viewGroup, "translationX", 0, displayAxis);
-        animator.setDuration(200);
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(@NonNull Animator animation, boolean isReverse) {
-                super.onAnimationStart(animation, isReverse);
-                Glide.with(LLActivityManager.getInstance().getTopActivity()).pauseRequests();
-            }
-
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
-                super.onAnimationEnd(animation, isReverse);
-                Glide.with(LLActivityManager.getInstance().getTopActivity()).resumeRequests();
-            }
-        });
-        startAnimatorSafely(viewGroup, animator);
+        objectAnimatorLeftOrRight(activity, isLeft, isRun, display.getWidth(), viewGroup);
     }
 
-    public static void objectAnimatorLeftOrRightNew(Activity activity, boolean isLeft, boolean isRun, int moveAxis, ViewGroup viewGroup) {
-        WindowManager windowManager = activity.getWindowManager();
-        Display display = windowManager.getDefaultDisplay();
+    /**
+     * banlap: 添加动画效果 左右显示
+     *
+     * @param isLeft true 设置向左; false 设置向右
+     * @param isRun true 设置移动到中间; false 设置移动到两边(根据isLeft值判断)
+     * @param moveAxis 移动距离
+     * */
+    public static void objectAnimatorLeftOrRight(Activity activity, boolean isLeft, boolean isRun, int moveAxis, ViewGroup viewGroup) {
         int displayAxis = isLeft ? -moveAxis * 2 - 100 : moveAxis * 2 - 100;
 
         ObjectAnimator animator = isRun ?
