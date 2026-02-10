@@ -40,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
@@ -184,6 +185,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     private boolean isShowMusicPanel = false;           //判断是否显示音乐面板
     private boolean isShowMusicList = false;            //判断是否显示音乐清单
+    private boolean isLastClickMusicPanel = true;       //记录上一次是否点击音乐清单
     private boolean isShowControllerModePanel = false;  //判断是否显示新版音乐控制模式
     private boolean isShowNewPlayController = false;    //判断是否显示新版音乐控制栏
     private boolean isShowNewMusicList = false;         //判断是否显新版音乐清单
@@ -191,15 +193,16 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     public boolean isOnTouchSeekBar = false;      //是否按着控制条
 
-    public boolean isCanClickFavorite = true;          //是否能点击收藏
-    public boolean isFavorite = false;                  //当前歌曲是否已收藏
-    private AlertDialog mAlertDialog;                   //弹窗
-    private PopupWindow mPopupWindow;                   //弹窗
-    private int musicListSize = 0;                      //获取总播放列表数
-    public static int playMode = 0;                     //播放模式: 0顺序播放 1随机播放 2单曲循环
-    private final int panelMoveAxis = 750;              //面板移动值
-    private int heightPixels = 0 ;                      //设备高度
-    private int rThemeId =0;                            //当前主题
+    public boolean isCanClickFavorite = true;                //是否能点击收藏
+    public boolean isFavorite = false;                       //当前歌曲是否已收藏
+    private AlertDialog mAlertDialog;                        //弹窗
+    private PopupWindow mPopupWindow;                        //弹窗
+    private int musicListSize = 0;                           //获取总播放列表数
+    public static int playMode = 0;                          //播放模式: 0顺序播放 1随机播放 2单曲循环
+    private final int panelMoveAxis = 750;                   //面板移动值
+    private final int controllerAndPanelHeight = 700 + 375;  //旧版播放控制器及面部整体高度
+    private int heightPixels = 0 ;                           //设备高度
+    private int rThemeId =0;                                 //当前主题
     /** 角色视图 */
     private String mCharacterName;                      //当前角色
     private ActivityResultLauncher<Intent> intentSettingsLauncher; //设置页面回调
@@ -436,6 +439,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, this), getViewDataBinding().rlNewPlayController);
                 getViewDataBinding().clFloatingController.setVisibility(View.VISIBLE);
             } else {
+                getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
+                getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
                 EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
             }
 
@@ -637,6 +642,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().lvNewShowLyric.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().lvNewShowLyricDetail.setOnClickListener(new ButtonClickListener());
         getViewDataBinding().lvNewShowLyricDetail.setIsUseLyricDetailColor(true);
+        //更多菜单
+        getViewDataBinding().llSystemSet.setOnClickListener(new ButtonClickListener());
 
         //新版播放页面圆角处理
         getViewDataBinding().clControllerMode.setClipToOutline(true);
@@ -647,15 +654,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             }
         });
 
+        //各种组件滑动处理
+        //旧版播放控制器滑动处理
+        getViewDataBinding().rlPlayController.setOnTouchListener(new ViewTouchListener());
+        getViewDataBinding().rlMusicImg.setOnTouchListener(new ViewTouchListener());
         //新版播放控制器滑动画动处理
         getViewDataBinding().rlNewPlayController.setOnTouchListener(new ViewTouchListener());
         //新版播放页面滑动画动处理
         getViewDataBinding().clControllerMode.setOnTouchListener(new ViewTouchListener());
         //两行歌词页面滑动画动处理
         getViewDataBinding().lvNewShowLyric.setOnTouchListener(new ViewTouchListener());
-        getViewDataBinding().rlPlayController.setOnTouchListener(new ViewTouchListener());
-        //更多菜单
-        getViewDataBinding().llSystemSet.setOnClickListener(new ButtonClickListener());
+
 
         //歌词大小设置监听
         getViewDataBinding().sbLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1694,13 +1703,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowNewPlayController = false;
 
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
-
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
                 //先升起再下降
-                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-
-                LLAnimationUtil.objectAnimatorUpOrDown(this, true, getViewDataBinding().clCurrentAllPanel.getHeight(), getViewDataBinding().rlPlayController);
+                //LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, controllerAndPanelHeight, getViewDataBinding().rlPlayController);
 
                 //重置状态
                 isClick = false;
@@ -2189,10 +2196,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public class ViewTouchListener implements View.OnTouchListener {
         private long mLastTime;
         private boolean isMove = false;
-        private float startYcMode = 0;
-        private float startYnpControl = 0;
-        private float startYnsLyric = 0;
-        private float startYpControl = 0;
+        private float startY = 0;
         private float originalYcMode = 0;
         private float originalYnpControl = 0;
         private float originalYpControl = 0;
@@ -2204,27 +2208,28 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 case MotionEvent.ACTION_DOWN:
                     isMove = false;
                     mLastTime = System.currentTimeMillis();
-                    startYcMode = event.getY();
-                    startYnpControl = event.getY();
-                    startYnsLyric = event.getY();
-                    startYpControl = event.getY();
+                    startY = event.getY();
                     originalYcMode = getViewDataBinding().clControllerMode.getTranslationY();
                     originalYnpControl = getViewDataBinding().rlNewPlayController.getTranslationY();
-                    originalYpControl = getViewDataBinding().clCurrentAllPanel.getTranslationY();
+                    originalYpControl = getViewDataBinding().rlPlayController.getTranslationY();
                     break;
                 case MotionEvent.ACTION_MOVE:
                     isMove = true;
                     if(v.getId() == R.id.rl_new_play_controller) {
-                        float newTranslation = originalYnpControl - (event.getY() - startYnpControl);
+                        float newTranslation = originalYnpControl - (event.getY() - startY);
                         newTranslation = Math.max(-getViewDataBinding().rlNewPlayController.getHeight(), Math.min(0, -newTranslation));
                         getViewDataBinding().rlNewPlayController.setTranslationY(newTranslation);
                     } else if(v.getId() == R.id.cl_controller_mode || v.getId() == R.id.lv_new_show_lyric) {
-                        float newTranslation = originalYcMode + (event.getY() - startYcMode);
+                        float newTranslation = originalYcMode + (event.getY() - startY);
                         newTranslation = Math.max(-getViewDataBinding().clControllerMode.getHeight(), Math.max(0, newTranslation));
                         getViewDataBinding().clControllerMode.setTranslationY(newTranslation);
-                    } else if(v.getId() == R.id.rl_play_controller) {
-                        float newTranslation = originalYpControl - (event.getY() - startYpControl);
-                        newTranslation = Math.max(-getViewDataBinding().rlPlayController.getHeight(), Math.min(0, -newTranslation));
+                    } else if(v.getId() == R.id.rl_play_controller || v.getId() == R.id.rl_music_img) {
+                        float newTranslation = originalYpControl + (event.getY() - startY);
+                        if (startY > event.getY()) {
+                            newTranslation = Math.min(originalYpControl, newTranslation);
+                        } else {
+                            newTranslation = Math.max(originalYpControl, newTranslation);
+                        }
                         getViewDataBinding().rlPlayController.setTranslationY(newTranslation);
                     }
                     break;
@@ -2243,9 +2248,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                 getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
                                 getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
                             }
-                        } else if (v.getId() == R.id.cl_controller_mode) {
-                            // 吸附逻辑
-                            if (-getViewDataBinding().clControllerMode.getTranslationY() < originalYcMode) {
+                        } else if(v.getId() == R.id.cl_controller_mode || v.getId() == R.id.lv_new_show_lyric) {
+                            if (startY < stopY) {
                                 getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
                                 isShowControllerModePanel = false;
                                 isShowNewPlayController = true;
@@ -2254,18 +2258,25 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                 getViewDataBinding().clControllerMode.animate().translationY(0).start();
                                 getViewDataBinding().rlNewPlayController.animate().translationY(PxUtil.getInstance().dp2px(185, v.getContext())).start();
                             }
-                        } else if(v.getId() == R.id.lv_new_show_lyric) {
-                            if (startYnsLyric < stopY) {
-                                getViewDataBinding().clControllerMode.animate().translationY(getViewDataBinding().clControllerMode.getHeight()).start();
-                                isShowControllerModePanel = false;
-                                isShowNewPlayController = true;
-                                getViewDataBinding().rlNewPlayController.animate().translationY(0).start();
-                            } else {
-                                getViewDataBinding().clControllerMode.animate().translationY(0).start();
-                                getViewDataBinding().rlNewPlayController.animate().translationY(PxUtil.getInstance().dp2px(185, v.getContext())).start();
+                        } else if(v.getId() == R.id.rl_play_controller || v.getId() == R.id.rl_music_img) {
+                            if(startY - stopY >20) {
+                                isClick = true;
+                                if(isLastClickMusicPanel) {
+                                    isShowMusicPanel = true;
+                                    isShowMusicList = false;
+                                } else {
+                                    isShowMusicPanel = false;
+                                    isShowMusicList = true;
+                                }
+                                getViewDataBinding().rlDisableClick.setVisibility(View.VISIBLE);
+                                getViewDataBinding().rlPlayController.animate().translationY(0).start();
+                            } else if(stopY - startY > 20) {
+                                isClick = false;
+                                isShowMusicPanel = false;
+                                isShowMusicList = false;
+                                getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
+                                getViewDataBinding().rlPlayController.animate().translationY(controllerAndPanelHeight).start();
                             }
-                        } else if(v.getId() == R.id.rl_play_controller) {
-                            //getViewDataBinding().clCurrentAllPanel.animate().translationY(panelMoveAxis).start();
                         }
                     }
                     break;
@@ -2276,7 +2287,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         //是否移动
         private boolean isTouchMove(int stopY) {
             long mCurrentTime = System.currentTimeMillis();
-            return mCurrentTime - mLastTime >= 500 || Math.abs(startYcMode - stopY) >= 10;
+            return mCurrentTime - mLastTime >= 500 || Math.abs(startY - stopY) >= 10;
         }
     }
 
@@ -2968,6 +2979,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isClick = !isClick;
             } else {
                 isShowMusicList = !isShowMusicList;
+                isLastClickMusicPanel = true;
                 LLAnimationUtil.objectAnimatorLeftOrRight(this, true, true, getViewDataBinding().clCurrentMusicPanel);
                 LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
 
@@ -2977,9 +2989,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
             }
         } else {
+            isLastClickMusicPanel = true;
             LLAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
             LLAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicPanel);
-
             getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
             getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
             getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
@@ -3007,18 +3019,17 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isClick = !isClick;
             } else {
                 isShowMusicPanel=!isShowMusicPanel;
-
+                isLastClickMusicPanel = false;
                 LLAnimationUtil.objectAnimatorLeftOrRight(this, true, false, getViewDataBinding().clCurrentMusicPanel);
                 LLAnimationUtil.objectAnimatorLeftOrRight(this, false, true, getViewDataBinding().clCurrentMusicList);
-
                 getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
                 getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
                 getViewDataBinding().btPlay.setVisibility(View.VISIBLE);
                 getViewDataBinding().btChangePlayMode.setVisibility(View.INVISIBLE);
             }
         } else {
+            isLastClickMusicPanel = false;
             LLAnimationUtil.objectAnimatorUpOrDown(this, false, moveAxis, getViewDataBinding().rlPlayController);
-
             LLAnimationUtil.objectAnimatorInit(this, getViewDataBinding().clCurrentMusicList);
 
             getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
