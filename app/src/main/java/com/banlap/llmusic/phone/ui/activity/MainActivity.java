@@ -2364,6 +2364,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                 isShowMusicPanel = false;
                                 isShowMusicList = true;
                                 isLastClickMusicPanel = false;
+                                getViewDataBinding().btPlay.setVisibility(View.INVISIBLE);
+                                getViewDataBinding().btChangePlayMode.setVisibility(View.VISIBLE);
                             } else {
                                 getViewDataBinding().clCurrentMusicPanel.animate().translationX(0).start();
                             }
@@ -2375,6 +2377,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                 isShowMusicPanel = true;
                                 isShowMusicList = false;
                                 isLastClickMusicPanel = true;
+                                getViewDataBinding().btPlay.setVisibility(View.VISIBLE);
+                                getViewDataBinding().btChangePlayMode.setVisibility(View.INVISIBLE);
                             } else {
                                 getViewDataBinding().clCurrentMusicList.animate().translationX(0).start();
                             }
@@ -3061,8 +3065,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 显示当前播放面板 */
     public void showOrHideMusicPlayerPanel() {
-        //Log.i("CLICK:", "isClick: " +isClick + " isShowMusicPanel: " + isShowMusicPanel + " isShowMusicList: " + isShowMusicList);
-        //clCurrentAllPanel隐藏会首次没有高度，需给固定值
+        //初始化view时首次没有高度，需给固定值
         int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
 
         if(isClick) {
@@ -3105,8 +3108,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 显示当前播放列表 */
     public void showOrHideMusicPlayerList() {
-        //Log.i("CLICK:", "isClick: " +isClick + " isShowMusicPanel: " + isShowMusicPanel + " isShowMusicList: " + isShowMusicList);
-        //clCurrentAllPanel隐藏会首次没有高度，需给固定值
+        //初始化view时首次没有高度，需给固定值
         int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
 
         if(isClick){
