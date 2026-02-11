@@ -1,15 +1,11 @@
 package com.banlap.llmusic.widget;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,12 +13,9 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.model.MusicLyric;
-import com.banlap.llmusic.utils.LLActivityManager;
-import com.banlap.llmusic.utils.PxUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 
 import java.util.ArrayList;
@@ -51,6 +44,15 @@ public class LyricScrollView extends View {
     private int highLightLyricColor, defaultLyricColor;        //高亮颜色、默认颜色
     private boolean isUseLyricDetailColor = false;
     private LyricClickListener lyricClickListener;        //点击监听
+
+    private final int mMinMove = 10;                           //最小触摸距离
+    private float mLastY;  //记录点击初始位置
+    private int mStartX, mStartY; //触摸时记录开始时的坐标 用于判断按下事件跟结束事件
+
+    //水平滑动处理
+    private float hScrollStartX, hScrollStartY;
+    private static final int TOUCH_SLOP = 20; // 判定为滑动的最小距离
+    private boolean mIsVerticalScroll = false; // 标记是否为水平滑动
 
     public LyricScrollView(@NonNull Context context) {
         super(context);
@@ -330,10 +332,6 @@ public class LyricScrollView extends View {
         }
     }
 
-    private final int mMinMove = 10;                           //最小触摸距离
-    private float mLastY;  //记录点击初始位置
-    private int mStartX, mStartY; //触摸时记录开始时的坐标 用于判断按下事件跟结束事件
-
     /**
      * 触摸滚动歌词
      **/
@@ -343,6 +341,9 @@ public class LyricScrollView extends View {
             Log.i(TAG, "super.onTouchEvent(event)：" + super.onTouchEvent(event));
             return super.onTouchEvent(event);
         }
+        int x = (int)event.getRawX();
+        int y = (int)event.getRawY();
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mStartX = (int) event.getRawX();
@@ -352,17 +353,36 @@ public class LyricScrollView extends View {
                 mLastY = event.getY();
                 postInvalidateOnAnimation();
                 handler.removeCallbacksAndMessages(null);
+
+                hScrollStartX = x;
+                hScrollStartY = y;
+                lyricClickListener.onVerticalScroll(event);
+                mIsVerticalScroll = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                seekLyricByTouchMove(event);
+                float dx = x - hScrollStartX;
+                float dy = y - hScrollStartY;
+                float absDx = Math.abs(dx);
+                float absDy = Math.abs(dy);
+
+                // 判断滑动方向：如果垂直距离 < 水平距离，判定为左右滑动
+                if (absDy < absDx && absDx > TOUCH_SLOP) {
+                    lyricClickListener.onVerticalScroll(event);
+                    mIsVerticalScroll = true;
+                } else {
+                    mIsVerticalScroll = false;
+                    seekLyricByTouchMove(event);
+                }
                 handler.removeCallbacksAndMessages(null);
                 break;
             case MotionEvent.ACTION_UP:
                 long endTime = System.currentTimeMillis();
+                boolean isSingleTap = false;
                 if(mStartTime - endTime <= 500) {
                     int mStopX = (int) event.getRawX();
                     int mStopY = (int) event.getRawY();
                     if (Math.abs(mStartX - mStopX) <= 10 || Math.abs(mStartY - mStopY) <= 10) {
+                        isSingleTap = true;
                         if(lyricClickListener != null) {
                             lyricClickListener.onSingleTap();
                         }
@@ -371,6 +391,11 @@ public class LyricScrollView extends View {
                 android.os.Message message = new Message();
                 message.what = 1;
                 handler.sendMessageDelayed(message, 2000);
+                //判断是否水平滚动
+                if(mIsVerticalScroll) {
+                    lyricClickListener.onVerticalScroll(event);
+                }
+                mIsVerticalScroll = false;
                 break;
         }
 
@@ -397,6 +422,9 @@ public class LyricScrollView extends View {
     public interface LyricClickListener {
         /** 点击回调 */
         void onSingleTap();
+        /**  左右滚动回调 */
+        void onVerticalScroll(MotionEvent event);
+
     }
     /**
      * 根据触摸滑动的距离滚动歌词

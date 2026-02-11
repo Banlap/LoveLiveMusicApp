@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
@@ -245,6 +246,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     public static final int REQUEST_CODE_CONTROLLER_MODE = 105;       //检查进入氛围模式时所需要的权限
 
     private final PublishSubject<String> textChangeSubject = PublishSubject.create();
+
+    private float vScrollStartX = 0; //歌词水平滚动
+    private float originalXcMusicPanel = 0; //歌词水平滚动时旧版控制器面板位置
 
     @Override
     protected int getLayoutId() { return R.layout.activity_main; }
@@ -660,6 +664,46 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         getViewDataBinding().lvNewShowLyric.setOnTouchListener(new ViewTouchListener());
         getViewDataBinding().clCurrentMusicPanel.setOnTouchListener(new ViewTouchListener());
         getViewDataBinding().clCurrentMusicList.setOnTouchListener(new ViewTouchListener());
+        //歌词左右滑动时动画处理
+        lyricScrollView.setOnLyricClickListener(new LyricScrollView.LyricClickListener() {
+            @Override
+            public void onSingleTap() {
+
+            }
+
+            @Override
+            public void onVerticalScroll(MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        vScrollStartX = event.getX();
+                        originalXcMusicPanel = getViewDataBinding().clCurrentMusicPanel.getTranslationX();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float newTranslation = originalXcMusicPanel + (event.getX() - vScrollStartX);
+                        if (vScrollStartX > event.getX()) {
+                            newTranslation = Math.min(originalXcMusicPanel, newTranslation);
+                        } else {
+                            newTranslation = Math.max(originalXcMusicPanel, newTranslation);
+                        }
+                        getViewDataBinding().clCurrentMusicPanel.setTranslationX(newTranslation);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        int stopX = (int) event.getX();
+                        if(vScrollStartX - stopX >20) {
+                            DisplayMetrics dm = SystemUtil.getInstance().getDM(MainActivity.this);
+                            getViewDataBinding().clCurrentMusicPanel.animate().translationX(-dm.widthPixels).start();
+                            getViewDataBinding().clCurrentMusicList.animate().translationX(0).start();
+                            isShowMusicPanel = false;
+                            isShowMusicList = true;
+                            isLastClickMusicPanel = false;
+                        } else {
+                            getViewDataBinding().clCurrentMusicPanel.animate().translationX(0).start();
+                        }
+                        break;
+                }
+            }
+
+        });
 
         //歌词大小设置监听
         getViewDataBinding().sbLyricSize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -733,6 +777,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             @Override
             public void onSingleTap() {
                 getViewModel().toggleClickNewSingleLyricView(false);
+            }
+
+            @Override
+            public void onVerticalScroll(MotionEvent event) {
+
             }
         });
         getViewDataBinding().llBack.setOnClickListener(new ButtonClickListener());
@@ -4129,7 +4178,12 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         @Override
         public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
             int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-            return makeMovementFlags(dragFlags, 0);
+            int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+            return makeMovementFlags(dragFlags, swipeFlags);
+        }
+
+        @Override
+        public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
 
         }
 
