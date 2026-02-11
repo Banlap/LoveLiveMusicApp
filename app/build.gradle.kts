@@ -218,8 +218,8 @@ android {
         //2.优化在线歌曲列表时点击收藏逻辑
         //3.解决下载列表页面主题ui问题
         versionName = "1.8.8"
-        //1.优化列表加载时其他动画效果处理
-        //2.优化部分页面动画切换效果
+        //1.优化在线列表加载时与动画效果处理
+        //2.优化部分页面触摸动画切换效果
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")
