@@ -20,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 33
         //修改版本号
-        versionCode = 188
+        versionCode = 189
         versionName = "1.0"
         //1.设置连接音乐数据库、实现播放音乐
         //2.实现各种显示效果、播放控制器各种功能
@@ -220,6 +220,8 @@ android {
         versionName = "1.8.8"
         //1.优化在线列表加载时与动画效果处理
         //2.优化部分页面触摸动画切换效果
+        versionName = "1.8.9"
+        //1.优化初始化加载数据问题
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")

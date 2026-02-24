@@ -4,17 +4,21 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.splashscreen.SplashScreen;
+import androidx.lifecycle.Observer;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseActivity;
+import com.banlap.llmusic.base.BaseApplication;
 import com.banlap.llmusic.databinding.ActivityWelcomeBinding;
 import com.banlap.llmusic.pad.ui.activity.PadMainActivity;
 import com.banlap.llmusic.phone.uivm.vm.WelcomeVM;
 import com.banlap.llmusic.sql.AppData;
+import com.banlap.llmusic.utils.CountDownHelper;
 import com.banlap.llmusic.utils.SPUtil;
 import com.banlap.llmusic.utils.SystemUtil;
 
@@ -27,13 +31,32 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     implements WelcomeVM.WelcomeCallBack {
 
     private static final String TAG = WelcomeActivity.class.getSimpleName();
+    private Observer<Boolean> initObserver;
+    private SplashScreen splashScreen;
+
     @Override
     protected int getLayoutId() { return R.layout.activity_welcome; }
 
     @Override
     protected void beforeOnCreate() {
         //显示闪屏页
-        SplashScreen.installSplashScreen(this);
+        splashScreen = SplashScreen.installSplashScreen(this);
+        //设置保持显示的条件
+        splashScreen.setKeepVisibleCondition(() -> true);
+
+        observeInitComplete();
+        CountDownHelper.startCountTime(3, new CountDownHelper.CountDownCallBack() {
+            @Override
+            public void showTime(int countDown, String time) {
+
+            }
+
+            @Override
+            public void finish() {
+                //超时回调
+                launchVideo();
+            }
+        });
     }
 
     @Override
@@ -45,8 +68,15 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
     protected void initView() {
         getViewDataBinding().setVm(getViewModel());
         getViewModel().setCallBack(this);
+    }
 
-        launchVideo();
+    private void observeInitComplete() {
+        BaseApplication.getInitComplete().observe(this, status -> {
+            if(status) {
+                CountDownHelper.pauseImm();
+                launchVideo();
+            }
+        });
     }
 
     /** 判断是否显示启动动画 */
@@ -66,6 +96,8 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
             runActivity();
             return;
         }
+        //有启动动画时关闭闪屏页
+        splashScreen.setKeepVisibleCondition(()-> false);
         //启动动画
         initVideo();
         new Handler().postDelayed(this::runActivity, 5000);
