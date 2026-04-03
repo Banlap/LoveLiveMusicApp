@@ -199,8 +199,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private PopupWindow mPopupWindow;                        //弹窗
     private int musicListSize = 0;                           //获取总播放列表数
     public static int playMode = 0;                          //播放模式: 0顺序播放 1随机播放 2单曲循环
-    private final int panelMoveAxis = 750;                   //面板移动值
-    private final int controllerAndPanelHeight = 700 + 375;  //旧版播放控制器及面部整体高度
+    private int panelMoveAxis = 750;                   //面板移动值
+    private int controllerAndPanelHeight = 700 + 375;  //旧版播放控制器及面部整体高度
     private int heightPixels = 0 ;                           //设备高度
     private int rThemeId =0;                                 //当前主题
     /** 角色视图 */
@@ -297,7 +297,13 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         mCharacterName = CharacterHelper.CHARACTER_NAME_KEKE;
 
-        //
+        //获取设备高度
+        DisplayMetrics dm = SystemUtil.getInstance().getDM(this);
+        heightPixels = (dm != null)? PxUtil.getInstance().dp2px(dm.heightPixels, this) : 750;
+        if(dm != null) {
+            panelMoveAxis = PxUtil.getInstance().dp2px(dm.heightPixels, this);
+            controllerAndPanelHeight = PxUtil.getInstance().dp2px(dm.heightPixels, this);
+        }
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
@@ -452,9 +458,6 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
         }
 
         initDeviceMate();
-        //获取设备高度
-        DisplayMetrics dm = SystemUtil.getInstance().getDM(this);
-        heightPixels = (dm != null)? PxUtil.getInstance().dp2px(dm.heightPixels, this) : 750;
         //
         LLAnimationUtil.objectAnimatorUpOrDown(this, true, heightPixels, getViewDataBinding().clControllerMode);
 
@@ -1746,7 +1749,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = false;
                 isShowNewPlayController = false;
 
-                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, heightPixels, getViewDataBinding().clControllerMode);
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
                 //先升起再下降
@@ -1774,7 +1777,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = false;
                 isShowNewPlayController = true;
 
-                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, heightPixels, getViewDataBinding().clControllerMode);
 
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
@@ -1797,7 +1800,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 isShowControllerModePanel = false;
                 isShowNewPlayController = false;
 
-                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+                LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, heightPixels, getViewDataBinding().clControllerMode);
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(85, MainActivity.this), getViewDataBinding().rlNewPlayController);
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
 
@@ -3384,7 +3387,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
     /** 是否展示新的音乐控制器 */
     public void showOrHideNewController(boolean isShow) {
-        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, isShow, getViewDataBinding().clControllerMode.getHeight(), getViewDataBinding().clControllerMode);
+        LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, isShow, heightPixels, getViewDataBinding().clControllerMode);
         LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, !isShow, PxUtil.getInstance().dp2px(!isShow? 185: 85, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
         isShowControllerModePanel = !isShow;
