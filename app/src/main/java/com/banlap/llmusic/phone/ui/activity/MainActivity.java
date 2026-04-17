@@ -962,7 +962,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
             @Override
             public void onChanged(Boolean isClick) {
                 getViewDataBinding().llNewShowLyricDetail.setVisibility(isClick? View.VISIBLE : View.GONE);
-                getViewDataBinding().llNewShowLyric.setVisibility(isClick? View.GONE : View.VISIBLE);
+                getViewDataBinding().clNewShowLyric.setVisibility(isClick? View.GONE : View.VISIBLE);
             }
         });
 
