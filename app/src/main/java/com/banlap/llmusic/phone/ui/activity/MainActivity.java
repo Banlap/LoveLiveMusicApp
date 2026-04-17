@@ -1752,6 +1752,11 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 //直接整个显示
                 if(event.b) {
+                    getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
+                    getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
+                    getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
+                    LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
+
                     showOrHideMusicPlayerPanel();
                 } else {
                     int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
