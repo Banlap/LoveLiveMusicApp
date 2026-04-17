@@ -442,7 +442,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
                 //
                 getViewDataBinding().clCurrentAllPanel.post(()->{
-                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE, false));
                 });
             }
 
@@ -1750,18 +1750,22 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, heightPixels, getViewDataBinding().clControllerMode);
                 LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, true, PxUtil.getInstance().dp2px(185, MainActivity.this), getViewDataBinding().rlNewPlayController);
 
-                //先升起再下降
-                //LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
-                LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
-                LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
+                //直接整个显示
+                if(event.b) {
+                    showOrHideMusicPlayerPanel();
+                } else {
+                    int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
+                    LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
 
-                //重置状态
-                isClick = false;
-                isShowMusicPanel = false;
-                isShowMusicList = false;
+                    LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
 
-                getViewDataBinding().clFloatingController.setVisibility(View.GONE);
+                    //重置状态
+                    isClick = false;
+                    isShowMusicPanel = false;
+                    isShowMusicList = false;
+
+                    getViewDataBinding().clFloatingController.setVisibility(View.GONE);
+                }
 
                 //SPUtil.setStrValue(this, SPUtil.SaveControllerScene, SPUtil.SaveControllerSceneValue_DefaultScene);
                 AppExecutors.getInstance().diskIO().execute(new Runnable() {
@@ -2904,7 +2908,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                     ActivityCompat.requestPermissions(MainActivity.this, permissions, REQUEST_CODE_CONTROLLER_MODE);
                     return;
                 }*/
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE, false));
             }
         });
 
@@ -4314,7 +4318,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 resultPost(permissions, ThreadEvent.VIEW_SELECT_IMG_FILE_SUCCESS, null);
                 break;
             case REQUEST_CODE_CONTROLLER_MODE:
-                resultPost(permissions, ThreadEvent.VIEW_CONTROLLER_MODE, null);
+                resultPost(permissions, ThreadEvent.VIEW_CONTROLLER_MODE, false);
                 break;
             case REQUEST_CODE_NEED_RUNNING_PERMISSION:
                 if(PermissionUtil.getInstance().checkPermission(this, permissions)) {
@@ -4328,9 +4332,9 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     /**
      * 处理权限并调用EventBus事件
      * */
-    private void resultPost(String[] permissions, int EVENT_NAME, String value) {
+    private void resultPost(String[] permissions, int EVENT_NAME, Object value) {
         if(!PermissionUtil.getInstance().checkPermission(this, permissions)) {
-            if(!TextUtils.isEmpty(value)) {
+            if(value != null) {
                 EventBus.getDefault().post(new ThreadEvent<>(EVENT_NAME, value));
             } else {
                 EventBus.getDefault().post(new ThreadEvent<>(EVENT_NAME));

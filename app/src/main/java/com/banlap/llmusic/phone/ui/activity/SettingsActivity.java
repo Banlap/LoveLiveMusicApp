@@ -37,6 +37,7 @@ import com.banlap.llmusic.databinding.DialogMessageBinding;
 import com.banlap.llmusic.databinding.DialogPermissionBinding;
 import com.banlap.llmusic.databinding.DialogSettingVideoBinding;
 import com.banlap.llmusic.databinding.DialogSettingViewModeBinding;
+import com.banlap.llmusic.phone.uivm.vm.MainVM;
 import com.banlap.llmusic.receiver.DownloadReceiver;
 import com.banlap.llmusic.request.ThreadEvent;
 import com.banlap.llmusic.service.LyricService;
@@ -588,7 +589,7 @@ public class SettingsActivity extends BaseActivity<SettingsVM, ActivitySettingsB
                 viewModeBinding.ivViewModeDefaultSelected.setVisibility(View.INVISIBLE);
                 viewModeBinding.ivViewModeFloatingSelected.setVisibility(View.INVISIBLE);
                 viewModeBinding.ivViewModeSimpleSelected.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
+                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE, true));
             }
         });
 
