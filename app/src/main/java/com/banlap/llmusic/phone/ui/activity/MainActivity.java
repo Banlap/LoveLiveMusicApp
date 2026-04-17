@@ -199,8 +199,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
     private PopupWindow mPopupWindow;                        //弹窗
     private int musicListSize = 0;                           //获取总播放列表数
     public static int playMode = 0;                          //播放模式: 0顺序播放 1随机播放 2单曲循环
-    private int panelMoveAxis = 750;                   //面板移动值
-    private int controllerAndPanelHeight = 700 + 375;  //旧版播放控制器及面部整体高度
+    private final int panelMoveAxis = 750;                   //面板移动值
     private int heightPixels = 0 ;                           //设备高度
     private int rThemeId =0;                                 //当前主题
     /** 角色视图 */
@@ -299,11 +298,7 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
         //获取设备高度
         DisplayMetrics dm = SystemUtil.getInstance().getDM(this);
-        heightPixels = (dm != null)? PxUtil.getInstance().dp2px(dm.heightPixels, this) : 750;
-        if(dm != null) {
-            panelMoveAxis = PxUtil.getInstance().dp2px(dm.heightPixels, this);
-            controllerAndPanelHeight = PxUtil.getInstance().dp2px(dm.heightPixels, this);
-        }
+        heightPixels = (dm != null)? PxUtil.getInstance().dp2px(dm.heightPixels, this) : panelMoveAxis;
     }
 
     @SuppressLint({"ClickableViewAccessibility", "SetTextI18n"})
@@ -445,7 +440,10 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                 getViewDataBinding().clCurrentAllPanel.setVisibility(View.VISIBLE);
                 getViewDataBinding().clCurrentMusicPanel.setVisibility(View.VISIBLE);
                 getViewDataBinding().clCurrentMusicList.setVisibility(View.VISIBLE);
-                EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
+                //
+                getViewDataBinding().clCurrentAllPanel.post(()->{
+                    EventBus.getDefault().post(new ThreadEvent<>(ThreadEvent.VIEW_CONTROLLER_MODE));
+                });
             }
 
         }
@@ -1754,7 +1752,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
 
                 //先升起再下降
                 //LLAnimationUtil.objectAnimatorUpOrDown(MainActivity.this, false, getViewDataBinding().rlPlayController.getHeight(), getViewDataBinding().rlPlayController);
-                LLAnimationUtil.objectAnimatorUpOrDown(this, true, controllerAndPanelHeight, getViewDataBinding().rlPlayController);
+                int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
+                LLAnimationUtil.objectAnimatorUpOrDown(this, true, moveAxis, getViewDataBinding().rlPlayController);
                 LLAnimationUtil.objectAnimatorLeftOrRight(this, false, false, getViewDataBinding().clCurrentMusicList);
 
                 //重置状态
@@ -2357,7 +2356,8 @@ public class MainActivity extends BaseActivity<MainVM, ActivityMainBinding> impl
                                 isShowMusicPanel = false;
                                 isShowMusicList = false;
                                 getViewDataBinding().rlDisableClick.setVisibility(View.GONE);
-                                getViewDataBinding().rlPlayController.animate().translationY(controllerAndPanelHeight).start();
+                                int moveAxis = getViewDataBinding().clCurrentAllPanel.getHeight() == 0 ? panelMoveAxis : getViewDataBinding().clCurrentAllPanel.getHeight();
+                                getViewDataBinding().rlPlayController.animate().translationY(moveAxis).start();
                             }
                         } else if(v.getId() == R.id.cl_current_music_panel) {
                             if(startX - stopX >20) {

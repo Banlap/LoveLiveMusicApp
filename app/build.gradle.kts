@@ -222,6 +222,8 @@ android {
         //2.优化部分页面触摸动画切换效果
         versionName = "1.8.9"
         //1.优化初始化加载数据问题
+        //2.优化音乐控制详情页面布局
+        //3.优化触摸滑动页面动画滚动位置
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")
