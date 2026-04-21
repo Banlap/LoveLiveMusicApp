@@ -44,19 +44,24 @@ public class WelcomeActivity extends BaseActivity<WelcomeVM, ActivityWelcomeBind
         //设置保持显示的条件
         splashScreen.setKeepVisibleCondition(() -> true);
 
-        observeInitComplete();
-        CountDownHelper.startCountTime(3, new CountDownHelper.CountDownCallBack() {
-            @Override
-            public void showTime(int countDown, String time) {
 
-            }
+        Intent intent = new Intent(getApplication(), NewMainActivity.class);
+        startActivity(intent);
+        finish();
 
-            @Override
-            public void finish() {
-                //超时回调
-                launchVideo();
-            }
-        });
+//        observeInitComplete();
+//        CountDownHelper.startCountTime(3, new CountDownHelper.CountDownCallBack() {
+//            @Override
+//            public void showTime(int countDown, String time) {
+//
+//            }
+//
+//            @Override
+//            public void finish() {
+//                //超时回调
+//                launchVideo();
+//            }
+//        });
     }
 
     @Override

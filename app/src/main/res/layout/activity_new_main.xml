@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="vm"
+            type="com.banlap.llmusic.phone.uivm.vm.NewMainVM" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@mipmap/ic_gradient_color_new1"
+        >
+
+        <RelativeLayout
+            android:id="@+id/rl_music_detail_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            >
+
+            <View
+                android:id="@+id/v_display"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"/>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/shape_top_round_white"
+                android:layout_below="@+id/v_display"
+                android:elevation="30dp"
+                >
+
+                <LinearLayout
+                    android:id="@+id/ll_music_detail_top_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingTop="30dp"
+                    android:paddingBottom="20dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    >
+
+                    <com.banlap.llmusic.widget.CircleImageView
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="30dp"
+                        android:background="@mipmap/ic_llmp_new_3_1"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="30dp"
+                        android:text="MusicName"
+                        android:textSize="17dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        />
+
+                </LinearLayout>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

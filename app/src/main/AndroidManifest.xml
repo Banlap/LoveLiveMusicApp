@@ -133,6 +133,11 @@
             />
 
         <activity
+            android:name=".phone.ui.activity.NewMainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            />
+
+        <activity
             android:name=".pad.ui.activity.PadMainActivity"
             android:configChanges="screenSize|smallestScreenSize|orientation|screenLayout|keyboardHidden|keyboard"
             />

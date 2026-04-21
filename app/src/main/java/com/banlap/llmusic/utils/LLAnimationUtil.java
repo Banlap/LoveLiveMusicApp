@@ -127,9 +127,13 @@ public class LLAnimationUtil {
      * @param isDown true 向下移动; false 向上移动
      * */
     public static void objectAnimatorUpOrDown(Activity activity, boolean isDown, int moveAxis, ViewGroup viewGroup) {
+       LLAnimationUtil.objectAnimatorUpOrDownOrigin(isDown, 0, moveAxis, viewGroup);
+    }
+
+    public static void objectAnimatorUpOrDownOrigin(boolean isDown, float originY, int moveAxis, ViewGroup viewGroup) {
         ObjectAnimator animator = isDown ?
-                ObjectAnimator.ofFloat(viewGroup, "translationY", 0, moveAxis)
-                : ObjectAnimator.ofFloat(viewGroup, "translationY", moveAxis, 0);
+                ObjectAnimator.ofFloat(viewGroup, "translationY", originY, moveAxis)
+                : ObjectAnimator.ofFloat(viewGroup, "translationY", moveAxis, originY);
         animator.setRepeatMode(ObjectAnimator.RESTART);
         animator.setDuration(200);
         animator.addListener(new AnimatorListenerAdapter() {
