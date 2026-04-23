@@ -35,19 +35,20 @@
 
             <FrameLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginStart="20dp"
+                >
 
                 <View
                     android:id="@+id/v_line"
-                    android:layout_width="80dp"
+                    android:layout_width="75dp"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="25dp"
                     android:background="@drawable/shape_button_white_alpha_70"/>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="150dp"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
                     android:gravity="center">
 
                     <TextView
@@ -57,12 +58,11 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        android:layout_marginStart="30dp"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
                         android:onClick="@{()->vdb.vpClick(0)}"
                         android:text="音乐"
-                        android:textSize="22sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
                         android:shadowColor="@color/black"
@@ -77,14 +77,12 @@
                         app:layout_constraintStart_toEndOf="@+id/tv_discover"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="20dp"
+                        android:layout_marginStart="13dp"
                         android:paddingStart="10dp"
                         android:paddingEnd="10dp"
                         android:onClick="@{()->vdb.vpClick(1)}"
                         android:text="本地"
-                        android:textSize="22sp"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/black"
                         android:shadowColor="@color/black"
@@ -93,7 +91,7 @@
                         android:shadowRadius="1"/>
 
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
 
             </FrameLayout>
 

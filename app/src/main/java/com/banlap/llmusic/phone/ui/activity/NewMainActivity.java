@@ -95,13 +95,13 @@ public class NewMainActivity extends BaseActivity<NewMainVM, ActivityNewMainBind
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 if (0 == position) {
-                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, 1, (float) 1.4);
-                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, (float) 1.4, 1);
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, 1, (float) 1.5);
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, (float) 1.5, 1);
                     int x = getViewDataBinding().vLine.getWidth();
                     LLAnimationUtil.animatorSetMoveOrigin(getViewDataBinding().vLine, false, x);
                 } else if (1 == position) {
-                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, (float) 1.4, 1);
-                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, 1, (float) 1.4);
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, (float) 1.5, 1);
+                    LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, 1, (float) 1.5);
                     int x = getViewDataBinding().vLine.getWidth();
                     LLAnimationUtil.animatorSetMoveOrigin(getViewDataBinding().vLine, true, x);
                 }
