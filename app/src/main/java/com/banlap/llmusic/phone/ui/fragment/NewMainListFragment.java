@@ -1,7 +1,9 @@
 package com.banlap.llmusic.phone.ui.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -18,6 +20,10 @@ import com.banlap.llmusic.fixed.AppMusic;
 import com.banlap.llmusic.model.TeamMusic;
 import com.banlap.llmusic.phone.ui.activity.NewMainActivity;
 import com.banlap.llmusic.phone.uivm.fvm.NewMainListFVM;
+import com.banlap.llmusic.phone.uivm.vm.NewMainVM;
+import com.mig35.carousellayoutmanager.CarouselLayoutManager;
+import com.mig35.carousellayoutmanager.CarouselZoomPostLayoutListener;
+import com.mig35.carousellayoutmanager.CenterScrollListener;
 
 import java.util.List;
 
@@ -40,10 +46,29 @@ public class NewMainListFragment extends BaseFragment<NewMainListFVM, FragmentNe
         initMainView();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initMainView() {
+        CarouselLayoutManager carouselLayoutManager = new CarouselLayoutManager(CarouselLayoutManager.HORIZONTAL, true);
+        carouselLayoutManager.setPostLayoutListener(new CarouselZoomPostLayoutListener(0.2f));
+
         mainTeamListAdapter = new MainTeamListAdapter(getContext(), AppMusic.getInstance().getTeamMusicList());
-        getViewDataBinding().trvList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        getViewDataBinding().trvList.setAdapter(mainTeamListAdapter);
+        getViewDataBinding().rvList.setLayoutManager(carouselLayoutManager);
+        getViewDataBinding().rvList.setHasFixedSize(true);
+        getViewDataBinding().rvList.setAdapter(mainTeamListAdapter);
+
+        getViewDataBinding().rvList.addOnScrollListener(new CenterScrollListener());
+        getViewDataBinding().rvList.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    getViewModel(NewMainVM.class).toggleViewPageTouch(true);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    getViewModel(NewMainVM.class).toggleViewPageTouch(false);
+                    break;
+            }
+            return false;
+        });
 
         mainTeamListAdapter.notifyDataSetChanged();
     }

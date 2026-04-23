@@ -226,7 +226,8 @@ android {
         //3.优化触摸滑动页面动画滚动位置
 
         versionName = "2.0.0"
-        //
+        //1.全新UI视觉、全新设计
+        //2.各种功能优化
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "MYSQL_URL", "\"${project.property("MYSQL_URL")}\"")
@@ -297,7 +298,8 @@ dependencies {
     /** 响应式框架 异步数据流处理 */
     implementation ("io.reactivex.rxjava3:rxjava:3.1.0")
     implementation ("io.reactivex.rxjava3:rxandroid:3.0.0")
-
+    /** 滚动布局管理器 */
+    implementation("com.mig35:carousellayoutmanager:1.4.6")
     /** 崩溃异常处理 框架*/
     implementation ("cat.ereza:customactivityoncrash:2.3.0")
 

@@ -17,17 +17,29 @@
             android:orientation="vertical"
             android:layout_marginTop="15dp"
             android:layout_marginBottom="15dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             >
 
-            <com.banlap.llmusic.widget.CircleImageView
-                android:id="@+id/iv_team_music"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="155dp"
-                />
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="@drawable/shape_item_border"
+                >
+                <com.banlap.llmusic.widget.CircleImageView
+                    android:id="@+id/iv_team_music"
+                    android:layout_width="match_parent"
+                    android:layout_height="175dp"
+                    android:scaleType="centerCrop"
+                    android:elevation="30dp"
+                    />
+            </LinearLayout>
+
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/tv_team_music"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

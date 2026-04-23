@@ -15,6 +15,7 @@
 
 
         <LinearLayout
+            android:id="@+id/ll_list"
             android:layout_width="match_parent"
             android:layout_height="220dp"
             android:orientation="vertical"
@@ -23,24 +24,39 @@
             app:layout_constraintEnd_toEndOf="parent"
             >
 
-            <com.banlap.llmusic.widget.TempRecyclerView
-                android:id="@+id/trv_list"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 />
 
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="250dp"
-            android:text="测试"
-            android:textSize="25sp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/ll_list"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            />
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginStart="10dp"
+                android:background="@drawable/shape_button_white_alpha_70"
+                android:text="每日推荐"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                />
+
+        </LinearLayout>
+
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

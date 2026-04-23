@@ -52,7 +52,7 @@ public class AppMusic {
         teamMusic10.setRemark1("蓮ノ空女学院スクールアイドルクラブ");
         teamMusic10.setRemark2("Hasunosora Jogakuin School Idol Club");
         teamMusic10.setResId(R.mipmap.ic_album_hasu_2);
-        teamMusic11.setResId2(R.mipmap.ic_album_hasu);
+        teamMusic10.setResId2(R.mipmap.ic_album_hasu);
         teamMusicList.add(teamMusic10);
 
         TeamMusic teamMusic9 = new TeamMusic();
@@ -87,8 +87,8 @@ public class AppMusic {
         teamMusic6.setTitleName("μ's");
         teamMusic6.setRemark1("μ's");
         teamMusic6.setRemark2("LoveLive!");
-        teamMusic6.setResId(R.mipmap.ic_album_us_2);
-        teamMusic6.setResId2(R.mipmap.ic_album_us_3);
+        teamMusic6.setResId(R.mipmap.ic_album_us_3);
+        teamMusic6.setResId2(R.mipmap.ic_album_us_2);
         teamMusicList.add(teamMusic6);
 
         TeamMusic teamMusic5 = new TeamMusic();

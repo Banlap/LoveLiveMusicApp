@@ -72,6 +72,7 @@ public class NewMainActivity extends BaseActivity<NewMainVM, ActivityNewMainBind
         });
 
         getViewModel().getMlIsClickMusicController().observe(this, b -> LLAnimationUtil.objectAnimatorUpOrDown(NewMainActivity.this, !b, downHeightByPortrait, getViewDataBinding().rlMusicDetailMain));
+        getViewModel().getMlIsViewPageTouch().observe(this, b -> getViewDataBinding().vp2Main.requestDisallowInterceptTouchEvent(b));
     }
 
 
@@ -96,11 +97,13 @@ public class NewMainActivity extends BaseActivity<NewMainVM, ActivityNewMainBind
                 if (0 == position) {
                     LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, 1, (float) 1.4);
                     LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, (float) 1.4, 1);
-                    LLAnimationUtil.animatorSetMoveOrigin(getViewDataBinding().vLine, false, PxUtil.getInstance().dp2px(80, getViewDataBinding().vLine.getContext()));
+                    int x = getViewDataBinding().vLine.getWidth();
+                    LLAnimationUtil.animatorSetMoveOrigin(getViewDataBinding().vLine, false, x);
                 } else if (1 == position) {
                     LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvDiscover, (float) 1.4, 1);
                     LLAnimationUtil.animatorSetEnlarge(getViewDataBinding().tvLocal, 1, (float) 1.4);
-                    LLAnimationUtil.animatorSetMoveOrigin(getViewDataBinding().vLine, true, PxUtil.getInstance().dp2px(82, getViewDataBinding().vLine.getContext()));
+                    int x = getViewDataBinding().vLine.getWidth();
+                    LLAnimationUtil.animatorSetMoveOrigin(getViewDataBinding().vLine, true, x);
                 }
             }
 
