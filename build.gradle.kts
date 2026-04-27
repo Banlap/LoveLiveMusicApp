@@ -8,7 +8,7 @@ buildscript {
         maven("https://maven.aliyun.com/repository/gradle-plugin")
         google()
         mavenCentral()
-        maven("https://jitpack.io")
+        maven("https://www.jitpack.io")
     }
 
     dependencies {

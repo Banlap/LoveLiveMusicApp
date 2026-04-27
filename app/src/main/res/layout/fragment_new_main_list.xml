@@ -24,8 +24,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             >
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_list"
+            <com.zhpan.bannerview.BannerViewPager
+                android:id="@+id/bvp_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 />

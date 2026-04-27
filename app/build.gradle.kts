@@ -261,9 +261,9 @@ android {
 }
 
 dependencies {
-    implementation ("androidx.appcompat:appcompat:1.3.0")
-    implementation ("androidx.constraintlayout:constraintlayout:2.0.4")
-    implementation ("com.google.ar:core:1.25.0")
+    implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation ("com.google.ar:core:1.36.0")
     testImplementation ("junit:junit:4.13.2")
     //androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     //androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -298,8 +298,9 @@ dependencies {
     /** 响应式框架 异步数据流处理 */
     implementation ("io.reactivex.rxjava3:rxjava:3.1.0")
     implementation ("io.reactivex.rxjava3:rxandroid:3.0.0")
-    /** 滚动布局管理器 */
-    implementation("com.mig35:carousellayoutmanager:1.4.6")
+    /** 轮播图管理器 */
+    implementation("com.github.zhpanvip:BannerViewPager:3.5.0")
+
     /** 崩溃异常处理 框架*/
     implementation ("cat.ereza:customactivityoncrash:2.3.0")
 
