@@ -71,7 +71,10 @@ public class NewMainActivity extends BaseActivity<NewMainVM, ActivityNewMainBind
             LLAnimationUtil.objectAnimatorUpOrDown(NewMainActivity.this, true, downHeightByPortrait, getViewDataBinding().rlMusicDetailMain);
         });
 
-        getViewModel().getMlIsClickMusicController().observe(this, b -> LLAnimationUtil.objectAnimatorUpOrDown(NewMainActivity.this, !b, downHeightByPortrait, getViewDataBinding().rlMusicDetailMain));
+        getViewModel().getMlIsClickMusicController().observe(this, b -> {
+            getViewDataBinding().vDisplay.setVisibility(b? View.VISIBLE: View.INVISIBLE);
+            LLAnimationUtil.objectAnimatorUpOrDown(NewMainActivity.this, !b, downHeightByPortrait, getViewDataBinding().rlMusicDetailMain);
+        });
         getViewModel().getMlIsViewPageTouch().observe(this, b -> getViewDataBinding().vp2Main.requestDisallowInterceptTouchEvent(b));
     }
 

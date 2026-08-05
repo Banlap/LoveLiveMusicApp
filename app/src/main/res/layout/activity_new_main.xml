@@ -180,6 +180,7 @@
 
             <View
                 android:id="@+id/v_display"
+                android:visibility="visible"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:onClick="@{()->vm.toggleMusicControllerSwitch()}"

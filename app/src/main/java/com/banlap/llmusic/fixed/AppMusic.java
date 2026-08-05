@@ -138,4 +138,12 @@ public class AppMusic {
 
         return teamMusicList;
     }
+
+    public <T> List<T> setTempData(T tData, int size) {
+        List<T> tList = new ArrayList<>();
+        for(int i = 0; i<size; i++) {
+            tList.add(tData);
+        }
+        return tList;
+    }
 }

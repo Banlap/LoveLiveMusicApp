@@ -13,17 +13,21 @@ import com.banlap.llmusic.databinding.ItemAddMusicLocalListBinding;
 import com.banlap.llmusic.databinding.ItemTeamMusicListBinding;
 import com.banlap.llmusic.fixed.AppMusic;
 import com.banlap.llmusic.model.TeamMusic;
+import com.banlap.llmusic.phone.ui.adapter.DailyMusicListAdapter;
 import com.banlap.llmusic.phone.uivm.fvm.NewMainListFVM;
+import com.banlap.llmusic.sql.room.RoomPlayMusic;
 import com.zhpan.bannerview.BaseBannerAdapter;
 import com.zhpan.bannerview.BaseViewHolder;
 import com.zhpan.bannerview.constants.PageStyle;
 import com.zhpan.indicator.enums.IndicatorSlideMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewMainListFragment extends BaseFragment<NewMainListFVM, FragmentNewMainListBinding> {
     private final String TAG = NewMainListFragment.class.getSimpleName();
     private MainTeamListAdapter mainTeamListAdapter;
+    private List<RoomPlayMusic> dailyMusicList = new ArrayList<>();
 
     @Override
     protected int getLayoutId() {
@@ -32,7 +36,7 @@ public class NewMainListFragment extends BaseFragment<NewMainListFVM, FragmentNe
 
     @Override
     protected void initData() {
-
+        dailyMusicList.addAll(AppMusic.getInstance().setTempData(new RoomPlayMusic(), 10));
     }
 
     @Override
@@ -48,11 +52,14 @@ public class NewMainListFragment extends BaseFragment<NewMainListFVM, FragmentNe
                 .setPageStyle(PageStyle.MULTI_PAGE_OVERLAP)
                 .setRevealWidth(10, 10)
                 .create(AppMusic.getInstance().getTeamMusicList());
+
+        getViewDataBinding().rvDailyList.setAdapter(new DailyMusicListAdapter(getContext(), dailyMusicList));
     }
 
-
+    /**
+     * 企划列表
+     * */
     public static class MainTeamListAdapter extends BaseBannerAdapter<TeamMusic> {
-
 
         @Override
         protected void bindData(BaseViewHolder<TeamMusic> holder, TeamMusic data, int position, int pageSize) {
