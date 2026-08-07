@@ -36,7 +36,6 @@ public class NewMainActivity extends BaseActivity<NewMainVM, ActivityNewMainBind
     private final String TAG = NewMainActivity.class.getSimpleName();
     private NewFragmentStateAdapter mainFragmentStateAdapter;     //主页与本地页面切换Adapter
 
-    private boolean isLandSpace = false; //是否横屏
     private int downHeightByPortrait = 0;
 
     @Override
@@ -133,8 +132,8 @@ public class NewMainActivity extends BaseActivity<NewMainVM, ActivityNewMainBind
     @Override
     public void onConfigurationChanged(Configuration config) {
         super.onConfigurationChanged(config);
-        isLandSpace = config.orientation != Configuration.ORIENTATION_PORTRAIT;
-        Log.e(TAG, "onConfigurationChanged: " + (!isLandSpace ? "竖屏" : "横屏"));
+        getViewModel().toggleIsLandSpace(config.orientation != Configuration.ORIENTATION_PORTRAIT);
+        Log.e(TAG, "onConfigurationChanged: " + (Boolean.FALSE.equals(getViewModel().getMlIsLandSpace().getValue()) ? "竖屏" : "横屏"));
 
         getViewDataBinding().rlMusicDetailMain.postDelayed(() -> {
             downHeightByPortrait = getViewDataBinding().rlMusicDetailMain.getHeight() - getViewDataBinding().vDisplay.getHeight() - getViewDataBinding().llMusicDetailTopView.getHeight();

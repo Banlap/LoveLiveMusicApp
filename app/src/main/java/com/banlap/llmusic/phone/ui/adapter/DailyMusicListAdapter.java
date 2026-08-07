@@ -1,6 +1,7 @@
 package com.banlap.llmusic.phone.ui.adapter;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +38,19 @@ public class DailyMusicListAdapter extends RecyclerView.Adapter<DailyMusicListAd
     public void onBindViewHolder(@NonNull DailyMusicListViewHolder holder, int position) {
         ItemDailyMusicListBinding dailyMusicListBinding = DataBindingUtil.getBinding(holder.itemView);
         if(dailyMusicListBinding != null) {
+            String musicName = list.get(position).musicName;
+            String musicSinger = list.get(position).musicSinger;
 
+            dailyMusicListBinding.tvMusicNameDefault.setVisibility(!TextUtils.isEmpty(musicName)? View.GONE : View.VISIBLE);
+            dailyMusicListBinding.tvSingerNameDefault.setVisibility(!TextUtils.isEmpty(musicSinger)? View.GONE : View.VISIBLE);
+
+            if(!TextUtils.isEmpty(musicName)) {
+                dailyMusicListBinding.tvMusicName.setText(musicName);
+            }
+
+            if(!TextUtils.isEmpty(musicSinger)) {
+                dailyMusicListBinding.tvSingerName.setText(musicSinger);
+            }
         }
     }
 

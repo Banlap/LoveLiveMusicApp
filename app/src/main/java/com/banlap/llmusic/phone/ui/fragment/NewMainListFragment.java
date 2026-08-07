@@ -5,6 +5,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.banlap.llmusic.R;
 import com.banlap.llmusic.base.BaseFragment;
@@ -13,9 +14,12 @@ import com.banlap.llmusic.databinding.ItemAddMusicLocalListBinding;
 import com.banlap.llmusic.databinding.ItemTeamMusicListBinding;
 import com.banlap.llmusic.fixed.AppMusic;
 import com.banlap.llmusic.model.TeamMusic;
+import com.banlap.llmusic.phone.ui.activity.MainActivity;
 import com.banlap.llmusic.phone.ui.adapter.DailyMusicListAdapter;
 import com.banlap.llmusic.phone.uivm.fvm.NewMainListFVM;
 import com.banlap.llmusic.sql.room.RoomPlayMusic;
+import com.banlap.llmusic.utils.LLAnimationUtil;
+import com.google.android.material.appbar.AppBarLayout;
 import com.zhpan.bannerview.BaseBannerAdapter;
 import com.zhpan.bannerview.BaseViewHolder;
 import com.zhpan.bannerview.constants.PageStyle;
@@ -28,7 +32,7 @@ public class NewMainListFragment extends BaseFragment<NewMainListFVM, FragmentNe
     private final String TAG = NewMainListFragment.class.getSimpleName();
     private MainTeamListAdapter mainTeamListAdapter;
     private List<RoomPlayMusic> dailyMusicList = new ArrayList<>();
-
+    private DailyMusicListAdapter dailyMusicListAdapter;
     @Override
     protected int getLayoutId() {
         return R.layout.fragment_new_main_list;
@@ -52,8 +56,22 @@ public class NewMainListFragment extends BaseFragment<NewMainListFVM, FragmentNe
                 .setPageStyle(PageStyle.MULTI_PAGE_OVERLAP)
                 .setRevealWidth(10, 10)
                 .create(AppMusic.getInstance().getTeamMusicList());
+        dailyMusicListAdapter = new DailyMusicListAdapter(getContext(), dailyMusicList);
+        getViewDataBinding().rvDailyList.setLayoutManager(new LinearLayoutManager(getContext()));
+        getViewDataBinding().rvDailyList.setAdapter(dailyMusicListAdapter);
+        dailyMusicListAdapter.notifyDataSetChanged();
 
-        getViewDataBinding().rvDailyList.setAdapter(new DailyMusicListAdapter(getContext(), dailyMusicList));
+        getViewDataBinding().ablAppBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                //Toast.makeText(MainActivity.this, "vo: " + verticalOffset, Toast.LENGTH_SHORT).show();
+                if(Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) {
+
+                } else {
+
+                }
+            }
+        });
     }
 
     /**
